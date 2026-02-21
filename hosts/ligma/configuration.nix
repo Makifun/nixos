@@ -1,4 +1,10 @@
-{ pkgs, lib, modulesPath, ... }: {
+{
+  pkgs,
+  lib,
+  modulesPath,
+  ...
+}:
+{
   imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
 
   # Proxmox QEMU Guest
@@ -13,6 +19,10 @@
   boot.zfs.devNodes = "/dev/disk/by-id";
   services.zfs.autoScrub.enable = true;
   services.zfs.trim.enable = true;
+
+  # Networking
+  networking.hostName = "ligma";
+  networking.useDHCP = true;
   networking.hostId = "324bbd6b"; # Required for ZFS
 
   # Impermanence Logic
@@ -29,22 +39,18 @@
     ];
   };
 
-  # General
-  time.timeZone = "Europe/Stockholm";
-  networking.hostName = "ligma";
-  networking.useDHCP = true;
-
   # Docker
   virtualisation.docker = {
     enable = true;
     enableOnBoot = true;
-    storageDriver = "zfs"; # Best performance since we are on ZFS
+    storageDriver = "zfs";
   };
   virtualisation.oci-containers.backend = "docker";
 
   # Dockhand
   virtualisation.oci-containers.containers."dockhand" = {
     image = "fnsys/dockhand:latest";
+    pull = "newer";
     ports = [ "3000:3000" ];
     volumes = [
       "/var/run/docker.sock:/var/run/docker.sock"
@@ -55,6 +61,7 @@
   # KomodoMongo
   virtualisation.oci-containers.containers."komodomongo" = {
     image = "mongo:latest";
+    pull = "newer";
     networks = [ "komodo" ];
     cmd = [ "--quiet --wiredTigerCacheSizeGB 0.25" ];
     volumes = [
@@ -70,6 +77,7 @@
   # KomodoCore
   virtualisation.oci-containers.containers."komodocore" = {
     image = "ghcr.io/moghtech/komodo-core:latest";
+    pull = "newer";
     ports = [ "9120:9120" ];
     networks = [ "komodo" ];
     dependsOn = [ "komodomongo" ];
@@ -86,6 +94,7 @@
   # KomodoPeriphery
   virtualisation.oci-containers.containers."komodoperiphery" = {
     image = "ghcr.io/moghtech/komodo-periphery:latest";
+    pull = "newer";
     networks = [ "komodo" ];
     volumes = [
       "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -102,7 +111,13 @@
   };
 
   # Firewall
-  networking.firewall.allowedTCPPorts = [ 80 443 2049 3000 9120 ];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+    2049
+    3000
+    9120
+  ];
 
   # Sudo nopasswd
   security.sudo.wheelNeedsPassword = false;
