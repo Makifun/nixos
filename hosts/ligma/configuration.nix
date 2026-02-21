@@ -50,7 +50,6 @@
   # Dockhand
   virtualisation.oci-containers.containers."dockhand" = {
     image = "fnsys/dockhand:latest";
-    pull = "newer";
     ports = [ "3000:3000" ];
     volumes = [
       "/var/run/docker.sock:/var/run/docker.sock"
@@ -61,7 +60,6 @@
   # KomodoMongo
   virtualisation.oci-containers.containers."komodomongo" = {
     image = "mongo:latest";
-    pull = "newer";
     networks = [ "komodo" ];
     cmd = [ "--quiet --wiredTigerCacheSizeGB 0.25" ];
     volumes = [
@@ -77,7 +75,6 @@
   # KomodoCore
   virtualisation.oci-containers.containers."komodocore" = {
     image = "ghcr.io/moghtech/komodo-core:latest";
-    pull = "newer";
     ports = [ "9120:9120" ];
     networks = [ "komodo" ];
     dependsOn = [ "komodomongo" ];
@@ -94,7 +91,6 @@
   # KomodoPeriphery
   virtualisation.oci-containers.containers."komodoperiphery" = {
     image = "ghcr.io/moghtech/komodo-periphery:latest";
-    pull = "newer";
     networks = [ "komodo" ];
     volumes = [
       "/var/run/docker.sock:/var/run/docker.sock:ro"
