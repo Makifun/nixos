@@ -57,10 +57,24 @@
     ];
   };
 
+  # Create the network before containers start
+  systemd.services.docker-network-komodo = {
+    description = "Create the internal docker network for Komodo";
+    after = [ "network.target" "docker.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      check=$(${pkgs.docker}/bin/docker network ls -qf name=komodo)
+      if [ -z "$check" ]; then
+        ${pkgs.docker}/bin/docker network create komodo
+      fi
+    '';
+  };
+
   # KomodoMongo
   virtualisation.oci-containers.containers."komodomongo" = {
     image = "mongo:latest";
-    networks = [ "komodo" ];
+    extraOptions = [ "--network=komodo" ];
     cmd = [ "--quiet --wiredTigerCacheSizeGB 0.25" ];
     volumes = [
       "komodomongo-data:/data/db"
@@ -76,7 +90,7 @@
   virtualisation.oci-containers.containers."komodocore" = {
     image = "ghcr.io/moghtech/komodo-core:latest";
     ports = [ "9120:9120" ];
-    networks = [ "komodo" ];
+    extraOptions = [ "--network=komodo" ];
     dependsOn = [ "komodomongo" ];
     volumes = [
       "komodocore-backups:/backups"
@@ -91,12 +105,21 @@
   # KomodoPeriphery
   virtualisation.oci-containers.containers."komodoperiphery" = {
     image = "ghcr.io/moghtech/komodo-periphery:latest";
-    networks = [ "komodo" ];
+    extraOptions = [ "--network=komodo" ];
     volumes = [
       "/var/run/docker.sock:/var/run/docker.sock:ro"
       "komodoperiphery-data:/etc/komodo"
     ];
   };
+
+  systemd.services."docker-komodomongo".after = [ "docker-network-komodo.service" ];
+  systemd.services."docker-komodomongo".requires = [ "docker-network-komodo.service" ];
+
+  systemd.services."docker-komodocore".after = [ "docker-network-komodo.service" ];
+  systemd.services."docker-komodocore".requires = [ "docker-network-komodo.service" ];
+
+  systemd.services."docker-komodoperiphery".after = [ "docker-network-komodo.service" ];
+  systemd.services."docker-komodoperiphery".requires = [ "docker-network-komodo.service" ];
 
   # NFS
   services.nfs.server = {
