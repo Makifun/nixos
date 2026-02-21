@@ -75,7 +75,6 @@
   virtualisation.oci-containers.containers."komodomongo" = {
     image = "mongo:latest";
     extraOptions = [ "--network=komodo" ];
-    cmd = [ "--quiet --wiredTigerCacheSizeGB 0.25" ];
     volumes = [
       "komodomongo-data:/data/db"
       "komodomongo-config:/data/configdb"
