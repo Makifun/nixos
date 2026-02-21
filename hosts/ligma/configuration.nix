@@ -14,6 +14,27 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Initrd with Network and SSH for LUKS Unlocking
+  boot.initrd = {
+    systemd.enable = true; 
+    systemd.network = {
+      enable = true;
+      networks."10-eth0" = {
+        matchConfig.Name = "en*";
+        networkConfig.DHCP = "yes";
+      };
+    };
+    network = {
+      enable = true;
+      ssh = {
+        enable = true;
+        port = 2222;
+        authorizedKeys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA4ulg3WPkj3HMDz3hi1ELphE/BQN5ztOY55JZzNfAih makizen" ];
+        hostKeys = [ ./initrd_ssh_host_ed25519_key ];
+      };
+    };
+  };
+
   # ZFS
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.devNodes = "/dev/disk/by-id";
@@ -52,75 +73,10 @@
     image = "fnsys/dockhand:latest";
     ports = [ "3000:3000" ];
     volumes = [
-      "/var/run/docker.sock:/var/run/docker.sock"
+      "/var/run/docker.sock:/var/run/docker.sock:ro"
       "dockhand_data:/app/data"
     ];
   };
-
-  # Create the network before containers start
-  systemd.services.docker-network-komodo = {
-    description = "Create the internal docker network for Komodo";
-    after = [ "network.target" "docker.service" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig.Type = "oneshot";
-    script = ''
-      check=$(${pkgs.docker}/bin/docker network ls -qf name=komodo)
-      if [ -z "$check" ]; then
-        ${pkgs.docker}/bin/docker network create komodo
-      fi
-    '';
-  };
-
-  # KomodoMongo
-  virtualisation.oci-containers.containers."komodomongo" = {
-    image = "mongo:latest";
-    extraOptions = [ "--network=komodo" ];
-    volumes = [
-      "komodomongo-data:/data/db"
-      "komodomongo-config:/data/configdb"
-    ];
-    environment = {
-      MONGO_INITDB_ROOT_USERNAME = "admin";
-      MONGO_INITDB_ROOT_PASSWORD = "password";
-    };
-  };
-
-  # KomodoCore
-  virtualisation.oci-containers.containers."komodocore" = {
-    image = "ghcr.io/moghtech/komodo-core:latest";
-    ports = [ "9120:9120" ];
-    extraOptions = [ "--network=komodo" ];
-    dependsOn = [ "komodomongo" ];
-    volumes = [
-      "komodocore-backups:/backups"
-    ];
-    environment = {
-      KOMODO_DATABASE_ADDRESS = "komodomongo:27017";
-      KOMODO_DATABASE_USERNAME = "admin";
-      KOMODO_DATABASE_PASSWORD = "password";
-      KOMODO_LOCAL_AUTH = "true";
-      KOMODO_INIT_ADMIN_USERNAME = "admin";
-    };
-  };
-
-  # KomodoPeriphery
-  virtualisation.oci-containers.containers."komodoperiphery" = {
-    image = "ghcr.io/moghtech/komodo-periphery:latest";
-    extraOptions = [ "--network=komodo" ];
-    volumes = [
-      "/var/run/docker.sock:/var/run/docker.sock:ro"
-      "komodoperiphery-data:/etc/komodo"
-    ];
-  };
-
-  systemd.services."docker-komodomongo".after = [ "docker-network-komodo.service" ];
-  systemd.services."docker-komodomongo".requires = [ "docker-network-komodo.service" ];
-
-  systemd.services."docker-komodocore".after = [ "docker-network-komodo.service" ];
-  systemd.services."docker-komodocore".requires = [ "docker-network-komodo.service" ];
-
-  systemd.services."docker-komodoperiphery".after = [ "docker-network-komodo.service" ];
-  systemd.services."docker-komodoperiphery".requires = [ "docker-network-komodo.service" ];
 
   # NFS
   services.nfs.server = {
