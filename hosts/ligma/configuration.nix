@@ -98,6 +98,8 @@
       KOMODO_DATABASE_ADDRESS = "komodomongo:27017";
       KOMODO_DATABASE_USERNAME = "admin";
       KOMODO_DATABASE_PASSWORD = "password";
+      KOMODO_LOCAL_AUTH = "true";
+      KOMODO_INIT_ADMIN_USERNAME = "admin";
     };
   };
 
