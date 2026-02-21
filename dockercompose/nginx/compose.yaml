@@ -1,0 +1,7 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "9001:80"
+    restart: always
