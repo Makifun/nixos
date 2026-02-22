@@ -4,6 +4,9 @@
   modulesPath,
   ...
 }:
+let
+  initrdHostKey = pkgs.writeText "initrd_ssh_host_ed25519_key" (builtins.readFile ./initrd_ssh_host_ed25519_key);
+in
 {
   imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
 
@@ -16,12 +19,15 @@
 
   # Initrd with Network and SSH for LUKS Unlocking
   boot.initrd = {
-    systemd.enable = true; 
-    systemd.network = {
+    systemd = {
       enable = true;
-      networks."10-eth0" = {
-        matchConfig.Name = "en*";
-        networkConfig.DHCP = "yes";
+      users.root.shell = "/bin/systemd-tty-ask-password-agent";
+      network = {
+        enable = true;
+        networks."10-eth0" = {
+          matchConfig.Name = "en*";
+          networkConfig.DHCP = "yes";
+        };
       };
     };
     network = {
@@ -30,7 +36,7 @@
         enable = true;
         port = 2222;
         authorizedKeys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA4ulg3WPkj3HMDz3hi1ELphE/BQN5ztOY55JZzNfAih makizen" ];
-        hostKeys = [ ./initrd_ssh_host_ed25519_key ];
+        hostKeys = [ initrdHostKey ];
       };
     };
   };
@@ -98,7 +104,7 @@
   # Sudo nopasswd
   security.sudo.wheelNeedsPassword = false;
 
-  # SSH
+  # SSH Persistence
   systemd.tmpfiles.rules = [
     "d /persist/etc/ssh 0755 root root -"
   ];
