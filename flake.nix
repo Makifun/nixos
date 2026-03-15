@@ -40,7 +40,6 @@
               {
                 imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix") ];
                 isoImage.squashfsCompression = "gzip -Xcompression-level 1";
-                image.fileName = "nixos-minimal-${system}.iso";
               }
             )
             ./common/users.nix
