@@ -1,0 +1,7 @@
+keys:
+  - &makifun age100c08p2hlc5vw258ug23wg4p5z7c99j4w30rayjyj5avtrfeegjqk9ylmk
+creation_rules:
+  - path_regex: .*\.sops$ # Encrypt any file ending in .sops
+    key_groups:
+      - age:
+          - *makifun

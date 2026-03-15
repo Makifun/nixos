@@ -4,6 +4,7 @@
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
     impermanence.url = "github:nix-community/impermanence";
+    sops-nix.url = "github:Mic92/sops-nix";
   };
 
   outputs =
@@ -12,6 +13,7 @@
       nixpkgs,
       disko,
       impermanence,
+      sops-nix,
       ...
     }:
     let
@@ -24,6 +26,7 @@
           modules = [
             disko.nixosModules.disko
             impermanence.nixosModules.impermanence
+            sops-nix.nixosModules.sops
             ./common/users.nix
             ./hosts/ligma/disko-config.nix
             ./hosts/ligma/configuration.nix
@@ -37,6 +40,7 @@
               {
                 imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix") ];
                 isoImage.squashfsCompression = "gzip -Xcompression-level 1";
+                image.fileName = "nixos-minimal-${system}.iso";
               }
             )
             ./common/users.nix

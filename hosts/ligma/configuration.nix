@@ -5,7 +5,9 @@
   ...
 }:
 let
-  initrdHostKey = pkgs.writeText "initrd_ssh_host_ed25519_key" (builtins.readFile ./initrd_ssh_host_ed25519_key);
+  initrdHostKey = pkgs.writeText "initrd_ssh_host_ed25519_key" (
+    builtins.readFile ./initrd_ssh_host_ed25519_key
+  );
 in
 {
   imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
@@ -24,7 +26,7 @@ in
       users.root.shell = "/bin/systemd-tty-ask-password-agent";
       network = {
         enable = true;
-        networks."10-eth0" = {
+        networks."10-dhcp" = {
           matchConfig.Name = "en*";
           networkConfig.DHCP = "yes";
         };
@@ -35,7 +37,9 @@ in
       ssh = {
         enable = true;
         port = 2222;
-        authorizedKeys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA4ulg3WPkj3HMDz3hi1ELphE/BQN5ztOY55JZzNfAih makizen" ];
+        authorizedKeys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA4ulg3WPkj3HMDz3hi1ELphE/BQN5ztOY55JZzNfAih makizen"
+        ];
         hostKeys = [ initrdHostKey ];
       };
     };
@@ -73,16 +77,6 @@ in
     storageDriver = "zfs";
   };
   virtualisation.oci-containers.backend = "docker";
-
-  # Dockhand
-  virtualisation.oci-containers.containers."dockhand" = {
-    image = "fnsys/dockhand:latest";
-    ports = [ "3000:3000" ];
-    volumes = [
-      "/var/run/docker.sock:/var/run/docker.sock:ro"
-      "dockhand_data:/app/data"
-    ];
-  };
 
   # NFS
   services.nfs.server = {
