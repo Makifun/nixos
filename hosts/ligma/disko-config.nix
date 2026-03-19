@@ -108,8 +108,8 @@
     };
   };
   fileSystems."/persist".neededForBoot = true;
-  zfs = {
-    autoScrub.enable = true;
-    trim.enable = true;
+  services = {
+    zfs.autoScrub.enable = true;
+    zfs.trim.enable = true;
   };
 }

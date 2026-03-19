@@ -27,11 +27,13 @@
     {
       nixosConfigurations = {
         ligma = nixpkgs.lib.nixosSystem {
+          system = system;
           modules = defaultModules ++ [
             ./hosts/ligma
           ];
         };
         minimaliso = nixpkgs.lib.nixosSystem {
+          system = system;
           modules = [
             (
               {
