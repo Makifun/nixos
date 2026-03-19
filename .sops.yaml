@@ -7,8 +7,3 @@ creation_rules:
       - age:
           - *hosts_ligma
           - *makifun
-  - path_regex: ^hosts/otherhost/[^/]+\.(yaml|json|env|ini|conf)$
-    key_groups:
-      - age:
-          - *hosts_ligma
-          - *makifun
