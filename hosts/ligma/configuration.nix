@@ -1,16 +1,23 @@
 {
+  config,
   pkgs,
   lib,
   modulesPath,
   ...
 }:
-let
-  initrdHostKey = pkgs.writeText "initrd_ssh_host_ed25519_key" (
-    builtins.readFile ./initrd_ssh_host_ed25519_key
-  );
-in
 {
-  imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
+  imports = [
+    (modulesPath + "/profiles/qemu-guest.nix")
+    ./disko-config.nix
+    ../../common/generic.nix
+    ../../common/users.nix
+    ../../modules/podman.nix
+  ];
+
+  sops.secrets."initrd_ssh_host_ed25519_key" = {
+    sopsFile = ./secrets.yaml;
+    format = "yaml";
+  };
 
   # Proxmox QEMU Guest
   services.qemuGuest.enable = true;
@@ -40,7 +47,7 @@ in
         authorizedKeys = [
           "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA4ulg3WPkj3HMDz3hi1ELphE/BQN5ztOY55JZzNfAih makizen"
         ];
-        hostKeys = [ initrdHostKey ];
+        hostKeys = [ config.sops.secrets."initrd_ssh_host_ed25519_key".path ];
       };
     };
   };
@@ -63,20 +70,12 @@ in
       "/var/log"
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
-      "/var/lib/docker" # Keep docker containers persistent
+      "/var/lib/podman"
     ];
     files = [
       "/etc/machine-id"
     ];
   };
-
-  # Docker
-  virtualisation.docker = {
-    enable = true;
-    enableOnBoot = true;
-    storageDriver = "zfs";
-  };
-  virtualisation.oci-containers.backend = "docker";
 
   # NFS
   services.nfs.server = {
@@ -91,8 +90,6 @@ in
     80
     443
     2049
-    3000
-    9120
   ];
 
   # Sudo nopasswd

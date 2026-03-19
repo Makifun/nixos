@@ -27,8 +27,6 @@
             disko.nixosModules.disko
             impermanence.nixosModules.impermanence
             sops-nix.nixosModules.sops
-            ./common/users.nix
-            ./hosts/ligma/disko-config.nix
             ./hosts/ligma/configuration.nix
           ];
         };
@@ -36,10 +34,15 @@
           system = system;
           modules = [
             (
-              { pkgs, modulesPath, ... }:
+              {
+                pkgs,
+                modulesPath,
+                lib,
+                ...
+              }:
               {
                 imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix") ];
-                isoImage.squashfsCompression = "gzip -Xcompression-level 1";
+                image.baseName = lib.mkForce "nixos-minimal-${system}";
               }
             )
             ./common/users.nix
