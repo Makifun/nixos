@@ -7,18 +7,11 @@
 }:
 {
   imports = [
-    (modulesPath + "/profiles/qemu-guest.nix")
     ./disko-config.nix
-    ../../common/generic.nix
-    ../../common/users.nix
+    ./sops.nix
+    ../../common
     ../../modules/podman.nix
   ];
-
-  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-  sops.secrets."initrd_ssh_host_ed25519_key" = {
-    sopsFile = ./secrets.yaml;
-    format = "yaml";
-  };
 
   # Proxmox QEMU Guest
   services.qemuGuest.enable = true;
@@ -35,7 +28,6 @@
       network = {
         enable = true;
         networks."10-dhcp" = {
-          matchConfig.Name = "en*";
           networkConfig.DHCP = "yes";
         };
       };
@@ -62,9 +54,9 @@
   # Networking
   networking.hostName = "ligma";
   networking.useDHCP = true;
-  networking.hostId = "324bbd6b"; # Required for ZFS
+  networking.hostId = "324bbd6b";
 
-  # Impermanence Logic
+  # Impermanence
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
@@ -116,5 +108,12 @@
     ];
   };
 
-  system.stateVersion = "25.11";
+  # Auto upgrade
+  system = {
+    stateVersion = "25.11";
+    autoUpgrade = {
+      flake = "github:makifun/nixos";
+      enable = true;
+    };
+  };
 }

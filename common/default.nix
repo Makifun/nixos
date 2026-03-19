@@ -1,4 +1,8 @@
+{ ... }:
 {
+  imports = [
+    ./users.nix
+  ];
   time.timeZone = "Europe/Stockholm";
   nix.gc = {
     automatic = true;

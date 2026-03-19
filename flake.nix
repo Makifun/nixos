@@ -27,7 +27,7 @@
             disko.nixosModules.disko
             impermanence.nixosModules.impermanence
             sops-nix.nixosModules.sops
-            ./hosts/ligma/configuration.nix
+            ./hosts/ligma
           ];
         };
         minimaliso = nixpkgs.lib.nixosSystem {
@@ -45,7 +45,7 @@
                 image.baseName = lib.mkForce "nixos-minimal-${system}";
               }
             )
-            ./common/users.nix
+            ./common
           ];
         };
       };
