@@ -30,5 +30,5 @@ if [[ -f "$SECRETS_FILE" ]]; then
     echo "Re-encrypting $SECRETS_FILE with the updated keys..."
     sops updatekeys -y "$SECRETS_FILE"
 else
-    echo "No secrets file found at $SECRETS_FILE to re-encrypt. If you have secrets elsewhere, run 'sops updatekeys -y <path/to/secrets>'"
+    echo "No secrets file found at $SECRETS_FILE to re-encrypt."
 fi
