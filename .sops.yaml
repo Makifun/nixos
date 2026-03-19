@@ -1,9 +1,9 @@
 keys:
+  - &hosts_ligma age1029rarkuv9hphvm8nmlnprxyjuqjhe28g5pza9ql3rqz2mpmmstqlgy74k
   - &makifun age100c08p2hlc5vw258ug23wg4p5z7c99j4w30rayjyj5avtrfeegjqk9ylmk
-  - &hosts_ligma age14u4t4w2jrnsx4g8ws4j0ar67lyjmwprh0dpht59z8n553mrmugvs345h3a
 creation_rules:
   - path_regex: .*\.yaml$
     key_groups:
       - age:
-          - *makifun
           - *hosts_ligma
+          - *makifun

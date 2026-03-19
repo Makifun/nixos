@@ -14,6 +14,7 @@
     ../../modules/podman.nix
   ];
 
+  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
   sops.secrets."initrd_ssh_host_ed25519_key" = {
     sopsFile = ./secrets.yaml;
     format = "yaml";
