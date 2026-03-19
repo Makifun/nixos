@@ -21,8 +21,7 @@ if grep -q "&hosts_$FLAKE_NAME\b" .sops.yaml; then
     echo "Updated existing &hosts_$FLAKE_NAME in .sops.yaml"
 else
     sed -i "/^keys:/a \  - &hosts_$FLAKE_NAME $PUBKEY" .sops.yaml
-    sed -i "/- age:/a \          - *hosts_$FLAKE_NAME" .sops.yaml
-    echo "Added new &hosts_$FLAKE_NAME to .sops.yaml"
+    echo "Added new &hosts_$FLAKE_NAME key to .sops.yaml"
 fi
 
 SECRETS_FILE="hosts/$FLAKE_NAME/secrets.yaml"
