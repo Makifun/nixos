@@ -17,4 +17,5 @@
       };
     };
   };
+  security.sudo.wheelNeedsPassword = false;
 }

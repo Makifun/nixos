@@ -32,16 +32,16 @@ else
     echo "No secrets file found at $SECRETS_FILE to re-encrypt."
 fi
 
-# Git automation
-git add .sops.yaml
-[[ -f "$SECRETS_FILE" ]] && git add "$SECRETS_FILE"
+# # Git automation
+# git add .sops.yaml
+# [[ -f "$SECRETS_FILE" ]] && git add "$SECRETS_FILE"
 
-# Check if there are any staged changes
-if ! git diff --cached --quiet; then
-    echo "Committing and pushing changes..."
-    COMMIT_MSG="Update sops keys for $FLAKE_NAME - $(date +'%Y-%m-%d %H:%M:%S')"
-    git commit -m "$COMMIT_MSG"
-    git push --quiet
-else
-    echo "No changes to commit."
-fi
+# # Check if there are any staged changes
+# if ! git diff --cached --quiet; then
+#     echo "Committing and pushing changes..."
+#     COMMIT_MSG="Update sops keys for $FLAKE_NAME - $(date +'%Y-%m-%d %H:%M:%S')"
+#     git commit -m "$COMMIT_MSG"
+#     git push --quiet
+# else
+#     echo "No changes to commit."
+# fi

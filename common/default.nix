@@ -1,6 +1,8 @@
 { ... }:
 {
   imports = [
+    ./boot.nix
+    ./openssh.nix
     ./users.nix
   ];
   time.timeZone = "Europe/Stockholm";

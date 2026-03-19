@@ -18,20 +18,20 @@
     }:
     let
       system = "x86_64-linux";
+      defaultModules = [
+        disko.nixosModules.disko
+        impermanence.nixosModules.impermanence
+        sops-nix.nixosModules.sops
+      ];
     in
     {
       nixosConfigurations = {
         ligma = nixpkgs.lib.nixosSystem {
-          system = system;
-          modules = [
-            disko.nixosModules.disko
-            impermanence.nixosModules.impermanence
-            sops-nix.nixosModules.sops
+          modules = defaultModules ++ [
             ./hosts/ligma
           ];
         };
         minimaliso = nixpkgs.lib.nixosSystem {
-          system = system;
           modules = [
             (
               {
