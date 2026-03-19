@@ -1,8 +1,13 @@
 keys:
-  - &hosts_ligma age19z6sduffk6tyzzkr0srm9fdes6xfd2c8l9hdclza8jh3gqkt6gasps38kt
+  - &hosts_ligma age1huf9dg53ete0y7zs4vtzd92635fcuaqywpu0087d4nnqammcx3gqd37tpz
   - &makifun age100c08p2hlc5vw258ug23wg4p5z7c99j4w30rayjyj5avtrfeegjqk9ylmk
 creation_rules:
-  - path_regex: .*\.yaml$
+  - path_regex: ^hosts/ligma/[^/]+\.(yaml|json|env|ini|conf)$
+    key_groups:
+      - age:
+          - *hosts_ligma
+          - *makifun
+  - path_regex: ^hosts/otherhost/[^/]+\.(yaml|json|env|ini|conf)$
     key_groups:
       - age:
           - *hosts_ligma
