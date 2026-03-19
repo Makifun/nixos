@@ -6,6 +6,11 @@
   services.openssh = {
     enable = true;
     openFirewall = true;
+    settings = {
+      AllowGroups = [ "wheel" ];
+      KbdInteractiveAuthentication = false;
+      PasswordAuthentication = false;
+    };
     hostKeys = [
       {
         path = "/persist/etc/ssh/ssh_host_ed25519_key";

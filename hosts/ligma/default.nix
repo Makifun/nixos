@@ -38,6 +38,10 @@
     ];
   };
 
+  environment.systemPackages = with pkgs; [
+    lynis
+  ];
+
   services = {
     qemuGuest.enable = true;
     nfs.server = {
