@@ -1,5 +1,5 @@
 keys:
-  - &hosts_ligma age1029rarkuv9hphvm8nmlnprxyjuqjhe28g5pza9ql3rqz2mpmmstqlgy74k
+  - &hosts_ligma age19z6sduffk6tyzzkr0srm9fdes6xfd2c8l9hdclza8jh3gqkt6gasps38kt
   - &makifun age100c08p2hlc5vw258ug23wg4p5z7c99j4w30rayjyj5avtrfeegjqk9ylmk
 creation_rules:
   - path_regex: .*\.yaml$
