@@ -2,9 +2,8 @@
 {
   services.forgejo = {
     enable = true;
-    # /ligma is a persistent ZFS dataset (zstorage pool) — no impermanence needed.
-    # SECRET_KEY, INTERNAL_TOKEN, and JWT secrets are auto-generated on first boot.
     stateDir = "/ligma/ligma/forgejo";
+    lfs.enable = true;
 
     settings = {
       DEFAULT.APP_NAME = "Forgejo";
@@ -13,7 +12,7 @@
         DOMAIN = "git.makifun.se";
         HTTP_ADDR = "127.0.0.1";
         HTTP_PORT = 3010;
-        ROOT_URL = "https://git.makifun.se";
+        ROOT_URL = "https://${srv.DOMAIN}/"; 
         SSH_DOMAIN = "git.makifun.se";
         SSH_PORT = 22222;
         SSH_LISTEN_PORT = 22222;
@@ -49,6 +48,11 @@
         SESSION_LIFE_TIME = 86400;
       };
 
+      actions = {
+        ENABLED = true;
+        DEFAULT_ACTIONS_URL = "github";
+      };
+
       log = {
         MODE = "console";
         LEVEL = "Warn";
@@ -60,6 +64,15 @@
       };
     };
   };
+
+  sops.secrets.forgejo-admin-password.owner = "forgejo";
+  systemd.services.forgejo.preStart = let 
+    adminCmd = "${lib.getExe cfg.package} admin user";
+    pwd = config.sops.secrets.forgejo-admin-password;
+    user = "makifun";
+  in ''
+    ${adminCmd} create --admin --email "root@localhost" --username ${user} --password "$(tr -d '\n' < ${pwd.path})" || true
+  '';
 
   networking.firewall.extraInputRules = ''
     tcp dport 22222 ip saddr 10.10.10.0/24 accept comment "Forgejo SSH"
