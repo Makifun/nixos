@@ -51,58 +51,5 @@
           ];
         };
       };
-      # dev shell for claude
-      # Usage: NIXPKGS_ALLOW_UNFREE=1 nix develop --impure
-      devShells.${system}.default =
-        let
-          pkgs = import nixpkgs {
-            inherit system;
-            config.allowUnfree = true;
-          };
-          sandbox =
-            import (fetchTarball "https://github.com/archie-judd/agent-sandbox.nix/archive/main.tar.gz")
-              {
-                inherit pkgs;
-              };
-          claude-sandboxed = sandbox.mkSandbox {
-            pkg = pkgs.claude-code;
-            binName = "claude";
-            outName = "claude-sandboxed";
-            allowedPackages = with pkgs; [
-              coreutils
-              which
-              bash
-              git
-              ripgrep
-              fd
-              gnused
-              gnugrep
-              findutils
-              jq
-            ];
-            stateDirs = [ "$HOME/.claude" ];
-            stateFiles = [
-              "$HOME/.claude.json"
-              "$HOME/.claude.json.lock"
-            ];
-            extraEnv = {
-              CLAUDE_CODE_OAUTH_TOKEN = "$CLAUDE_CODE_OAUTH_TOKEN";
-              GITHUB_TOKEN = "$GITHUB_TOKEN";
-              GIT_AUTHOR_NAME = "claude-agent";
-              GIT_AUTHOR_EMAIL = "claude-agent@localhost";
-              GIT_COMMITTER_NAME = "claude-agent";
-              GIT_COMMITTER_EMAIL = "claude-agent@localhost";
-            };
-            restrictNetwork = true;
-            allowedDomains = [
-              "anthropic.com"
-              "api.anthropic.com"
-              "claude.com"
-              "raw.githubusercontent.com"
-              "api.github.com"
-            ];
-          };
-        in
-        pkgs.mkShell { packages = [ claude-sandboxed ]; };
     };
 }
