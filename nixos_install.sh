@@ -16,7 +16,7 @@ nix run github:nix-community/nixos-anywhere -- --flake .#$FLAKE_NAME --copy-host
 echo "Unlocking LUKS partitions"
 ssh -o ConnectTimeout=10 root@$HOST -p 2222
 
-echo "Waiting for boot to finish"
+echo "Waiting for boot to finish (15s)"
 sleep 15
 
 echo "Post-install: Refreshing sops keys for $FLAKE_NAME"
