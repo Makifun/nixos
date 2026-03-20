@@ -12,6 +12,7 @@
     ./sops.nix
     ../../common
     ../../modules/podman.nix
+    ./apps/forgejo.nix
   ];
   networking = {
     hostName = "ligma";
@@ -35,9 +36,6 @@
       "/etc/machine-id"
     ];
   };
-  environment.systemPackages = with pkgs; [
-    lynis
-  ];
   services = {
     qemuGuest.enable = true;
     nfs.server = {
