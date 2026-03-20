@@ -39,6 +39,5 @@
   sops.secrets.authentik_env = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
-    owner = "authentik";
   };
 }
