@@ -3,7 +3,6 @@
   services.pangolin = {
     enable = true;
     baseDomain = "makifun.se";
-    # dashboardDomain defaults to "pangolin.makifun.se"
     letsEncryptEmail = "admin@makifun.se";
     dnsProvider = "cloudflare";
     dataDir = "/ligma/ligma/pangolin";
@@ -55,7 +54,6 @@
     };
   };
 
-  # Ensure parent directory exists before Pangolin's tmpfiles run
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/pangolin' 0770 pangolin fossorial - -"
     # gerbil-wg0-fix-script has a hardcoded /var/lib/pangolin path (module bug)

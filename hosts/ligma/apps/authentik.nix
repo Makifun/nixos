@@ -18,7 +18,6 @@
     };
   };
 
-  # PostgreSQL for Authentik — store data on the persistent ZFS pool
   services.postgresql = {
     enable = true;
     dataDir = "/ligma/ligma/authentik/postgresql";
@@ -33,11 +32,8 @@
 
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/authentik' 0755 root root - -"
-    # Do NOT pre-create the postgresql data dir — PostgreSQL runs initdb itself
-    # and needs to own the full initialization. Just ensure the parent exists.
   ];
 
-  # Declare user early so SOPS can assign secret ownership before authentik-nix does
   users.users.authentik = {
     isSystemUser = true;
     group = "authentik";

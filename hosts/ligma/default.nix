@@ -9,7 +9,6 @@
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disko-config.nix
-    ./sops.nix
     ../../common
     ../../modules/podman.nix
     ./apps/forgejo.nix
@@ -38,6 +37,9 @@
       "/etc/machine-id"
     ];
   };
+  systemd.tmpfiles.rules = [
+    "d '/ligma/ligma' 0755 root root - -"
+  ];
   services = {
     qemuGuest.enable = true;
     nfs.server = {

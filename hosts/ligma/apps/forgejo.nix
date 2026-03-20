@@ -10,12 +10,11 @@
       DEFAULT.APP_NAME = "Forgejo";
 
       server = {
-        DOMAIN = "ligma";
+        DOMAIN = "git.makifun.se";
         HTTP_ADDR = "127.0.0.1";
         HTTP_PORT = 3010;
-        ROOT_URL = "http://ligma";
-        # Forgejo's built-in SSH server for git operations
-        SSH_DOMAIN = "ligma";
+        ROOT_URL = "https://git.makifun.se";
+        SSH_DOMAIN = "git.makifun.se";
         SSH_PORT = 22222;
         SSH_LISTEN_PORT = 22222;
         START_SSH_SERVER = true;
@@ -46,7 +45,7 @@
       };
 
       session = {
-        COOKIE_SECURE = false; # set to true once behind HTTPS
+        COOKIE_SECURE = true;
         SESSION_LIFE_TIME = 86400;
       };
 
@@ -62,14 +61,6 @@
     };
   };
 
-  # Ensure parent directory exists on the ZFS pool before forgejo's tmpfiles run
-  systemd.tmpfiles.rules = [
-    "d '/ligma/ligma' 0755 root root - -"
-  ];
-
-  # Traefik (via Pangolin) handles reverse proxying — see pangolin.nix
-
-  # Allow Forgejo's git SSH from the local subnet
   networking.firewall.extraInputRules = ''
     tcp dport 22222 ip saddr 10.10.10.0/24 accept comment "Forgejo SSH"
   '';
