@@ -36,8 +36,16 @@
     "d '/ligma/ligma/authentik/postgresql' 0700 postgres postgres - -"
   ];
 
+  # Declare user early so SOPS can assign secret ownership before authentik-nix does
+  users.users.authentik = {
+    isSystemUser = true;
+    group = "authentik";
+  };
+  users.groups.authentik = { };
+
   sops.secrets.authentik_env = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
+    owner = "authentik";
   };
 }
