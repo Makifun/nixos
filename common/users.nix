@@ -11,6 +11,9 @@
       };
     };
   };
+  programs.zsh.enable = true;
+  users.defaultUserShell = pkgs.zsh;
+  users.mutableUsers = false;
   security.sudo = {
     wheelNeedsPassword = false;
     execWheelOnly = true;

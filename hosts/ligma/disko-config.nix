@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   disko.devices = {
     nodev."/" = {
@@ -28,6 +29,7 @@
               size = "100%";
               content = {
                 type = "luks";
+                passwordFile = config.sops.secrets."luks_password".path;
                 name = "crypted_zroot";
                 settings.allowDiscards = true;
                 content = {
@@ -49,6 +51,7 @@
               size = "100%";
               content = {
                 type = "luks";
+                passwordFile = config.sops.secrets."luks_password".path;
                 name = "crypted_ligma";
                 settings.allowDiscards = true;
                 content = {

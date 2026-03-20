@@ -37,14 +37,12 @@
       ncdu
     ];
   };
-  programs = {
-    nh = {
+  programs.nh = {
+    enable = true;
+    clean = {
       enable = true;
-      clean = {
-        enable = true;
-        extraArgs = "--keep-since 4d --keep 3";
-      };
-      flake = "github:makifun/nixos";
+      extraArgs = "--keep-since 4d --keep 3";
     };
+    flake = "github:makifun/nixos";
   };
 }

@@ -13,7 +13,6 @@
     ../../common
     ../../modules/podman.nix
   ];
-
   networking = {
     hostName = "ligma";
     useDHCP = true;
@@ -24,7 +23,6 @@
       2049
     ];
   };
-
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
@@ -37,11 +35,9 @@
       "/etc/machine-id"
     ];
   };
-
   environment.systemPackages = with pkgs; [
     lynis
   ];
-
   services = {
     qemuGuest.enable = true;
     nfs.server = {
@@ -51,7 +47,6 @@
       '';
     };
   };
-
   system = {
     stateVersion = "25.11";
     autoUpgrade = {

@@ -33,6 +33,7 @@
       "hidepid=2"
     ];
   };
+  security.auditd.enable = true;
   services.dbus.implementation = "broker";
   systemd.services = {
     systemd-rfkill = {
