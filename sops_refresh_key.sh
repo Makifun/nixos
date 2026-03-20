@@ -1,11 +1,20 @@
 #!/bin/zsh
-if [[ -z "$1" || -z "$2" ]]; then
-    echo "Usage: ./sops_refresh_key.sh <ip/hostname> <flake_name>"
+NO_PUSH=false
+POS_ARGS=()
+for arg in "$@"; do
+    case "$arg" in
+        --no-push|-n) NO_PUSH=true ;;
+        *) POS_ARGS+=("$arg") ;;
+    esac
+done
+
+if [[ ${#POS_ARGS[@]} -lt 2 ]]; then
+    echo "Usage: ./sops_refresh_key.sh [--no-push|-n] <ip/hostname> <flake_name>"
     exit 1
 fi
 
-HOST="$1"
-FLAKE_NAME="$2"
+HOST="${POS_ARGS[1]}"
+FLAKE_NAME="${POS_ARGS[2]}"
 
 PUBKEY=$(ssh-keyscan -t ed25519 "$HOST" 2>/dev/null | ssh-to-age)
 if [[ -z "$PUBKEY" ]]; then
@@ -32,16 +41,17 @@ else
     echo "No secrets file found at $SECRETS_FILE to re-encrypt."
 fi
 
-# # Git automation
-# git add .sops.yaml
-# [[ -f "$SECRETS_FILE" ]] && git add "$SECRETS_FILE"
+if [[ "$NO_PUSH" == true ]]; then
+    echo "Not pushing because of --no-push."
+else
+    git add .sops.yaml
+    [[ -f "$SECRETS_FILE" ]] && git add "$SECRETS_FILE"
 
-# # Check if there are any staged changes
-# if ! git diff --cached --quiet; then
-#     echo "Committing and pushing changes..."
-#     COMMIT_MSG="Update sops keys for $FLAKE_NAME - $(date +'%Y-%m-%d %H:%M:%S')"
-#     git commit -m "$COMMIT_MSG"
-#     git push --quiet
-# else
-#     echo "No changes to commit."
-# fi
+    if ! git diff --cached --quiet; then
+        COMMIT_MSG="Update sops keys for $FLAKE_NAME - $(date +'%Y-%m-%d %H:%M:%S')"
+        git commit -m "$COMMIT_MSG"
+        git push --quiet
+    else
+        echo "No changes to commit."
+    fi
+fi
