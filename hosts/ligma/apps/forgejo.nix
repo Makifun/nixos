@@ -1,4 +1,4 @@
-{ ... }:
+{ config, lib, ... }:
 {
   services.forgejo = {
     enable = true;
@@ -65,13 +65,21 @@
     };
   };
 
-  sops.secrets.forgejo-admin-password.owner = "forgejo";
-  systemd.services.forgejo.preStart = let 
-    adminCmd = "${lib.getExe cfg.package} admin user";
-    pwd = config.sops.secrets.forgejo-admin-password;
-    user = "makifun";
-  in ''
-    ${adminCmd} create --admin --email "root@localhost" --username ${user} --password "$(tr -d '\n' < ${pwd.path})" || true
+  sops.secrets.forgejo-admin-password = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner = config.services.forgejo.user;
+  };
+
+  # Append admin user creation to forgejo's existing preStart.
+  # Uses || true so it's a no-op if the user already exists.
+  systemd.services.forgejo.preStart = lib.mkAfter ''
+    ${lib.getExe config.services.forgejo.package} admin user create \
+      --admin \
+      --username makifun \
+      --email "admin@makifun.se" \
+      --password "$(tr -d '\n' < ${config.sops.secrets.forgejo-admin-password.path})" \
+      || true
   '';
 
   networking.firewall.extraInputRules = ''
