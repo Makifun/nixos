@@ -41,6 +41,9 @@
   # Ensure parent directory exists before Pangolin's tmpfiles run
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/pangolin' 0770 pangolin fossorial - -"
+    # gerbil-wg0-fix-script has a hardcoded /var/lib/pangolin path (module bug)
+    "d '/var/lib/pangolin' 0770 pangolin fossorial - -"
+    "d '/var/lib/pangolin/config' 0770 pangolin fossorial - -"
   ];
 
   # Pangolin server secret (SERVER_SECRET=<random>)
