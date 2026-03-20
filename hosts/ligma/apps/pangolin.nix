@@ -38,6 +38,12 @@
     };
   };
 
+  # Ensure pangolin and traefik start after SOPS secrets are decrypted
+  systemd.services.pangolin.after = [ "sops-install-secrets.service" ];
+  systemd.services.pangolin.requires = [ "sops-install-secrets.service" ];
+  systemd.services.traefik.after = [ "sops-install-secrets.service" ];
+  systemd.services.traefik.requires = [ "sops-install-secrets.service" ];
+
   # Ensure parent directory exists before Pangolin's tmpfiles run
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/pangolin' 0770 pangolin fossorial - -"

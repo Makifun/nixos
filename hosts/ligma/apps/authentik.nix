@@ -32,8 +32,9 @@
   };
 
   systemd.tmpfiles.rules = [
-    "d '/ligma/ligma/authentik' 0750 root root - -"
-    "d '/ligma/ligma/authentik/postgresql' 0700 postgres postgres - -"
+    "d '/ligma/ligma/authentik' 0755 root root - -"
+    # Do NOT pre-create the postgresql data dir — PostgreSQL runs initdb itself
+    # and needs to own the full initialization. Just ensure the parent exists.
   ];
 
   # Declare user early so SOPS can assign secret ownership before authentik-nix does
