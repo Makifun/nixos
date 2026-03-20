@@ -50,6 +50,12 @@
     autoUpgrade = {
       flake = "github:makifun/nixos";
       enable = true;
+      randomizedDelaySec = "30min";
+      allowReboot = true;
+      rebootWindow = {
+        lower = "03:00";
+        upper = "06:00";
+      };
     };
   };
 }
