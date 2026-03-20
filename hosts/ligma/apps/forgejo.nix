@@ -12,7 +12,7 @@
       server = {
         DOMAIN = "ligma";
         HTTP_ADDR = "127.0.0.1";
-        HTTP_PORT = 3000;
+        HTTP_PORT = 3010;
         ROOT_URL = "http://ligma";
         # Forgejo's built-in SSH server for git operations
         SSH_DOMAIN = "ligma";

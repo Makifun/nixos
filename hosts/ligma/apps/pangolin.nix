@@ -33,7 +33,7 @@
       };
     };
     services = {
-      forgejo.loadBalancer.servers = [ { url = "http://127.0.0.1:3000"; } ];
+      forgejo.loadBalancer.servers = [ { url = "http://127.0.0.1:3010"; } ];
       authentik.loadBalancer.servers = [ { url = "http://127.0.0.1:9000"; } ];
     };
   };
