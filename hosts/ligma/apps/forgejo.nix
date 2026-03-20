@@ -51,7 +51,7 @@
 
       log = {
         MODE = "console";
-        LEVEL = "warn";
+        LEVEL = "Warn";
       };
 
       other = {
