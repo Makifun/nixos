@@ -51,7 +51,8 @@
           ];
         };
       };
-
+      # dev shell for claude
+      # Usage: NIXPKGS_ALLOW_UNFREE=1 nix develop --impure
       devShells.${system}.default =
         let
           pkgs = import nixpkgs {
