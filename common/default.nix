@@ -1,12 +1,10 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
-  imports = [
-    ./boot.nix
-    ./fail2ban.nix
-    ./hardening.nix
-    ./openssh.nix
-    ./users.nix
-  ];
+  imports = map (f: ./. + "/${f}") (
+    builtins.filter
+      (f: f != "default.nix" && lib.hasSuffix ".nix" f)
+      (builtins.attrNames (builtins.readDir ./.))
+  );
   time.timeZone = "Europe/Stockholm";
   nix = {
     settings = {
