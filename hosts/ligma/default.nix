@@ -13,6 +13,8 @@
     ../../common
     ../../modules/podman.nix
     ./apps/forgejo.nix
+    ./apps/pangolin.nix
+    ./apps/authentik.nix
   ];
   networking = {
     hostName = "ligma";

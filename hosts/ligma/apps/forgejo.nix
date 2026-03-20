@@ -67,24 +67,7 @@
     "d '/ligma/ligma' 0755 root root - -"
   ];
 
-  # Nginx reverse proxy on port 80
-  services.nginx = {
-    enable = true;
-    virtualHosts."ligma" = {
-      default = true;
-      locations."/" = {
-        proxyPass = "http://127.0.0.1:3000";
-        proxyWebsockets = true;
-        extraConfig = ''
-          client_max_body_size 100M;
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Proto $scheme;
-        '';
-      };
-    };
-  };
+  # Traefik (via Pangolin) handles reverse proxying — see pangolin.nix
 
   # Allow Forgejo's git SSH from the local subnet
   networking.firewall.extraInputRules = ''

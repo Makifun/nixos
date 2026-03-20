@@ -5,6 +5,8 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
     impermanence.url = "github:nix-community/impermanence";
     sops-nix.url = "github:Mic92/sops-nix";
+    authentik-nix.url = "github:nix-community/authentik-nix";
+    authentik-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -14,6 +16,7 @@
       disko,
       impermanence,
       sops-nix,
+      authentik-nix,
       ...
     }:
     let
@@ -22,6 +25,7 @@
         disko.nixosModules.disko
         impermanence.nixosModules.impermanence
         sops-nix.nixosModules.sops
+        authentik-nix.nixosModules.default
       ];
     in
     {
