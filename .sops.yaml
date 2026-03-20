@@ -1,5 +1,5 @@
 keys:
-  - &hosts_ligma age1d00lhjn92pqxm8c9vwclaslpfladu599espc26t89v8xrj3zg9lqchj639
+  - &hosts_ligma age1vem94t69svzmvx3lvcyrgfz27nufr0p493ttev22qk07vp0p8sdqp43qnr
   - &makifun age100c08p2hlc5vw258ug23wg4p5z7c99j4w30rayjyj5avtrfeegjqk9ylmk
 creation_rules:
   - path_regex: ^hosts/ligma/[^/]+\.(yaml|json|env|ini|conf)$
