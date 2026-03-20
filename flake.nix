@@ -51,7 +51,7 @@
                 image.baseName = lib.mkForce "nixos-minimal-${system}";
               }
             )
-            ./common
+            ./common/users.nix
           ];
         };
       };
