@@ -16,6 +16,22 @@
   # Token needs Zone:DNS:Edit permission for makifun.se.
   services.traefik.environmentFiles = [ config.sops.secrets.traefik_env.path ];
 
+  services.traefik.staticConfigOptions = {
+    global.sendAnonymousUsage = false;
+    certificatesResolvers.letsencrypt.acme = {
+      keyType = "EC384";
+      dnsChallenge.propagation = {
+        delayBeforeChecks = "30s";
+        disableChecks = true;
+      };
+    };
+    # HTTP/3 (QUIC) on port 443 — requires UDP 443 open in firewall
+    entryPoints.websecure.http3.advertisedPort = 443;
+  };
+
+  # UDP 443 for HTTP/3
+  networking.firewall.allowedUDPPorts = [ 443 ];
+
   # Static routes for NixOS-managed services — declarative, no Pangolin UI needed.
   services.traefik.dynamicConfigOptions.http = {
     routers = {
