@@ -12,7 +12,7 @@
         DOMAIN = "git.makifun.se";
         HTTP_ADDR = "127.0.0.1";
         HTTP_PORT = 3010;
-        ROOT_URL = "https://${srv.DOMAIN}/"; 
+        ROOT_URL = "https://git.makifun.se/";
         SSH_DOMAIN = "git.makifun.se";
         SSH_PORT = 22222;
         SSH_LISTEN_PORT = 22222;
