@@ -29,7 +29,7 @@
         ligma = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = defaultModules ++ [
-            ./hosts/ligma #poopoo
+            ./hosts/ligma
           ];
         };
         minimaliso = nixpkgs.lib.nixosSystem {
