@@ -7,10 +7,6 @@
         format = "yaml";
         sopsFile = ./secrets.yaml;
       };
-      luks_password = {
-        format = "yaml";
-        sopsFile = ./secrets.yaml;
-      };
     };
   };
 }

@@ -29,6 +29,7 @@
   };
   environment = {
     systemPackages = with pkgs; [
+      starship
       btop
       screen
       nmap

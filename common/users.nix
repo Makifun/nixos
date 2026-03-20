@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 {
   users.users.makifun = {
     isNormalUser = true;
@@ -11,8 +11,6 @@
       };
     };
   };
-  programs.zsh.enable = true;
-  users.defaultUserShell = pkgs.zsh;
   users.mutableUsers = false;
   security.sudo = {
     wheelNeedsPassword = false;

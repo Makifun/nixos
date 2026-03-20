@@ -3,7 +3,7 @@
   systemd.tmpfiles.rules = [
     "d /persist/etc/ssh 0755 root root -"
   ];
-  networking.firewall = lib.mkIf config.networking.nftables.enable {
+  networking.firewall = {
     extraInputRules = ''
       ip saddr 10.10.10.0/24 tcp dport 22 accept comment "SSH local access"
     '';
@@ -12,7 +12,7 @@
     enable = true;
     allowSFTP = false;
     ports = [ 22 ];
-    openFirewall = true;
+    openFirewall = false;
     settings = {
       AllowGroups = [ "wheel" ];
       KbdInteractiveAuthentication = false;
