@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 {
   services.forgejo = {
     enable = true;
@@ -81,6 +81,32 @@
       --password "$(tr -d '\n' < ${config.sops.secrets.forgejo-admin-password.path})" \
       || true
   '';
+
+  sops.secrets.forgejo-runner-token = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+
+  services.gitea-actions-runner = {
+    package = pkgs.forgejo-runner;
+    instances.default = {
+      enable = true;
+      name = "monolith";
+      url = "https://git.makifun.se";
+      tokenFile = config.sops.secrets.forgejo-runner-token.path;
+      labels = [
+        "ubuntu-latest:docker://node:16-bullseye"
+      ];
+    };
+  };
+
+  # Runner state must survive reboots — it stores auth credentials after registration
+  environment.persistence."/persist".directories = [
+    "/var/lib/gitea-runner"
+  ];
+
+  # Podman docker-compat socket access for the runner
+  users.users.gitea-runner.extraGroups = [ "podman" ];
 
   networking.firewall.extraInputRules = ''
     tcp dport 22222 ip saddr 10.10.10.0/24 accept comment "Forgejo SSH"
