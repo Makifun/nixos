@@ -19,7 +19,7 @@
           authorizedKeys = [
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA4ulg3WPkj3HMDz3hi1ELphE/BQN5ztOY55JZzNfAih makizen"
           ];
-          hostKeys = config.sops.secrets.initrd_ssh_host_ed25519_key.path;
+          hostKeys = [ config.sops.secrets."initrd_ssh_host_ed25519_key".path ];
         };
       };
     };
