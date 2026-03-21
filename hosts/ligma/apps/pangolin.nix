@@ -109,15 +109,10 @@ in
     "d '/ligma/ligma/pangolin/config' 0755 root root - -"
   ];
 
-  services.traefik.dynamicConfigOptions.http = {
-    routers.pangolin = {
-      rule = "Host(`pangolin.makifun.se`)";
-      entryPoints = [ "websecure" ];
-      service = "pangolin";
-      tls.certResolver = "letsencrypt";
-    };
-    services.pangolin.loadBalancer.servers = [ { url = "http://127.0.0.1:3000"; } ];
-  };
+  # Pangolin configures its own Traefik routes via the HTTP provider
+  # (services.traefik.staticConfigOptions.providers.http in traefik.nix).
+  # No manual router needed here — Pangolin reports the correct backend via
+  # its /api/v1/traefik-config endpoint.
 
   # Pangolin server secret (SERVER_SECRET=<random>)
   sops.secrets.pangolin_env = {
