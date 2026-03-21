@@ -1,4 +1,43 @@
-{ config, ... }:
+{ config, pkgs, ... }:
+let
+  pangolinConfig = (pkgs.formats.yaml { }).generate "config.yml" {
+    app = {
+      dashboard_url = "https://pangolin.makifun.se";
+      log_level = "info";
+      save_logs = false;
+    };
+
+    server = {
+      external_port = 3001;
+      internal_port = 3000;
+      next_port = 3002;
+      base_domain = "makifun.se";
+      # Actual secret is injected via SERVER_SECRET env var at runtime
+      secret = "changeme";
+    };
+
+    domains.domain1 = {
+      base_domain = "makifun.se";
+      cert_resolver = "letsencrypt";
+      prefer_wildcard_cert = true;
+      lets_encrypt_email = "admin@makifun.se";
+    };
+
+    gerbil = {
+      start_port = 51820;
+      base_endpoint = "pangolin.makifun.se";
+      dns_provider = "cloudflare";
+    };
+
+    flags = {
+      require_email_verification = true;
+      disable_signup_without_invite = true;
+      disable_user_create_org = true;
+      allow_raw_resources = true;
+      enable_integration_api = true;
+    };
+  };
+in
 {
   virtualisation.oci-containers.backend = "podman";
 
@@ -14,9 +53,12 @@
       image = "fosrl/gerbil:1.3.0";
       dependsOn = [ "pangolin" ];
       cmd = [
-        "--reachableAt" "http://gerbil:3003"
-        "--generateAndSaveKeyTo" "/var/config/peer_key"
-        "--remoteConfig" "http://pangolin:3001/api/v1"
+        "--reachableAt"
+        "http://gerbil:3003"
+        "--generateAndSaveKeyTo"
+        "/var/config/peer_key"
+        "--remoteConfig"
+        "http://pangolin:3001/api/v1"
       ];
       volumes = [ "/ligma/ligma/pangolin/config:/var/config" ];
       ports = [ "51820:51820/udp" ];
@@ -26,13 +68,29 @@
         "--cap-add=SYS_MODULE"
         "--sysctl=net.ipv4.ip_forward=1"
         "--sysctl=net.ipv4.conf.all.src_valid_mark=1"
-        "--sysctl=net.ipv6.conf.all.forwarding=1"
       ];
     };
   };
 
+  # Write config.yml only if it doesn't already exist, so manual edits are preserved.
+  systemd.services.pangolin-config-init = {
+    description = "Initialise Pangolin config.yml";
+    wantedBy = [ "podman-pangolin.service" ];
+    before = [ "podman-pangolin.service" ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      if [ ! -f /ligma/ligma/pangolin/config/config.yml ]; then
+        cp ${pangolinConfig} /ligma/ligma/pangolin/config/config.yml
+        chmod 600 /ligma/ligma/pangolin/config/config.yml
+      fi
+    '';
+  };
+
   # WireGuard port for gerbil tunnels
-  networking.firewall.allowedUDPPorts = [ 443 51820 ];
+  networking.firewall.allowedUDPPorts = [
+    443
+    51820
+  ];
 
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/pangolin' 0755 root root - -"
