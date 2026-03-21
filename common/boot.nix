@@ -6,6 +6,7 @@
       efi.canTouchEfiVariables = true;
     };
     supportedFilesystems = [ "zfs" ];
+    zfs.devNodes = "/dev/mapper";
     initrd = {
       systemd = {
         enable = true;
