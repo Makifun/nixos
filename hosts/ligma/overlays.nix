@@ -15,7 +15,7 @@
           src = newSrc;
           npmDeps = prev.fetchNpmDeps {
             src = newSrc;
-            hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+            hash = "sha256-CwS26eRAIuxJ2fekRRapDWYAOHXPV0mIX/by4uW2ZOM=";
           };
         };
       })
