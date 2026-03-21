@@ -14,6 +14,7 @@
     ./apps/forgejo.nix
     ./apps/pangolin.nix
     ./apps/authentik.nix
+    ./apps/vaultwarden.nix
   ];
   networking = {
     hostName = "ligma";
