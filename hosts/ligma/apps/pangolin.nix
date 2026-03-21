@@ -99,6 +99,8 @@ in
     "d '/ligma/ligma/pangolin/config' 0755 root root - -"
   ];
 
+  services.traefik.enable = true;
+
   # Cloudflare DNS API token for Traefik wildcard cert challenge.
   # Secret file must contain: CF_DNS_API_TOKEN=<token>
   # Token needs Zone:DNS:Edit permission for makifun.se.
