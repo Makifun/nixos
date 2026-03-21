@@ -67,13 +67,10 @@ in
         "http://127.0.0.1:3001/api/v1"
       ];
       volumes = [ "/ligma/ligma/pangolin/config:/var/config" ];
-      ports = [ "51820:51820/udp" ];
       extraOptions = [
         "--network=host"
         "--cap-add=NET_ADMIN"
         "--cap-add=SYS_MODULE"
-        "--sysctl=net.ipv4.ip_forward=1"
-        "--sysctl=net.ipv4.conf.all.src_valid_mark=1"
       ];
     };
   };
