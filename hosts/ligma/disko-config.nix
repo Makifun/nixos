@@ -84,6 +84,13 @@
             mountpoint = "/persist";
             options.mountpoint = "legacy";
           };
+          reserved = {
+            type = "zfs_fs";
+            options = {
+              mountpoint = "none";
+              refreservation = "10G";
+            };
+          };
         };
       };
       zstorage = {
@@ -102,6 +109,13 @@
             type = "zfs_fs";
             mountpoint = "/ligma";
             options.mountpoint = "legacy";
+          };
+          reserved = {
+            type = "zfs_fs";
+            options = {
+              mountpoint = "none";
+              refreservation = "5G";
+            };
           };
         };
       };
