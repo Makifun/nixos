@@ -11,7 +11,9 @@
       systemd = {
         enable = true;
         users.root.shell = "/bin/systemd-tty-ask-password-agent";
-        services."zfs-import-zroot".serviceConfig.ExecStartPre = "${pkgs.coreutils}/bin/sleep infinity";
+        services."zfs-import-zroot".serviceConfig.ExecStartPre = "${pkgs.coreutils}/bin/sleep 10";
+        services."systemd-cryptsetup@crypted_zroot".serviceConfig.TimeoutStartSec = "infinity";
+        services."systemd-cryptsetup@crypted_ligma".serviceConfig.TimeoutStartSec = "infinity";
       };
       network = {
         enable = true;
