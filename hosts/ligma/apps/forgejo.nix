@@ -106,21 +106,19 @@
   users.users.gitea-runner = {
     isSystemUser = true;
     group = "gitea-runner";
+    home = "/var/lib/gitea-runner";
     extraGroups = [ "podman" ];
   };
   users.groups.gitea-runner = { };
 
-  systemd.services."gitea-runner-default".serviceConfig = {
-    DynamicUser = lib.mkForce false;
-    User = "gitea-runner";
-    Group = "gitea-runner";
-    SupplementaryGroups = [ "podman" ];
-  };
-
-  systemd.services."gitea-register-runner-default".serviceConfig = {
-    DynamicUser = lib.mkForce false;
-    User = "gitea-runner";
-    Group = "gitea-runner";
+  systemd.services."gitea-runner-default" = {
+    environment.DOCKER_HOST = "unix:///run/podman/podman.sock";
+    serviceConfig = {
+      DynamicUser = lib.mkForce false;
+      User = "gitea-runner";
+      Group = "gitea-runner";
+      SupplementaryGroups = [ "podman" ];
+    };
   };
 
   environment.persistence."/persist".directories = [
