@@ -7,8 +7,16 @@
     dnsProvider = "cloudflare";
     dataDir = "/ligma/ligma/pangolin";
     environmentFile = config.sops.secrets.pangolin_env.path;
-    settings.domains.domain1.prefer_wildcard_cert = true;
-    settings.flags.enable_integration_api = true;
+    settings = {
+      domains.domain1.prefer_wildcard_cert = true;
+      flags = {
+        allow_raw_resources = true;
+        disable_signup_without_invite = true;
+        disable_user_create_org = true;
+        enable_integration_api = true;
+        require_email_verification = true;
+      };
+    };
   };
 
   # Cloudflare DNS API token for Traefik wildcard cert challenge.
