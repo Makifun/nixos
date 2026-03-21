@@ -9,6 +9,7 @@
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disko-config.nix
+    ./overlays.nix
     ../../common
     ../../modules/podman.nix
     ./apps/forgejo.nix
