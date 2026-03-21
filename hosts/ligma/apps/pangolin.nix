@@ -3,8 +3,12 @@ let
   pangolinConfig = (pkgs.formats.yaml { }).generate "config.yml" {
     app = {
       dashboard_url = "https://pangolin.makifun.se";
+      log_failed_attempts = true;
       log_level = "info";
-      save_logs = false;
+      save_logs = true;
+      telemetry = {
+        anonymous_usage = false;
+      };
     };
 
     server = {
@@ -12,11 +16,9 @@ let
       internal_port = 3000;
       next_port = 3002;
       base_domain = "makifun.se";
-      # Actual secret is injected via SERVER_SECRET env var at runtime
-      secret = "changeme";
     };
 
-    domains.domain1 = {
+    domains.makifun.se = {
       base_domain = "makifun.se";
       cert_resolver = "letsencrypt";
       prefer_wildcard_cert = true;
@@ -30,11 +32,11 @@ let
     };
 
     flags = {
-      require_email_verification = true;
+      require_email_verification = false;
       disable_signup_without_invite = true;
       disable_user_create_org = true;
       allow_raw_resources = true;
-      enable_integration_api = true;
+      enable_integration_api = false;
     };
   };
 in
