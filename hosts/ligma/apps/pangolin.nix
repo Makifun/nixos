@@ -60,7 +60,7 @@ in
       dependsOn = [ "pangolin" ];
       cmd = [
         "--reachableAt"
-        "http://gerbil:3003"
+        "http://gerbil:3004"
         "--generateAndSaveKeyTo"
         "/var/config/peer_key"
         "--remoteConfig"
@@ -87,6 +87,13 @@ in
         chmod 600 /ligma/ligma/pangolin/config/config.yml
       fi
     '';
+  };
+
+  # Required for WireGuard routing — gerbil uses --network=host so these
+  # must be set on the host, not as container --sysctl flags.
+  boot.kernel.sysctl = {
+    "net.ipv4.ip_forward" = 1;
+    "net.ipv4.conf.all.src_valid_mark" = 1;
   };
 
   # Gerbil runs with --network=host and uses the host /etc/hosts.
