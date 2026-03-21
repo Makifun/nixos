@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 {
   boot = {
     loader = {
@@ -11,6 +11,7 @@
       systemd = {
         enable = true;
         users.root.shell = "/bin/systemd-tty-ask-password-agent";
+        services."zfs-import-zroot".serviceConfig.ExecStartPre = "${pkgs.coreutils}/bin/sleep 10";
       };
       network = {
         enable = true;
