@@ -18,7 +18,7 @@ let
       base_domain = "makifun.se";
     };
 
-    domains."makifun.se" = {
+    domains.makifun = {
       base_domain = "makifun.se";
       cert_resolver = "letsencrypt";
       prefer_wildcard_cert = true;
