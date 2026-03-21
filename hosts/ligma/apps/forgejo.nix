@@ -100,16 +100,34 @@
     };
   };
 
+  # Disable DynamicUser so systemd uses /var/lib/gitea-runner directly
+  # (DynamicUser redirects to /var/lib/private which conflicts with impermanence bind mounts)
+  users.users.gitea-runner = {
+    isSystemUser = true;
+    group = "gitea-runner";
+    extraGroups = [ "podman" ];
+  };
+  users.groups.gitea-runner = { };
+
+  systemd.services."gitea-runner-default".serviceConfig = {
+    DynamicUser = lib.mkForce false;
+    User = "gitea-runner";
+    Group = "gitea-runner";
+    SupplementaryGroups = [ "podman" ];
+  };
+
   environment.persistence."/persist".directories = [
-    "/var/lib/gitea-runner"
+    {
+      directory = "/var/lib/gitea-runner";
+      user = "gitea-runner";
+      group = "gitea-runner";
+      mode = "0750";
+    }
   ];
 
   systemd.tmpfiles.rules = [
-    "d '/persist/var/lib/gitea-runner' 0750 root root - -"
+    "d '/persist/var/lib/gitea-runner' 0750 gitea-runner gitea-runner - -"
   ];
-
-  # Podman docker-compat socket access for the runner
-  systemd.services."gitea-runner-default".serviceConfig.SupplementaryGroups = [ "podman" ];
 
   networking.firewall.extraInputRules = ''
     tcp dport 22222 ip saddr 10.10.10.0/24 accept comment "Forgejo SSH"
