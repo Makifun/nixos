@@ -137,4 +137,14 @@
   networking.firewall.extraInputRules = ''
     tcp dport 22222 ip saddr 10.10.10.0/24 accept comment "Forgejo SSH"
   '';
+
+  services.traefik.dynamicConfigOptions.http = {
+    routers.forgejo = {
+      rule = "Host(`git.makifun.se`)";
+      entryPoints = [ "websecure" ];
+      service = "forgejo";
+      tls.certResolver = "letsencrypt";
+    };
+    services.forgejo.loadBalancer.servers = [ { url = "http://127.0.0.1:3010"; } ];
+  };
 }

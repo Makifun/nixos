@@ -32,28 +32,6 @@
   # UDP 443 for HTTP/3
   networking.firewall.allowedUDPPorts = [ 443 ];
 
-  # Static routes for NixOS-managed services — declarative, no Pangolin UI needed.
-  services.traefik.dynamicConfigOptions.http = {
-    routers = {
-      forgejo = {
-        rule = "Host(`git.makifun.se`)";
-        entryPoints = [ "websecure" ];
-        service = "forgejo";
-        tls.certResolver = "letsencrypt";
-      };
-      authentik = {
-        rule = "Host(`auth.makifun.se`)";
-        entryPoints = [ "websecure" ];
-        service = "authentik";
-        tls.certResolver = "letsencrypt";
-      };
-    };
-    services = {
-      forgejo.loadBalancer.servers = [ { url = "http://127.0.0.1:3010"; } ];
-      authentik.loadBalancer.servers = [ { url = "http://127.0.0.1:9000"; } ];
-    };
-  };
-
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/pangolin' 0770 pangolin fossorial - -"
     # gerbil-wg0-fix-script has a hardcoded /var/lib/pangolin path (module bug)

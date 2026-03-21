@@ -45,4 +45,14 @@
     sopsFile = ../secrets.yaml;
     owner = "authentik";
   };
+
+  services.traefik.dynamicConfigOptions.http = {
+    routers.authentik = {
+      rule = "Host(`auth.makifun.se`)";
+      entryPoints = [ "websecure" ];
+      service = "authentik";
+      tls.certResolver = "letsencrypt";
+    };
+    services.authentik.loadBalancer.servers = [ { url = "http://127.0.0.1:9000"; } ];
+  };
 }
