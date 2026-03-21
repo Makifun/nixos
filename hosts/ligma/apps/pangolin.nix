@@ -32,6 +32,16 @@
   # UDP 443 for HTTP/3
   networking.firewall.allowedUDPPorts = [ 443 ];
 
+  services.traefik.dynamicConfigOptions.http = {
+    routers.pangolin = {
+      rule = "Host(`pangolin.makifun.se`)";
+      entryPoints = [ "websecure" ];
+      service = "pangolin";
+      tls.certResolver = "letsencrypt";
+    };
+    services.pangolin.loadBalancer.servers = [ { url = "http://127.0.0.1:3000"; } ];
+  };
+
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/pangolin' 0770 pangolin fossorial - -"
     # gerbil-wg0-fix-script has a hardcoded /var/lib/pangolin path (module bug)
