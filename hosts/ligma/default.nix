@@ -11,21 +11,12 @@
     ./disko-config.nix
     ../../common
     ../../modules/podman.nix
+    ./apps/traefik.nix
     ./apps/forgejo.nix
     ./apps/pangolin.nix
     ./apps/authentik.nix
     ./apps/vaultwarden.nix
   ];
-  networking = {
-    hostName = "ligma";
-    useDHCP = true;
-    hostId = "324bbd6b";
-    firewall.allowedTCPPorts = [
-      80
-      443
-      2049
-    ];
-  };
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
@@ -38,7 +29,6 @@
       "/etc/machine-id"
     ];
   };
-
   sops.secrets.initrd_ssh_host_ed25519_key = {
     format = "yaml";
     sopsFile = ./secrets.yaml;
@@ -47,6 +37,14 @@
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma' 0755 root root - -"
   ];
+  networking = {
+    hostName = "ligma";
+    useDHCP = true;
+    hostId = "324bbd6b";
+    firewall.allowedTCPPorts = [
+      2049 # NFS
+    ];
+  };
   services = {
     qemuGuest.enable = true;
     nfs.server = {

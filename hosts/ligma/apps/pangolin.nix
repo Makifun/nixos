@@ -47,7 +47,10 @@ in
     pangolin = {
       image = "fosrl/pangolin:1.16.2";
       volumes = [ "/ligma/ligma/pangolin/config:/app/config" ];
-      ports = [ "127.0.0.1:3000:3000" ];
+      ports = [
+        "127.0.0.1:3000:3000" # dashboard (internal port)
+        "127.0.0.1:3001:3001" # API port — used by Traefik HTTP provider and gerbil
+      ];
       environmentFiles = [ config.sops.secrets.pangolin_env.path ];
     };
 
@@ -60,7 +63,7 @@ in
         "--generateAndSaveKeyTo"
         "/var/config/peer_key"
         "--remoteConfig"
-        "http://pangolin:3001/api/v1"
+        "http://127.0.0.1:3001/api/v1"
       ];
       volumes = [ "/ligma/ligma/pangolin/config:/var/config" ];
       ports = [ "51820:51820/udp" ];
@@ -88,40 +91,23 @@ in
     '';
   };
 
-  # WireGuard port for gerbil tunnels
-  networking.firewall.allowedUDPPorts = [
-    443
-    51820
-  ];
-
+  networking = {
+    hostName = "ligma";
+    useDHCP = true;
+    hostId = "324bbd6b";
+    firewall.allowedTCPPorts = [
+      80
+      443
+    ];
+    firewall.allowedUDPPorts = [
+      443
+      51820
+    ];
+  };
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/pangolin' 0755 root root - -"
     "d '/ligma/ligma/pangolin/config' 0755 root root - -"
   ];
-
-  services.traefik.enable = true;
-
-  # Cloudflare DNS API token for Traefik wildcard cert challenge.
-  # Secret file must contain: CF_DNS_API_TOKEN=<token>
-  # Token needs Zone:DNS:Edit permission for makifun.se.
-  services.traefik.environmentFiles = [ config.sops.secrets.traefik_env.path ];
-
-  services.traefik.staticConfigOptions = {
-    global.sendAnonymousUsage = false;
-    certificatesResolvers.letsencrypt.acme = {
-      email = "admin@makifun.se";
-      keyType = "EC384";
-      dnsChallenge = {
-        provider = "cloudflare";
-        propagation = {
-          delayBeforeChecks = "30s";
-          disableChecks = true;
-        };
-      };
-    };
-    # HTTP/3 (QUIC) on port 443 — requires UDP 443 open in firewall
-    entryPoints.websecure.http3.advertisedPort = 443;
-  };
 
   services.traefik.dynamicConfigOptions.http = {
     routers.pangolin = {
@@ -137,12 +123,5 @@ in
   sops.secrets.pangolin_env = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
-  };
-
-  # Traefik Cloudflare token (CF_DNS_API_TOKEN=<token>)
-  sops.secrets.traefik_env = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-    owner = "traefik";
   };
 }
