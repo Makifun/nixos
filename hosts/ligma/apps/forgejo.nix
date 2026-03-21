@@ -104,6 +104,10 @@
     "/var/lib/gitea-runner"
   ];
 
+  systemd.tmpfiles.rules = [
+    "d '/persist/var/lib/gitea-runner' 0750 root root - -"
+  ];
+
   # Podman docker-compat socket access for the runner
   systemd.services."gitea-runner-default".serviceConfig.SupplementaryGroups = [ "podman" ];
 
