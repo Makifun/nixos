@@ -106,7 +106,7 @@
   ];
 
   # Podman docker-compat socket access for the runner
-  users.users.gitea-runner.extraGroups = [ "podman" ];
+  systemd.services."gitea-runner-default".serviceConfig.SupplementaryGroups = [ "podman" ];
 
   networking.firewall.extraInputRules = ''
     tcp dport 22222 ip saddr 10.10.10.0/24 accept comment "Forgejo SSH"
