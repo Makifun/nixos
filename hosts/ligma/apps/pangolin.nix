@@ -109,10 +109,14 @@ in
   services.traefik.staticConfigOptions = {
     global.sendAnonymousUsage = false;
     certificatesResolvers.letsencrypt.acme = {
+      email = "admin@makifun.se";
       keyType = "EC384";
-      dnsChallenge.propagation = {
-        delayBeforeChecks = "30s";
-        disableChecks = true;
+      dnsChallenge = {
+        provider = "cloudflare";
+        propagation = {
+          delayBeforeChecks = "30s";
+          disableChecks = true;
+        };
       };
     };
     # HTTP/3 (QUIC) on port 443 — requires UDP 443 open in firewall
