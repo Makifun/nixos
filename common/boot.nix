@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 {
   boot = {
     loader = {
@@ -11,7 +11,6 @@
       systemd = {
         enable = true;
         users.root.shell = "/bin/systemd-tty-ask-password-agent";
-        services."zfs-import-zroot".serviceConfig.ExecStartPre = "${pkgs.coreutils}/bin/sleep 10";
         services."systemd-cryptsetup@crypted_zroot".serviceConfig.TimeoutStartSec = "infinity";
         services."systemd-cryptsetup@crypted_ligma".serviceConfig.TimeoutStartSec = "infinity";
       };
