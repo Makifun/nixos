@@ -100,10 +100,8 @@
     };
   };
 
-  systemd.tmpfiles.rules = [
-    "d '/ligma/ligma/forgejo-runner' 0750 root root - -"
-    # Symlink default state dir to ZFS pool so registration and runtime use the same path
-    "L+ /var/lib/gitea-runner - - - - /ligma/ligma/forgejo-runner"
+  environment.persistence."/persist".directories = [
+    "/var/lib/gitea-runner"
   ];
 
   # Podman docker-compat socket access for the runner
