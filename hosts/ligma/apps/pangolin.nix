@@ -48,8 +48,9 @@ in
       image = "fosrl/pangolin:1.16.2";
       volumes = [ "/ligma/ligma/pangolin/config:/app/config" ];
       ports = [
-        "127.0.0.1:3000:3000" # dashboard (internal port)
-        "127.0.0.1:3001:3001" # API port — used by Traefik HTTP provider and gerbil
+        "127.0.0.1:3000:3000" # Express API + WebSocket server
+        "127.0.0.1:3001:3001" # External API (Traefik HTTP provider, gerbil)
+        "127.0.0.1:3002:3002" # Next.js frontend
       ];
       environmentFiles = [ config.sops.secrets.pangolin_env.path ];
     };
@@ -110,15 +111,33 @@ in
   ];
 
   services.traefik.dynamicConfigOptions.http = {
-    routers.pangolin = {
-      rule = "Host(`pangolin.makifun.se`)";
-      entryPoints = [ "websecure" ];
-      service = "pangolin";
-      tls.certResolver = "letsencrypt";
+    routers = {
+      # Next.js frontend — handles everything except /api/v1
+      pangolin-next = {
+        rule = "Host(`pangolin.makifun.se`) && !PathPrefix(`/api/v1`)";
+        entryPoints = [ "websecure" ];
+        service = "pangolin-next";
+        tls.certResolver = "letsencrypt";
+      };
+      # Express API server
+      pangolin-api = {
+        rule = "Host(`pangolin.makifun.se`) && PathPrefix(`/api/v1`)";
+        entryPoints = [ "websecure" ];
+        service = "pangolin-api";
+        tls.certResolver = "letsencrypt";
+      };
+      # WebSocket fallback (lower priority due to shorter rule)
+      pangolin-ws = {
+        rule = "Host(`pangolin.makifun.se`)";
+        entryPoints = [ "websecure" ];
+        service = "pangolin-api";
+        tls.certResolver = "letsencrypt";
+      };
     };
-    # Pangolin dashboard (internal_port). The HTTP provider in traefik.nix
-    # also registers Pangolin-managed tunnel routes once auth is configured.
-    services.pangolin.loadBalancer.servers = [ { url = "http://127.0.0.1:3000"; } ];
+    services = {
+      pangolin-next.loadBalancer.servers = [ { url = "http://127.0.0.1:3002"; } ];
+      pangolin-api.loadBalancer.servers = [ { url = "http://127.0.0.1:3000"; } ];
+    };
   };
 
   # Pangolin server secret (SERVER_SECRET=<random>)
