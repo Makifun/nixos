@@ -64,7 +64,7 @@ in
         "--generateAndSaveKeyTo"
         "/var/config/peer_key"
         "--remoteConfig"
-        "http://127.0.0.1:3001/api/v1"
+        "http://pangolin:3001/api/v1"
       ];
       volumes = [ "/ligma/ligma/pangolin/config:/var/config" ];
       extraOptions = [
@@ -88,6 +88,11 @@ in
       fi
     '';
   };
+
+  # Gerbil runs with --network=host and uses the host /etc/hosts.
+  # "pangolin" must resolve so the Host header matches what Pangolin's
+  # CSRF protection expects (matching the original Docker container name).
+  networking.extraHosts = "127.0.0.1 pangolin";
 
   networking = {
     hostName = "ligma";
