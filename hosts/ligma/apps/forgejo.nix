@@ -97,12 +97,13 @@
       labels = [
         "ubuntu-latest:docker://node:16-bullseye"
       ];
-      settings.runner.file = "/ligma/ligma/forgejo-runner/.runner";
     };
   };
 
   systemd.tmpfiles.rules = [
-    "d '/ligma/ligma/forgejo-runner' 0750 gitea-runner gitea-runner - -"
+    "d '/ligma/ligma/forgejo-runner' 0750 root root - -"
+    # Symlink default state dir to ZFS pool so registration and runtime use the same path
+    "L+ /var/lib/gitea-runner - - - - /ligma/ligma/forgejo-runner"
   ];
 
   # Podman docker-compat socket access for the runner
