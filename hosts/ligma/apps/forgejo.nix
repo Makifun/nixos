@@ -85,6 +85,7 @@
   sops.secrets.forgejo-runner-token = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
+    owner = "gitea-runner";
   };
 
   services.gitea-actions-runner = {
@@ -114,6 +115,12 @@
     User = "gitea-runner";
     Group = "gitea-runner";
     SupplementaryGroups = [ "podman" ];
+  };
+
+  systemd.services."gitea-register-runner-default".serviceConfig = {
+    DynamicUser = lib.mkForce false;
+    User = "gitea-runner";
+    Group = "gitea-runner";
   };
 
   environment.persistence."/persist".directories = [
