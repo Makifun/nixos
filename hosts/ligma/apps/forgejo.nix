@@ -97,12 +97,12 @@
       labels = [
         "ubuntu-latest:docker://node:16-bullseye"
       ];
+      settings.runner.file = "/ligma/ligma/forgejo-runner/.runner";
     };
   };
 
-  # Runner state must survive reboots — it stores auth credentials after registration
-  environment.persistence."/persist".directories = [
-    "/var/lib/gitea-runner"
+  systemd.tmpfiles.rules = [
+    "d '/ligma/ligma/forgejo-runner' 0750 gitea-runner gitea-runner - -"
   ];
 
   # Podman docker-compat socket access for the runner
