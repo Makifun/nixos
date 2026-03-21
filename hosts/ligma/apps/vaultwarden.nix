@@ -16,6 +16,8 @@
     };
   };
 
+  systemd.services.vaultwarden.serviceConfig.ReadWritePaths = [ "/ligma/ligma/vaultwarden" ];
+
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/vaultwarden' 0700 vaultwarden vaultwarden - -"
   ];
