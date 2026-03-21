@@ -13,6 +13,10 @@
         users.root.shell = "/bin/systemd-tty-ask-password-agent";
         services."systemd-cryptsetup@crypted_zroot".serviceConfig.TimeoutStartSec = "infinity";
         services."systemd-cryptsetup@crypted_ligma".serviceConfig.TimeoutStartSec = "infinity";
+        services."zfs-import-zroot" = {
+          after = [ "dev-mapper-crypted_zroot.device" ];
+          requires = [ "dev-mapper-crypted_zroot.device" ];
+        };
       };
       network = {
         enable = true;
