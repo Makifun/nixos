@@ -47,13 +47,9 @@ in
     pangolin = {
       image = "fosrl/pangolin:1.16.2";
       volumes = [ "/ligma/ligma/pangolin/config:/app/config" ];
-      ports = [
-        "127.0.0.1:3000:3000" # Express API + WebSocket server
-        "127.0.0.1:3001:3001" # External API (Traefik HTTP provider)
-        "127.0.0.1:3002:3002" # Next.js frontend
-      ];
+      # Ports are published by the pod, not the individual container
       environmentFiles = [ config.sops.secrets.pangolin_env.path ];
-      extraOptions = [ "--network=pangolin_net" ];
+      extraOptions = [ "--pod=pangolin-pod" ];
     };
 
     gerbil = {
@@ -68,13 +64,10 @@ in
         "http://pangolin:3001/api/v1"
       ];
       volumes = [ "/ligma/ligma/pangolin/config:/var/config" ];
-      ports = [ "51820:51820/udp" ];
       extraOptions = [
-        "--network=pangolin_net"
+        "--pod=pangolin-pod"
         "--cap-add=NET_ADMIN"
         "--cap-add=SYS_MODULE"
-        "--sysctl=net.ipv4.ip_forward=1"
-        "--sysctl=net.ipv4.conf.all.src_valid_mark=1"
       ];
     };
   };
@@ -93,12 +86,12 @@ in
     '';
   };
 
-  # Create the shared podman network before either container starts.
-  # Both pangolin and gerbil join pangolin_net so they can reach each other
-  # by container name (podman DNS). This avoids --network=host on gerbil
-  # and fixes Pangolin's CSRF check (Host header is "pangolin", not an IP).
-  systemd.services.podman-network-pangolin-create = {
-    description = "Create pangolin podman network";
+  # Pangolin pod: pangolin + gerbil share one network namespace.
+  # Host entries resolve container names via 127.0.0.1 (loopback) — no DNS needed.
+  # Sysctls for WireGuard are set on the pod's infra container.
+  # Ports are published here; individual containers omit their own port mappings.
+  systemd.services.podman-pod-pangolin-create = {
+    description = "Create pangolin podman pod";
     before = [ "podman-pangolin.service" "podman-gerbil.service" ];
     wantedBy = [ "podman-pangolin.service" "podman-gerbil.service" ];
     serviceConfig = {
@@ -107,8 +100,17 @@ in
     };
     path = [ pkgs.podman ];
     script = ''
-      podman network inspect pangolin_net >/dev/null 2>&1 \
-        || podman network create pangolin_net
+      podman pod inspect pangolin-pod >/dev/null 2>&1 || \
+      podman pod create \
+        --name pangolin-pod \
+        --add-host=pangolin:127.0.0.1 \
+        --add-host=gerbil:127.0.0.1 \
+        --sysctl=net.ipv4.ip_forward=1 \
+        --sysctl=net.ipv4.conf.all.src_valid_mark=1 \
+        --publish 127.0.0.1:3000:3000 \
+        --publish 127.0.0.1:3001:3001 \
+        --publish 127.0.0.1:3002:3002 \
+        --publish 51820:51820/udp
     '';
   };
 
