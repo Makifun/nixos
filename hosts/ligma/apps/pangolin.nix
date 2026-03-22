@@ -18,7 +18,7 @@ let
       base_domain = "makifun.se";
     };
 
-    domains.makifun = {
+    domains."makifun.se" = {
       base_domain = "makifun.se";
       cert_resolver = "letsencrypt";
       prefer_wildcard_cert = true;
@@ -49,10 +49,11 @@ in
       volumes = [ "/ligma/ligma/pangolin/config:/app/config" ];
       ports = [
         "127.0.0.1:3000:3000" # Express API + WebSocket server
-        "127.0.0.1:3001:3001" # External API (Traefik HTTP provider, gerbil)
+        "127.0.0.1:3001:3001" # External API (Traefik HTTP provider)
         "127.0.0.1:3002:3002" # Next.js frontend
       ];
       environmentFiles = [ config.sops.secrets.pangolin_env.path ];
+      extraOptions = [ "--network=pangolin_net" ];
     };
 
     gerbil = {
@@ -67,10 +68,13 @@ in
         "http://pangolin:3001/api/v1"
       ];
       volumes = [ "/ligma/ligma/pangolin/config:/var/config" ];
+      ports = [ "51820:51820/udp" ];
       extraOptions = [
-        "--network=host"
+        "--network=pangolin_net"
         "--cap-add=NET_ADMIN"
         "--cap-add=SYS_MODULE"
+        "--sysctl=net.ipv4.ip_forward=1"
+        "--sysctl=net.ipv4.conf.all.src_valid_mark=1"
       ];
     };
   };
@@ -89,16 +93,33 @@ in
     '';
   };
 
-  # Required for WireGuard routing — gerbil uses --network=host so these
-  # must be set on the host, not as container --sysctl flags.
+  # Create the shared podman network before either container starts.
+  # Both pangolin and gerbil join pangolin_net so they can reach each other
+  # by container name (podman DNS). This avoids --network=host on gerbil
+  # and fixes Pangolin's CSRF check (Host header is "pangolin", not an IP).
+  systemd.services.podman-network-pangolin-create = {
+    description = "Create pangolin podman network";
+    before = [ "podman-pangolin.service" "podman-gerbil.service" ];
+    wantedBy = [ "podman-pangolin.service" "podman-gerbil.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    path = [ pkgs.podman ];
+    script = ''
+      podman network inspect pangolin_net >/dev/null 2>&1 \
+        || podman network create pangolin_net
+    '';
+  };
+
+  # IP forwarding required on the host for WireGuard traffic routing
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;
     "net.ipv4.conf.all.src_valid_mark" = 1;
   };
 
-  # Gerbil runs with --network=host and uses the host /etc/hosts.
-  # "pangolin" must resolve so the Host header matches what Pangolin's
-  # CSRF protection expects (matching the original Docker container name).
+  # Traefik (NixOS service on host) also needs to reach pangolin by hostname
+  # so its HTTP provider request passes Pangolin's CSRF origin check.
   networking.extraHosts = "127.0.0.1 pangolin";
 
   networking = {
