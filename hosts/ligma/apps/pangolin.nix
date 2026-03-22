@@ -65,8 +65,8 @@ in
       ];
       volumes = [ "/ligma/ligma/pangolin/gerbil:/var/config" ];
       capabilities = {
-        SYS_ADMIN = true;
-        SYS_WRITE = false;
+        NET_ADMIN = true;
+        SYS_MODULE = true;
       };
       extraOptions = [
         "--pod=pangolin-pod"
