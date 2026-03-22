@@ -118,10 +118,6 @@ in
     "net.ipv4.conf.all.src_valid_mark" = 1;
   };
 
-  # Traefik (NixOS service on host) also needs to reach pangolin by hostname
-  # so its HTTP provider request passes Pangolin's CSRF origin check.
-  networking.extraHosts = "127.0.0.1 pangolin";
-
   networking = {
     hostName = "ligma";
     useDHCP = true;
