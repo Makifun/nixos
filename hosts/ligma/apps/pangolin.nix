@@ -64,10 +64,12 @@ in
         "http://pangolin:3001/api/v1"
       ];
       volumes = [ "/ligma/ligma/pangolin/gerbil:/var/config" ];
+      capabilities = [
+        "NET_ADMIN"
+        "SYS_MODULE"
+      ];
       extraOptions = [
         "--pod=pangolin-pod"
-        "--cap-add=NET_ADMIN"
-        "--cap-add=SYS_MODULE"
       ];
     };
   };
@@ -109,8 +111,6 @@ in
       podman pod inspect pangolin-pod >/dev/null 2>&1 || \
       podman pod create \
         --name pangolin-pod \
-        --add-host=pangolin:127.0.0.1 \
-        --add-host=gerbil:127.0.0.1 \
         --sysctl=net.ipv4.ip_forward=1 \
         --sysctl=net.ipv4.conf.all.src_valid_mark=1 \
         --publish 127.0.0.1:3000:3000 \
