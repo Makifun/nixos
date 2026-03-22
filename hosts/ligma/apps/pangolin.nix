@@ -59,11 +59,11 @@ in
         "--reachableAt"
         "http://gerbil:3004"
         "--generateAndSaveKeyTo"
-        "/var/config/peer_key"
+        "/var/config/key"
         "--remoteConfig"
         "http://pangolin:3001/api/v1"
       ];
-      volumes = [ "/ligma/ligma/pangolin/config:/var/config" ];
+      volumes = [ "/ligma/ligma/pangolin/gerbil:/var/config" ];
       extraOptions = [
         "--pod=pangolin-pod"
         "--cap-add=NET_ADMIN"
@@ -92,8 +92,14 @@ in
   # Ports are published here; individual containers omit their own port mappings.
   systemd.services.podman-pod-pangolin-create = {
     description = "Create pangolin podman pod";
-    before = [ "podman-pangolin.service" "podman-gerbil.service" ];
-    wantedBy = [ "podman-pangolin.service" "podman-gerbil.service" ];
+    before = [
+      "podman-pangolin.service"
+      "podman-gerbil.service"
+    ];
+    wantedBy = [
+      "podman-pangolin.service"
+      "podman-gerbil.service"
+    ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -136,6 +142,7 @@ in
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/pangolin' 0755 root root - -"
     "d '/ligma/ligma/pangolin/config' 0755 root root - -"
+    "d '/ligma/ligma/pangolin/gerbil' 0755 root root - -"
   ];
 
   services.traefik.dynamicConfigOptions.http = {
