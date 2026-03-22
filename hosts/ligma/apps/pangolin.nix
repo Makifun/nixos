@@ -45,7 +45,7 @@ in
 
   virtualisation.oci-containers.containers = {
     pangolin = {
-      image = "fosrl/pangolin:1.16.2";
+      image = "fosrl/pangolin:1.15.3";
       volumes = [ "/ligma/ligma/pangolin/config:/app/config" ];
       # Ports are published by the pod, not the individual container
       environmentFiles = [ config.sops.secrets.pangolin_env.path ];
