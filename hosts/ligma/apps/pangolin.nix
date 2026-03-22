@@ -64,10 +64,10 @@ in
         "http://pangolin:3001/api/v1"
       ];
       volumes = [ "/ligma/ligma/pangolin/gerbil:/var/config" ];
-      capabilities = [
-        "NET_ADMIN"
-        "SYS_MODULE"
-      ];
+      capabilities = {
+        SYS_ADMIN = true;
+        SYS_WRITE = false;
+      };
       extraOptions = [
         "--pod=pangolin-pod"
       ];
