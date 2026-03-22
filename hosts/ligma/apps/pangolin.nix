@@ -116,6 +116,7 @@ in
         --publish 127.0.0.1:3000:3000 \
         --publish 127.0.0.1:3001:3001 \
         --publish 127.0.0.1:3002:3002 \
+        --publish 21820:21820/udp \
         --publish 51820:51820/udp
     '';
   };
@@ -127,15 +128,13 @@ in
   };
 
   networking = {
-    hostName = "ligma";
-    useDHCP = true;
-    hostId = "324bbd6b";
     firewall.allowedTCPPorts = [
       80
       443
     ];
     firewall.allowedUDPPorts = [
       443
+      21820
       51820
     ];
   };
