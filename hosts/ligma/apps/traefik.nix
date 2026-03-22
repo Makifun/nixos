@@ -19,7 +19,7 @@
 
     # Pangolin provides dynamic route config for its tunneled resources
     providers.http = {
-      endpoint = "http://127.0.0.1:3001/api/v1/traefik-config";
+      endpoint = "http://127.0.0.1:3000/api/v1/traefik-config";
       pollInterval = "5s";
     };
 

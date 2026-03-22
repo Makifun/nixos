@@ -61,7 +61,7 @@ in
         "--generateAndSaveKeyTo"
         "/var/config/key"
         "--remoteConfig"
-        "http://pangolin:3001/api/v1"
+        "http://pangolin:3000/api/v1"
       ];
       volumes = [ "/ligma/ligma/pangolin/gerbil:/var/config" ];
       capabilities = {
