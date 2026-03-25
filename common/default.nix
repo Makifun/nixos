@@ -1,9 +1,9 @@
 { pkgs, lib, ... }:
 {
   imports = map (f: ./. + "/${f}") (
-    builtins.filter
-      (f: f != "default.nix" && lib.hasSuffix ".nix" f)
-      (builtins.attrNames (builtins.readDir ./.))
+    builtins.filter (f: f != "default.nix" && lib.hasSuffix ".nix" f) (
+      builtins.attrNames (builtins.readDir ./.)
+    )
   );
   time.timeZone = "Europe/Stockholm";
   nix = {
@@ -27,7 +27,6 @@
   };
   environment = {
     systemPackages = with pkgs; [
-      starship
       btop
       screen
       nmap
