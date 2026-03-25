@@ -13,6 +13,8 @@
       SIGNUPS_ALLOWED = false;
       INVITATIONS_ALLOWED = true;
       SHOW_PASSWORD_HINT = false;
+      LOG_LEVEL = "warn";
+      EXTENDED_LOGGING = true;
     };
   };
 
@@ -26,6 +28,31 @@
     format = "yaml";
     sopsFile = ../secrets.yaml;
     owner = "vaultwarden";
+  };
+
+  environment.etc."fail2ban/filter.d/vaultwarden.conf".text = ''
+    [INCLUDES]
+    before = common.conf
+
+    [Definition]
+    failregex = ^.*Username or password is incorrect\. Try again\. IP: <HOST>\..*$
+                ^.*Invalid admin token\. IP: <HOST>\..*$
+
+    ignoreregex =
+
+    journalmatch = _SYSTEMD_UNIT=vaultwarden.service
+  '';
+
+  services.fail2ban.jails.vaultwarden = {
+    settings = {
+      enabled = true;
+      filter = "vaultwarden";
+      backend = "systemd";
+      port = "80,443";
+      maxretry = 5;
+      findtime = 14400;
+      bantime = 14400;
+    };
   };
 
   services.traefik.dynamicConfigOptions.http = {
