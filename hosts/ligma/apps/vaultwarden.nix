@@ -11,7 +11,7 @@
       ROCKET_ADDRESS = "127.0.0.1";
       ROCKET_PORT = 8310;
       SIGNUPS_ALLOWED = false;
-      INVITATIONS_ALLOWED = true;
+      INVITATIONS_ALLOWED = false;
       SHOW_PASSWORD_HINT = false;
       LOG_LEVEL = "warn";
       EXTENDED_LOGGING = true;
