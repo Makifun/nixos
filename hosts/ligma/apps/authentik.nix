@@ -32,6 +32,9 @@
 
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/authentik' 0755 root root - -"
+    # PostgreSQL's initdb runs as the postgres user, which can't create
+    # subdirs inside a root-owned 0755 directory — pre-create it here.
+    "d '/ligma/ligma/authentik/postgresql' 0700 postgres postgres - -"
   ];
 
   users.users.authentik = {
