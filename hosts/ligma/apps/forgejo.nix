@@ -77,7 +77,7 @@
     ${lib.getExe config.services.forgejo.package} admin user create \
       --admin \
       --username makifun \
-      --email "admin@makifun.se" \
+      --email "makifun@makifun.se" \
       --password "$(tr -d '\n' < ${config.sops.secrets.forgejo-admin-password.path})" \
       || true
   '';
