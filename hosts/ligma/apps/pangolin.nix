@@ -128,6 +128,11 @@ in
   };
 
   networking = {
+    # Traefik's Badger plugin calls "http://pangolin:3000/api/v1" for auth checks.
+    # Traefik runs on the host, not inside the pod, so the container hostname
+    # "pangolin" must resolve on the host to reach the published API port.
+    hosts."127.0.0.1" = [ "pangolin" ];
+
     firewall.allowedTCPPorts = [
       80
       443
