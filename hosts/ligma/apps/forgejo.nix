@@ -10,7 +10,7 @@
 
       server = {
         DOMAIN = "git.makifun.se";
-        HTTP_ADDR = "127.0.0.1";
+        HTTP_ADDR = "0.0.0.0";
         HTTP_PORT = 3010;
         ROOT_URL = "https://git.makifun.se/";
         SSH_DOMAIN = "git.makifun.se";
@@ -136,5 +136,6 @@
 
   networking.firewall.extraInputRules = ''
     tcp dport 22222 ip saddr 10.10.10.0/24 accept comment "Forgejo SSH"
+    tcp dport 3010 ip saddr != { 127.0.0.1, 10.10.10.0/24, 10.88.0.0/16 } drop comment "Forgejo HTTP internal only"
   '';
 }
