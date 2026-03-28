@@ -33,6 +33,7 @@
       git
       nh
       ncdu
+      jq
     ];
   };
   programs.nh = {
