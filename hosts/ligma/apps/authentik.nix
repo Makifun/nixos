@@ -2,9 +2,6 @@
 {
   services.authentik = {
     enable = true;
-    # Secret file must contain:
-    #   AUTHENTIK_SECRET_KEY=<random 50+ char string>
-    #   AUTHENTIK_POSTGRESQL__PASSWORD=<random password>
     environmentFile = config.sops.secrets.authentik_env.path;
     settings = {
       disable_startup_analytics = true;
@@ -13,7 +10,15 @@
         host = "/run/postgresql";
         user = "authentik";
         name = "authentik";
-        # password comes from environmentFile
+        # secrets.yaml
+      };
+      email = {
+        host = "smtp.protonmail.ch";
+        port = 587;
+        use_tls = true;
+        use_ssl = false;
+        timeout = 30;
+        # secrets.yaml
       };
     };
   };
@@ -32,8 +37,6 @@
 
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/authentik' 0755 root root - -"
-    # PostgreSQL's initdb runs as the postgres user, which can't create
-    # subdirs inside a root-owned 0755 directory — pre-create it here.
     "d '/ligma/ligma/authentik/postgresql' 0700 postgres postgres - -"
   ];
 
