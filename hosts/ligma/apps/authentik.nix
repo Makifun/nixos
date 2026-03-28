@@ -12,14 +12,6 @@
         name = "authentik";
         # secrets.yaml
       };
-      email = {
-        host = "smtp.protonmail.ch";
-        port = 587;
-        use_tls = true;
-        use_ssl = false;
-        timeout = 30;
-        # secrets.yaml
-      };
     };
   };
 
