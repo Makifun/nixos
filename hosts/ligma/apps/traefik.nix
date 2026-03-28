@@ -7,6 +7,11 @@
   # Token needs Zone:DNS:Edit permission for makifun.se.
   services.traefik.environmentFiles = [ config.sops.secrets.traefik_env.path ];
 
+  networking.firewall = {
+    allowedTCPPorts = [ 80 443 ];
+    allowedUDPPorts = [ 443 ]; # HTTP/3 QUIC
+  };
+
   services.traefik.staticConfigOptions = {
     global.sendAnonymousUsage = false;
     log.level = "INFO";
@@ -16,15 +21,6 @@
       dashboard = true;
       insecure = true;
     };
-
-    # Pangolin provides dynamic route config for its tunneled resources
-    providers.http = {
-      endpoint = "http://127.0.0.1:3000/api/v1/traefik-config";
-      pollInterval = "5s";
-    };
-
-    # Allow connecting to backends without TLS verification (needed by Pangolin)
-    serversTransport.insecureSkipVerify = true;
 
     entryPoints = {
       web = {
@@ -64,11 +60,6 @@
       };
     };
 
-    # Badger plugin — Pangolin's authentication middleware for Traefik
-    experimental.plugins.badger = {
-      moduleName = "github.com/fosrl/badger";
-      version = "v1.2.1";
-    };
   };
 
   # Persist ACME certificates and Traefik state across reboots

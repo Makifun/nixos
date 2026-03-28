@@ -13,7 +13,6 @@
     ../../modules/podman.nix
     ./apps/traefik.nix
     ./apps/forgejo.nix
-    ./apps/pangolin.nix
     ./apps/authentik.nix
     ./apps/vaultwarden.nix
   ];
