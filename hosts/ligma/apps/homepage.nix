@@ -29,14 +29,14 @@
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       homepage = {
-        rule = "Host(`homepage.makifun.se`)";
+        rule = "Host(`homepage2.makifun.se`)";
         entryPoints = [ "websecure" ];
         service = "homepage-svc";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
       homepage-outpost = {
-        rule = "Host(`homepage.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`homepage2.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
