@@ -15,6 +15,7 @@
     ./apps/forgejo.nix
     ./apps/authentik.nix
     ./apps/vaultwarden.nix
+    ./apps/homepage.nix
   ];
   environment.persistence."/persist" = {
     hideMounts = true;
