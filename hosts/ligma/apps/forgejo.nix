@@ -71,6 +71,12 @@
     owner = config.services.forgejo.user;
   };
 
+  sops.secrets.forgejo-admin-email = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner = config.services.forgejo.user;
+  };
+
   # Append admin user creation to forgejo's existing preStart.
   # Uses || true so it's a no-op if the user already exists.
   systemd.services.forgejo.preStart = lib.mkAfter ''
