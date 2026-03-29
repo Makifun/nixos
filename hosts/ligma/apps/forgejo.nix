@@ -29,7 +29,8 @@
       };
 
       service = {
-        DISABLE_REGISTRATION = true;
+        DISABLE_REGISTRATION = false;
+        ALLOW_ONLY_EXTERNAL_REGISTRATION = true;
         REQUIRE_SIGNIN_VIEW = true;
         DEFAULT_ALLOW_CREATE_ORGANIZATION = false;
         DEFAULT_USER_VISIBILITY = "private";
