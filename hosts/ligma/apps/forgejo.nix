@@ -77,6 +77,12 @@
     owner = config.services.forgejo.user;
   };
 
+  sops.secrets.forgejo-oauth-secret = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner = config.services.forgejo.user;
+  };
+
   # Append admin user creation to forgejo's existing preStart.
   # Uses || true so it's a no-op if the user already exists.
   systemd.services.forgejo.preStart = lib.mkAfter ''
@@ -85,6 +91,17 @@
       --username makifun \
       --email "$(tr -d '\n' < ${config.sops.secrets.forgejo-admin-email.path})" \
       --password "$(tr -d '\n' < ${config.sops.secrets.forgejo-admin-password.path})" \
+      || true
+
+    # Register Authentik as an OAuth2/OIDC authentication source.
+    # No-op if the source already exists.
+    ${lib.getExe config.services.forgejo.package} admin auth add-oauth \
+      --name "Authentik" \
+      --provider openidConnect \
+      --key "forgejo" \
+      --secret "$(tr -d '\n' < ${config.sops.secrets.forgejo-oauth-secret.path})" \
+      --auto-discover-url "https://auth2.makifun.se/application/o/forgejo-sso/.well-known/openid-configuration" \
+      --scopes "openid email profile" \
       || true
   '';
 
