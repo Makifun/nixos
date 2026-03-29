@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, ... }:
 {
   # Authentik API token for the homepage widget.
   # Retrieve from Terraform: tofu output -raw homepage_token
@@ -11,20 +11,20 @@
   services.homepage-dashboard = {
     enable = true;
     listenPort = 8082;
-
-    widgets = [
-      {
-        authentik = {
-          url = "https://auth2.makifun.se";
-          key = "{{HOMEPAGE_VAR_AUTHENTIK_TOKEN}}";
-        };
-      }
-    ];
   };
 
-  # Inject the Authentik API token via environment variable substitution.
-  systemd.services.homepage-dashboard.serviceConfig.EnvironmentFile =
-    config.sops.secrets.homepage-env.path;
+  systemd.services.homepage-dashboard = {
+    environment = {
+      # Config and data directory — create YAML files here to configure homepage.
+      HOMEPAGE_CONFIG_DIR = "/ligma/ligma/homepage";
+      HOMEPAGE_ALLOWED_HOSTS = "homepage2.makifun.se";
+    };
+    serviceConfig.EnvironmentFile = config.sops.secrets.homepage-env.path;
+  };
+
+  systemd.tmpfiles.rules = [
+    "d '/ligma/ligma/homepage' 0755 root root - -"
+  ];
 
   services.traefik.dynamicConfigOptions.http = {
     routers = {
