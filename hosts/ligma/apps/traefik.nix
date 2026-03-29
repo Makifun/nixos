@@ -78,4 +78,25 @@
     sopsFile = ../secrets.yaml;
     owner = "traefik";
   };
+
+  # htpasswd-format credentials for the dashboard (user:bcrypt_hash per line)
+  # Generate with: htpasswd -nbB <user> <password>
+  sops.secrets.traefik_dashboard_users = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner = "traefik";
+  };
+
+  services.traefik.dynamicConfigOptions.http = {
+    routers.traefik-dashboard = {
+      rule = "Host(`traefik-ligma.makifun.se`)";
+      entryPoints = [ "websecure" ];
+      service = "api@internal";
+      middlewares = [ "traefik-dashboard-auth" ];
+      tls.certResolver = "letsencrypt";
+    };
+    middlewares.traefik-dashboard-auth.basicAuth = {
+      usersFile = config.sops.secrets.traefik_dashboard_users.path;
+    };
+  };
 }
