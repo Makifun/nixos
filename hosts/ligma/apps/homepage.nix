@@ -11,19 +11,30 @@
   services.homepage-dashboard = {
     enable = true;
     listenPort = 8082;
+    allowedHosts = "localhost:8082,127.0.0.1:8082,homepage2.makifun.se";
+    environmentFiles = [ config.sops.secrets.homepage-env.path ];
   };
 
+  # Disable DynamicUser so we can use a static user with a persistent directory.
+  # Same pattern as gitea-runner — DynamicUser can't own pre-created paths on zstorage.
+  users.users.homepage-dashboard = {
+    isSystemUser = true;
+    group = "homepage-dashboard";
+  };
+  users.groups.homepage-dashboard = { };
+
   systemd.services.homepage-dashboard = {
-    environment = {
-      # Config and data directory — create YAML files here to configure homepage.
-      HOMEPAGE_CONFIG_DIR = lib.mkForce "/ligma/ligma/homepage";
-      HOMEPAGE_ALLOWED_HOSTS = lib.mkForce "localhost:8082,127.0.0.1:8082,homepage2.makifun.se";
+    environment.HOMEPAGE_CONFIG_DIR = lib.mkForce "/ligma/ligma/homepage";
+    serviceConfig = {
+      DynamicUser = lib.mkForce false;
+      User = lib.mkForce "homepage-dashboard";
+      Group = lib.mkForce "homepage-dashboard";
+      ReadWritePaths = [ "/ligma/ligma/homepage" ];
     };
-    serviceConfig.EnvironmentFile = config.sops.secrets.homepage-env.path;
   };
 
   systemd.tmpfiles.rules = [
-    "d '/ligma/ligma/homepage' 0755 root root - -"
+    "d '/ligma/ligma/homepage' 0750 homepage-dashboard homepage-dashboard - -"
   ];
 
   services.traefik.dynamicConfigOptions.http = {
