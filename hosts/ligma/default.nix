@@ -22,7 +22,6 @@
       "/var/log"
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
-      "/var/lib/podman"
     ];
     files = [
       "/etc/machine-id"
@@ -32,7 +31,6 @@
     format = "yaml";
     sopsFile = ./secrets.yaml;
   };
-
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma' 0755 root root - -"
   ];
