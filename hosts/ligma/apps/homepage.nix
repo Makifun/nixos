@@ -15,16 +15,16 @@
     environmentFiles = [ config.sops.secrets.homepage-env.path ];
 
     settings = {
-      layout = {
-        Media     = { style = "column"; };
-        Downloads = { style = "column"; };
-        DVR       = { style = "column"; };
-        DVR4K     = { style = "column"; };
-        Calendar  = { style = "column"; };
-        Utilities = { style = "column"; columns = 1; };
-        Network   = { style = "column"; columns = 1; };
-        Server    = { style = "column"; columns = 1; };
-      };
+      layout = [
+        { Media     = { style = "column"; }; }
+        { Downloads = { style = "column"; }; }
+        { DVR       = { style = "column"; }; }
+        { DVR4K     = { style = "column"; }; }
+        { Calendar  = { style = "column"; }; }
+        { Utilities = { style = "column"; columns = 1; }; }
+        { Network   = { style = "column"; columns = 1; }; }
+        { Server    = { style = "column"; columns = 1; }; }
+      ];
       headerStyle      = "boxed";
       color            = "slate";
       theme            = "dark";
@@ -37,10 +37,7 @@
     widgets = [
       { resources = { label = "System"; cpu = true; memory = true; uptime = true; }; }
       { resources = { label = "/"; disk = "/"; }; }
-      { resources = { label = "/mnt/nicememe";       disk = "/downloadsusenet"; }; }
-      { resources = { label = "/mnt/slowmeme";       disk = "/downloadstorrent"; }; }
-      { resources = { label = "/mnt/rclonecache_new"; disk = "/rclonecache_new"; }; }
-      { resources = { label = "/mnt/cloud";          disk = "/cloud"; }; }
+      { resources = { label = "/ligma";       disk = "/ligma"; }; }
       { unifi_console = {
           url      = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
           username = "{{HOMEPAGE_VAR_UNIFI_USERNAME}}";
