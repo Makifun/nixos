@@ -79,24 +79,43 @@
     owner = "traefik";
   };
 
-  # htpasswd-format credentials for the dashboard (user:bcrypt_hash per line)
-  # Generate with: htpasswd -nbB <user> <password>
-  sops.secrets.traefik_dashboard_users = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-    owner = "traefik";
-  };
-
   services.traefik.dynamicConfigOptions.http = {
-    routers.traefik-dashboard = {
-      rule = "Host(`traefik-ligma.makifun.se`)";
-      entryPoints = [ "websecure" ];
-      service = "api@internal";
-      middlewares = [ "traefik-dashboard-auth" ];
-      tls.certResolver = "letsencrypt";
+    routers = {
+      traefik-dashboard = {
+        rule = "Host(`traefik-ligma.makifun.se`)";
+        entryPoints = [ "websecure" ];
+        service = "api@internal";
+        middlewares = [ "authentik" ];
+        tls.certResolver = "letsencrypt";
+      };
+      # Routes the post-login callback back to the embedded outpost.
+      # Authentik redirects here after authentication to set the session cookie.
+      traefik-dashboard-outpost = {
+        rule = "Host(`traefik-ligma.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        entryPoints = [ "websecure" ];
+        service = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
     };
-    middlewares.traefik-dashboard-auth.basicAuth = {
-      usersFile = config.sops.secrets.traefik_dashboard_users.path;
+    middlewares.authentik.forwardAuth = {
+      address = "http://localhost:9000/outpost.goauthentik.io/auth/traefik";
+      trustForwardHeader = true;
+      authResponseHeaders = [
+        "X-authentik-username"
+        "X-authentik-groups"
+        "X-authentik-email"
+        "X-authentik-name"
+        "X-authentik-uid"
+        "X-authentik-jwt"
+        "X-authentik-meta-jwks"
+        "X-authentik-meta-outpost"
+        "X-authentik-meta-provider"
+        "X-authentik-meta-app"
+        "X-authentik-meta-version"
+      ];
     };
+    services.authentik-embedded-outpost.loadBalancer.servers = [
+      { url = "http://localhost:9000"; }
+    ];
   };
 }
