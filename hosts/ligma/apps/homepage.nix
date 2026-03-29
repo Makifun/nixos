@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 {
   # Authentik API token for the homepage widget.
   # Retrieve from Terraform: tofu output -raw homepage_token
@@ -17,7 +17,7 @@
     environment = {
       # Config and data directory — create YAML files here to configure homepage.
       HOMEPAGE_CONFIG_DIR = "/ligma/ligma/homepage";
-      HOMEPAGE_ALLOWED_HOSTS = "homepage2.makifun.se";
+      HOMEPAGE_ALLOWED_HOSTS = lib.mkForce "localhost:8082,127.0.0.1:8082,homepage2.makifun.se";
     };
     serviceConfig.EnvironmentFile = config.sops.secrets.homepage-env.path;
   };
