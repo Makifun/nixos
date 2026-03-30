@@ -101,7 +101,7 @@
       --provider openidConnect \
       --key "forgejo" \
       --secret "$(tr -d '\n' < ${config.sops.secrets.forgejo-oauth-secret.path})" \
-      --auto-discover-url "https://auth2.makifun.se/application/o/forgejo-sso/.well-known/openid-configuration" \
+      --auto-discover-url "https://auth.makifun.se/application/o/forgejo-sso/.well-known/openid-configuration" \
       --scopes "openid email profile" \
       || true
   '';

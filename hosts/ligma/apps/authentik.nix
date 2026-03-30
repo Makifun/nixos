@@ -46,7 +46,7 @@
 
   services.traefik.dynamicConfigOptions.http = {
     routers.authentik = {
-      rule = "Host(`auth2.makifun.se`)";
+      rule = "Host(`auth.makifun.se`)";
       entryPoints = [ "websecure" ];
       service = "authentik";
       tls.certResolver = "letsencrypt";
