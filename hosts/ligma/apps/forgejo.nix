@@ -96,7 +96,7 @@
 
     # Register Authentik as an OAuth2/OIDC authentication source.
     # Update the existing source if present, otherwise create it.
-    _auth_id=$(${lib.getExe config.services.forgejo.package} admin auth list | awk '/Authentik/ {print $1}')
+    _auth_id=$(${lib.getExe config.services.forgejo.package} admin auth list | ${pkgs.gawk}/bin/awk '/Authentik/ {print $1}')
     if [ -n "$_auth_id" ]; then
       ${lib.getExe config.services.forgejo.package} admin auth update-oauth \
         --id "$_auth_id" \
