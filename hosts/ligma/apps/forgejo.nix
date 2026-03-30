@@ -95,15 +95,24 @@
       || true
 
     # Register Authentik as an OAuth2/OIDC authentication source.
-    # No-op if the source already exists.
-    ${lib.getExe config.services.forgejo.package} admin auth add-oauth \
-      --name "Authentik" \
-      --provider openidConnect \
-      --key "forgejo" \
-      --secret "$(tr -d '\n' < ${config.sops.secrets.forgejo-oauth-secret.path})" \
-      --auto-discover-url "https://auth.makifun.se/application/o/forgejo-sso/.well-known/openid-configuration" \
-      --scopes "openid email profile" \
-      || true
+    # Update the existing source if present, otherwise create it.
+    _auth_id=$(${lib.getExe config.services.forgejo.package} admin auth list | awk '/Authentik/ {print $1}')
+    if [ -n "$_auth_id" ]; then
+      ${lib.getExe config.services.forgejo.package} admin auth update-oauth \
+        --id "$_auth_id" \
+        --key "forgejo" \
+        --secret "$(tr -d '\n' < ${config.sops.secrets.forgejo-oauth-secret.path})" \
+        --auto-discover-url "https://auth.makifun.se/application/o/forgejo-sso/.well-known/openid-configuration" \
+        --scopes "openid email profile"
+    else
+      ${lib.getExe config.services.forgejo.package} admin auth add-oauth \
+        --name "Authentik" \
+        --provider openidConnect \
+        --key "forgejo" \
+        --secret "$(tr -d '\n' < ${config.sops.secrets.forgejo-oauth-secret.path})" \
+        --auto-discover-url "https://auth.makifun.se/application/o/forgejo-sso/.well-known/openid-configuration" \
+        --scopes "openid email profile"
+    fi
   '';
 
   sops.secrets.forgejo-runner-token = {
