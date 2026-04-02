@@ -33,7 +33,7 @@
       color            = "slate";
       theme            = "dark";
       hideVersion      = true;
-      background       = "/images/background_old.png";
+      background       = "/images/background.png";
       backgroundOpacity = 0.9;
       disableCollapse  = true;
     };
