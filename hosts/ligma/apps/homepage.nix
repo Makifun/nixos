@@ -15,7 +15,7 @@
   services.homepage-dashboard = {
     enable = true;
     listenPort = 8082;
-    allowedHosts = "localhost:8082,127.0.0.1:8082,homepage2.makifun.se";
+    allowedHosts = "localhost:8082,127.0.0.1:8082,homepage.makifun.se";
     environmentFiles = [ config.sops.secrets.homepage-env.path ];
 
     settings = {
@@ -532,20 +532,20 @@
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       homepage = {
-        rule        = "Host(`homepage2.makifun.se`)";
+        rule        = "Host(`homepage.makifun.se`)";
         entryPoints = [ "websecure" ];
         service     = "homepage-svc";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
       homepage-images = {
-        rule        = "Host(`homepage2.makifun.se`) && PathPrefix(`/images/`)";
+        rule        = "Host(`homepage.makifun.se`) && PathPrefix(`/images/`)";
         entryPoints = [ "websecure" ];
         service     = "homepage-images-svc";
         tls.certResolver = "letsencrypt";
       };
       homepage-outpost = {
-        rule        = "Host(`homepage2.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule        = "Host(`homepage.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service     = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
