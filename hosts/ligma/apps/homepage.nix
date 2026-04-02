@@ -520,6 +520,15 @@
     ];
   };
 
+  # Serve images from $HOMEPAGE_CONFIG_DIR/images/ via nginx since the
+  # Next.js standalone server only serves its own bundled public/ directory.
+  services.nginx.enable = true;
+  services.nginx.virtualHosts."homepage-images" = {
+    listen = [{ addr = "127.0.0.1"; port = 8083; ssl = false; }];
+    root = "/etc/homepage-dashboard";
+    locations."/images/".extraConfig = "try_files $uri =404;";
+  };
+
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       homepage = {
@@ -529,6 +538,13 @@
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
+      homepage-images = {
+        rule        = "Host(`homepage2.makifun.se`) && PathPrefix(`/images/`)";
+        entryPoints = [ "websecure" ];
+        service     = "homepage-images-svc";
+        priority    = 10;
+        tls.certResolver = "letsencrypt";
+      };
       homepage-outpost = {
         rule        = "Host(`homepage2.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
@@ -536,6 +552,9 @@
         tls.certResolver = "letsencrypt";
       };
     };
+    services.homepage-images-svc.loadBalancer.servers = [
+      { url = "http://localhost:8083"; }
+    ];
     services.homepage-svc.loadBalancer.servers = [
       { url = "http://localhost:8082"; }
     ];
