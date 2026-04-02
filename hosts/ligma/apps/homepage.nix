@@ -8,6 +8,10 @@
     sopsFile = ../secrets.yaml;
   };
 
+  # Images are served from $HOMEPAGE_CONFIG_DIR/images/ (/etc/homepage-dashboard/images/).
+  # Add files to hosts/ligma/homepage_images/ and they will appear at /images/<file> in homepage.
+  environment.etc."homepage-dashboard/images".source = ../homepage_images;
+
   services.homepage-dashboard = {
     enable = true;
     listenPort = 8082;
