@@ -542,7 +542,6 @@
         rule        = "Host(`homepage2.makifun.se`) && PathPrefix(`/images/`)";
         entryPoints = [ "websecure" ];
         service     = "homepage-images-svc";
-        priority    = 10;
         tls.certResolver = "letsencrypt";
       };
       homepage-outpost = {
