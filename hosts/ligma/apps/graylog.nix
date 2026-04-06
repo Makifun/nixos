@@ -4,6 +4,9 @@ let
   glPort    = 9099;  # 9000 is taken by the Authentik embedded outpost
 in
 {
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    "graylog_6.0"
+  ];
   # ---------------------------------------------------------------------------
   # Secrets
   # Generate and add to secrets.yaml:
