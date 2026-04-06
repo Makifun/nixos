@@ -6,6 +6,7 @@ in
 {
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "graylog_6.0"
+    "mongodb"
   ];
   # ---------------------------------------------------------------------------
   # Secrets
