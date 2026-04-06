@@ -1,6 +1,8 @@
 { config, lib, pkgs, ... }:
 let
-  glBase    = "/ligma/ligma/graylog";
+  glBase    = "/ligma/ligma/graylog";   # Graylog-owned dirs only (journal, data, node-id)
+  mongoBase = "/ligma/ligma/mongodb";   # Separate — graylog preStart must not chown these
+  osBase    = "/ligma/ligma/opensearch";
   glPort    = 9099;  # 9000 is taken by the Authentik embedded outpost
 in
 {
@@ -29,17 +31,16 @@ in
   # ---------------------------------------------------------------------------
   virtualisation.oci-containers.containers.mongodb = {
     image = "docker.io/mongo:7";
-    volumes = [ "${glBase}/mongodb:/data/db" ];
-    ports  = [ "127.0.0.1:27017:27017" ];
+    volumes = [ "${mongoBase}:/data/db" ];
     extraOptions = [ "--network=host" ];
   };
 
   systemd.tmpfiles.rules = [
-    "d '${glBase}'            0755 root       root       - -"
-    "d '${glBase}/mongodb'    0700 root       root       - -"
-    "d '${glBase}/opensearch' 0700 opensearch opensearch - -"
-    "d '${glBase}/journal'    0750 graylog    graylog    - -"
-    "d '${glBase}/data'       0750 graylog    graylog    - -"
+    "d '${glBase}'     0750 graylog    graylog    - -"
+    "d '${mongoBase}'  0700 root       root       - -"
+    "d '${osBase}'     0700 opensearch opensearch - -"
+    "d '${glBase}/journal' 0750 graylog graylog   - -"
+    "d '${glBase}/data'    0750 graylog graylog   - -"
   ];
 
   # ---------------------------------------------------------------------------
@@ -48,13 +49,13 @@ in
   users.users.opensearch = {
     isSystemUser = true;
     group = "opensearch";
-    home  = "${glBase}/opensearch";
+    home  = osBase;
   };
   users.groups.opensearch = { };
 
   services.opensearch = {
     enable  = true;
-    dataDir = "${glBase}/opensearch";
+    dataDir = osBase;
     settings = {
       "cluster.name"             = "graylog";
       "network.host"             = "127.0.0.1";
