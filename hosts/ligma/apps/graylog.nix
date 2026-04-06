@@ -45,6 +45,13 @@ in
   # ---------------------------------------------------------------------------
   # OpenSearch — log data store (Graylog 6.x requires OpenSearch 2.x)
   # ---------------------------------------------------------------------------
+  users.users.opensearch = {
+    isSystemUser = true;
+    group = "opensearch";
+    home  = "${glBase}/opensearch";
+  };
+  users.groups.opensearch = { };
+
   services.opensearch = {
     enable  = true;
     dataDir = "${glBase}/opensearch";
