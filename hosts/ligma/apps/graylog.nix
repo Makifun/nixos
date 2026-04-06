@@ -71,7 +71,7 @@ in
   virtualisation.oci-containers.containers = {
 
     mongodb = {
-      image        = "docker.io/mongo:7";
+      image        = "docker.io/mongo:8";
       volumes      = [ "/ligma/ligma/mongodb:/data/db" ];
       extraOptions = [ "--network=graylog_network" ];
     };
