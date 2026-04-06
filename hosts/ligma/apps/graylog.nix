@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   glBase = "/ligma/ligma/graylog";
   glPort = 9099;  # 9000 is taken by the Authentik embedded outpost
@@ -28,6 +28,21 @@ in
   ];
 
   # ---------------------------------------------------------------------------
+  # Create the isolated podman network shared by all three containers.
+  # ---------------------------------------------------------------------------
+  systemd.services.podman-create-graylog-network = {
+    description    = "Create graylog_network podman network";
+    before         = [ "podman-mongodb.service" "podman-opensearch.service" "podman-graylog.service" ];
+    requiredBy     = [ "podman-mongodb.service" "podman-opensearch.service" "podman-graylog.service" ];
+    serviceConfig  = {
+      Type            = "oneshot";
+      RemainAfterExit = true;
+    };
+    path   = [ pkgs.podman ];
+    script = "podman network exists graylog_network || podman network create graylog_network";
+  };
+
+  # ---------------------------------------------------------------------------
   # Write env file with SOPS secrets before the Graylog container starts.
   # ---------------------------------------------------------------------------
   systemd.services.graylog-env = {
@@ -48,14 +63,17 @@ in
   };
 
   # ---------------------------------------------------------------------------
-  # Containers — all use host networking so they talk via 127.0.0.1.
+  # Containers
+  # MongoDB and OpenSearch are only reachable within graylog_network.
+  # Graylog publishes its HTTP port to localhost for Traefik.
+  # Inter-container hostnames: mongodb, opensearch, graylog (podman DNS).
   # ---------------------------------------------------------------------------
   virtualisation.oci-containers.containers = {
 
     mongodb = {
-      image   = "docker.io/mongo:7";
-      volumes = [ "/ligma/ligma/mongodb:/data/db" ];
-      extraOptions = [ "--network=host" ];
+      image        = "docker.io/mongo:7";
+      volumes      = [ "/ligma/ligma/mongodb:/data/db" ];
+      extraOptions = [ "--network=graylog_network" ];
     };
 
     opensearch = {
@@ -65,11 +83,11 @@ in
         "cluster.name"             = "graylog";
         "discovery.type"           = "single-node";
         "action.auto_create_index" = "false";
-        "network.host"             = "127.0.0.1";
+        "network.host"             = "0.0.0.0";
         "OPENSEARCH_JAVA_OPTS"     = "-Xms512m -Xmx512m";
         "DISABLE_SECURITY_PLUGIN"  = "true";
       };
-      extraOptions = [ "--network=host" ];
+      extraOptions = [ "--network=graylog_network" ];
     };
 
     graylog = {
@@ -77,16 +95,17 @@ in
       dependsOn        = [ "mongodb" "opensearch" ];
       environmentFiles = [ "/run/graylog/env" ];
       environment = {
-        GRAYLOG_MONGODB_URI          = "mongodb://127.0.0.1/graylog";
-        GRAYLOG_ELASTICSEARCH_HOSTS  = "http://127.0.0.1:9200";
-        GRAYLOG_HTTP_BIND_ADDRESS    = "0.0.0.0:${toString glPort}";
-        GRAYLOG_HTTP_EXTERNAL_URI    = "https://graylog.makifun.se/";
+        GRAYLOG_MONGODB_URI         = "mongodb://mongodb/graylog";
+        GRAYLOG_ELASTICSEARCH_HOSTS = "http://opensearch:9200";
+        GRAYLOG_HTTP_BIND_ADDRESS   = "0.0.0.0:${toString glPort}";
+        GRAYLOG_HTTP_EXTERNAL_URI   = "https://graylog.makifun.se/";
       };
+      ports   = [ "127.0.0.1:${toString glPort}:${toString glPort}" ];
       volumes = [
         "${glBase}/journal:/usr/share/graylog/data/journal"
         "${glBase}/data:/usr/share/graylog/data/data"
       ];
-      extraOptions = [ "--network=host" ];
+      extraOptions = [ "--network=graylog_network" ];
     };
   };
 
