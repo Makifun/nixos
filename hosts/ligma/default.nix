@@ -16,6 +16,7 @@
     ./apps/authentik.nix
     ./apps/vaultwarden.nix
     ./apps/homepage.nix
+    ./apps/graylog.nix
   ];
   environment.persistence."/persist" = {
     hideMounts = true;
