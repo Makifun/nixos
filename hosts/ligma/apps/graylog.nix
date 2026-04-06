@@ -6,7 +6,6 @@ in
 {
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "graylog_6.0"
-    "mongodb"
   ];
   # ---------------------------------------------------------------------------
   # Secrets
@@ -26,20 +25,21 @@ in
   };
 
   # ---------------------------------------------------------------------------
-  # MongoDB — configuration/metadata store (Graylog 6.x requires 6.x/7.x)
-  # Default pkgs.mongodb resolves to mongodb-7_0.
+  # MongoDB — run as a Podman container to avoid building the unfree package.
   # ---------------------------------------------------------------------------
-  services.mongodb = {
-    enable = true;
-    dbpath = "${glBase}/mongodb";
+  virtualisation.oci-containers.containers.mongodb = {
+    image = "docker.io/mongo:7";
+    volumes = [ "${glBase}/mongodb:/data/db" ];
+    ports  = [ "127.0.0.1:27017:27017" ];
+    extraOptions = [ "--network=host" ];
   };
 
   systemd.tmpfiles.rules = [
-    "d '${glBase}'           0755 root      root      - -"
-    "d '${glBase}/mongodb'   0700 mongodb   mongodb   - -"
+    "d '${glBase}'            0755 root       root       - -"
+    "d '${glBase}/mongodb'    0700 root       root       - -"
     "d '${glBase}/opensearch' 0700 opensearch opensearch - -"
-    "d '${glBase}/journal'   0750 graylog   graylog   - -"
-    "d '${glBase}/data'      0750 graylog   graylog   - -"
+    "d '${glBase}/journal'    0750 graylog    graylog    - -"
+    "d '${glBase}/data'       0750 graylog    graylog    - -"
   ];
 
   # ---------------------------------------------------------------------------
@@ -84,8 +84,8 @@ in
   };
 
   systemd.services.graylog = {
-    after    = [ "mongodb.service" "opensearch.service" ];
-    requires = [ "mongodb.service" "opensearch.service" ];
+    after    = [ "podman-mongodb.service" "opensearch.service" ];
+    requires = [ "podman-mongodb.service" "opensearch.service" ];
     serviceConfig = {
       RuntimeDirectory     = "graylog";
       RuntimeDirectoryMode = "0700";
