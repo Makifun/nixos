@@ -84,6 +84,13 @@
     owner = config.services.forgejo.user;
   };
 
+  # Wait for Authentik if it's starting, but don't hard-require it —
+  # Forgejo is fully usable without Authentik (local login still works).
+  systemd.services.forgejo = {
+    after  = [ "authentik-worker.service" ];
+    wants  = [ "authentik-worker.service" ];
+  };
+
   # Append admin user creation to forgejo's existing preStart.
   # Uses || true so it's a no-op if the user already exists.
   systemd.services.forgejo.preStart = lib.mkAfter ''
@@ -96,6 +103,7 @@
 
     # Register Authentik as an OAuth2/OIDC authentication source.
     # Update the existing source if present, otherwise create it.
+    # || true — failure must not block Forgejo startup (Authentik may not be ready yet).
     _auth_id=$(${lib.getExe config.services.forgejo.package} admin auth list | ${pkgs.gawk}/bin/awk '/Authentik/ {print $1}')
     if [ -n "$_auth_id" ]; then
       ${lib.getExe config.services.forgejo.package} admin auth update-oauth \
@@ -103,7 +111,8 @@
         --key "forgejo" \
         --secret "$(tr -d '\n' < ${config.sops.secrets.forgejo-oauth-secret.path})" \
         --auto-discover-url "https://auth.makifun.se/application/o/forgejo-sso/.well-known/openid-configuration" \
-        --scopes "openid email profile"
+        --scopes "openid email profile" \
+        || true
     else
       ${lib.getExe config.services.forgejo.package} admin auth add-oauth \
         --name "Authentik" \
@@ -111,7 +120,8 @@
         --key "forgejo" \
         --secret "$(tr -d '\n' < ${config.sops.secrets.forgejo-oauth-secret.path})" \
         --auto-discover-url "https://auth.makifun.se/application/o/forgejo-sso/.well-known/openid-configuration" \
-        --scopes "openid email profile"
+        --scopes "openid email profile" \
+        || true
     fi
   '';
 
