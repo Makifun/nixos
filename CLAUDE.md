@@ -8,7 +8,11 @@ This is a NixOS flake-based system configuration for a single production host (`
 
 ## Common Commands
 
-**Apply configuration changes to the running system:**
+**Apply configuration changes to the running system (run on ligma):**
+```bash
+nh os switch --refresh
+```
+The `--refresh` flag pulls the latest flake from GitHub before building. Alternatively:
 ```bash
 sudo nixos-rebuild switch --flake .#ligma
 ```
@@ -77,3 +81,18 @@ SSH restricted to `10.10.10.0/24`. NFS exported to same subnet. NFTables firewal
 ### Auto-upgrade
 
 `hosts/ligma/default.nix` enables `system.autoUpgrade` pulling from the GitHub flake. Changes pushed to the repo will be automatically applied.
+
+### Services (`hosts/ligma/apps/`)
+
+| File | Service | Notes |
+|---|---|---|
+| `traefik.nix` | Traefik reverse proxy | Handles TLS termination for all apps |
+| `authentik.nix` | Authentik SSO | Port 9000; PostgreSQL on zstorage |
+| `forgejo.nix` | Forgejo + Actions runner | Port 3010; SSH on 22222; waits for Authentik on boot |
+| `vaultwarden.nix` | Vaultwarden | Password manager |
+| `homepage.nix` | Homepage dashboard | Port 8082; nginx on 8083 serves `/images/` from `/etc/homepage-dashboard/` |
+| `graylog.nix` | Graylog 7 log management | Port 9099; three Podman containers on `graylog_network`: MongoDB 8, Graylog-datanode 7, Graylog 7 |
+
+### Podman
+
+`modules/podman.nix` configures Podman with `graphRoot = /ligma/ligma/images` (zstorage) to avoid filling the root tmpfs. All container images are pulled there.
