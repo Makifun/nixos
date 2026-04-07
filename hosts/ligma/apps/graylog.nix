@@ -20,11 +20,11 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d '/ligma/ligma/mongodb'    0755 root root - -"
-    "d '/ligma/ligma/opensearch' 0755 root root - -"
-    "d '${glBase}'              0755 root root - -"
-    "d '${glBase}/journal'      0755 root root - -"
-    "d '${glBase}/data'         0755 root root - -"
+    "d '/ligma/ligma/mongodb'  0755 root root - -"
+    "d '/ligma/ligma/datanode' 0755 root root - -"
+    "d '${glBase}'            0755 root root - -"
+    "d '${glBase}/journal'    0755 root root - -"
+    "d '${glBase}/data'       0755 root root - -"
   ];
 
   # ---------------------------------------------------------------------------
@@ -32,8 +32,8 @@ in
   # ---------------------------------------------------------------------------
   systemd.services.podman-create-graylog-network = {
     description    = "Create graylog_network podman network";
-    before         = [ "podman-mongodb.service" "podman-opensearch.service" "podman-graylog.service" ];
-    requiredBy     = [ "podman-mongodb.service" "podman-opensearch.service" "podman-graylog.service" ];
+    before         = [ "podman-mongodb.service" "podman-datanode.service" "podman-graylog.service" ];
+    requiredBy     = [ "podman-mongodb.service" "podman-datanode.service" "podman-graylog.service" ];
     serviceConfig  = {
       Type            = "oneshot";
       RemainAfterExit = true;
@@ -43,30 +43,37 @@ in
   };
 
   # ---------------------------------------------------------------------------
-  # Write env file with SOPS secrets before the Graylog container starts.
+  # Write env file with SOPS secrets before the containers start.
+  # Both graylog and datanode use this file; extra vars are ignored per container.
   # ---------------------------------------------------------------------------
   systemd.services.graylog-env = {
     description    = "Write Graylog environment file from SOPS secrets";
-    before         = [ "podman-graylog.service" ];
-    requiredBy     = [ "podman-graylog.service" ];
+    before         = [ "podman-datanode.service" "podman-graylog.service" ];
+    requiredBy     = [ "podman-datanode.service" "podman-graylog.service" ];
     serviceConfig  = {
-      Type              = "oneshot";
-      RemainAfterExit   = true;
-      RuntimeDirectory  = "graylog";
+      Type                 = "oneshot";
+      RemainAfterExit      = true;
+      RuntimeDirectory     = "graylog";
       RuntimeDirectoryMode = "0700";
     };
     script = ''
-      printf 'GRAYLOG_PASSWORD_SECRET=%s\n'    "$(tr -d '\n' < ${config.sops.secrets.graylog-password-secret.path})"    >  /run/graylog/env
-      printf 'GRAYLOG_ROOT_PASSWORD_SHA2=%s\n' "$(tr -d '\n' < ${config.sops.secrets.graylog-root-password-sha2.path})" >> /run/graylog/env
+      secret=$(tr -d '\n' < ${config.sops.secrets.graylog-password-secret.path})
+      sha2=$(tr -d '\n' < ${config.sops.secrets.graylog-root-password-sha2.path})
+      {
+        printf 'GRAYLOG_PASSWORD_SECRET=%s\n'              "$secret"
+        printf 'GRAYLOG_ROOT_PASSWORD_SHA2=%s\n'           "$sha2"
+        printf 'GRAYLOG_DATANODE_PASSWORD_SECRET=%s\n'     "$secret"
+        printf 'GRAYLOG_DATANODE_ROOT_PASSWORD_SHA2=%s\n'  "$sha2"
+      } > /run/graylog/env
       chmod 400 /run/graylog/env
     '';
   };
 
   # ---------------------------------------------------------------------------
   # Containers
-  # MongoDB and OpenSearch are only reachable within graylog_network.
+  # MongoDB and Datanode are only reachable within graylog_network.
   # Graylog publishes its HTTP port to localhost for Traefik.
-  # Inter-container hostnames: mongodb, opensearch, graylog (podman DNS).
+  # Inter-container hostnames resolved via podman DNS: mongodb, datanode, graylog.
   # ---------------------------------------------------------------------------
   virtualisation.oci-containers.containers = {
 
@@ -76,27 +83,25 @@ in
       extraOptions = [ "--network=graylog_network" ];
     };
 
-    opensearch = {
-      image   = "docker.io/opensearchproject/opensearch:2";
-      volumes = [ "/ligma/ligma/opensearch:/usr/share/opensearch/data" ];
+    datanode = {
+      image            = "docker.io/graylog/graylog-datanode:7.0";
+      environmentFiles = [ "/run/graylog/env" ];
       environment = {
-        "cluster.name"             = "graylog";
-        "discovery.type"           = "single-node";
-        "action.auto_create_index" = "false";
-        "network.host"             = "0.0.0.0";
-        "OPENSEARCH_JAVA_OPTS"     = "-Xms512m -Xmx512m";
-        "DISABLE_SECURITY_PLUGIN"  = "true";
+        GRAYLOG_DATANODE_MONGODB_URI  = "mongodb://mongodb/graylog";
+        GRAYLOG_DATANODE_NODE_NAME    = "datanode";
+        GRAYLOG_DATANODE_ROOT_USERNAME = "admin";
       };
-      extraOptions = [ "--network=graylog_network" ];
+      volumes      = [ "/ligma/ligma/datanode:/var/lib/graylog-datanode" ];
+      extraOptions = [ "--network=graylog_network" "--hostname=datanode" ];
     };
 
     graylog = {
       image            = "docker.io/graylog/graylog:7.0";
-      dependsOn        = [ "mongodb" "opensearch" ];
+      dependsOn        = [ "mongodb" "datanode" ];
       environmentFiles = [ "/run/graylog/env" ];
       environment = {
         GRAYLOG_MONGODB_URI         = "mongodb://mongodb/graylog";
-        GRAYLOG_ELASTICSEARCH_HOSTS = "http://opensearch:9200";
+        GRAYLOG_ELASTICSEARCH_HOSTS = "https://datanode:9200";
         GRAYLOG_HTTP_BIND_ADDRESS   = "0.0.0.0:${toString glPort}";
         GRAYLOG_HTTP_EXTERNAL_URI   = "https://graylog.makifun.se/";
       };
