@@ -312,7 +312,7 @@
             };
           }
           { "s3manager" = {
-              icon      = "/images/ibmcos.png";
+              icon      = "/images/s3man.png";
               href      = "https://{{HOMEPAGE_VAR_S3MANAGER_URL}}";
               server    = "jonny";
               container = "s3manager";
