@@ -41,8 +41,8 @@ in
     "d '/ligma/ligma/mongodb'  0755 root root - -"
     "d '/ligma/ligma/datanode' 0755 root root - -"
     "d '${glBase}'            0755 root root - -"
-    "d '${glBase}/journal'    0755 root root - -"
-    "d '${glBase}/data'       0755 root root - -"
+    "d '${glBase}/journal'    0750 1100 1100 - -"  # graylog runs as UID 1100 in the container
+    "d '${glBase}/data'       0750 1100 1100 - -"
   ];
 
   # ---------------------------------------------------------------------------
