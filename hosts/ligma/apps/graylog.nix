@@ -89,7 +89,7 @@ in
         GRAYLOG_DATANODE_MONGODB_URI   = "mongodb://mongodb/graylog";
         GRAYLOG_DATANODE_NODE_NAME     = "datanode";
         GRAYLOG_DATANODE_ROOT_USERNAME = "admin";
-        GRAYLOG_DATANODE_OPENSEARCH_HEAP = "4g";
+        GRAYLOG_DATANODE_OPENSEARCH_HEAP = "2g";
       };
       volumes      = [ "/ligma/ligma/datanode:/var/lib/graylog-datanode" ];
       extraOptions = [ "--network=graylog_network" "--hostname=datanode" ];
