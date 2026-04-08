@@ -27,13 +27,14 @@
   };
   environment = {
     systemPackages = with pkgs; [
+      bat
       btop
-      screen
-      nmap
       git
-      nh
-      ncdu
       jq
+      ncdu
+      nh
+      nmap
+      screen
     ];
   };
   programs.nh = {
