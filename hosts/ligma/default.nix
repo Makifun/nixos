@@ -24,6 +24,7 @@
       "/var/log"
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
+      "/var/lib/containers"
     ];
     files = [
       "/etc/machine-id"
