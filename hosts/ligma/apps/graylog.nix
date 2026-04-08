@@ -2,6 +2,24 @@
 let
   glBase = "/ligma/ligma/graylog";
   glPort = 9099;  # 9000 is taken by the Authentik embedded outpost
+
+  # Script that writes /run/graylog/env with SOPS secrets.
+  # Embedded directly in podman-datanode's preStart so it runs on every
+  # start including systemd auto-restarts (After/Requires only apply to
+  # initial starts, not restart loops).
+  writeEnvFile = ''
+    mkdir -p /run/graylog
+    chmod 700 /run/graylog
+    secret=$(tr -d '\n' < ${config.sops.secrets.graylog-password-secret.path})
+    sha2=$(tr -d '\n' < ${config.sops.secrets.graylog-root-password-sha2.path})
+    {
+      printf 'GRAYLOG_PASSWORD_SECRET=%s\n'              "$secret"
+      printf 'GRAYLOG_ROOT_PASSWORD_SHA2=%s\n'           "$sha2"
+      printf 'GRAYLOG_DATANODE_PASSWORD_SECRET=%s\n'     "$secret"
+      printf 'GRAYLOG_DATANODE_ROOT_PASSWORD_SHA2=%s\n'  "$sha2"
+    } > /run/graylog/env
+    chmod 400 /run/graylog/env
+  '';
 in
 {
   # ---------------------------------------------------------------------------
@@ -43,41 +61,11 @@ in
   };
 
   # ---------------------------------------------------------------------------
-  # Write env file with SOPS secrets before the containers start.
-  # Both graylog and datanode use this file; extra vars are ignored per container.
+  # Inject env file into podman-datanode's preStart so it's written on
+  # every start, including systemd restart loops.
+  # podman-graylog shares the same file written by datanode's preStart.
   # ---------------------------------------------------------------------------
-  systemd.services.graylog-env = {
-    description    = "Write Graylog environment file from SOPS secrets";
-    before         = [ "podman-datanode.service" "podman-graylog.service" ];
-    requiredBy     = [ "podman-datanode.service" "podman-graylog.service" ];
-    serviceConfig  = {
-      Type            = "oneshot";
-      RemainAfterExit = true;
-    };
-    script = ''
-      mkdir -p /run/graylog
-      chmod 700 /run/graylog
-      secret=$(tr -d '\n' < ${config.sops.secrets.graylog-password-secret.path})
-      sha2=$(tr -d '\n' < ${config.sops.secrets.graylog-root-password-sha2.path})
-      {
-        printf 'GRAYLOG_PASSWORD_SECRET=%s\n'              "$secret"
-        printf 'GRAYLOG_ROOT_PASSWORD_SHA2=%s\n'           "$sha2"
-        printf 'GRAYLOG_DATANODE_PASSWORD_SECRET=%s\n'     "$secret"
-        printf 'GRAYLOG_DATANODE_ROOT_PASSWORD_SHA2=%s\n'  "$sha2"
-      } > /run/graylog/env
-      chmod 400 /run/graylog/env
-    '';
-  };
-
-  # Enforce env file ordering from the container side as well.
-  systemd.services.podman-datanode = {
-    after    = [ "graylog-env.service" ];
-    requires = [ "graylog-env.service" ];
-  };
-  systemd.services.podman-graylog = {
-    after    = [ "graylog-env.service" ];
-    requires = [ "graylog-env.service" ];
-  };
+  systemd.services.podman-datanode.preStart = lib.mkBefore writeEnvFile;
 
   # ---------------------------------------------------------------------------
   # Containers
@@ -97,8 +85,8 @@ in
       image            = "docker.io/graylog/graylog-datanode:7.0";
       environmentFiles = [ "/run/graylog/env" ];
       environment = {
-        GRAYLOG_DATANODE_MONGODB_URI  = "mongodb://mongodb/graylog";
-        GRAYLOG_DATANODE_NODE_NAME    = "datanode";
+        GRAYLOG_DATANODE_MONGODB_URI   = "mongodb://mongodb/graylog";
+        GRAYLOG_DATANODE_NODE_NAME     = "datanode";
         GRAYLOG_DATANODE_ROOT_USERNAME = "admin";
       };
       volumes      = [ "/ligma/ligma/datanode:/var/lib/graylog-datanode" ];
