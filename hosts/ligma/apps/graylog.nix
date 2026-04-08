@@ -98,10 +98,9 @@ in
       dependsOn        = [ "mongodb" "datanode" ];
       environmentFiles = [ "/run/graylog/env" ];
       environment = {
-        GRAYLOG_MONGODB_URI         = "mongodb://mongodb/graylog";
-        GRAYLOG_ELASTICSEARCH_HOSTS = "https://datanode:9200";
-        GRAYLOG_HTTP_BIND_ADDRESS   = "0.0.0.0:${toString glPort}";
-        GRAYLOG_HTTP_EXTERNAL_URI   = "https://graylog.makifun.se/";
+        GRAYLOG_MONGODB_URI       = "mongodb://mongodb/graylog";
+        GRAYLOG_HTTP_BIND_ADDRESS = "0.0.0.0:${toString glPort}";
+        GRAYLOG_HTTP_EXTERNAL_URI = "https://graylog.makifun.se/";
       };
       ports   = [ "127.0.0.1:${toString glPort}:${toString glPort}" ];
       volumes = [
