@@ -61,11 +61,12 @@ in
   };
 
   # ---------------------------------------------------------------------------
-  # Inject env file into podman-datanode's preStart so it's written on
-  # every start, including systemd restart loops.
-  # podman-graylog shares the same file written by datanode's preStart.
+  # Write env file in each container's preStart independently.
+  # Both services write the same content so whichever starts first wins,
+  # and restarts are always self-sufficient regardless of ordering.
   # ---------------------------------------------------------------------------
   systemd.services.podman-datanode.preStart = lib.mkBefore writeEnvFile;
+  systemd.services.podman-graylog.preStart  = lib.mkBefore writeEnvFile;
 
   # ---------------------------------------------------------------------------
   # Containers
