@@ -51,12 +51,12 @@ in
     before         = [ "podman-datanode.service" "podman-graylog.service" ];
     requiredBy     = [ "podman-datanode.service" "podman-graylog.service" ];
     serviceConfig  = {
-      Type                 = "oneshot";
-      RemainAfterExit      = true;
-      RuntimeDirectory     = "graylog";
-      RuntimeDirectoryMode = "0700";
+      Type            = "oneshot";
+      RemainAfterExit = true;
     };
     script = ''
+      mkdir -p /run/graylog
+      chmod 700 /run/graylog
       secret=$(tr -d '\n' < ${config.sops.secrets.graylog-password-secret.path})
       sha2=$(tr -d '\n' < ${config.sops.secrets.graylog-root-password-sha2.path})
       {
