@@ -39,7 +39,7 @@ in
       RemainAfterExit = true;
     };
     path   = [ pkgs.podman ];
-    script = "podman network exists graylog_network || podman network create --dns-enable graylog_network";
+    script = "podman network exists graylog_network || podman network create graylog_network";
   };
 
   # ---------------------------------------------------------------------------
