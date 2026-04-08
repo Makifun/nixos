@@ -69,6 +69,16 @@ in
     '';
   };
 
+  # Enforce env file ordering from the container side as well.
+  systemd.services.podman-datanode = {
+    after    = [ "graylog-env.service" ];
+    requires = [ "graylog-env.service" ];
+  };
+  systemd.services.podman-graylog = {
+    after    = [ "graylog-env.service" ];
+    requires = [ "graylog-env.service" ];
+  };
+
   # ---------------------------------------------------------------------------
   # Containers
   # MongoDB and Datanode are only reachable within graylog_network.
