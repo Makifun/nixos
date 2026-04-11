@@ -112,6 +112,7 @@
         --secret "$(tr -d '\n' < ${config.sops.secrets.forgejo-oauth-secret.path})" \
         --auto-discover-url "https://auth.makifun.se/application/o/forgejo-sso/.well-known/openid-configuration" \
         --scopes "openid email profile groups" \
+        --group-claim-name "groups" \
         --admin-group "git_admins" \
         || true
     else
@@ -122,6 +123,7 @@
         --secret "$(tr -d '\n' < ${config.sops.secrets.forgejo-oauth-secret.path})" \
         --auto-discover-url "https://auth.makifun.se/application/o/forgejo-sso/.well-known/openid-configuration" \
         --scopes "openid email profile groups" \
+        --group-claim-name "groups" \
         --admin-group "git_admins" \
         || true
     fi
