@@ -15,6 +15,10 @@
       SHOW_PASSWORD_HINT = false;
       LOG_LEVEL = "warn";
       EXTENDED_LOGGING = true;
+      # SSO via Authentik OIDC — client secret comes from vaultwarden_env
+      SSO_ENABLED = true;
+      SSO_CLIENT_ID = "vaultwarden";
+      SSO_AUTHORITY = "https://auth.makifun.se/application/o/vaultwarden-sso/";
     };
   };
 
