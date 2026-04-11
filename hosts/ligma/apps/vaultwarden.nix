@@ -19,8 +19,6 @@
       SSO_ENABLED = true;
       SSO_CLIENT_ID = "vaultwarden";
       SSO_AUTHORITY = "https://auth.makifun.se/application/o/vaultwarden-sso/";
-      # Authentik doesn't set email_verified=true for admin-created users
-      SSO_DANGEROUSLY_OVERRIDE_VERIFIED_EMAIL = true;
     };
   };
 
