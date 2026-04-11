@@ -104,7 +104,10 @@ in
         GRAYLOG_HTTP_BIND_ADDRESS = "0.0.0.0:${toString glPort}";
         GRAYLOG_HTTP_EXTERNAL_URI = "https://graylog.makifun.se/";
       };
-      ports   = [ "127.0.0.1:${toString glPort}:${toString glPort}" ];
+      ports   = [
+        "127.0.0.1:${toString glPort}:${toString glPort}"
+        "0.0.0.0:5140:5140/udp"  # OPNsense syslog (filterlog)
+      ];
       volumes = [
         "${glBase}/journal:/usr/share/graylog/data/journal"
         "${glBase}/data:/usr/share/graylog/data/data"
@@ -112,6 +115,13 @@ in
       extraOptions = [ "--network=graylog_network" ];
     };
   };
+
+  # ---------------------------------------------------------------------------
+  # Firewall
+  # ---------------------------------------------------------------------------
+  networking.firewall.extraInputRules = ''
+    udp dport 5140 ip saddr 10.10.10.0/24 accept comment "Graylog syslog UDP (OPNsense)"
+  '';
 
   # ---------------------------------------------------------------------------
   # Traefik
