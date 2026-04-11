@@ -19,6 +19,9 @@
       SSO_ENABLED = true;
       SSO_CLIENT_ID = "vaultwarden";
       SSO_AUTHORITY = "https://auth.makifun.se/application/o/vaultwarden-sso/";
+      SSO_SCOPES = "email profile offline_access";
+      SSO_SIGNUPS_MATCH_EMAIL = true;
+      SSO_CLIENT_CACHE_EXPIRATION = 0;
     };
   };
 
