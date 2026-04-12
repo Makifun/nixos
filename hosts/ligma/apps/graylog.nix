@@ -103,6 +103,8 @@ in
         GRAYLOG_MONGODB_URI       = "mongodb://mongodb/graylog";
         GRAYLOG_HTTP_BIND_ADDRESS = "0.0.0.0:${toString glPort}";
         GRAYLOG_HTTP_EXTERNAL_URI = "https://graylog.makifun.se/";
+        TZ                        = "Europe/Stockholm";  # JVM/OS timezone
+        GRAYLOG_ROOT_TIMEZONE     = "Europe/Stockholm";  # Graylog root_timezone config
       };
       ports   = [
         "127.0.0.1:${toString glPort}:${toString glPort}"
