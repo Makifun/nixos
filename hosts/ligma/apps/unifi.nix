@@ -26,6 +26,7 @@ in
   # ---------------------------------------------------------------------------
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "unifi-controller"
+    "mongodb"
   ];
 
   services.unifi = {
