@@ -10,25 +10,30 @@ in
   ];
 
   # ---------------------------------------------------------------------------
+  # Isolated Podman network for unifi + unifi-db.
+  # ---------------------------------------------------------------------------
+  systemd.services.podman-create-unifi-network = {
+    description    = "Create unifi_network podman network";
+    before         = [ "podman-unifi-db.service" "podman-unifi.service" ];
+    requiredBy     = [ "podman-unifi-db.service" "podman-unifi.service" ];
+    serviceConfig  = { Type = "oneshot"; RemainAfterExit = true; };
+    path           = [ pkgs.podman ];
+    script         = "podman network exists unifi_network || podman network create unifi_network";
+  };
+
+  # ---------------------------------------------------------------------------
   # Containers
   #
-  # Podman network DNS (hostname resolution between named containers) was
-  # unreliable on this host. Replaced with a simpler approach:
-  #   - unifi-db publishes MongoDB to 127.0.0.1:27017 (host loopback only)
-  #   - unifi connects via host.containers.internal — a hostname Podman
-  #     injects into every container's /etc/hosts pointing at the host
-  # No custom network or DNS needed.
-  #
-  # MongoDB auth is not enabled; mongo:7 without --auth accepts any credentials
-  # in the connection URI. The loopback-only port publish ensures it is not
-  # reachable from outside the host.
+  # Podman network DNS was unreliable for custom networks on this host.
+  # Workaround: point both containers at the default Podman gateway (10.88.0.1)
+  # as the DNS server — aardvark-dns there resolves names across all networks.
   # ---------------------------------------------------------------------------
   virtualisation.oci-containers.containers = {
 
     unifi-db = {
       image   = "docker.io/mongo:7";
       volumes = [ "${unifiBase}/db:/data/db" ];
-      ports   = [ "127.0.0.1:27017:27017" ];
+      extraOptions = [ "--network=unifi_network" "--dns=10.88.0.1" ];
     };
 
     unifi = {
@@ -40,7 +45,7 @@ in
         TZ           = "Europe/Stockholm";
         MONGO_USER   = "unifi";
         MONGO_PASS   = "unifi";
-        MONGO_HOST   = "host.containers.internal";
+        MONGO_HOST   = "unifi-db";
         MONGO_PORT   = "27017";
         MONGO_DBNAME = "unifi";
         MEM_LIMIT    = "1024";
@@ -53,14 +58,15 @@ in
         "0.0.0.0:3478:3478/udp"    # STUN
         "0.0.0.0:10001:10001/udp"  # AP discovery
       ];
+      extraOptions = [ "--network=unifi_network" "--dns=10.88.0.1" ];
     };
   };
 
-  # Wait until MongoDB is actually accepting connections before starting UniFi.
-  # Uses bash /dev/tcp — no extra packages needed.
+  # Wait until unifi-db is running and registered in DNS before starting UniFi.
   systemd.services.podman-unifi.preStart = lib.mkAfter ''
-    until (echo > /dev/tcp/127.0.0.1/27017) 2>/dev/null; do
-      echo "Waiting for MongoDB on 127.0.0.1:27017..."
+    until ${pkgs.podman}/bin/podman container inspect unifi-db \
+        --format '{{.State.Running}}' 2>/dev/null | grep -q true; do
+      echo "Waiting for unifi-db to be running..."
       sleep 2
     done
   '';
