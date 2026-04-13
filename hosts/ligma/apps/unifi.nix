@@ -4,22 +4,28 @@ let
 in
 {
   # ---------------------------------------------------------------------------
-  # Data directory on zstorage (survives reboots; not on ephemeral root tmpfs)
+  # Data directory on zstorage
+  #
+  # services.unifi hardcodes /var/lib/unifi and does not accept a custom path
+  # (the dataDir option asserts it must equal /var/lib/unifi/data).
+  # Bind-mount the zstorage path at the location the module expects so data
+  # survives reboots on the ephemeral root tmpfs.
   # ---------------------------------------------------------------------------
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/unifi' 0700 unifi unifi - -"
-    # dataDir subdirectories the module expects:
-    "d '/ligma/ligma/unifi/data' 0700 unifi unifi - -"
-    "d '/ligma/ligma/unifi/logs' 0700 unifi unifi - -"
-    "d '/ligma/ligma/unifi/run'  0700 unifi unifi - -"
   ];
+
+  fileSystems."/var/lib/unifi" = {
+    device        = "/ligma/ligma/unifi";
+    options       = [ "bind" ];
+    neededForBoot = false;
+  };
 
   # ---------------------------------------------------------------------------
   # UniFi Network Application
   # ---------------------------------------------------------------------------
   services.unifi = {
     enable         = true;
-    dataDir        = "/ligma/ligma/unifi";
     openFirewall   = false;  # managed manually below
     unifiPackage   = pkgs.unifi8;
     mongodbPackage = pkgs.mongodb-ce;
