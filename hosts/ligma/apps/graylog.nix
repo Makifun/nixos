@@ -127,15 +127,25 @@ in
 
   # ---------------------------------------------------------------------------
   # Traefik
-  # No authentik middleware — Graylog has its own authentication.
-  # Added to Authentik ligma_apps (apps.tf) for the app-panel link only.
+  # Authentik forward-auth middleware gates the UI. The /api path is excluded
+  # via skip_path_regex in apps.tf so Terraform token auth still works.
+  # The outpost route handles the post-login callback Authentik redirects to.
   # ---------------------------------------------------------------------------
   services.traefik.dynamicConfigOptions.http = {
-    routers.graylog = {
-      rule        = "Host(`graylog.makifun.se`)";
-      entryPoints = [ "websecure" ];
-      service     = "graylog-svc";
-      tls.certResolver = "letsencrypt";
+    routers = {
+      graylog = {
+        rule        = "Host(`graylog.makifun.se`)";
+        entryPoints = [ "websecure" ];
+        service     = "graylog-svc";
+        middlewares = [ "authentik" ];
+        tls.certResolver = "letsencrypt";
+      };
+      graylog-outpost = {
+        rule        = "Host(`graylog.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        entryPoints = [ "websecure" ];
+        service     = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
     };
     services.graylog-svc.loadBalancer.servers = [
       { url = "http://127.0.0.1:${toString glPort}"; }
