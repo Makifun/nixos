@@ -93,6 +93,25 @@ SSH restricted to `10.10.10.0/24`. NFS exported to same subnet. NFTables firewal
 | `homepage.nix` | Homepage dashboard | Port 8082; nginx on 8083 serves `/images/` from `/etc/homepage-dashboard/` |
 | `graylog.nix` | Graylog 7 log management | Port 9099; three Podman containers on `graylog_network`: MongoDB 8, Graylog-datanode 7, Graylog 7 |
 
+### Traefik + Authentik integration
+
+The `authentik` forwardAuth middleware (defined in `traefik.nix`) adds SSO to any router.
+The Authentik embedded outpost (port 9000) injects response headers (lowercase, e.g.
+`x-authentik-username`) which Traefik copies to the upstream request via `authResponseHeaders`.
+
+**Graylog uses a three-router priority split** (`graylog.nix`) to support both browser SSO
+and Terraform/API token access on the same domain:
+
+| Router | Priority | Rule | Middleware | Purpose |
+|--------|----------|------|------------|---------|
+| `graylog-outpost` | 30 | `Host + PathPrefix(/outpost.goauthentik.io)` | none | Authentik post-login callback |
+| `graylog-basic-auth` | 10 | `Host + HeaderRegexp(Authorization, ^Basic .+)` | none | Terraform API token access (bypasses SSO) |
+| `graylog` | 1 | `Host` (catch-all) | `authentik` | Browser SSO — header injected for Trusted Header Auth |
+
+`GRAYLOG_TRUSTED_PROXIES` is set in the Graylog container environment so Graylog trusts
+the `X-authentik-username` header forwarded from Traefik. The REST API does not support
+trusted header auth (by design) — only the web UI.
+
 ### Podman
 
 `modules/podman.nix` configures Podman with `graphRoot = /ligma/ligma/images` (zstorage) to avoid filling the root tmpfs. All container images are pulled there.
