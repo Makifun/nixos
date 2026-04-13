@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 let
   unifiPort = 8443;  # HTTPS web UI — self-signed cert, Traefik terminates TLS externally
 in
@@ -25,10 +25,9 @@ in
   # UniFi Network Application
   # ---------------------------------------------------------------------------
   services.unifi = {
-    enable         = true;
-    openFirewall   = false;  # managed manually below
-    unifiPackage   = pkgs.unifi8;
-    mongodbPackage = pkgs.mongodb-ce;
+    enable       = true;
+    openFirewall = false;  # managed manually below
+    # unifiPackage and mongodbPackage use module defaults (pkgs.unifi, pkgs.mongodb-7_0)
   };
 
   # ---------------------------------------------------------------------------
