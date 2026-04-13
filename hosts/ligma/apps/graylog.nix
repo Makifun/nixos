@@ -114,6 +114,7 @@ in
       ports   = [
         "127.0.0.1:${toString glPort}:${toString glPort}"
         "0.0.0.0:5140:5140/udp"  # OPNsense syslog (filterlog)
+        "127.0.0.1:5141:5141/udp"  # UniFi syslog (localhost only — UniFi runs on ligma)
       ];
       volumes = [
         "${glBase}/journal:/usr/share/graylog/data/journal"
