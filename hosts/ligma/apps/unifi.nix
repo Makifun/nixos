@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, ... }:
 let
   unifiPort = 8443;  # HTTPS web UI — self-signed cert, Traefik terminates TLS externally
 in
@@ -24,6 +24,10 @@ in
   # ---------------------------------------------------------------------------
   # UniFi Network Application
   # ---------------------------------------------------------------------------
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    "unifi-controller"
+  ];
+
   services.unifi = {
     enable       = true;
     openFirewall = false;  # managed manually below
