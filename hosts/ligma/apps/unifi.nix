@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   unifiPort = 8443;
   unifiBase = "/ligma/ligma/unifi";
@@ -77,6 +77,17 @@ in
       extraOptions = [ "--network=unifi_network" ];
     };
   };
+
+  # Wait for unifi-db to be running before starting UniFi.
+  # Podman DNS registers the container name only after the container is running;
+  # UniFi's Java process starts fast enough to race ahead of that registration.
+  systemd.services.podman-unifi.preStart = lib.mkAfter ''
+    until ${pkgs.podman}/bin/podman container inspect unifi-db \
+        --format '{{.State.Running}}' 2>/dev/null | grep -q true; do
+      echo "Waiting for unifi-db to be running..."
+      sleep 2
+    done
+  '';
 
   # ---------------------------------------------------------------------------
   # Firewall
