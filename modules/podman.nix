@@ -1,8 +1,11 @@
 { ... }:
 {
-  # Trust podman bridge interfaces so aardvark-dns can bind on the gateway
-  # address and containers can query DNS (10.89.x.x:53).
-  networking.firewall.trustedInterfaces = [ "podman0" "podman1" "podman2" ];
+  # Trust all podman bridge interfaces so aardvark-dns can bind on each
+  # network's gateway and containers can query DNS. These are host-only
+  # bridges — external traffic cannot arrive on podman* interfaces.
+  networking.firewall.extraInputRules = ''
+    iifname "podman*" accept comment "trust all podman bridge interfaces"
+  '';
 
   virtualisation = {
     containers = {
