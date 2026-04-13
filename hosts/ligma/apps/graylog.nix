@@ -114,7 +114,7 @@ in
       ports   = [
         "127.0.0.1:${toString glPort}:${toString glPort}"
         "0.0.0.0:5140:5140/udp"  # OPNsense syslog (filterlog)
-        "127.0.0.1:5141:5141/udp"  # UniFi syslog (localhost only — UniFi runs on ligma)
+        "0.0.0.0:5141:5141/udp"    # UniFi syslog (UniFi container reaches host via Podman gateway)
       ];
       volumes = [
         "${glBase}/journal:/usr/share/graylog/data/journal"
@@ -129,6 +129,7 @@ in
   # ---------------------------------------------------------------------------
   networking.firewall.extraInputRules = ''
     udp dport 5140 ip saddr 10.10.10.0/24 accept comment "Graylog syslog UDP (OPNsense)"
+    udp dport 5141 ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } accept comment "Graylog syslog UDP (UniFi container via Podman gateway)"
   '';
 
   # ---------------------------------------------------------------------------
