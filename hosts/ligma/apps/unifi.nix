@@ -33,7 +33,7 @@ in
     unifi-db = {
       image   = "docker.io/mongo:7";
       volumes = [ "${unifiBase}/db:/data/db" ];
-      extraOptions = [ "--network=unifi_network" "--dns=10.88.0.1" ];
+      extraOptions = [ "--network=unifi_network" ];
     };
 
     unifi = {
@@ -58,7 +58,7 @@ in
         "0.0.0.0:3478:3478/udp"    # STUN
         "0.0.0.0:10001:10001/udp"  # AP discovery
       ];
-      extraOptions = [ "--network=unifi_network" "--dns=10.88.0.1" ];
+      extraOptions = [ "--network=unifi_network" ];
     };
   };
 
