@@ -8,6 +8,10 @@ in
   # ---------------------------------------------------------------------------
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/unifi' 0700 unifi unifi - -"
+    # dataDir subdirectories the module expects:
+    "d '/ligma/ligma/unifi/data' 0700 unifi unifi - -"
+    "d '/ligma/ligma/unifi/logs' 0700 unifi unifi - -"
+    "d '/ligma/ligma/unifi/run'  0700 unifi unifi - -"
   ];
 
   # ---------------------------------------------------------------------------
@@ -15,7 +19,7 @@ in
   # ---------------------------------------------------------------------------
   services.unifi = {
     enable         = true;
-    stateDir       = "/ligma/ligma/unifi";
+    dataDir        = "/ligma/ligma/unifi";
     openFirewall   = false;  # managed manually below
     unifiPackage   = pkgs.unifi8;
     mongodbPackage = pkgs.mongodb-ce;
