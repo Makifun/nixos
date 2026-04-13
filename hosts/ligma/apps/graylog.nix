@@ -105,11 +105,11 @@ in
         GRAYLOG_HTTP_EXTERNAL_URI = "https://graylog.makifun.se/";
         TZ                        = "Europe/Stockholm";  # JVM/OS timezone
         GRAYLOG_ROOT_TIMEZONE     = "Europe/Stockholm";  # Graylog root_timezone config
-        # Trust headers (X-authentik-username etc.) from Traefik on the host.
-        # Traefik reaches the container via the Podman host gateway; 0.0.0.0/0
-        # is safe here because Graylog only listens on 127.0.0.1 externally —
-        # only Traefik can reach it.
-        GRAYLOG_HTTP_TRUSTED_PROXIES = "127.0.0.1/32,172.16.0.0/12,10.0.0.0/8";
+        # Trust the username header from Traefik on the host.
+        # Traefik reaches the container via the Podman host gateway; covering
+        # loopback + RFC-1918 catches all possible Podman gateway IPs.
+        # Maps to trusted_proxies in server.conf.
+        GRAYLOG_TRUSTED_PROXIES = "127.0.0.1/32,172.16.0.0/12,10.0.0.0/8";
       };
       ports   = [
         "127.0.0.1:${toString glPort}:${toString glPort}"
