@@ -127,23 +127,41 @@ in
 
   # ---------------------------------------------------------------------------
   # Traefik
-  # Authentik forward-auth middleware gates the UI. The /api path is excluded
-  # via skip_path_regex in apps.tf so Terraform token auth still works.
-  # The outpost route handles the post-login callback Authentik redirects to.
+  # Three routers, explicit priorities to avoid ambiguity:
+  #
+  #   graylog-outpost (30)   — Authentik post-login callback, no middleware
+  #   graylog-basic-auth (10) — requests with Authorization: Basic bypass
+  #                             Authentik so Terraform API tokens work;
+  #                             Graylog validates the credential itself
+  #   graylog (1)            — catch-all, Authentik gate + header injection
+  #                             for browser / SSO flow
+  #
+  # The SPA's initial auth check (GET /api/system/session, no Authorization
+  # header) hits the catch-all, Authentik injects X-authentik-username, and
+  # Graylog auto-logs in via Trusted Header Authentication.
   # ---------------------------------------------------------------------------
   services.traefik.dynamicConfigOptions.http = {
     routers = {
+      graylog-outpost = {
+        rule        = "Host(`graylog.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        priority    = 30;
+        entryPoints = [ "websecure" ];
+        service     = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
+      graylog-basic-auth = {
+        rule        = "Host(`graylog.makifun.se`) && HeaderRegexp(`Authorization`, `^Basic .+`)";
+        priority    = 10;
+        entryPoints = [ "websecure" ];
+        service     = "graylog-svc";
+        tls.certResolver = "letsencrypt";
+      };
       graylog = {
         rule        = "Host(`graylog.makifun.se`)";
+        priority    = 1;
         entryPoints = [ "websecure" ];
         service     = "graylog-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
-      };
-      graylog-outpost = {
-        rule        = "Host(`graylog.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
-        entryPoints = [ "websecure" ];
-        service     = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
     };
