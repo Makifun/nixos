@@ -16,11 +16,13 @@
     global.sendAnonymousUsage = false;
     log.level = "INFO";
 
-    # Dashboard accessible on port 8080 (firewalled, internal only)
+    # Dashboard accessible on port 8090 (firewalled, internal only).
+    # Port 8080 is reserved for the UniFi device inform endpoint.
     api = {
       dashboard = true;
       insecure = true;
     };
+    entryPoints.traefik.address = ":8090";
 
     entryPoints = {
       web = {
