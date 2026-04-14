@@ -44,6 +44,9 @@ in
     environment      = { PORT = "45876"; };
     environmentFiles = [ config.sops.secrets.beszel_agent_key.path ];
     extraOptions     = [ "--network=host" ];
+    # Mount the Podman socket so Beszel can report container stats.
+    # /run/docker.sock is the symlink created by dockerSocket.enable in podman.nix.
+    volumes          = [ "/run/docker.sock:/var/run/docker.sock:ro" ];
   };
 
   sops.secrets.beszel_agent_key = {

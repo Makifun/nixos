@@ -14,6 +14,9 @@
     podman = {
       enable = true;
       dockerCompat = true;
+      # Enable the socket so tools like beszel-agent can query container stats.
+      # Creates /run/podman/podman.sock (group: podman) and symlinks /run/docker.sock.
+      dockerSocket.enable = true;
       defaultNetwork.settings.dns_enabled = true;
       autoPrune = {
         enable = true;
