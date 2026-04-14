@@ -45,7 +45,10 @@ in
     environmentFiles = [ config.sops.secrets.beszel_agent_key.path ];
     extraOptions     = [ "--network=host" ];
     # Mount the Podman socket so Beszel can report container stats.
-    volumes          = [ "/run/podman/podman.sock:/var/run/docker.sock:ro" ];
+    volumes          = [
+      "/run/podman/podman.sock:/var/run/docker.sock:ro"
+      "/ligma:/ligma:ro"
+    ];
   };
 
   # Ensure podman.socket is active before the agent container starts,
