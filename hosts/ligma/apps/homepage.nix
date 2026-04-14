@@ -13,7 +13,12 @@
   environment.etc."homepage-dashboard/images".source = ../homepage_images;
 
   # The Podman socket (group: podman) is needed for the ligma docker connection.
-  users.users.homepage-dashboard.extraGroups = [ "podman" ];
+  # Repeat the required fields so the merge satisfies NixOS user validation.
+  users.users.homepage-dashboard = {
+    isSystemUser = true;
+    group        = "homepage-dashboard";
+    extraGroups  = [ "podman" ];
+  };
 
   services.homepage-dashboard = {
     enable = true;
