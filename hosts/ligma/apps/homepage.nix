@@ -19,6 +19,7 @@
     group        = "homepage-dashboard";
     extraGroups  = [ "podman" ];
   };
+  users.groups.homepage-dashboard = {};
 
   services.homepage-dashboard = {
     enable = true;
