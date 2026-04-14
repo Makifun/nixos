@@ -462,7 +462,7 @@
               container = "beszel-agent";
               widget = {
                 type     = "beszel";
-                fields   = [ "cpu", "memory", "disk", "network" ];
+                fields   = [ "cpu" "memory" "disk" ];
                 url      = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
                 username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
@@ -478,7 +478,7 @@
               container = "beszel";
               widget = {
                 type     = "beszel";
-                fields   = [ "cpu", "memory", "disk", "network" ];
+                fields   = [ "cpu" "memory" "disk" ];
                 url      = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
                 username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
