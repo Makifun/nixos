@@ -45,9 +45,13 @@ in
     environmentFiles = [ config.sops.secrets.beszel_agent_key.path ];
     extraOptions     = [ "--network=host" ];
     # Mount the Podman socket so Beszel can report container stats.
-    # /run/docker.sock is the symlink created by dockerSocket.enable in podman.nix.
-    volumes          = [ "/run/docker.sock:/var/run/docker.sock:ro" ];
+    volumes          = [ "/run/podman/podman.sock:/var/run/docker.sock:ro" ];
   };
+
+  # Ensure podman.socket is active before the agent container starts,
+  # so /run/podman/podman.sock exists when Podman tries to bind-mount it.
+  systemd.services.podman-beszel-agent.after    = [ "podman.socket" ];
+  systemd.services.podman-beszel-agent.requires = [ "podman.socket" ];
 
   sops.secrets.beszel_agent_key = {
     format   = "yaml";
