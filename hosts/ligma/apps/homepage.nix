@@ -411,6 +411,8 @@
           { "Unifi Controller" = {
               icon = "unifi.png";
               href = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
+              server    = "ligma";
+              container = "unifi";
               widget = {
                 type     = "unifi";
                 url      = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
@@ -506,11 +508,15 @@
           }
           { "Graylog" = {
               icon = "graylog.png";
+              server    = "ligma";
+              container = "graylog";
               href = "https://{{HOMEPAGE_VAR_GRAYLOG_URL}}";
             };
           }
           { "Traefik Jonny" = {
               icon = "traefik.png";
+              server    = "jonny";
+              container = "traefik";
               href = "https://{{HOMEPAGE_VAR_TRAEFIK_JONNY_URL}}/dashboard/";
               widget = {
                 type = "traefik";
@@ -520,6 +526,8 @@
           }
           { "Traefik Ligma" = {
               icon = "traefik.png";
+              server    = "ligma";
+              container = "traefik";
               href = "https://{{HOMEPAGE_VAR_TRAEFIK_LIGMA_URL}}/dashboard/";
               widget = {
                 type = "traefik";
