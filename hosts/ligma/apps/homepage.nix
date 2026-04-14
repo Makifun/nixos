@@ -19,7 +19,6 @@
     group        = "homepage-dashboard";
     extraGroups  = [ "podman" ];
   };
-  users.groups.homepage-dashboard = {};
 
   services.homepage-dashboard = {
     enable = true;
@@ -436,6 +435,7 @@
               href = "https://{{HOMEPAGE_VAR_PROXMOX_URL}}";
               widget = {
                 type     = "proxmox";
+                fields   = [ "vms" "resources.cpu" "resources.mem" ];
                 url      = "https://{{HOMEPAGE_VAR_PROXMOX_URL}}";
                 username = "{{HOMEPAGE_VAR_PROXMOX_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_PROXMOX_PASSWORD}}";
@@ -462,7 +462,7 @@
               container = "beszel-agent";
               widget = {
                 type     = "beszel";
-                fields   = [ "cpu" "memory" "disk" ];
+                fields   = [ "cpu" "memory" "disk" "network" ];
                 url      = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
                 username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
@@ -478,7 +478,7 @@
               container = "beszel";
               widget = {
                 type     = "beszel";
-                fields   = [ "cpu" "memory" "disk" ];
+                fields   = [ "cpu" "memory" "disk" "network" ];
                 url      = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
                 username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
@@ -532,8 +532,6 @@
           }
           { "Traefik Ligma" = {
               icon = "traefik.png";
-              server    = "ligma";
-              container = "traefik";
               href = "https://{{HOMEPAGE_VAR_TRAEFIK_LIGMA_URL}}/dashboard/";
               widget = {
                 type = "traefik";
