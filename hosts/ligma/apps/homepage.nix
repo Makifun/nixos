@@ -484,6 +484,15 @@
               };
             };
           }
+          { "Graylog" = {
+              icon = "graylog.png";
+              href = "https://{{HOMEPAGE_VAR_GRAYLOG_URL}}";
+              widget = {
+                type = "graylog";
+                url  = "https://{{HOMEPAGE_VAR_GRAYLOG_URL}}";
+              };
+            };
+          }
           { "Traefik Jonny" = {
               icon = "traefik.png";
               href = "https://{{HOMEPAGE_VAR_TRAEFIK_JONNY_URL}}/dashboard/";
