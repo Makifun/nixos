@@ -12,6 +12,9 @@
   # Add files to hosts/ligma/homepage_images/ and they will appear at /images/<file> in homepage.
   environment.etc."homepage-dashboard/images".source = ../homepage_images;
 
+  # The Podman socket (group: podman) is needed for the ligma docker connection.
+  users.users.homepage-dashboard.extraGroups = [ "podman" ];
+
   services.homepage-dashboard = {
     enable = true;
     listenPort = 8082;
@@ -65,6 +68,7 @@
 
     docker = {
       jonny = { host = "{{HOMEPAGE_VAR_SOCKET_PROXY}}"; port = 2375; };
+      ligma  = { socket = "/run/podman/podman.sock"; };
     };
 
     services = [
@@ -443,10 +447,26 @@
               };
             };
           }
-          { "Beszel" = {
+          { "Jonny Beszel" = {
               icon      = "/images/beszel.svg";
               href      = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
               server    = "jonny";
+              container = "beszel-agent";
+              widget = {
+                type     = "beszel";
+                fields   = [ "cpu" "memory" "network" ];
+                url      = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+                username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
+                password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
+                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_JONNY}}";
+                version  = 2;
+              };
+            };
+          }
+          { "Ligma Beszel" = {
+              icon      = "/images/beszel.svg";
+              href      = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+              server    = "ligma";
               container = "beszel";
               widget = {
                 type     = "beszel";
@@ -454,7 +474,7 @@
                 url      = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
                 username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
-                #systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID}}";
+                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_LIGMA}}";
                 version  = 2;
               };
             };
