@@ -68,31 +68,35 @@ in
         # Docker Hub — official images: .../dockerhub/library/nginx
         #             user images:      .../dockerhub/username/image
         {
-          urls      = [ "https://registry-1.docker.io" ];
-          onDemand  = true;
-          tlsVerify = true;
-          content   = [{ prefix = "**"; destination = "dockerhub"; }];
+          urls           = [ "https://registry-1.docker.io" ];
+          onDemand       = true;
+          tlsVerify      = true;
+          preserveDigest = true;
+          content        = [{ prefix = "**"; destination = "dockerhub"; }];
         }
         # GitHub Container Registry — .../ghcr/owner/image
         {
-          urls      = [ "https://ghcr.io" ];
-          onDemand  = true;
-          tlsVerify = true;
-          content   = [{ prefix = "**"; destination = "ghcr"; }];
+          urls           = [ "https://ghcr.io" ];
+          onDemand       = true;
+          tlsVerify      = true;
+          preserveDigest = true;
+          content        = [{ prefix = "**"; destination = "ghcr"; }];
         }
         # Quay.io — .../quay/owner/image
         {
-          urls      = [ "https://quay.io" ];
-          onDemand  = true;
-          tlsVerify = true;
-          content   = [{ prefix = "**"; destination = "quay"; }];
+          urls           = [ "https://quay.io" ];
+          onDemand       = true;
+          tlsVerify      = true;
+          preserveDigest = true;
+          content        = [{ prefix = "**"; destination = "quay"; }];
         }
         # LinuxServer (lscr.io) — .../lscr/linuxserver/sonarr
         {
-          urls      = [ "https://lscr.io" ];
-          onDemand  = true;
-          tlsVerify = true;
-          content   = [{ prefix = "**"; destination = "lscr"; }];
+          urls           = [ "https://lscr.io" ];
+          onDemand       = true;
+          tlsVerify      = true;
+          preserveDigest = true;
+          content        = [{ prefix = "**"; destination = "lscr"; }];
         }
       ];
     };      # sync
