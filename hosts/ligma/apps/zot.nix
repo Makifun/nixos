@@ -53,7 +53,6 @@ in
       ui.enable     = true;  # Web UI at https://registry.makifun.se
       sync = {
       enable     = true;
-      # Only cache linux/amd64 — skip arm, arm64, etc.
       registries = [
         # Docker Hub — official images: .../dockerhub/library/nginx
         #             user images:      .../dockerhub/username/image
@@ -61,28 +60,28 @@ in
           urls      = [ "https://registry-1.docker.io" ];
           onDemand  = true;
           tlsVerify = true;
-          content   = [{ prefix = "**"; destination = "/dockerhub"; platforms = [{ os = "linux"; arch = "amd64"; }]; }];
+          content   = [{ prefix = "**"; destination = "/dockerhub"; }];
         }
         # GitHub Container Registry — .../ghcr/owner/image
         {
           urls      = [ "https://ghcr.io" ];
           onDemand  = true;
           tlsVerify = true;
-          content   = [{ prefix = "**"; destination = "/ghcr"; platforms = [{ os = "linux"; arch = "amd64"; }]; }];
+          content   = [{ prefix = "**"; destination = "/ghcr"; }];
         }
         # Quay.io — .../quay/owner/image
         {
           urls      = [ "https://quay.io" ];
           onDemand  = true;
           tlsVerify = true;
-          content   = [{ prefix = "**"; destination = "/quay"; platforms = [{ os = "linux"; arch = "amd64"; }]; }];
+          content   = [{ prefix = "**"; destination = "/quay"; }];
         }
         # LinuxServer (lscr.io) — .../lscr/linuxserver/sonarr
         {
           urls      = [ "https://lscr.io" ];
           onDemand  = true;
           tlsVerify = true;
-          content   = [{ prefix = "**"; destination = "/lscr"; platforms = [{ os = "linux"; arch = "amd64"; }]; }];
+          content   = [{ prefix = "**"; destination = "/lscr"; }];
         }
       ];
     };      # sync
