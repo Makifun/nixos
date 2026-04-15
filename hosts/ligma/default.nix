@@ -19,6 +19,7 @@
     ./apps/graylog.nix
     ./apps/unifi.nix
     ./apps/beszel.nix
+    ./apps/zot.nix
   ];
   environment.persistence."/persist" = {
     hideMounts = true;
