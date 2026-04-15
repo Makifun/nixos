@@ -3,7 +3,7 @@ let
   beszelPort = 8095;
   beszelBase = "/ligma/ligma/beszel";
   # renovate: datasource=docker depName=henrygd/beszel
-  beszelTag  = "0.9.5";
+  beszelTag  = "0.18.7";
 in
 {
   systemd.tmpfiles.rules = [
