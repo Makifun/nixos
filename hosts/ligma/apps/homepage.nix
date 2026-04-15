@@ -331,8 +331,6 @@
           { "Vaultwarden" = {
               icon      = "vaultwarden.png";
               href      = "https://{{HOMEPAGE_VAR_VAULTWARDEN_URL}}";
-              server    = "jonny";
-              container = "vaultwarden";
             };
           }
           { "Gotify" = {
