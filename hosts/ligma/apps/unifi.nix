@@ -5,7 +5,7 @@ let
   # renovate: datasource=docker depName=mongo
   mongoTag  = "7";
   # renovate: datasource=docker depName=linuxserver/unifi-network-application registryUrl=https://lscr.io
-  unifiTag  = "9.5.21";
+  unifiTag  = "10.1.89";
 in
 {
   systemd.tmpfiles.rules = [
