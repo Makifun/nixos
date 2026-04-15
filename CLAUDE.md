@@ -114,4 +114,4 @@ trusted header auth (by design) — only the web UI.
 
 ### Podman
 
-`modules/podman.nix` configures Podman with `graphRoot = /ligma/ligma/images` (zstorage) to avoid filling the root tmpfs. All container images are pulled there.
+`modules/podman.nix` configures Podman. Container images use the default location (`/var/lib/containers`), which is persisted via impermanence.

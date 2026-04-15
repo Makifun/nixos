@@ -1,7 +1,7 @@
 { config, ... }:
 let
   zotPort = 5000;
-  zotBase = "/ligma/ligma/zot";
+  zotBase = "/var/lib/zot";
 in
 {
   # ---------------------------------------------------------------------------
@@ -88,10 +88,6 @@ in
     };      # sync
   };        # extensions
   };
-
-  systemd.tmpfiles.rules = [
-    "d '${zotBase}' 0755 root root - -"
-  ];
 
   virtualisation.oci-containers.containers.zot = {
     image = "ghcr.io/project-zot/zot-linux-amd64:latest";
