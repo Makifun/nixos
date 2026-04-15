@@ -48,7 +48,10 @@ in
       auth.htpasswd.path = "/etc/zot/htpasswd";
     };
     log.level = "info";
-    extensions.sync = {
+    extensions = {
+      search.enable = true;  # GraphQL API powering the UI
+      ui.enable     = true;  # Web UI at https://registry.makifun.se
+      sync = {
       enable     = true;
       registries = [
         # Docker Hub — official images: .../dockerhub/library/nginx
@@ -81,7 +84,8 @@ in
           content    = [{ prefix = "**"; destination = "/lscr"; }];
         }
       ];
-    };
+    };      # sync
+  };        # extensions
   };
 
   systemd.tmpfiles.rules = [
