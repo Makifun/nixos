@@ -53,35 +53,36 @@ in
       ui.enable     = true;  # Web UI at https://registry.makifun.se
       sync = {
       enable     = true;
+      # Only cache linux/amd64 — skip arm, arm64, etc.
       registries = [
         # Docker Hub — official images: .../dockerhub/library/nginx
         #             user images:      .../dockerhub/username/image
         {
-          urls       = [ "https://registry-1.docker.io" ];
-          onDemand   = true;
-          tlsVerify  = true;
-          content    = [{ prefix = "**"; destination = "/dockerhub"; }];
+          urls      = [ "https://registry-1.docker.io" ];
+          onDemand  = true;
+          tlsVerify = true;
+          content   = [{ prefix = "**"; destination = "/dockerhub"; platforms = [{ os = "linux"; arch = "amd64"; }]; }];
         }
         # GitHub Container Registry — .../ghcr/owner/image
         {
-          urls       = [ "https://ghcr.io" ];
-          onDemand   = true;
-          tlsVerify  = true;
-          content    = [{ prefix = "**"; destination = "/ghcr"; }];
+          urls      = [ "https://ghcr.io" ];
+          onDemand  = true;
+          tlsVerify = true;
+          content   = [{ prefix = "**"; destination = "/ghcr"; platforms = [{ os = "linux"; arch = "amd64"; }]; }];
         }
         # Quay.io — .../quay/owner/image
         {
-          urls       = [ "https://quay.io" ];
-          onDemand   = true;
-          tlsVerify  = true;
-          content    = [{ prefix = "**"; destination = "/quay"; }];
+          urls      = [ "https://quay.io" ];
+          onDemand  = true;
+          tlsVerify = true;
+          content   = [{ prefix = "**"; destination = "/quay"; platforms = [{ os = "linux"; arch = "amd64"; }]; }];
         }
         # LinuxServer (lscr.io) — .../lscr/linuxserver/sonarr
         {
-          urls       = [ "https://lscr.io" ];
-          onDemand   = true;
-          tlsVerify  = true;
-          content    = [{ prefix = "**"; destination = "/lscr"; }];
+          urls      = [ "https://lscr.io" ];
+          onDemand  = true;
+          tlsVerify = true;
+          content   = [{ prefix = "**"; destination = "/lscr"; platforms = [{ os = "linux"; arch = "amd64"; }]; }];
         }
       ];
     };      # sync
