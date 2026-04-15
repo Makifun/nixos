@@ -71,28 +71,28 @@ in
           urls      = [ "https://registry-1.docker.io" ];
           onDemand  = true;
           tlsVerify = true;
-          content   = [{ prefix = "**"; destination = "/dockerhub"; }];
+          content   = [{ prefix = "**"; destination = "dockerhub"; }];
         }
         # GitHub Container Registry — .../ghcr/owner/image
         {
           urls      = [ "https://ghcr.io" ];
           onDemand  = true;
           tlsVerify = true;
-          content   = [{ prefix = "**"; destination = "/ghcr"; }];
+          content   = [{ prefix = "**"; destination = "ghcr"; }];
         }
         # Quay.io — .../quay/owner/image
         {
           urls      = [ "https://quay.io" ];
           onDemand  = true;
           tlsVerify = true;
-          content   = [{ prefix = "**"; destination = "/quay"; }];
+          content   = [{ prefix = "**"; destination = "quay"; }];
         }
         # LinuxServer (lscr.io) — .../lscr/linuxserver/sonarr
         {
           urls      = [ "https://lscr.io" ];
           onDemand  = true;
           tlsVerify = true;
-          content   = [{ prefix = "**"; destination = "/lscr"; }];
+          content   = [{ prefix = "**"; destination = "lscr"; }];
         }
       ];
     };      # sync
