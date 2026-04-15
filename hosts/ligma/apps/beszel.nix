@@ -9,6 +9,7 @@ in
   systemd.tmpfiles.rules = [
     "d '${beszelBase}/data' 0755 root root - -"
     "d '/ligma/.beszel'     0755 root root - -"
+    "d '/persist/.beszel'  0755 root root - -"
   ];
 
   # ---------------------------------------------------------------------------
@@ -51,6 +52,7 @@ in
     volumes          = [
       "/run/podman/podman.sock:/var/run/docker.sock:ro"
       "/ligma/.beszel:/extra-filesystems/ligma:ro"
+      "/persist/.beszel:/extra-filesystems/zroot:ro"
     ];
   };
 
