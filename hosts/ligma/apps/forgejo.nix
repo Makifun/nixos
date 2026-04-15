@@ -142,9 +142,11 @@
     ${lib.getExe config.services.forgejo.package} admin user generate-access-token \
       --username makifun \
       --token-name forgejo-provision \
-      --raw 2>/dev/null \
+      --scopes write:admin,read:admin,write:user,read:user \
+      --raw 2>&1 \
       | tr -d '\n' > /run/forgejo/provision-token
     chmod 600 /run/forgejo/provision-token
+    echo "forgejo-provision: token length=$(wc -c < /run/forgejo/provision-token)"
   '';
 
   # ---------------------------------------------------------------------------
@@ -173,8 +175,15 @@
         exit 0
       fi
 
-      # Wait for the API to be reachable
+      # Wait for the API to be reachable (max 60s)
+      retries=0
       until curl -sf -H "Authorization: token $token" "$base/user" > /dev/null; do
+        retries=$((retries + 1))
+        if [ "$retries" -ge 30 ]; then
+          echo "forgejo-provision: API not reachable after 60s — last response:" >&2
+          curl -s -H "Authorization: token $token" "$base/user" >&2
+          exit 1
+        fi
         sleep 2
       done
 
