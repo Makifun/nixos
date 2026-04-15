@@ -188,17 +188,20 @@
       done
 
       # Create opnsense user (409 if already exists — ignored)
-      rand_pass="$(openssl rand -hex 32)"
-      curl -sf -H "Authorization: token $token" -X POST "$base/admin/users" \
+      # base64 satisfies all complexity requirements: upper, lower, digit, special (+/=)
+      rand_pass="$(openssl rand -base64 32)"
+      http_code="$(curl -s -o /dev/null -w "%{http_code}" \
+        -H "Authorization: token $token" -X POST "$base/admin/users" \
         -H "Content-Type: application/json" \
-        -d "{\"email\":\"opnsense@opnsense\",\"login_name\":\"opnsense\",\"username\":\"opnsense\",\"password\":\"$rand_pass\",\"restricted\":true,\"must_change_password\":false,\"send_notify\":false,\"source_id\":0}" \
-        || true
+        -d "{\"email\":\"opnsense@opnsense\",\"login_name\":\"opnsense\",\"username\":\"opnsense\",\"password\":\"$rand_pass\",\"restricted\":true,\"must_change_password\":false,\"send_notify\":false,\"source_id\":0}")"
+      echo "forgejo-provision: create user opnsense → HTTP $http_code"
 
       # Add SSH key (422 if already exists — ignored)
-      curl -sf -H "Authorization: token $token" -X POST "$base/admin/users/opnsense/keys" \
+      http_code="$(curl -s -o /dev/null -w "%{http_code}" \
+        -H "Authorization: token $token" -X POST "$base/admin/users/opnsense/keys" \
         -H "Content-Type: application/json" \
-        --data-raw '{"key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAe5wrFAm/Dw+jETfuiGWpVcy5NAGX/dM+2oFuGoKv90 opnsense_git_backup","read_only":false,"title":"opnsense_git_backup"}' \
-        || true
+        --data-raw '{"key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAe5wrFAm/Dw+jETfuiGWpVcy5NAGX/dM+2oFuGoKv90 opnsense_git_backup","read_only":false,"title":"opnsense_git_backup"}')"
+      echo "forgejo-provision: add SSH key opnsense → HTTP $http_code"
     '';
   };
 
