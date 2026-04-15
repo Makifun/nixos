@@ -46,6 +46,15 @@ in
       address = "0.0.0.0";
       port    = toString zotPort;
       auth.htpasswd.path = "/etc/zot/htpasswd";
+      # Allow anonymous pulls so Podman mirrors work without credentials.
+      # Pushes still require authentication.
+      accessControl.repositories."**" = {
+        anonymousPolicy = [ "read" ];
+        policies = [{
+          users   = [ "makifun" ];
+          actions = [ "read" "create" "update" "delete" ];
+        }];
+      };
     };
     log.level = "info";
     extensions = {
@@ -106,6 +115,21 @@ in
       mode = "0750";
     }
   ];
+
+  # ---------------------------------------------------------------------------
+  # Ordering: other OCI containers should start after Zot so their first-pull
+  # goes through the cache. Uses `wants` (not `requires`) so they still start
+  # if Zot fails.
+  # ---------------------------------------------------------------------------
+  systemd.services = let
+    afterZot = { after = [ "podman-zot.service" ]; wants = [ "podman-zot.service" ]; };
+  in {
+    podman-mongodb       = afterZot;
+    podman-datanode      = afterZot;
+    podman-graylog       = afterZot;
+    podman-beszel        = afterZot;
+    podman-beszel-agent  = afterZot;
+  };
 
   services.traefik.dynamicConfigOptions.http = {
     routers.zot = {
