@@ -3,7 +3,7 @@ let
   zotPort = 5000;
   zotBase = "/var/lib/zot";
   # renovate: datasource=docker depName=project-zot/zot-linux-amd64 registryUrl=https://ghcr.io
-  zotTag  = "v2.1.1";
+  zotTag  = "v2.1.15";
 in
 {
   # ---------------------------------------------------------------------------
