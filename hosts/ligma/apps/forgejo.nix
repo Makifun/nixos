@@ -133,6 +133,48 @@
     fi
   '';
 
+  # ---------------------------------------------------------------------------
+  # Provision service accounts
+  #
+  # Runs after Forgejo is up on every boot. Idempotent — duplicate user/key
+  # requests return 4xx which are swallowed by || true.
+  # ---------------------------------------------------------------------------
+  systemd.services.forgejo-provision = {
+    description = "Provision Forgejo service accounts";
+    after       = [ "forgejo.service" ];
+    wants       = [ "forgejo.service" ];
+    wantedBy    = [ "multi-user.target" ];
+    serviceConfig = {
+      Type            = "oneshot";
+      RemainAfterExit = true;
+      User            = config.services.forgejo.user;
+    };
+    path   = [ pkgs.curl pkgs.openssl ];
+    script = ''
+      base="http://127.0.0.1:3010/api/v1"
+      admin="makifun"
+      pass="$(tr -d '\n' < ${config.sops.secrets.forgejo-admin-password.path})"
+
+      # Wait for the API to be reachable
+      until curl -sf -u "$admin:$pass" "$base/user" > /dev/null; do
+        sleep 2
+      done
+
+      # Create opnsense user (409 if already exists — ignored)
+      rand_pass="$(openssl rand -hex 32)"
+      curl -sf -u "$admin:$pass" -X POST "$base/admin/users" \
+        -H "Content-Type: application/json" \
+        -d "{\"email\":\"opnsense@opnsense\",\"login_name\":\"opnsense\",\"username\":\"opnsense\",\"password\":\"$rand_pass\",\"restricted\":true,\"must_change_password\":false,\"send_notify\":false,\"source_id\":0}" \
+        || true
+
+      # Add SSH key (422 if already exists — ignored)
+      curl -sf -u "$admin:$pass" -X POST "$base/admin/users/opnsense/keys" \
+        -H "Content-Type: application/json" \
+        --data-raw '{"key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAe5wrFAm/Dw+jETfuiGWpVcy5NAGX/dM+2oFuGoKv90 opnsense_git_backup","read_only":false,"title":"opnsense_git_backup"}' \
+        || true
+    '';
+  };
+
   sops.secrets.forgejo-runner-token = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
