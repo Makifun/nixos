@@ -63,6 +63,10 @@
         SHOW_FOOTER_VERSION = false;
         SHOW_FOOTER_TEMPLATE_LOAD_TIME = false;
       };
+
+      migrations = {
+        ALLOWED_DOMAIN = "github.com, *.github.com, *.githubusercontent.com, *.makifun.se"
+      }
     };
   };
 
