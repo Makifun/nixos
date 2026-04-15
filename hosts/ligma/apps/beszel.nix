@@ -2,6 +2,8 @@
 let
   beszelPort = 8095;
   beszelBase = "/ligma/ligma/beszel";
+  # renovate: datasource=docker depName=henrygd/beszel
+  beszelTag  = "0.9.5";
 in
 {
   systemd.tmpfiles.rules = [
@@ -15,7 +17,7 @@ in
   # Web UI served on localhost:8095 → Traefik only.
   # ---------------------------------------------------------------------------
   virtualisation.oci-containers.containers.beszel = {
-    image   = "henrygd/beszel:latest";
+    image   = "henrygd/beszel:${beszelTag}";
     ports   = [ "127.0.0.1:${toString beszelPort}:8090" ];
     volumes = [ "${beszelBase}/data:/beszel_data" ];
   };
@@ -41,7 +43,7 @@ in
   #   5. Redeploy → agent starts and hub shows ligma as connected
   # ---------------------------------------------------------------------------
   virtualisation.oci-containers.containers.beszel-agent = {
-    image            = "henrygd/beszel-agent:latest";
+    image            = "henrygd/beszel-agent:${beszelTag}";
     environment      = { PORT = "45876"; };
     environmentFiles = [ config.sops.secrets.beszel_agent_key.path ];
     extraOptions     = [ "--network=host" ];

@@ -3,6 +3,11 @@ let
   glBase = "/ligma/ligma/graylog";
   glPort = 9099;  # 9000 is taken by the Authentik embedded outpost
 
+  # renovate: datasource=docker depName=mongo
+  mongoTag   = "8";
+  # renovate: datasource=docker depName=graylog/graylog-datanode
+  graylogTag = "7.0";  # shared by graylog-datanode and graylog
+
   # Script that writes /run/graylog/env with SOPS secrets.
   # Embedded directly in podman-datanode's preStart so it runs on every
   # start including systemd auto-restarts (After/Requires only apply to
@@ -77,13 +82,13 @@ in
   virtualisation.oci-containers.containers = {
 
     mongodb = {
-      image        = "docker.io/mongo:8";
+      image        = "docker.io/mongo:${mongoTag}";
       volumes      = [ "/ligma/ligma/mongodb:/data/db" ];
       extraOptions = [ "--network=graylog_network" ];
     };
 
     datanode = {
-      image            = "docker.io/graylog/graylog-datanode:7.0";
+      image            = "docker.io/graylog/graylog-datanode:${graylogTag}";
       environmentFiles = [ "/run/graylog/env" ];
       environment = {
         GRAYLOG_DATANODE_MONGODB_URI   = "mongodb://mongodb/graylog";
@@ -96,7 +101,7 @@ in
     };
 
     graylog = {
-      image            = "docker.io/graylog/graylog:7.0";
+      image            = "docker.io/graylog/graylog:${graylogTag}";
       dependsOn        = [ "mongodb" "datanode" ];
       environmentFiles = [ "/run/graylog/env" ];
       environment = {

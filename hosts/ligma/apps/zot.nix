@@ -2,6 +2,8 @@
 let
   zotPort = 5000;
   zotBase = "/var/lib/zot";
+  # renovate: datasource=docker depName=project-zot/zot-linux-amd64 registryUrl=https://ghcr.io
+  zotTag  = "v2.1.1";
 in
 {
   # ---------------------------------------------------------------------------
@@ -98,7 +100,7 @@ in
   };
 
   virtualisation.oci-containers.containers.zot = {
-    image = "ghcr.io/project-zot/zot-linux-amd64:latest";
+    image = "ghcr.io/project-zot/zot-linux-amd64:${zotTag}";
     ports = [ "127.0.0.1:${toString zotPort}:${toString zotPort}" ];
     volumes = [
       "/etc/zot/config.json:/etc/zot/config.json:ro"

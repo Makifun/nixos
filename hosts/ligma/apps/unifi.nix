@@ -2,6 +2,10 @@
 let
   unifiPort = 8443;
   unifiBase = "/ligma/ligma/unifi";
+  # renovate: datasource=docker depName=mongo
+  mongoTag  = "7";
+  # renovate: datasource=docker depName=linuxserver/unifi-network-application registryUrl=https://lscr.io
+  unifiTag  = "9.0.114";
 in
 {
   systemd.tmpfiles.rules = [
@@ -31,13 +35,13 @@ in
   virtualisation.oci-containers.containers = {
 
     unifi-db = {
-      image   = "docker.io/mongo:7";
+      image   = "docker.io/mongo:${mongoTag}";
       volumes = [ "${unifiBase}/db:/data/db" ];
       extraOptions = [ "--network=unifi_network" ];
     };
 
     unifi = {
-      image     = "lscr.io/linuxserver/unifi-network-application:latest";
+      image     = "lscr.io/linuxserver/unifi-network-application:${unifiTag}";
       dependsOn = [ "unifi-db" ];
       environment = {
         PUID         = "1000";
