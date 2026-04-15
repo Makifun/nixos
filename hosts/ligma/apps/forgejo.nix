@@ -119,6 +119,8 @@
         --scopes "openid email profile groups" \
         --group-claim-name "groups" \
         --admin-group "git_admins" \
+        --image-url "https://homepage.makifun.se/images/authentik.png" \
+        --skip-local-2fa \
         || true
     else
       ${lib.getExe config.services.forgejo.package} admin auth add-oauth \
@@ -130,6 +132,8 @@
         --scopes "openid email profile groups" \
         --group-claim-name "groups" \
         --admin-group "git_admins" \
+        --image-url "https://homepage.makifun.se/images/authentik.png" \
+        --skip-local-2fa \
         || true
     fi
 
