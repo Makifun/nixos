@@ -65,7 +65,7 @@
       };
 
       migrations = {
-        ALLOWED_DOMAIN = "github.com, *.github.com, *.githubusercontent.com, *.makifun.se";
+        ALLOWED_DOMAINS = "github.com, *.github.com, *.githubusercontent.com, *.makifun.se";
       };
     };
   };
