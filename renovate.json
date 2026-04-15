@@ -1,11 +1,13 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base"],
+  "extends": ["config:recommended"],
   "customManagers": [
     {
       "customType": "regex",
       "description": "Update container image tags in NixOS let-bindings annotated with renovate comments",
-      "fileMatch": ["\\.nix$"],
+      "managerFilePatterns": [
+        "/\\.nix$/"
+      ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: registryUrl=(?<registryUrl>\\S+))?\\n\\s*\\w+\\s*=\\s*\"(?<currentValue>[^\"]+)\""
       ],
