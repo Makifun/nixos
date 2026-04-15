@@ -131,6 +131,20 @@
         --admin-group "git_admins" \
         || true
     fi
+
+    # Generate a short-lived API token for the provision service.
+    # The CLI accesses the DB directly — no password or 2FA required.
+    # /run is ephemeral so the token must be regenerated each boot; delete
+    # the DB entry from any previous boot before recreating it.
+    ${pkgs.sqlite}/bin/sqlite3 "${config.services.forgejo.settings.database.PATH}" \
+      "DELETE FROM access_token WHERE name='forgejo-provision';" 2>/dev/null || true
+    install -d -m 700 /run/forgejo
+    ${lib.getExe config.services.forgejo.package} admin user generate-access-token \
+      --username makifun \
+      --token-name forgejo-provision \
+      --raw 2>/dev/null \
+      | tr -d '\n' > /run/forgejo/provision-token
+    chmod 600 /run/forgejo/provision-token
   '';
 
   # ---------------------------------------------------------------------------
@@ -152,23 +166,27 @@
     path   = [ pkgs.curl pkgs.openssl ];
     script = ''
       base="http://127.0.0.1:3010/api/v1"
-      admin="makifun"
-      pass="$(tr -d '\n' < ${config.sops.secrets.forgejo-admin-password.path})"
+      token="$(cat /run/forgejo/provision-token 2>/dev/null || true)"
+
+      if [ -z "$token" ]; then
+        echo "forgejo-provision: no token found in /run/forgejo/provision-token, skipping" >&2
+        exit 0
+      fi
 
       # Wait for the API to be reachable
-      until curl -sf -u "$admin:$pass" "$base/user" > /dev/null; do
+      until curl -sf -H "Authorization: token $token" "$base/user" > /dev/null; do
         sleep 2
       done
 
       # Create opnsense user (409 if already exists — ignored)
       rand_pass="$(openssl rand -hex 32)"
-      curl -sf -u "$admin:$pass" -X POST "$base/admin/users" \
+      curl -sf -H "Authorization: token $token" -X POST "$base/admin/users" \
         -H "Content-Type: application/json" \
         -d "{\"email\":\"opnsense@opnsense\",\"login_name\":\"opnsense\",\"username\":\"opnsense\",\"password\":\"$rand_pass\",\"restricted\":true,\"must_change_password\":false,\"send_notify\":false,\"source_id\":0}" \
         || true
 
       # Add SSH key (422 if already exists — ignored)
-      curl -sf -u "$admin:$pass" -X POST "$base/admin/users/opnsense/keys" \
+      curl -sf -H "Authorization: token $token" -X POST "$base/admin/users/opnsense/keys" \
         -H "Content-Type: application/json" \
         --data-raw '{"key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAe5wrFAm/Dw+jETfuiGWpVcy5NAGX/dM+2oFuGoKv90 opnsense_git_backup","read_only":false,"title":"opnsense_git_backup"}' \
         || true
