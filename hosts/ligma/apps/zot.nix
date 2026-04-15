@@ -99,6 +99,15 @@ in
     ];
   };
 
+  environment.persistence."/persist".directories = [
+    {
+      directory = "${zotBase}";
+      user = "root";
+      group = "root";
+      mode = "0750";
+    }
+  ];
+
   services.traefik.dynamicConfigOptions.http = {
     routers.zot = {
       rule             = "Host(`registry.makifun.se`)";

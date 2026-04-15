@@ -7,6 +7,15 @@
     iifname "podman*" accept comment "trust all podman bridge interfaces"
   '';
 
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/containers";
+      user = "root";
+      group = "root";
+      mode = "0750";
+    }
+  ];
+
   virtualisation = {
     containers = {
       enable = true;
