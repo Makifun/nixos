@@ -8,8 +8,8 @@ in
 {
   systemd.tmpfiles.rules = [
     "d '${beszelBase}/data' 0755 root root - -"
-    "d '/ligma/.beszel'     0755 root root - -"
-    "d '/persist/.beszel'  0755 root root - -"
+    "d '/ligma/.beszelligma'     0755 root root - -"
+    "d '/persist/.beszelpersist'  0755 root root - -"
   ];
 
   # ---------------------------------------------------------------------------
@@ -51,8 +51,8 @@ in
     # Mount the Podman socket so Beszel can report container stats.
     volumes          = [
       "/run/podman/podman.sock:/var/run/docker.sock:ro"
-      "/ligma/.beszel:/extra-filesystems/ligma:ro"
-      "/persist/.beszel:/extra-filesystems/zroot:ro"
+      "/ligma/.beszelligma:/extra-filesystems/ligma:ro"
+      "/persist/.beszelpersist:/extra-filesystems/persist:ro"
     ];
   };
 
