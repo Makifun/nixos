@@ -143,7 +143,7 @@
       --username makifun \
       --token-name forgejo-provision \
       --scopes write:admin,read:admin,write:user,read:user \
-      --raw 2>&1 \
+      --raw 2>/dev/null \
       | tr -d '\n' > /run/forgejo/provision-token
     chmod 600 /run/forgejo/provision-token
     echo "forgejo-provision: token length=$(wc -c < /run/forgejo/provision-token)"
