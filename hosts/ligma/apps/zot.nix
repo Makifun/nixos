@@ -47,6 +47,7 @@ in
     http = {
       address = "0.0.0.0";
       port    = toString zotPort;
+      compat  = [ "docker2s2" ];
       auth.htpasswd.path = "/etc/zot/htpasswd";
       # Allow anonymous pulls so Podman mirrors work without credentials.
       # Pushes still require authentication.
