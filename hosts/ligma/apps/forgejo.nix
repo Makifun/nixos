@@ -2,6 +2,7 @@
 {
   services.forgejo = {
     enable = true;
+    package = pkgs.forgejo;
     stateDir = "/ligma/ligma/forgejo";
     lfs.enable = true;
 
