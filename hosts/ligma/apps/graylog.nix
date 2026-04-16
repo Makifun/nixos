@@ -3,8 +3,8 @@ let
   glBase = "/ligma/ligma/graylog";
   glPort = 9099;  # 9000 is taken by the Authentik embedded outpost
 
-  # renovate: datasource=docker depName=mongo
-  mongoTag   = "8";
+  # renovate: datasource=docker depName=mongo versioning=semver
+  mongoTag  = "8.2.6";
   # renovate: datasource=docker depName=graylog/graylog-datanode
   graylogTag = "7.0";  # shared by graylog-datanode and graylog
 
