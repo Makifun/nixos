@@ -224,7 +224,7 @@
       url = "https://git.makifun.se";
       tokenFile = config.sops.secrets.forgejo-runner-token.path;
       labels = [
-        "ubuntu-latest:docker://node:16-bullseye"
+        "go-builder:docker://golang:alpine"
       ];
     };
   };
