@@ -134,7 +134,7 @@ in
   # ---------------------------------------------------------------------------
   networking.firewall.extraInputRules = ''
     udp dport 5140 ip saddr 10.10.10.0/24 accept comment "Graylog syslog UDP (OPNsense)"
-    udp dport 5141 ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } accept comment "Graylog syslog UDP (UniFi container via Podman gateway)"
+    udp dport 5141 ip saddr 10.10.10.0/24 accept comment "Graylog syslog UDP (UniFi)"
   '';
 
   # ---------------------------------------------------------------------------

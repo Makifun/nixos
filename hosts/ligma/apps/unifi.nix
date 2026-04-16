@@ -79,8 +79,8 @@ in
   # Firewall
   # ---------------------------------------------------------------------------
   networking.firewall.extraInputRules = ''
-    tcp dport 8080 ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } accept comment "UniFi device inform"
-    udp dport { 3478, 10001 } ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } accept comment "UniFi STUN + discovery"
+    tcp dport 8080 ip saddr 10.10.10.0/24 accept comment "UniFi device inform"
+    udp dport { 3478, 10001 } ip saddr 10.10.10.0/24 accept comment "UniFi STUN + discovery"
   '';
 
   # ---------------------------------------------------------------------------
