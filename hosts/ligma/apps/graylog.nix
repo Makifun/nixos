@@ -6,7 +6,7 @@ let
   # renovate: datasource=docker depName=mongo versioning=semver
   mongoTag  = "8.2.6";
   # renovate: datasource=docker depName=graylog/graylog-datanode
-  graylogTag = "7.0";  # shared by graylog-datanode and graylog
+  graylogTag = "7.0.6";  # shared by graylog-datanode and graylog
 
   # Script that writes /run/graylog/env with SOPS secrets.
   # Embedded directly in podman-datanode's preStart so it runs on every
