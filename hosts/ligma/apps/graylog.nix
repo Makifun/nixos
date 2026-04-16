@@ -114,7 +114,7 @@ in
         # Traefik reaches the container via the Podman host gateway; covering
         # loopback + RFC-1918 catches all possible Podman gateway IPs.
         # Maps to trusted_proxies in server.conf.
-        GRAYLOG_TRUSTED_PROXIES = "127.0.0.1/32,172.16.0.0/12,10.0.0.0/8";
+        GRAYLOG_TRUSTED_PROXIES = "127.0.0.1/32,10.88.0.0/16";
       };
       ports   = [
         "127.0.0.1:${toString glPort}:${toString glPort}"
