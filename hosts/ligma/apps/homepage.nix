@@ -50,7 +50,6 @@
     widgets = [
       { resources = { label = "System"; cpu = true; memory = true; uptime = true; }; }
       { resources = { label = "/"; disk = "/"; }; }
-      { resources = { label = "/nix"; disk = "/nix"; }; }
       { resources = { label = "/persist"; disk = "/persist"; }; }
       { resources = { label = "/ligma"; disk = "/ligma"; }; }
       { unifi_console = {
