@@ -42,7 +42,7 @@ in
       rootDirectory = "/var/lib/zot";
       gc            = true;
       gcDelay       = "1h";
-      gcInterval    = "24h";
+      gcInterval    = "1h";
     };
     http = {
       address = "0.0.0.0";
