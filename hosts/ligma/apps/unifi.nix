@@ -35,7 +35,7 @@ in
   virtualisation.oci-containers.containers = {
 
     unifi-db = {
-      image   = "docker.io/mongo:${mongoTag}";
+      image   = "docker.io/amd64/mongo:${mongoTag}";
       volumes = [ "${unifiBase}/db:/data/db" ];
       extraOptions = [ "--network=unifi_network" ];
     };
