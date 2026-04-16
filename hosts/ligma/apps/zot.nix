@@ -61,8 +61,21 @@ in
     };
     log.level = "info";
     extensions = {
-      search.enable = true;  # GraphQL API powering the UI
+      search = {
+        enable = true;  # GraphQL API powering the UI
+        cve = {
+          updateInterval = "24h";
+          trivy = {
+            dbRepository     = "ghcr.io/aquasecurity/trivy-db";
+            javaDBRepository = "ghcr.io/aquasecurity/trivy-java-db";
+          };
+        };
+      };
       ui.enable     = true;  # Web UI at https://registry.makifun.se
+      metrics = {
+        enable     = true;
+        prometheus.path = "/metrics";
+      };
       sync = {
       enable     = true;
       registries = [
