@@ -50,7 +50,9 @@
     widgets = [
       { resources = { label = "System"; cpu = true; memory = true; uptime = true; }; }
       { resources = { label = "/"; disk = "/"; }; }
-      { resources = { label = "/ligma";       disk = "/ligma"; }; }
+      { resources = { label = "/nix"; disk = "/nix"; }; }
+      { resources = { label = "/persist"; disk = "/persist"; }; }
+      { resources = { label = "/ligma"; disk = "/ligma"; }; }
       { unifi_console = {
           url      = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
           username = "{{HOMEPAGE_VAR_UNIFI_USERNAME}}";
