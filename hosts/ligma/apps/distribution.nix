@@ -1,7 +1,7 @@
 { pkgs, lib, ... }:
 let
   # renovate: datasource=docker depName=registry
-  registryTag = "2.8";
+  registryTag = "3.1";
   base = "/var/lib/distribution";
 
   # One Distribution instance per upstream registry.
