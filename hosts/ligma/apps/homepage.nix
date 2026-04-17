@@ -335,7 +335,7 @@
           { "Gotify" = {
               icon      = "gotify.png";
               href      = "https://{{HOMEPAGE_VAR_GOTIFY_URL}}";
-              server    = "jonny";
+              server    = "ligma";
               container = "gotify";
             };
           }
