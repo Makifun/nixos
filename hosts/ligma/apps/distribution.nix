@@ -1,7 +1,7 @@
 { pkgs, lib, ... }:
 let
   # renovate: datasource=docker depName=registry
-  registryTag = "2.8";
+  registryTag = "3.1";
   base = "/var/lib/distribution";
 
   # One Distribution instance per upstream registry.
@@ -21,7 +21,7 @@ let
       delete.enabled = true;
     };
     http.addr = ":5000";
-    proxy.remoteurl = upstream;
+    proxy.url = upstream;
   };
 in
 {
