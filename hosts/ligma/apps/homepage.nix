@@ -81,7 +81,7 @@
     services = [
       { "Media" = [
           { "Plex" = {
-              icon      = "plex.png";
+              icon      = "/images/plex.png";
               href      = "https://app.plex.tv";
               server    = "jonny";
               container = "{{HOMEPAGE_VAR_PLEX_CONTAINER}}";
@@ -94,7 +94,7 @@
             };
           }
           { "Tautulli" = {
-              icon      = "tautulli.png";
+              icon      = "/images/tautulli.png";
               href      = "https://{{HOMEPAGE_VAR_TAUTULLI_URL}}";
               server    = "jonny";
               container = "tautulli";
@@ -115,12 +115,12 @@
             };
           }
           { "Seerr" = {
-              icon      = "jellyseerr.png";
+              icon      = "/images/seerr.png";
               href      = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
               server    = "jonny";
               container = "seerr";
               widget = {
-                type   = "jellyseerr";
+                type   = "seerr";
                 fields = [ "pending" "approved" "available" "processing" ];
                 url    = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
                 key    = "{{HOMEPAGE_VAR_SEERR_TOKEN}}";
@@ -132,7 +132,7 @@
 
       { "Downloads" = [
           { "NZBget" = {
-              icon      = "nzbget.png";
+              icon      = "/images/nzbget.png";
               href      = "https://{{HOMEPAGE_VAR_NZBGET_URL}}";
               server    = "jonny";
               container = "nzbget";
@@ -145,7 +145,7 @@
             };
           }
           { "qBittorrent" = {
-              icon      = "qbittorrent.png";
+              icon      = "/images/qbittorrent.png";
               href      = "https://{{HOMEPAGE_VAR_QUI_URL}}";
               server    = "jonny";
               container = "qbittorrent";
@@ -158,7 +158,7 @@
             };
           }
           { "autobrr" = {
-              icon      = "autobrr.png";
+              icon      = "/images/autobrr.png";
               href      = "https://{{HOMEPAGE_VAR_AUTOBRR_URL}}";
               server    = "jonny";
               container = "autobrr";
@@ -175,7 +175,7 @@
 
       { "DVR" = [
           { "Sonarr" = {
-              icon      = "sonarr.png";
+              icon      = "/images/sonarr.png";
               href      = "https://{{HOMEPAGE_VAR_SONARR_URL}}";
               server    = "jonny";
               container = "sonarr";
@@ -189,7 +189,7 @@
             };
           }
           { "Radarr" = {
-              icon      = "radarr.png";
+              icon      = "/images/radarr.png";
               href      = "https://{{HOMEPAGE_VAR_RADARR_URL}}";
               server    = "jonny";
               container = "radarr";
@@ -203,7 +203,7 @@
             };
           }
           { "Bazarr" = {
-              icon      = "bazarr.png";
+              icon      = "/images/bazarr.png";
               href      = "https://{{HOMEPAGE_VAR_BAZARR_URL}}";
               server    = "jonny";
               container = "bazarr";
@@ -291,7 +291,7 @@
             };
           }
           { "Home Assistant" = {
-              icon      = "home-assistant.png";
+              icon      = "/images/home-assistant.png";
               href      = "https://{{HOMEPAGE_VAR_HOMEASSISTANT_URL}}";
               server    = "jonny";
               container = "homeassistant";
@@ -303,7 +303,7 @@
             };
           }
           { "Forgejo" = {
-              icon      = "forgejo.png";
+              icon      = "/images/forgejo.png";
               href      = "https://{{HOMEPAGE_VAR_FORGEJO_URL}}";
               widget = {
                 type   = "gitea";
@@ -314,7 +314,7 @@
             };
           }
           { "Filebrowser" = {
-              icon      = "filebrowser.png";
+              icon      = "/images/filebrowser.png";
               href      = "https://{{HOMEPAGE_VAR_FILEBROWSER_URL}}";
               server    = "jonny";
               container = "filebrowser";
@@ -328,26 +328,26 @@
             };
           }
           { "Vaultwarden" = {
-              icon      = "vaultwarden.png";
+              icon      = "/images/vaultwarden.png";
               href      = "https://{{HOMEPAGE_VAR_VAULTWARDEN_URL}}";
             };
           }
           { "Gotify" = {
-              icon      = "gotify.png";
+              icon      = "/images/gotify.png";
               href      = "https://{{HOMEPAGE_VAR_GOTIFY_URL}}";
               server    = "ligma";
               container = "gotify";
             };
           }
           { "Apprise" = {
-              icon      = "apprise.png";
+              icon      = "/images/apprise.png";
               href      = "https://{{HOMEPAGE_VAR_APPRISE_URL}}";
               server    = "ligma";
               container = "apprise";
             };
           }
           { "Prowlarr" = {
-              icon      = "prowlarr.png";
+              icon      = "/images/prowlarr.png";
               href      = "https://{{HOMEPAGE_VAR_PROWLARR_URL}}";
               server    = "jonny";
               container = "prowlarr";
@@ -361,27 +361,27 @@
             };
           }
           { "Privatebin" = {
-              icon      = "privatebin.png";
+              icon      = "/images/privatebin.png";
               href      = "https://{{HOMEPAGE_VAR_PRIVATEBIN_URL}}";
               server    = "jonny";
               container = "privatebin";
             };
           }
           { "Kasmcord" = {
-              icon      = "discord.png";
+              icon      = "/images/discord.png";
               href      = "https://{{HOMEPAGE_VAR_KASMCORD_URL}}";
               server    = "jonny";
               container = "kasmcord";
             };
           }
           { "discord-rich-presence-plex" = {
-              icon      = "discord.png";
+              icon      = "/images/discord.png";
               server    = "jonny";
               container = "drpp";
             };
           }
           { "Rclone" = {
-              icon = "rclone.png";
+              icon = "/images/rclone.png";
               href = "https://{{HOMEPAGE_VAR_RCLONE_URL}}";
             };
           }
@@ -390,7 +390,7 @@
 
       { "Network" = [
           { "OPNsense" = {
-              icon = "opnsense.png";
+              icon = "/images/opnsense.png";
               href = "https://{{HOMEPAGE_VAR_OPNSENSE_URL}}";
               widget = {
                 type     = "opnsense";
@@ -401,7 +401,7 @@
             };
           }
           { "Adguard" = {
-              icon = "adguard-home.png";
+              icon = "/images/adguard-home.png";
               href = "https://{{HOMEPAGE_VAR_ADGUARD_URL}}";
               widget = {
                 type     = "adguard";
@@ -412,7 +412,7 @@
             };
           }
           { "Unifi Controller" = {
-              icon = "unifi.png";
+              icon = "/images/unifi.png";
               href = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
               server    = "ligma";
               container = "unifi";
@@ -429,7 +429,7 @@
 
       { "Server" = [
           { "Proxmox" = {
-              icon = "proxmox.png";
+              icon = "/images/proxmox.png";
               href = "https://{{HOMEPAGE_VAR_PROXMOX_URL}}";
               widget = {
                 type     = "proxmox";
@@ -441,7 +441,7 @@
             };
           }
           { "Kopia" = {
-              icon = "kopia.png";
+              icon = "/images/kopia.png";
               href = "https://{{HOMEPAGE_VAR_KOPIA_URL}}";
               widget = {
                 type         = "kopia";
@@ -486,7 +486,7 @@
             };
           }
           { "Portainer" = {
-              icon      = "portainer.png";
+              icon      = "/images/portainer.png";
               href      = "https://{{HOMEPAGE_VAR_PORTAINER_URL}}";
               server    = "jonny";
               container = "portainer";
@@ -500,7 +500,7 @@
             };
           }
           { "Authentik" = {
-              icon = "authentik.png";
+              icon = "/images/authentik.png";
               href = "https://{{HOMEPAGE_VAR_AUTHENTIK_URL}}";
               widget = {
                 type    = "authentik";
@@ -511,14 +511,14 @@
             };
           }
           { "Graylog" = {
-              icon = "graylog.png";
+              icon = "/images/graylog.png";
               server    = "ligma";
               container = "graylog";
               href = "https://{{HOMEPAGE_VAR_GRAYLOG_URL}}";
             };
           }
           { "Traefik Jonny" = {
-              icon = "traefik.png";
+              icon = "/images/traefik.png";
               server    = "jonny";
               container = "traefik";
               href = "https://{{HOMEPAGE_VAR_TRAEFIK_JONNY_URL}}/dashboard/";
@@ -529,7 +529,7 @@
             };
           }
           { "Traefik Ligma" = {
-              icon = "traefik.png";
+              icon = "/images/traefik.png";
               href = "https://{{HOMEPAGE_VAR_TRAEFIK_LIGMA_URL}}/dashboard/";
               widget = {
                 type = "traefik";
