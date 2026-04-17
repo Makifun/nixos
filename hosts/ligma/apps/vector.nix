@@ -21,17 +21,17 @@
         source = ''
           .host          = "ligma"
           .short_message = string(.MESSAGE) ?? "<no message>"
-          .level         = if exists(.PRIORITY) { to_int!(.PRIORITY) } else { 6 }
+          .level         = if exists(.PRIORITY) { to_int(.PRIORITY) ?? 6 } else { 6 }
 
           # Promote journald metadata as top-level GELF fields for Graylog filtering.
           if exists(.CONTAINER_NAME) {
-            .container_name = string!(.CONTAINER_NAME)
+            .container_name = string(.CONTAINER_NAME) ?? ""
           }
           if exists(._SYSTEMD_UNIT) {
-            .systemd_unit = string!(._SYSTEMD_UNIT)
+            .systemd_unit = string(._SYSTEMD_UNIT) ?? ""
           }
           if exists(.SYSLOG_IDENTIFIER) {
-            .syslog_identifier = string!(.SYSLOG_IDENTIFIER)
+            .syslog_identifier = string(.SYSLOG_IDENTIFIER) ?? ""
           }
         '';
       };
