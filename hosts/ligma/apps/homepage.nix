@@ -337,11 +337,6 @@
               href      = "https://{{HOMEPAGE_VAR_GOTIFY_URL}}";
               server    = "ligma";
               container = "gotify";
-              widget = {
-                type = "gotify";
-                url  = "https://{{HOMEPAGE_VAR_GOTIFY_URL}}";
-                key  = "{{HOMEPAGE_VAR_GOTIFY_TOKEN}}";
-              };
             };
           }
           { "Apprise" = {
