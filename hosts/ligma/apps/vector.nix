@@ -48,6 +48,13 @@
         mode    = "udp";
         encoding.codec = "gelf";
       };
+
+      sinks.debug_file = {
+        type   = "file";
+        inputs = [ "remap" ];
+        path   = "/tmp/vector-debug.json";
+        encoding.codec = "json";
+      };
     };
   };
 }
