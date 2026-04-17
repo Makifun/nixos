@@ -305,11 +305,9 @@
           { "Forgejo" = {
               icon      = "forgejo.png";
               href      = "https://{{HOMEPAGE_VAR_FORGEJO_URL}}";
-              server    = "jonny";
-              container = "forgejo";
               widget = {
                 type   = "gitea";
-                fields = [ "none" ];
+                fields = [ "repositories" "notifications" "issues" "pulls" ];
                 url    = "https://{{HOMEPAGE_VAR_FORGEJO_URL}}";
                 key    = "{{HOMEPAGE_VAR_FORGEJO_TOKEN}}";
               };
