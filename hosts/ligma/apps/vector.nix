@@ -1,16 +1,9 @@
-{ pkgs, ... }:
+{ ... }:
 {
-  systemd.services.vector.serviceConfig.RuntimeDirectory = "vector";
-
   services.vector = {
     enable = true;
     journaldAccess = true;
     settings = {
-      api = {
-        enabled = true;
-        address = "127.0.0.1:8686";
-      };
-
       sources.all_journal = {
         type = "journald";
         # Exclude the Graylog stack itself and Vector to prevent feedback loops.
@@ -49,13 +42,6 @@
         address = "127.0.0.1:12201";
         mode    = "udp";
         encoding.codec = "gelf";
-      };
-
-      sinks.debug_file = {
-        type   = "file";
-        inputs = [ "remap" ];
-        path   = "/run/vector/debug.json";
-        encoding.codec = "json";
       };
     };
   };
