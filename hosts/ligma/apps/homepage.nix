@@ -307,7 +307,7 @@
               href      = "https://{{HOMEPAGE_VAR_FORGEJO_URL}}";
               widget = {
                 type   = "gitea";
-                fields = [ "repositories" "notifications" "issues" "pulls" ];
+                fields = [ "repositories" "issues" "pulls" ];
                 url    = "https://{{HOMEPAGE_VAR_FORGEJO_URL}}";
                 key    = "{{HOMEPAGE_VAR_FORGEJO_TOKEN}}";
               };
