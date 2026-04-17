@@ -7,8 +7,8 @@
       sources.authentik_journal = {
         type          = "journald";
         include_units = [
-          "podman-authentik-worker.service"
-          "podman-authentik-server.service"
+          "authentik-worker.service"
+          "authentik-server.service"
         ];
       };
 
