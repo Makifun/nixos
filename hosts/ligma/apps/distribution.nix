@@ -21,7 +21,7 @@ let
       delete.enabled = true;
     };
     http.addr = ":5000";
-    proxy.url = upstream;
+    proxy.remoteurl = upstream;
   };
 in
 {
