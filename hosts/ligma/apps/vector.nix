@@ -20,7 +20,7 @@
         inputs = [ "all_journal" ];
         source = ''
           .host          = "ligma"
-          .short_message = string!(.MESSAGE)
+          .short_message = string(.MESSAGE) ?? "<no message>"
           .level         = if exists(.PRIORITY) { to_int!(.PRIORITY) } else { 6 }
 
           # Promote journald metadata as top-level GELF fields for Graylog filtering.
