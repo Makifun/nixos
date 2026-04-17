@@ -52,7 +52,7 @@
       sinks.debug_file = {
         type   = "file";
         inputs = [ "remap" ];
-        path   = "/run/vector-debug.json";
+        path   = "/ligma/vector-debug.json";
         encoding.codec = "json";
       };
     };
