@@ -15,7 +15,7 @@ let
 
   mkConfig = upstream: builtins.toJSON {
     version = "0.1";
-    log.level = "info";
+    log.level = "warn";
     storage = {
       filesystem.rootdirectory = "/var/lib/registry";
       delete.enabled = true;
