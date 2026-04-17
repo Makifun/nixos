@@ -62,7 +62,7 @@ in
       RemainAfterExit = true;
     };
     path   = [ pkgs.podman ];
-    script = "podman network exists graylog_network || podman network create graylog_network";
+    script = "podman network exists graylog_network || podman network create --subnet 10.89.1.0/24 graylog_network";
   };
 
   # ---------------------------------------------------------------------------
@@ -114,7 +114,9 @@ in
         # Traefik reaches the container via the Podman host gateway; covering
         # loopback + RFC-1918 catches all possible Podman gateway IPs.
         # Maps to trusted_proxies in server.conf.
-        GRAYLOG_TRUSTED_PROXIES = "127.0.0.1/32,10.88.0.0/16";
+        # Trust the loopback and the graylog_network gateway (10.89.1.1).
+        # Subnet pinned via --subnet in podman-create-graylog-network.
+        GRAYLOG_TRUSTED_PROXIES = "127.0.0.1/32,10.89.1.0/24";
       };
       ports   = [
         "127.0.0.1:${toString glPort}:${toString glPort}"
