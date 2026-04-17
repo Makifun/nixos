@@ -22,7 +22,7 @@ in
     requiredBy     = [ "podman-unifi-db.service" "podman-unifi.service" ];
     serviceConfig  = { Type = "oneshot"; RemainAfterExit = true; };
     path           = [ pkgs.podman ];
-    script         = "podman network exists unifi_network || podman network create unifi_network";
+    script         = "podman network exists unifi_network || podman network create --subnet 10.89.0.0/24 unifi_network";
   };
 
   # ---------------------------------------------------------------------------
