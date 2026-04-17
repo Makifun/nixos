@@ -4,6 +4,11 @@
     enable = true;
     journaldAccess = true;
     settings = {
+      api = {
+        enabled = true;
+        address = "127.0.0.1:8686";
+      };
+
       sources.all_journal = {
         type = "journald";
         # Exclude the Graylog stack itself and Vector to prevent feedback loops.
