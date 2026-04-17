@@ -339,7 +339,7 @@
               container = "gotify";
               widget = {
                 type = "gotify";
-                url  = "http://{{HOMEPAGE_VAR_GOTIFY_URL}}";
+                url  = "https://{{HOMEPAGE_VAR_GOTIFY_URL}}";
                 key  = "{{HOMEPAGE_VAR_GOTIFY_TOKEN}}";
               };
             };
