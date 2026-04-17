@@ -337,13 +337,18 @@
               href      = "https://{{HOMEPAGE_VAR_GOTIFY_URL}}";
               server    = "ligma";
               container = "gotify";
+              widget = {
+                type = "gotify";
+                url  = "http://{{HOMEPAGE_VAR_GOTIFY_URL}}";
+                key  = "{{HOMEPAGE_VAR_GOTIFY_TOKEN}}";
+              };
             };
           }
           { "Apprise" = {
               icon      = "apprise.png";
               href      = "https://{{HOMEPAGE_VAR_APPRISE_URL}}";
-              server    = "jonny";
-              container = "apprise-api";
+              server    = "ligma";
+              container = "apprise";
             };
           }
           { "Prowlarr" = {
