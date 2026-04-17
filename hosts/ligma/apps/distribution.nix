@@ -55,7 +55,7 @@ in
     lib.nameValuePair "dist-${name}" {
       image       = "docker.io/library/registry:${registryTag}";
       ports       = [ "127.0.0.1:${toString cfg.port}:5000" ];
-      environment = { OTEL_TRACES_EXPORTER = "none"; };
+      environment = { OTEL_SDK_DISABLED = "true"; };
       volumes = [
         "/etc/distribution/${name}/config.json:/etc/docker/registry/config.yml:ro"
         "${base}/${name}:/var/lib/registry"
