@@ -1,5 +1,7 @@
 { pkgs, ... }:
 {
+  systemd.services.vector.serviceConfig.RuntimeDirectory = "vector";
+
   services.vector = {
     enable = true;
     journaldAccess = true;
@@ -52,7 +54,7 @@
       sinks.debug_file = {
         type   = "file";
         inputs = [ "remap" ];
-        path   = "/ligma/vector-debug.json";
+        path   = "/run/vector/debug.json";
         encoding.codec = "json";
       };
     };
