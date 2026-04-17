@@ -123,7 +123,6 @@ in
         "0.0.0.0:5140:5140/udp"   # OPNsense syslog (filterlog)
         "0.0.0.0:5141:5141/udp"   # UniFi syslog (UniFi container reaches host via Podman gateway)
         "127.0.0.1:12201:12201/udp"  # GELF UDP — Vector log shipper
-        "127.0.0.1:12202:12202"      # HTTP Raw — Authentik notification webhooks
       ];
       volumes = [
         "${glBase}/journal:/usr/share/graylog/data/journal"
