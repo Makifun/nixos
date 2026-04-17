@@ -52,7 +52,7 @@
       sinks.debug_file = {
         type   = "file";
         inputs = [ "remap" ];
-        path   = "/var/log/vector-debug.json";
+        path   = "/run/vector-debug.json";
         encoding.codec = "json";
       };
     };
