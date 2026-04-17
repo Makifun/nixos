@@ -3,7 +3,7 @@ let
   gotifyPort = 8096;
   gotifyBase = "/ligma/ligma/gotify";
   # renovate: datasource=docker depName=gotify/server
-  gotifyTag  = "2";
+  gotifyTag  = "2.9.1";
 in
 {
   systemd.tmpfiles.rules = [
