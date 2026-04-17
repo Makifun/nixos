@@ -19,6 +19,7 @@
     ./apps/graylog.nix
     ./apps/unifi.nix
     ./apps/beszel.nix
+    ./apps/gotify.nix
     ./apps/distribution.nix
   ];
   environment.persistence."/persist" = {
