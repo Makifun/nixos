@@ -32,7 +32,7 @@ in
         rule        = "Host(`gotify.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
         priority    = 30;
         entryPoints = [ "websecure" ];
-        service     = "gotify-svc";
+        service     = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
       gotify-token = {
