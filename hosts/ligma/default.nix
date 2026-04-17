@@ -22,6 +22,7 @@
     ./apps/gotify.nix
     ./apps/apprise.nix
     ./apps/distribution.nix
+    ./apps/vector.nix
   ];
   environment.persistence."/persist" = {
     hideMounts = true;
