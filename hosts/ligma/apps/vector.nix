@@ -19,6 +19,12 @@
         type   = "remap";
         inputs = [ "all_journal" ];
         source = ''
+          # Drop distribution registry OTEL trace spam.
+          if starts_with(string(.SYSLOG_IDENTIFIER) ?? "", "dist-") &&
+             contains(string(.message) ?? "", "level=debug") {
+            abort
+          }
+
           .host          = "ligma"
           .short_message = string(.message) ?? "<no message>"
           .level         = if exists(.PRIORITY) { to_int(.PRIORITY) ?? 6 } else { 6 }
