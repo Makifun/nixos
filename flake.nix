@@ -5,7 +5,7 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
     impermanence.url = "github:nix-community/impermanence";
     sops-nix.url = "github:Mic92/sops-nix";
-    authentik-nix.url = "github:nix-community/authentik-nix";
+    authentik-nix.url = "github:nix-community/authentik-nix/8048437d601f772be45e10495d975cf0ac4acbf7";
   };
 
   outputs =
