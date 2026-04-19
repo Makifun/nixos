@@ -6,7 +6,6 @@
     impermanence.url = "github:nix-community/impermanence";
     sops-nix.url = "github:Mic92/sops-nix";
     authentik-nix.url = "github:nix-community/authentik-nix";
-    authentik-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
