@@ -120,7 +120,7 @@
               server    = "jonny";
               container = "seerr";
               widget = {
-                type   = "jellyseerr";
+                type   = "seerr";
                 fields = [ "pending" "approved" "available" "processing" ];
                 url    = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
                 key    = "{{HOMEPAGE_VAR_SEERR_TOKEN}}";
