@@ -21,6 +21,7 @@
     ./apps/beszel.nix
     ./apps/gotify.nix
     ./apps/apprise.nix
+    ./apps/backrest.nix
     ./apps/distribution.nix
     ./apps/vector.nix
   ];
