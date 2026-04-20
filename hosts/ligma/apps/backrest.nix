@@ -1,42 +1,9 @@
-{ config, pkgs, ... }:
+{ config, lib, ... }:
 let
   backrestPort = 9898;
   backrestBase = "/ligma/ligma/backrest";
   # renovate: datasource=docker depName=ghcr.io/garethgeorge/backrest
   backrestTag = "v1.12.1";
-
-  configJson = pkgs.writeText "backrest-config.json" (builtins.toJSON {
-    version = 4;
-    modno = 1;
-    instance = "ligma";
-    auth.disabled = true;
-    repos = [
-      {
-        id = "ligma-s3";
-        guid = "7eef850cc715baa31782fffbe5a5f3e62529481760e12e7817e65ebc34e06184";
-        uri = "{{ .Env.BACKREST_REPO_URI }}";
-        password = "{{ .Env.BACKREST_RESTIC_PASSWORD }}";
-        env = [
-          "AWS_ACCESS_KEY_ID={{ .Env.AWS_ACCESS_KEY_ID }}"
-          "AWS_SECRET_ACCESS_KEY={{ .Env.AWS_SECRET_ACCESS_KEY }}"
-        ];
-        prunePolicy.schedule.cron = "0 5 * * *";
-      }
-    ];
-    plans = [
-      {
-        id = "ligma-daily";
-        repo = "ligma-s3";
-        paths = [ "/ligma" ];
-        schedule.cron = "0 4 * * *";
-        retention.policyTimeBucketed = {
-          daily = 30;
-          weekly = 8;
-          monthly = 12;
-        };
-      }
-    ];
-  });
 in
 {
   sops.secrets = {
@@ -46,13 +13,40 @@ in
     backrest-aws-secret-access-key = { format = "yaml"; sopsFile = ../secrets.yaml; };
   };
 
-  sops.templates."backrest-env" = {
-    content = ''
-      BACKREST_RESTIC_PASSWORD=${config.sops.placeholder.backrest-restic-password}
-      BACKREST_REPO_URI=${config.sops.placeholder.backrest-repo-uri}
-      AWS_ACCESS_KEY_ID=${config.sops.placeholder.backrest-aws-access-key-id}
-      AWS_SECRET_ACCESS_KEY=${config.sops.placeholder.backrest-aws-secret-access-key}
-    '';
+  # Rendered at runtime with real secret values — written to zstorage (LUKS-encrypted).
+  sops.templates."backrest-config.json" = {
+    content = builtins.toJSON {
+      version  = 4;
+      modno    = 1;
+      instance = "ligma";
+      auth.disabled = true;
+      repos = [
+        {
+          id       = "ligma-s3";
+          guid     = "7eef850cc715baa31782fffbe5a5f3e62529481760e12e7817e65ebc34e06184";
+          uri      = config.sops.placeholder.backrest-repo-uri;
+          password = config.sops.placeholder.backrest-restic-password;
+          env = [
+            "AWS_ACCESS_KEY_ID=${config.sops.placeholder.backrest-aws-access-key-id}"
+            "AWS_SECRET_ACCESS_KEY=${config.sops.placeholder.backrest-aws-secret-access-key}"
+          ];
+          prunePolicy.schedule.cron = "0 5 * * *";
+        }
+      ];
+      plans = [
+        {
+          id   = "ligma-daily";
+          repo = "ligma-s3";
+          paths = [ "/ligma" ];
+          schedule.cron = "0 4 * * *";
+          retention.policyTimeBucketed = {
+            daily   = 30;
+            weekly  = 8;
+            monthly = 12;
+          };
+        }
+      ];
+    };
   };
 
   systemd.tmpfiles.rules = [
@@ -66,24 +60,23 @@ in
     description = "Initialize backrest config.json";
     wantedBy    = [ "podman-backrest.service" ];
     before      = [ "podman-backrest.service" ];
-    after       = [ "local-fs.target" ];
+    after       = [ "local-fs.target" "sops-nix.service" ];
     serviceConfig = {
-      Type              = "oneshot";
-      RemainAfterExit   = true;
+      Type            = "oneshot";
+      RemainAfterExit = true;
     };
     script = ''
       dest="${backrestBase}/config/config.json"
       if [ ! -f "$dest" ]; then
-        cp ${configJson} "$dest"
+        cp ${config.sops.templates."backrest-config.json".path} "$dest"
         chmod 640 "$dest"
       fi
     '';
   };
 
   virtualisation.oci-containers.containers.backrest = {
-    image            = "ghcr.io/garethgeorge/backrest:${backrestTag}";
-    ports            = [ "127.0.0.1:${toString backrestPort}:9898" ];
-    environmentFiles = [ config.sops.templates."backrest-env".path ];
+    image   = "ghcr.io/garethgeorge/backrest:${backrestTag}";
+    ports   = [ "127.0.0.1:${toString backrestPort}:9898" ];
     volumes = [
       "${backrestBase}/data:/data"
       "${backrestBase}/config:/config"
