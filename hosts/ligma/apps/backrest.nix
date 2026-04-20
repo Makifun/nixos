@@ -11,6 +11,7 @@ in
     backrest-repo-uri              = { format = "yaml"; sopsFile = ../secrets.yaml; };
     backrest-aws-access-key-id     = { format = "yaml"; sopsFile = ../secrets.yaml; };
     backrest-aws-secret-access-key = { format = "yaml"; sopsFile = ../secrets.yaml; };
+    backrest-gotify-token          = { format = "yaml"; sopsFile = ../secrets.yaml; };
   };
 
   # Rendered at runtime with real secret values — written to zstorage (LUKS-encrypted).
@@ -44,6 +45,18 @@ in
             weekly  = 8;
             monthly = 12;
           };
+          hooks = [
+            {
+              conditions = [ "CONDITION_ANY_ERROR" ];
+              actionGotify = {
+                baseUrl       = "https://gotify.makifun.se";
+                token         = config.sops.placeholder.backrest-gotify-token;
+                titleTemplate = "Backrest: {{ .Plan.Id }} failed";
+                bodyTemplate  = "{{ .Error }}";
+                priority      = 7;
+              };
+            }
+          ];
         }
       ];
     };
