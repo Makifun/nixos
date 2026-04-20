@@ -30,6 +30,7 @@ in
             "AWS_ACCESS_KEY_ID=${config.sops.placeholder.backrest-aws-access-key-id}"
             "AWS_SECRET_ACCESS_KEY=${config.sops.placeholder.backrest-aws-secret-access-key}"
           ];
+          autoInitialize = true;
           prunePolicy.schedule.cron = "0 5 * * *";
         }
       ];
