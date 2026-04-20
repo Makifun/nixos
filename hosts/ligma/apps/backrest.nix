@@ -12,6 +12,7 @@ let
     repos = [
       {
         id = "ligma-s3";
+        guid = "f8e4fcd0-7902-4713-852e-a1600d344933";
         uri = "{{ .Env.BACKREST_REPO_URI }}";
         password = "{{ .Env.BACKREST_RESTIC_PASSWORD }}";
         env = [
