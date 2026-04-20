@@ -6,6 +6,7 @@ let
   backrestTag = "v1.12.1";
 
   configJson = pkgs.writeText "backrest-config.json" (builtins.toJSON {
+    version = 4;
     modno = 1;
     instance = "ligma";
     repos = [
