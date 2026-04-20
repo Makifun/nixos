@@ -9,6 +9,7 @@ let
     version = 4;
     modno = 1;
     instance = "ligma";
+    auth.disabled = true;
     repos = [
       {
         id = "ligma-s3";
