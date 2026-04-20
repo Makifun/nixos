@@ -23,8 +23,8 @@ in
       repos = [
         {
           id       = "ligma-s3";
-          guid     = "7eef850cc715baa31782fffbe5a5f3e62529481760e12e7817e65ebc34e06184";
-          uri      = config.sops.placeholder.backrest-repo-uri;
+          uri            = config.sops.placeholder.backrest-repo-uri;
+          autoInitialize = true;
           password = config.sops.placeholder.backrest-restic-password;
           env = [
             "AWS_ACCESS_KEY_ID=${config.sops.placeholder.backrest-aws-access-key-id}"
