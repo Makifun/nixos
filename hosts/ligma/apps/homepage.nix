@@ -453,6 +453,15 @@
               };
             };
           }
+          { "Backrest" = {
+              icon = "/images/backrest.png";
+              href = "https://{{HOMEPAGE_VAR_BACKREST_URL}}";
+              widget = {
+                type = "backrest";
+                url  = "http://127.0.0.1:9898";
+              };
+            };
+          }
           { "Jonny Beszel" = {
               icon      = "/images/beszel.svg";
               href      = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
