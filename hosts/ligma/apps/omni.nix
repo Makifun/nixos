@@ -16,12 +16,13 @@ in
     # persists the SideroLink WG private key in its embedded etcd state.
   };
 
-  # Account ID is loaded as OMNI_ACCOUNT_ID via sops-rendered env file
-  # (Omni distroless image has no shell, so we cannot use a wrapper script).
-  sops.templates."omni.env" = {
+  # Account ID rendered into a YAML config (Omni's --config-path accepts
+  # cobra/viper config files). Distroless image has no shell so we can't
+  # wrap, and Omni does not bind env vars to its flags.
+  sops.templates."omni-config.yaml" = {
     mode = "0600";
     content = ''
-      OMNI_ACCOUNT_ID=${config.sops.placeholder.omni-account-uuid}
+      account-id: "${config.sops.placeholder.omni-account-uuid}"
     '';
   };
 
@@ -65,8 +66,8 @@ in
       "--cap-add=NET_ADMIN"
       "--device=/dev/net/tun"
     ];
-    environmentFiles = [ config.sops.templates."omni.env".path ];
     cmd = [
+      "--config-path=/config/omni.yaml"
       "--name=ligma"
       "--bind-addr=0.0.0.0:${toString uiPort}"
       "--cert=/tls/server.crt"
@@ -76,9 +77,9 @@ in
       "--siderolink-wireguard-advertised-addr=${ligmaIP}:${toString wgPort}"
       "--siderolink-wireguard-bind-addr=0.0.0.0:${toString wgPort}"
       "--etcd-embedded"
-      "--etcd-embedded-data-dir=/_out/etcd"
+      "--etcd-embedded-db-path=/_out/etcd"
       "--auth-saml-enabled"
-      "--auth-saml-url=https://auth.makifun.se/application/saml/omni/metadata/?download"
+      "--auth-saml-metadata=https://auth.makifun.se/application/saml/omni/metadata/?download"
       "--initial-users=${initialUser}"
     ];
     ports = [
@@ -89,6 +90,7 @@ in
       "${base}/etcd:/_out/etcd"
       "${base}/keys:/keys:ro"
       "${base}/tls:/tls:ro"
+      "${config.sops.templates."omni-config.yaml".path}:/config/omni.yaml:ro"
     ];
   };
 
