@@ -24,6 +24,7 @@
     ./apps/backrest.nix
     ./apps/distribution.nix
     ./apps/vector.nix
+    ./apps/autoupgrade-notify.nix
   ];
   environment.persistence."/persist" = {
     hideMounts = true;
