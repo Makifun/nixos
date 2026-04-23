@@ -82,6 +82,9 @@ in
       "--advertised-api-url=https://omni.makifun.se/"
       "--siderolink-wireguard-advertised-addr=${ligmaIP}:${toString wgPort}"
       "--siderolink-wireguard-bind-addr=0.0.0.0:${toString wgPort}"
+      # Nodes reach Omni over the SideroLink WG tunnel; advertise the
+      # WG-internal address rather than the container's podman IP.
+      "--machine-api-advertised-url=grpc://[fdae:41e4:649b:9303::1]:8090"
       "--etcd-embedded"
       "--etcd-embedded-db-path=/_out/etcd"
       "--sqlite-storage-path=/_out/omni.db"
