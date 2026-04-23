@@ -92,6 +92,9 @@ SSH restricted to `10.10.10.0/24`. NFS exported to same subnet. NFTables firewal
 | `vaultwarden.nix` | Vaultwarden | Password manager |
 | `homepage.nix` | Homepage dashboard | Port 8082; nginx on 8083 serves `/images/` from `/etc/homepage-dashboard/` |
 | `graylog.nix` | Graylog 7 log management | Port 9099; three Podman containers on `graylog_network`: MongoDB 8, Graylog-datanode 7, Graylog 7 |
+| `backrest.nix` | Backrest backup manager | Port 9898 loopback; restic-backed; auth disabled, gated by Authentik via Traefik |
+| `omni.nix` | Sidero Omni (Talos cluster manager) | Container at port 9999 loopback (Traefik fronted); SideroLink WG UDP 50180 on `${ligmaIP}` (LAN-only); SAML auth via Authentik |
+| `autoupgrade-notify.nix` | Gotify notifier on `nixos-upgrade` | Templated `OnSuccess`/`OnFailure` units; failure path attaches the last 40 journal lines |
 
 ### Traefik + Authentik integration
 
@@ -115,3 +118,81 @@ trusted header auth (by design) — only the web UI.
 ### Podman
 
 `modules/podman.nix` configures Podman. Container images use the default location (`/var/lib/containers`), which is persisted via impermanence.
+
+### Omni (Sidero Talos cluster manager)
+
+Self-hosted Omni runs as a Podman container on ligma. State (embedded etcd +
+SQLite) lives at `/ligma/ligma/omni/`. Auth is delegated to Authentik via SAML
+— no Traefik forwardAuth in front of the Omni router. The corresponding
+SAML provider, application, and policy binding are defined in the **authentik**
+repo at `omni.tf`; that must be `tofu apply`'d before deploying Omni so the
+metadata URL `https://auth.makifun.se/application/saml/omni/metadata/` resolves.
+
+Three SOPS secrets live in `hosts/ligma/secrets.yaml`:
+
+| Secret | Purpose | Format |
+|---|---|---|
+| `omni-account-uuid` | `--account-id` (passed via `OMNI_ACCOUNT_ID` from a sops-rendered env file) | bare UUID string |
+| `omni-jwt-signing-key` | `--private-key-source` for embedded-etcd master key encryption | **ASCII-armored OpenPGP private key** (gopenpgp), not raw PEM |
+| `omni-wireguard-key` | reserved, currently unused; Omni manages the SideroLink WG private key in its own etcd state | WG private key |
+
+**Generate the PGP key** (one-time):
+
+```bash
+nix run nixpkgs#gnupg -- --batch --gen-key <<EOF
+%no-protection
+Key-Type: EDDSA
+Key-Curve: ed25519
+Subkey-Type: ECDH
+Subkey-Curve: cv25519
+Name-Real: omni
+Name-Email: omni@makifun.se
+Expire-Date: 0
+%commit
+EOF
+nix run nixpkgs#gnupg -- --armor --export-secret-keys omni@makifun.se
+```
+
+Paste the full `-----BEGIN PGP PRIVATE KEY BLOCK-----...END...` into sops as a
+YAML literal block (`omni-jwt-signing-key: |`). After editing the secret on a
+running ligma, `systemctl restart omni-prep podman-omni` to re-stage and
+re-load the key without a full rebuild.
+
+**SAML quirks worth knowing** (configured in the authentik repo, not here):
+
+- Provider `audience` must be `https://omni.makifun.se/saml/metadata` (the
+  metadata path), not the bare host. Omni rejects any other value.
+- The provider must include the default property mappings (email, name,
+  username, uid, upn) and pin `name_id_mapping` to the email mapping —
+  Authentik otherwise sends an empty `<saml:AttributeStatement/>` and Omni
+  cannot identify the user.
+- `--auth-saml-attribute-rules` maps Authentik's MS SOAP claim URIs
+  (`http://schemas.xmlsoap.org/ws/2005/05/identity/claims/...`) to Omni's
+  internal `identity` and `fullname` fields. Direction is
+  `saml-attr → omni-field`.
+- `--auth-saml-url` takes the metadata URL despite its name.
+  `--auth-saml-metadata` expects a local XML file path, not a URL.
+
+**Other gotchas:**
+
+- Omni's distroless image has no `/bin/sh` — entrypoint must be the binary
+  directly, no wrapper script.
+- The `--account-id` flag has no env-binding shown in `--help`, but cobra/viper
+  auto-binds `OMNI_ACCOUNT_ID`. We use that to keep the UUID out of `/nix/store`.
+- Required flags not obvious from `--help`: `--sqlite-storage-path`,
+  `--etcd-embedded-db-path`, `--machine-api-advertised-url`. Missing flags fail
+  with JSON-schema validation errors that name the missing config path.
+- `--initial-users` re-checks on every start and seeds new admin emails.
+  Existing users created via the UI are not touched.
+
+### Auto-upgrade notifications
+
+`apps/autoupgrade-notify.nix` hooks `OnSuccess=`/`OnFailure=` on the
+`nixos-upgrade.service` to a templated oneshot (`nixos-upgrade-notify@%i`)
+that posts to `https://gotify.makifun.se`. Failure messages include the last
+40 journal lines from `nixos-upgrade.service`. The Gotify app token is in
+SOPS as `nixos-upgrade-gotify-token`. Test with:
+
+```bash
+sudo systemctl start nixos-upgrade-notify@success.service
+```
