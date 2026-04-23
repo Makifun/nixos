@@ -79,7 +79,7 @@ in
       "--etcd-embedded-db-path=/_out/etcd"
       "--sqlite-storage-path=/_out/omni.db"
       "--auth-saml-enabled"
-      "--auth-saml-metadata=https://auth.makifun.se/application/saml/omni/metadata/?download"
+      "--auth-saml-url=https://auth.makifun.se/application/saml/omni/metadata/?download"
       "--initial-users=${initialUser}"
     ];
     ports = [
