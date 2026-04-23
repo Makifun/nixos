@@ -16,21 +16,12 @@ in
     # persists the SideroLink WG private key in its embedded etcd state.
   };
 
-  # Account ID rendered into a YAML config (Omni's --config-path accepts
-  # cobra/viper config files). Distroless image has no shell so we can't
-  # wrap, and Omni does not bind env vars to its flags.
-  sops.templates."omni-config.yaml" = {
-    mode = "0600";
-    content = ''
-      account-id: "${config.sops.placeholder.omni-account-uuid}"
-    '';
-  };
-
   systemd.tmpfiles.rules = [
-    "d '${base}'      0750 root root - -"
-    "d '${base}/etcd' 0750 root root - -"
-    "d '${base}/keys' 0750 root root - -"
-    "d '${base}/tls'  0750 root root - -"
+    "d '${base}'        0750 root root - -"
+    "d '${base}/etcd'   0750 root root - -"
+    "d '${base}/keys'   0750 root root - -"
+    "d '${base}/tls'    0750 root root - -"
+    "d '${base}/config' 0750 root root - -"
   ];
 
   # Stage JWT signing key from sops, generate self-signed TLS for the API
@@ -47,6 +38,14 @@ in
     };
     script = ''
       install -m 0640 ${config.sops.secrets.omni-jwt-signing-key.path} ${base}/keys/jwt.pem
+
+      # Render Omni config.yaml at runtime so the account UUID stays out of
+      # /nix/store. Schema is camelCase per Omni's strict mapstructure decoder.
+      account_id="$(tr -d '[:space:]' < ${config.sops.secrets.omni-account-uuid.path})"
+      umask 077
+      cat > ${base}/config/omni.yaml <<EOF
+      accountID: "$account_id"
+      EOF
 
       cert=${base}/tls/server.crt
       key=${base}/tls/server.key
@@ -90,7 +89,7 @@ in
       "${base}/etcd:/_out/etcd"
       "${base}/keys:/keys:ro"
       "${base}/tls:/tls:ro"
-      "${config.sops.templates."omni-config.yaml".path}:/config/omni.yaml:ro"
+      "${base}/config:/config:ro"
     ];
   };
 
