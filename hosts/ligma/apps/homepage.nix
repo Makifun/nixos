@@ -542,7 +542,7 @@
               href = "https://{{HOMEPAGE_VAR_TRAEFIK_LIGMA_URL}}/dashboard/";
               widget = {
                 type = "traefik";
-                url  = "http://127.0.0.1:9000";
+                url  = "https://{{HOMEPAGE_VAR_TRAEFIK_LIGMA_URL}}";
               };
             };
           }
