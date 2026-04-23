@@ -77,6 +77,7 @@ in
       "--siderolink-wireguard-bind-addr=0.0.0.0:${toString wgPort}"
       "--etcd-embedded"
       "--etcd-embedded-db-path=/_out/etcd"
+      "--sqlite-storage-path=/_out/omni.db"
       "--auth-saml-enabled"
       "--auth-saml-metadata=https://auth.makifun.se/application/saml/omni/metadata/?download"
       "--initial-users=${initialUser}"
