@@ -16,28 +16,12 @@ in
     # persists the SideroLink WG private key in its embedded etcd state.
   };
 
-  # Render an entrypoint script with the account ID baked in via sops.
-  # The container mounts this file and execs it.
-  sops.templates."omni-entrypoint.sh" = {
-    mode = "0755";
+  # Account ID is loaded as OMNI_ACCOUNT_ID via sops-rendered env file
+  # (Omni distroless image has no shell, so we cannot use a wrapper script).
+  sops.templates."omni.env" = {
+    mode = "0600";
     content = ''
-      #!/bin/sh
-      set -eu
-      exec /omni \
-        "--account-id=${config.sops.placeholder.omni-account-uuid}" \
-        "--name=ligma" \
-        "--bind-addr=0.0.0.0:${toString uiPort}" \
-        "--cert=/tls/server.crt" \
-        "--key=/tls/server.key" \
-        "--private-key-source=file:///keys/jwt.pem" \
-        "--advertised-api-url=https://omni.makifun.se/" \
-        "--siderolink-wireguard-advertised-addr=${ligmaIP}:${toString wgPort}" \
-        "--siderolink-wireguard-bind-addr=0.0.0.0:${toString wgPort}" \
-        "--etcd-embedded" \
-        "--etcd-embedded-data-dir=/_out/etcd" \
-        "--auth-saml-enabled" \
-        "--auth-saml-url=https://auth.makifun.se/application/saml/omni/metadata/?download" \
-        "--initial-users=${initialUser}"
+      OMNI_ACCOUNT_ID=${config.sops.placeholder.omni-account-uuid}
     '';
   };
 
@@ -80,9 +64,23 @@ in
     extraOptions = [
       "--cap-add=NET_ADMIN"
       "--device=/dev/net/tun"
-      "--entrypoint=/bin/sh"
     ];
-    cmd = [ "/entrypoint.sh" ];
+    environmentFiles = [ config.sops.templates."omni.env".path ];
+    cmd = [
+      "--name=ligma"
+      "--bind-addr=0.0.0.0:${toString uiPort}"
+      "--cert=/tls/server.crt"
+      "--key=/tls/server.key"
+      "--private-key-source=file:///keys/jwt.pem"
+      "--advertised-api-url=https://omni.makifun.se/"
+      "--siderolink-wireguard-advertised-addr=${ligmaIP}:${toString wgPort}"
+      "--siderolink-wireguard-bind-addr=0.0.0.0:${toString wgPort}"
+      "--etcd-embedded"
+      "--etcd-embedded-data-dir=/_out/etcd"
+      "--auth-saml-enabled"
+      "--auth-saml-url=https://auth.makifun.se/application/saml/omni/metadata/?download"
+      "--initial-users=${initialUser}"
+    ];
     ports = [
       "127.0.0.1:${toString uiPort}:${toString uiPort}"
       "${ligmaIP}:${toString wgPort}:${toString wgPort}/udp"
@@ -91,7 +89,6 @@ in
       "${base}/etcd:/_out/etcd"
       "${base}/keys:/keys:ro"
       "${base}/tls:/tls:ro"
-      "${config.sops.templates."omni-entrypoint.sh".path}:/entrypoint.sh:ro"
     ];
   };
 
