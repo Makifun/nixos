@@ -9,10 +9,10 @@ let
   omniTag = "v1.7.0";
 
   # Authentik emits attributes under the Microsoft SOAP claim URIs.
-  # Map them to the identity / fullname fields Omni reads.
+  # Map SAML attribute name → Omni identity field.
   samlAttributeRules = builtins.toJSON {
-    identity = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress";
-    fullname = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name";
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress" = "identity";
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"         = "fullname";
   };
 in
 {
