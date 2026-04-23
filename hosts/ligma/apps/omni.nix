@@ -7,6 +7,13 @@ let
   initialUser = "makifun@pm.me";
   # renovate: datasource=docker depName=ghcr.io/siderolabs/omni
   omniTag = "v1.7.0";
+
+  # Authentik emits attributes under the Microsoft SOAP claim URIs.
+  # Map them to the identity / fullname fields Omni reads.
+  samlAttributeRules = builtins.toJSON {
+    identity = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress";
+    fullname = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name";
+  };
 in
 {
   sops.secrets = {
@@ -80,6 +87,7 @@ in
       "--sqlite-storage-path=/_out/omni.db"
       "--auth-saml-enabled"
       "--auth-saml-url=https://auth.makifun.se/application/saml/omni/metadata/?download"
+      "--auth-saml-attribute-rules=${samlAttributeRules}"
       "--initial-users=${initialUser}"
     ];
     ports = [
