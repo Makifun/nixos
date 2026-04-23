@@ -16,12 +16,20 @@ in
     # persists the SideroLink WG private key in its embedded etcd state.
   };
 
+  # Render OMNI_ACCOUNT_ID into a sops env file. Omni does not list env
+  # bindings in --help but cobra/viper typically auto-binds OMNI_<FLAG>.
+  sops.templates."omni.env" = {
+    mode = "0600";
+    content = ''
+      OMNI_ACCOUNT_ID=${config.sops.placeholder.omni-account-uuid}
+    '';
+  };
+
   systemd.tmpfiles.rules = [
-    "d '${base}'        0750 root root - -"
-    "d '${base}/etcd'   0750 root root - -"
-    "d '${base}/keys'   0750 root root - -"
-    "d '${base}/tls'    0750 root root - -"
-    "d '${base}/config' 0750 root root - -"
+    "d '${base}'      0750 root root - -"
+    "d '${base}/etcd' 0750 root root - -"
+    "d '${base}/keys' 0750 root root - -"
+    "d '${base}/tls'  0750 root root - -"
   ];
 
   # Stage JWT signing key from sops, generate self-signed TLS for the API
@@ -38,14 +46,6 @@ in
     };
     script = ''
       install -m 0640 ${config.sops.secrets.omni-jwt-signing-key.path} ${base}/keys/jwt.pem
-
-      # Render Omni config.yaml at runtime so the account UUID stays out of
-      # /nix/store. Schema is camelCase per Omni's strict mapstructure decoder.
-      account_id="$(tr -d '[:space:]' < ${config.sops.secrets.omni-account-uuid.path})"
-      umask 077
-      cat > ${base}/config/omni.yaml <<EOF
-      accountID: "$account_id"
-      EOF
 
       cert=${base}/tls/server.crt
       key=${base}/tls/server.key
@@ -65,8 +65,8 @@ in
       "--cap-add=NET_ADMIN"
       "--device=/dev/net/tun"
     ];
+    environmentFiles = [ config.sops.templates."omni.env".path ];
     cmd = [
-      "--config-path=/config/omni.yaml"
       "--name=ligma"
       "--bind-addr=0.0.0.0:${toString uiPort}"
       "--cert=/tls/server.crt"
@@ -89,7 +89,6 @@ in
       "${base}/etcd:/_out/etcd"
       "${base}/keys:/keys:ro"
       "${base}/tls:/tls:ro"
-      "${base}/config:/config:ro"
     ];
   };
 
