@@ -1,12 +1,12 @@
 { config, lib, pkgs, ... }:
 let
   base        = "/ligma/ligma/omni";
-  uiPort      = 8080;
+  uiPort      = 9999;
   wgPort      = 50180;
   ligmaIP     = "10.10.10.13";
   initialUser = "makifun@pm.me";
   # renovate: datasource=docker depName=ghcr.io/siderolabs/omni
-  omniTag = "v0.50.0";
+  omniTag = "v1.7.0";
 in
 {
   sops.secrets = {
