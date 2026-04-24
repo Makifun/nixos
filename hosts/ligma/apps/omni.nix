@@ -2,7 +2,6 @@
 let
   base        = "/ligma/ligma/omni";
   uiPort      = 9999;
-  machinePort = 8091;
   wgPort      = 50180;
   ligmaIP     = "10.10.10.13";
   initialUser = "makifun@pm.me";
@@ -83,7 +82,7 @@ in
       "--advertised-api-url=https://omni.makifun.se/"
       "--siderolink-wireguard-advertised-addr=${ligmaIP}:${toString wgPort}"
       "--siderolink-wireguard-bind-addr=0.0.0.0:${toString wgPort}"
-      "--machine-api-advertised-url=grpc://${ligmaIP}:${toString machinePort}"
+      "--machine-api-advertised-url=grpc://[fdae:41e4:649b:9303::1]:8090"
       "--etcd-embedded"
       "--etcd-embedded-db-path=/_out/etcd"
       "--sqlite-storage-path=/_out/omni.db"
@@ -95,7 +94,6 @@ in
     ports = [
       "127.0.0.1:${toString uiPort}:${toString uiPort}"
       "${ligmaIP}:${toString wgPort}:${toString wgPort}/udp"
-      "${ligmaIP}:${toString machinePort}:${toString machinePort}"
     ];
     volumes = [
       "${base}/etcd:/_out/etcd"
@@ -104,10 +102,9 @@ in
     ];
   };
 
-  # SideroLink UDP + machine gRPC API — LAN only.
+  # SideroLink UDP — LAN only.
   networking.firewall.extraInputRules = ''
     ip saddr 10.10.10.0/24 udp dport ${toString wgPort} accept
-    ip saddr 10.10.10.0/24 tcp dport ${toString machinePort} accept
   '';
 
   # Traefik — TLS termination + proxy to the container's HTTPS listener.
