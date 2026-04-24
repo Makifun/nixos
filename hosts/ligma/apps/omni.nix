@@ -6,7 +6,7 @@ let
   ligmaIP     = "10.10.10.13";
   initialUser = "makifun@pm.me";
   # renovate: datasource=docker depName=ghcr.io/siderolabs/omni
-  omniTag = "v1.7.0";
+  omniTag = "v1.7.1";
 
   # Authentik emits attributes under the Microsoft SOAP claim URIs.
   # Map SAML attribute name → Omni identity field.
