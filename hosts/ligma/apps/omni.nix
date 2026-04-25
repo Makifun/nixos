@@ -132,9 +132,10 @@ in
       serversTransport = "omni-self-signed";
       servers          = [ { url = "https://127.0.0.1:${toString uiPort}"; } ];
     };
-    services."omni-k8s-proxy-svc".loadBalancer.servers = [
-      { url = "h2c://127.0.0.1:8098"; }
-    ];
+    services."omni-k8s-proxy-svc".loadBalancer = {
+      serversTransport = "omni-self-signed";
+      servers = [ { url = "https://127.0.0.1:8098"; } ];
+    };
     serversTransports."omni-self-signed".insecureSkipVerify = true;
   };
 }
