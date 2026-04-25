@@ -1,11 +1,12 @@
 { config, lib, pkgs, ... }:
 let
-  base           = "/ligma/ligma/omni";
-  k8sProxyPort   = 8098;
-  machineApiPort = 8091;
-  uiPort         = 9999;
-  wgPort         = 50180;
-  ligmaIP        = "10.10.10.13";
+  base                   = "/ligma/ligma/omni";
+  k8sProxyPortExternal   = 6443;
+  k8sProxyPortInternal   = 8098;
+  machineApiPort         = 8091;
+  uiPort                 = 9999;
+  wgPort                 = 50180;
+  ligmaIP                = "10.10.10.13";
   initialUser    = "makifun@pm.me";
   # renovate: datasource=docker depName=ghcr.io/siderolabs/omni
   omniTag = "v1.7.1";
@@ -86,8 +87,8 @@ in
       "--siderolink-wireguard-bind-addr=0.0.0.0:${toString wgPort}"
       "--machine-api-bind-addr=0.0.0.0:${toString machineApiPort}"
       "--machine-api-advertised-url=grpc://${ligmaIP}:${toString machineApiPort}"
-      "--k8s-proxy-bind-addr=0.0.0.0:${toString k8sProxyPort}"
-      "--advertised-kubernetes-proxy-url=https://omni.makifun.se:6443"
+      "--k8s-proxy-bind-addr=0.0.0.0:${toString k8sProxyPortInternal}"
+      "--advertised-kubernetes-proxy-url=https://omni.makifun.se:${toString k8sProxyPortExternal}"
       "--etcd-embedded"
       "--etcd-embedded-db-path=/_out/etcd"
       "--sqlite-storage-path=/_out/omni.db"
@@ -100,7 +101,7 @@ in
       "127.0.0.1:${toString uiPort}:${toString uiPort}"
       "${ligmaIP}:${toString wgPort}:${toString wgPort}/udp"
       "${ligmaIP}:${toString machineApiPort}:${toString machineApiPort}"
-      "127.0.0.1:${toString k8sProxyPort}:${toString k8sProxyPort}"
+      "127.0.0.1:${toString k8sProxyPortInternal}:${toString k8sProxyPortInternal}"
     ];
     volumes = [
       "${base}/etcd:/_out/etcd"
@@ -112,10 +113,10 @@ in
   networking.firewall.extraInputRules = ''
     ip saddr 10.10.10.0/24 udp dport ${toString wgPort} accept
     ip saddr 10.10.10.0/24 tcp dport ${toString machineApiPort} accept
-    ip saddr 10.10.10.0/24 tcp dport 6443 accept
+    ip saddr 10.10.10.0/24 tcp dport ${toString k8sProxyPortExternal} accept
   '';
 
-  services.traefik.staticConfigOptions.entryPoints.k8s-proxy.address = ":6443";
+  services.traefik.staticConfigOptions.entryPoints.k8s-proxy.address = ":${toString k8sProxyPortExternal}";
 
   # Traefik — TLS termination + proxy to the container's HTTPS listener.
   # No Authentik forwardAuth: Omni does its own SAML against Authentik.
@@ -138,7 +139,7 @@ in
     };
     services."omni-k8s-proxy-svc".loadBalancer = {
       serversTransport = "omni-self-signed";
-      servers = [ { url = "https://127.0.0.1:${toString k8sProxyPort}"; } ];
+      servers = [ { url = "https://127.0.0.1:${toString k8sProxyPortInternal}"; } ];
     };
     serversTransports."omni-self-signed".insecureSkipVerify = true;
   };
