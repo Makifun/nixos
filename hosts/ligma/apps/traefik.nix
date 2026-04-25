@@ -8,7 +8,7 @@
   services.traefik.environmentFiles = [ config.sops.secrets.traefik_env.path ];
 
   networking.firewall = {
-    allowedTCPPorts = [ 80 443 ];
+    allowedTCPPorts = [ 80 443 6443 ];
     allowedUDPPorts = [ 443 ]; # HTTP/3 QUIC
   };
 
@@ -33,6 +33,10 @@
           permanent = true;
         };
       };
+      k8s-proxy = {
+        address = ":6443";
+      };
+
       websecure = {
         address = ":443";
         http3.advertisedPort = 443;
