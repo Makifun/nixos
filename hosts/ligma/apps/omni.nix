@@ -1,10 +1,12 @@
 { config, lib, pkgs, ... }:
 let
-  base        = "/ligma/ligma/omni";
-  uiPort      = 9999;
-  wgPort      = 50180;
-  ligmaIP     = "10.10.10.13";
-  initialUser = "makifun@pm.me";
+  base           = "/ligma/ligma/omni";
+  k8sProxyPort   = 8098;
+  machineApiPort = 8091;
+  uiPort         = 9999;
+  wgPort         = 50180;
+  ligmaIP        = "10.10.10.13";
+  initialUser    = "makifun@pm.me";
   # renovate: datasource=docker depName=ghcr.io/siderolabs/omni
   omniTag = "v1.7.1";
 
@@ -82,9 +84,9 @@ in
       "--advertised-api-url=https://omni.makifun.se/"
       "--siderolink-wireguard-advertised-addr=${ligmaIP}:${toString wgPort}"
       "--siderolink-wireguard-bind-addr=0.0.0.0:${toString wgPort}"
-      "--machine-api-bind-addr=0.0.0.0:8091"
-      "--machine-api-advertised-url=grpc://${ligmaIP}:8091"
-      "--k8s-proxy-bind-addr=0.0.0.0:8098"
+      "--machine-api-bind-addr=0.0.0.0:${toString machineApiPort}"
+      "--machine-api-advertised-url=grpc://${ligmaIP}:${toString machineApiPort}"
+      "--k8s-proxy-bind-addr=0.0.0.0:${toString k8sProxyPort}"
       "--advertised-kubernetes-proxy-url=https://omni.makifun.se:6443"
       "--etcd-embedded"
       "--etcd-embedded-db-path=/_out/etcd"
@@ -97,8 +99,8 @@ in
     ports = [
       "127.0.0.1:${toString uiPort}:${toString uiPort}"
       "${ligmaIP}:${toString wgPort}:${toString wgPort}/udp"
-      "${ligmaIP}:8091:8091"
-      "127.0.0.1:8098:8098"
+      "${ligmaIP}:${toString machineApiPort}:${toString machineApiPort}"
+      "127.0.0.1:${toString k8sProxyPort}:${toString k8sProxyPort}"
     ];
     volumes = [
       "${base}/etcd:/_out/etcd"
@@ -110,7 +112,7 @@ in
   # SideroLink UDP + machine gRPC API — LAN only.
   networking.firewall.extraInputRules = ''
     ip saddr 10.10.10.0/24 udp dport ${toString wgPort} accept
-    ip saddr 10.10.10.0/24 tcp dport 8091 accept
+    ip saddr 10.10.10.0/24 tcp dport ${toString machineApiPort} accept
   '';
 
   # Traefik — TLS termination + proxy to the container's HTTPS listener.
@@ -134,7 +136,7 @@ in
     };
     services."omni-k8s-proxy-svc".loadBalancer = {
       serversTransport = "omni-self-signed";
-      servers = [ { url = "https://127.0.0.1:8098"; } ];
+      servers = [ { url = "https://127.0.0.1:${toString k8sProxyPort}"; } ];
     };
     serversTransports."omni-self-signed".insecureSkipVerify = true;
   };
