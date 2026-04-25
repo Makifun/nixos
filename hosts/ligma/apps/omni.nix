@@ -82,8 +82,8 @@ in
       "--advertised-api-url=https://omni.makifun.se/"
       "--siderolink-wireguard-advertised-addr=${ligmaIP}:${toString wgPort}"
       "--siderolink-wireguard-bind-addr=0.0.0.0:${toString wgPort}"
-      "--machine-api-advertised-url=https://omni.makifun.se"
-      "--siderolink-use-grpc-tunnel"
+      "--machine-api-bind-addr=0.0.0.0:8090"
+      "--machine-api-advertised-url=grpc://${ligmaIP}:8090"
       "--etcd-embedded"
       "--etcd-embedded-db-path=/_out/etcd"
       "--sqlite-storage-path=/_out/omni.db"
@@ -95,6 +95,7 @@ in
     ports = [
       "127.0.0.1:${toString uiPort}:${toString uiPort}"
       "${ligmaIP}:${toString wgPort}:${toString wgPort}/udp"
+      "${ligmaIP}:8090:8090"
     ];
     volumes = [
       "${base}/etcd:/_out/etcd"
@@ -103,9 +104,10 @@ in
     ];
   };
 
-  # SideroLink UDP — LAN only.
+  # SideroLink UDP + machine gRPC API — LAN only.
   networking.firewall.extraInputRules = ''
     ip saddr 10.10.10.0/24 udp dport ${toString wgPort} accept
+    ip saddr 10.10.10.0/24 tcp dport 8090 accept
   '';
 
   # Traefik — TLS termination + proxy to the container's HTTPS listener.
