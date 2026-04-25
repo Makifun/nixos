@@ -7,10 +7,11 @@
   # Token needs Zone:DNS:Edit permission for makifun.se.
   services.traefik.environmentFiles = [ config.sops.secrets.traefik_env.path ];
 
-  networking.firewall = {
-    allowedTCPPorts = [ 80 443 6443 ];
-    allowedUDPPorts = [ 443 ]; # HTTP/3 QUIC
-  };
+  networking.firewall.extraInputRules = ''
+    ip saddr 10.10.10.0/24 tcp dport 80 accept
+    ip saddr 10.10.10.0/24 tcp dport 443 accept
+    ip saddr 10.10.10.0/24 udp dport 443 accept
+  '';
 
   services.traefik.staticConfigOptions = {
     global.sendAnonymousUsage = false;
@@ -33,17 +34,12 @@
           permanent = true;
         };
       };
-      k8s-proxy = {
-        address = ":6443";
-      };
-
       websecure = {
         address = ":443";
         http3.advertisedPort = 443;
         # Trust X-Forwarded-For from HAProxy on OPNsense (10.10.10.1).
         # HAProxy sets it from CF-Connecting-IP so Authentik/apps see the real client IP.
         forwardedHeaders.trustedIPs = [ "10.10.10.1/32" ];
-        # Request wildcard cert proactively (matches Pangolin's prefer_wildcard_cert)
         http.tls = {
           certResolver = "letsencrypt";
           domains = [

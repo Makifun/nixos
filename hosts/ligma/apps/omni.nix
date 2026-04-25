@@ -109,11 +109,13 @@ in
     ];
   };
 
-  # SideroLink UDP + machine gRPC API — LAN only.
   networking.firewall.extraInputRules = ''
     ip saddr 10.10.10.0/24 udp dport ${toString wgPort} accept
     ip saddr 10.10.10.0/24 tcp dport ${toString machineApiPort} accept
+    ip saddr 10.10.10.0/24 tcp dport 6443 accept
   '';
+
+  services.traefik.staticConfigOptions.entryPoints.k8s-proxy.address = ":6443";
 
   # Traefik — TLS termination + proxy to the container's HTTPS listener.
   # No Authentik forwardAuth: Omni does its own SAML against Authentik.
