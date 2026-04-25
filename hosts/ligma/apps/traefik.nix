@@ -22,7 +22,7 @@
       dashboard = true;
       insecure = true;
     };
-    entryPoints.traefik.address = ":8090";
+    entryPoints.traefik.address = "127.0.0.1:8090";
 
     entryPoints = {
       web = {
