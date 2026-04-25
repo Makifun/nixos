@@ -84,7 +84,7 @@ in
       "--siderolink-wireguard-bind-addr=0.0.0.0:${toString wgPort}"
       "--machine-api-bind-addr=0.0.0.0:8091"
       "--machine-api-advertised-url=grpc://${ligmaIP}:8091"
-      "--k8s-proxy-bind-addr=0.0.0.0:8095"
+      "--k8s-proxy-bind-addr=0.0.0.0:8096"
       "--advertised-kubernetes-proxy-url=https://omni.makifun.se:6443"
       "--etcd-embedded"
       "--etcd-embedded-db-path=/_out/etcd"
@@ -98,7 +98,7 @@ in
       "127.0.0.1:${toString uiPort}:${toString uiPort}"
       "${ligmaIP}:${toString wgPort}:${toString wgPort}/udp"
       "${ligmaIP}:8091:8091"
-      "127.0.0.1:8095:8095"
+      "127.0.0.1:8096:8096"
     ];
     volumes = [
       "${base}/etcd:/_out/etcd"
@@ -133,7 +133,7 @@ in
       servers          = [ { url = "https://127.0.0.1:${toString uiPort}"; } ];
     };
     services."omni-k8s-proxy-svc".loadBalancer.servers = [
-      { url = "h2c://127.0.0.1:8095"; }
+      { url = "h2c://127.0.0.1:8096"; }
     ];
     serversTransports."omni-self-signed".insecureSkipVerify = true;
   };
