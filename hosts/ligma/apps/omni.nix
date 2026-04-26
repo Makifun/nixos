@@ -130,16 +130,16 @@ in
       tls.certResolver = "letsencrypt";
     };
     routers."omni-k8s-proxy" = {
-      rule             = "Host(`kube.omni.makifun.se`)";
-      entryPoints      = [ "websecure" ];
-      service          = "omni-k8s-proxy-svc";
-      tls.certResolver = "letsencrypt";
+      rule        = "Host(`kube.omni.makifun.se`)";
+      entryPoints = [ "websecure" ];
+      service     = "omni-k8s-proxy-svc";
+      tls         = {};
     };
     routers."omni-siderolink-api" = {
-      rule             = "Host(`api.omni.makifun.se`)";
-      entryPoints      = [ "websecure" ];
-      service          = "omni-siderolink-api-svc";
-      tls.certResolver = "letsencrypt";
+      rule        = "Host(`api.omni.makifun.se`)";
+      entryPoints = [ "websecure" ];
+      service     = "omni-siderolink-api-svc";
+      tls         = {};
     };
     services."omni-svc".loadBalancer = {
       serversTransport = "omni-self-signed";
