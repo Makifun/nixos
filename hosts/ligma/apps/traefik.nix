@@ -104,6 +104,7 @@
     middlewares.authentik.forwardAuth = {
       address = "http://localhost:9000/outpost.goauthentik.io/auth/traefik";
       trustForwardHeader = true;
+      maxResponseBodySize = 65536;
       authResponseHeaders = [
         "X-authentik-username"
         "X-authentik-groups"
