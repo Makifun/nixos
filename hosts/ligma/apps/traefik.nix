@@ -45,7 +45,7 @@
           domains = [
             {
               main = "makifun.se";
-              sans = [ "*.makifun.se" ];
+              sans = [ "*.makifun.se" "*.omni.makifun.se" ];
             }
           ];
         };
