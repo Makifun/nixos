@@ -131,15 +131,15 @@ in
     };
     routers."omni-k8s-proxy" = {
       rule        = "Host(`kube.omni.makifun.se`)";
-      entryPoints = [ "websecure" ];
-      service     = "omni-k8s-proxy-svc";
-      tls         = {};
+      entryPoints      = [ "websecure" ];
+      service          = "omni-k8s-proxy-svc";
+      tls.certResolver = "letsencrypt";
     };
     routers."omni-siderolink-api" = {
-      rule        = "Host(`api.omni.makifun.se`)";
-      entryPoints = [ "websecure" ];
-      service     = "omni-siderolink-api-svc";
-      tls         = {};
+      rule             = "Host(`api.omni.makifun.se`)";
+      entryPoints      = [ "websecure" ];
+      service          = "omni-siderolink-api-svc";
+      tls.certResolver = "letsencrypt";
     };
     services."omni-svc".loadBalancer = {
       serversTransport = "omni-self-signed";
