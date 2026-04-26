@@ -1,13 +1,13 @@
 { config, lib, pkgs, ... }:
 let
-  base                   = "/ligma/ligma/omni";
-  k8sProxyPort           = 8098;
-  machineApiPort         = 8091;
-  siderolinkApiPort      = 8092;
-  uiPort                 = 9999;
-  wgPort                 = 50180;
-  ligmaIP                = "10.10.10.13";
-  initialUser            = "makifun@pm.me";
+  base                 = "/ligma/ligma/omni";
+  k8sProxyPortExternal = 6443;
+  k8sProxyPort         = 8098;
+  machineApiPort       = 8091;
+  uiPort               = 9999;
+  wgPort               = 50180;
+  ligmaIP              = "10.10.10.13";
+  initialUser          = "makifun@pm.me";
   # renovate: datasource=docker depName=ghcr.io/siderolabs/omni
   omniTag = "v1.7.1";
 
@@ -37,8 +37,8 @@ in
 
   systemd.tmpfiles.rules = [
     "d '${base}'      0750 root root - -"
-    "d '${base}/etcd' 0750 root root - -"
     "d '${base}/db'   0750 root root - -"
+    "d '${base}/etcd' 0750 root root - -"
     "d '${base}/keys' 0750 root root - -"
     "d '${base}/tls'  0750 root root - -"
   ];
@@ -79,7 +79,7 @@ in
     environmentFiles = [ config.sops.templates."omni.env".path ];
     cmd = [
       "--advertised-api-url=https://omni.makifun.se/"
-      "--advertised-kubernetes-proxy-url=https://kube.omni.makifun.se"
+      "--advertised-kubernetes-proxy-url=https://omni.makifun.se:${toString k8sProxyPortExternal}"
       "--auth-saml-attribute-rules=${samlAttributeRules}"
       "--auth-saml-enabled"
       "--auth-saml-url=https://auth.makifun.se/application/saml/omni/metadata/?download"
@@ -94,8 +94,6 @@ in
       "--machine-api-bind-addr=0.0.0.0:${toString machineApiPort}"
       "--name=ligma"
       "--private-key-source=file:///keys/jwt.pem"
-      "--siderolink-api-advertised-url=https://api.omni.makifun.se"
-      "--siderolink-api-bind-addr=0.0.0.0:${toString siderolinkApiPort}"
       "--siderolink-wireguard-advertised-addr=${ligmaIP}:${toString wgPort}"
       "--siderolink-wireguard-bind-addr=${ligmaIP}:${toString wgPort}"
       "--sqlite-storage-path=/_out/db/omni.db"
@@ -105,7 +103,6 @@ in
       "${ligmaIP}:${toString wgPort}:${toString wgPort}/udp"
       "${ligmaIP}:${toString machineApiPort}:${toString machineApiPort}"
       "127.0.0.1:${toString k8sProxyPort}:${toString k8sProxyPort}"
-      "127.0.0.1:${toString siderolinkApiPort}:${toString siderolinkApiPort}"
     ];
     volumes = [
       "${base}/etcd:/_out/etcd"
@@ -118,10 +115,16 @@ in
   networking.firewall.extraInputRules = ''
     ip saddr 10.10.10.0/24 udp dport ${toString wgPort} accept
     ip saddr 10.10.10.0/24 tcp dport ${toString machineApiPort} accept
+    ip saddr 10.10.10.0/24 tcp dport ${toString k8sProxyPortExternal} accept
   '';
 
-  # Traefik — TLS termination + proxy to the container's HTTPS listener.
+  # Traefik — TLS termination + proxy to the container's HTTPS listeners.
   # No Authentik forwardAuth: Omni does its own SAML against Authentik.
+  # k8s proxy runs on a dedicated port (6443) on the same hostname so no
+  # second-level wildcard cert is needed.
+  services.traefik.staticConfigOptions.entryPoints."k8s-proxy".address =
+    ":${toString k8sProxyPortExternal}";
+
   services.traefik.dynamicConfigOptions.http = {
     routers.omni = {
       rule             = "Host(`omni.makifun.se`)";
@@ -130,15 +133,9 @@ in
       tls.certResolver = "letsencrypt";
     };
     routers."omni-k8s-proxy" = {
-      rule        = "Host(`kube.omni.makifun.se`)";
-      entryPoints      = [ "websecure" ];
+      rule             = "Host(`omni.makifun.se`)";
+      entryPoints      = [ "k8s-proxy" ];
       service          = "omni-k8s-proxy-svc";
-      tls.certResolver = "letsencrypt";
-    };
-    routers."omni-siderolink-api" = {
-      rule             = "Host(`api.omni.makifun.se`)";
-      entryPoints      = [ "websecure" ];
-      service          = "omni-siderolink-api-svc";
       tls.certResolver = "letsencrypt";
     };
     services."omni-svc".loadBalancer = {
@@ -148,10 +145,6 @@ in
     services."omni-k8s-proxy-svc".loadBalancer = {
       serversTransport = "omni-self-signed";
       servers          = [ { url = "https://127.0.0.1:${toString k8sProxyPort}"; } ];
-    };
-    services."omni-siderolink-api-svc".loadBalancer = {
-      serversTransport = "omni-self-signed";
-      servers          = [ { url = "https://127.0.0.1:${toString siderolinkApiPort}"; } ];
     };
     serversTransports."omni-self-signed".insecureSkipVerify = true;
   };
