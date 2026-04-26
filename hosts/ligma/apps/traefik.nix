@@ -60,7 +60,7 @@
         provider = "cloudflare";
         propagation = {
           delayBeforeChecks = "30s";
-          disableChecks = true;
+          resolvers = [ "1.1.1.1:53" "1.0.0.1:53" ];
         };
       };
     };
