@@ -23,6 +23,7 @@
     ./apps/apprise.nix
     ./apps/backrest.nix
     ./apps/distribution.nix
+    ./apps/nfs.nix
     ./apps/vector.nix
     ./apps/autoupgrade-notify.nix
     ./apps/omni.nix
@@ -49,19 +50,8 @@
     hostName = "ligma";
     useDHCP = true;
     hostId = "324bbd6b";
-    firewall.allowedTCPPorts = [
-      2049 # NFS
-    ];
   };
-  services = {
-    qemuGuest.enable = true;
-    nfs.server = {
-      enable = true;
-      exports = ''
-        /ligma 10.10.10.0/24(rw,sync,no_subtree_check,no_root_squash)
-      '';
-    };
-  };
+  services.qemuGuest.enable = true;
   system = {
     stateVersion = "25.11";
     autoUpgrade = {
