@@ -9,7 +9,7 @@
   services.nfs.server = {
     enable = true;
     exports = ''
-      /ligma 10.10.10.0/24(rw,sync,no_subtree_check,no_root_squash)
+      /ligma/sugma 10.10.10.0/24(rw,sync,no_subtree_check,no_root_squash)
     '';
   };
 }
