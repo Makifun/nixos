@@ -75,6 +75,10 @@ in
     extraOptions = [
       "--cap-add=NET_ADMIN"
       "--device=/dev/net/tun"
+      # ligma disables IPv6 globally; SideroLink requires IPv6 on its WireGuard
+      # overlay interface inside the container. Override for this namespace only.
+      "--sysctl=net.ipv6.conf.all.disable_ipv6=0"
+      "--sysctl=net.ipv6.conf.default.disable_ipv6=0"
     ];
     environmentFiles = [ config.sops.templates."omni.env".path ];
     cmd = [
