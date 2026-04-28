@@ -2,7 +2,7 @@ name: Update Flake Inputs
 
 on:
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "0 0 * * *"
       timezone: "Europe/Stockholm"
   workflow_dispatch:
 
