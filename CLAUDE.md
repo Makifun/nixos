@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This is a NixOS flake-based system configuration for a single production host (`ligma`) running on Proxmox. Key features: ephemeral root (tmpfs), full disk encryption (LUKS+ZFS), SOPS secrets, and impermanence.
+NixOS flake-based system configuration for a single production host (`ligma`) running on Proxmox. Key features: ephemeral root (tmpfs), full disk encryption (LUKS+ZFS), SOPS secrets, and impermanence.
 
 ## Common Commands
 
@@ -90,7 +90,7 @@ SSH restricted to `10.10.10.0/24`. NFS exported to same subnet. NFTables firewal
 | `authentik.nix` | Authentik SSO | Port 9000; PostgreSQL on zstorage |
 | `forgejo.nix` | Forgejo + Actions runner | Port 3010; SSH on 22222; waits for Authentik on boot |
 | `vaultwarden.nix` | Vaultwarden | Password manager |
-| `homepage.nix` | Homepage dashboard | Port 8082; nginx on 8083 serves `/images/` from `/etc/homepage-dashboard/` |
+| `homepage.nix` | Homepage dashboard | Port 8082; nginx on 8083 serves `/images/`; connects to sugma k8s via kubeconfig |
 | `graylog.nix` | Graylog 7 log management | Port 9099; three Podman containers on `graylog_network`: MongoDB 8, Graylog-datanode 7, Graylog 7 |
 | `backrest.nix` | Backrest backup manager | Port 9898 loopback; restic-backed; auth disabled, gated by Authentik via Traefik |
 | `omni.nix` | Sidero Omni (Talos cluster manager) | Container at port 9999 loopback (Traefik fronted); SideroLink WG UDP 50180 on `${ligmaIP}` (LAN-only); SAML auth via Authentik |
@@ -102,6 +102,10 @@ The `authentik` forwardAuth middleware (defined in `traefik.nix`) adds SSO to an
 The Authentik embedded outpost (port 9000) injects response headers (lowercase, e.g.
 `x-authentik-username`) which Traefik copies to the upstream request via `authResponseHeaders`.
 
+Every service protected by the `authentik` middleware also needs a second router for
+`PathPrefix(/outpost.goauthentik.io)` pointing to `authentik-embedded-outpost` (no middleware)
+so the post-login callback reaches the outpost. See `traefik.nix` for the pattern.
+
 **Graylog uses a three-router priority split** (`graylog.nix`) to support both browser SSO
 and Terraform/API token access on the same domain:
 
@@ -110,10 +114,6 @@ and Terraform/API token access on the same domain:
 | `graylog-outpost` | 30 | `Host + PathPrefix(/outpost.goauthentik.io)` | none | Authentik post-login callback |
 | `graylog-basic-auth` | 10 | `Host + HeaderRegexp(Authorization, ^Basic .+)` | none | Terraform API token access (bypasses SSO) |
 | `graylog` | 1 | `Host` (catch-all) | `authentik` | Browser SSO — header injected for Trusted Header Auth |
-
-`GRAYLOG_TRUSTED_PROXIES` is set in the Graylog container environment so Graylog trusts
-the `X-authentik-username` header forwarded from Traefik. The REST API does not support
-trusted header auth (by design) — only the web UI.
 
 ### Podman
 
@@ -184,6 +184,74 @@ re-load the key without a full rebuild.
   with JSON-schema validation errors that name the missing config path.
 - `--initial-users` re-checks on every start and seeds new admin emails.
   Existing users created via the UI are not touched.
+
+### Homepage → Kubernetes integration
+
+`homepage.nix` connects Homepage to the sugma k8s cluster for service discovery and pod metrics.
+
+**How it works:**
+- `kubernetes.mode = "default"` + `gateway = true` — enables Gateway API HTTPRoute discovery
+- `KUBECONFIG` env var points to a SOPS secret rendered at runtime
+- Homepage uses the `homepage` ServiceAccount (scoped read-only ClusterRole) in the `homepage` namespace on sugma
+
+**SOPS secret `homepage-kubeconfig`** — kubeconfig YAML for the sugma cluster. Must be added to
+`secrets.yaml` after Flux applies `k8s/infra/homepage-rbac/` on sugma.
+
+**One-time bootstrap** (run after `k8s/infra/homepage-rbac/` is deployed):
+
+```bash
+# On a machine with sugma kubeconfig access:
+TOKEN=$(kubectl get secret homepage-token -n homepage -o jsonpath='{.data.token}' | base64 -d)
+SERVER="https://10.10.10.29:6443"
+
+# On ligma, add to secrets.yaml:
+sops hosts/ligma/secrets.yaml
+```
+
+Add the following key (use `insecure-skip-tls-verify: true` since the API server uses self-signed cert):
+
+```yaml
+homepage-kubeconfig: |
+  apiVersion: v1
+  kind: Config
+  clusters:
+  - cluster:
+      insecure-skip-tls-verify: true
+      server: https://10.10.10.29:6443
+    name: sugma
+  contexts:
+  - context:
+      cluster: sugma
+      user: homepage
+    name: homepage@sugma
+  current-context: homepage@sugma
+  users:
+  - name: homepage
+    user:
+      token: <TOKEN>
+```
+
+The secret is rendered with `owner = "homepage-dashboard"` so the service can read it. The `KUBECONFIG` env var is injected via `systemd.services.homepage-dashboard.environment`.
+
+**HTTPRoute auto-discovery** — annotate any HTTPRoute on sugma with:
+
+```yaml
+annotations:
+  gethomepage.dev/enabled: "true"
+  gethomepage.dev/name: "My App"
+  gethomepage.dev/group: "Server"
+  gethomepage.dev/icon: "myapp.png"
+  gethomepage.dev/href: "https://myapp.makifun.se"
+  gethomepage.dev/pod-selector: "app=myapp"   # matches actual pod label (not app.kubernetes.io/name)
+  # optional widget:
+  gethomepage.dev/widget.type: "myapp"
+  gethomepage.dev/widget.url: "https://{{HOMEPAGE_VAR_MYAPP_URL}}"
+  gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_MYAPP_TOKEN}}"
+```
+
+`{{HOMEPAGE_VAR_*}}` substitution works in annotations (same pipeline as YAML config).
+`pod-selector` must match actual pod labels — homepage defaults to `app.kubernetes.io/name=<name>`
+which often doesn't match. Use `gethomepage.dev/pod-selector` to override.
 
 ### Auto-upgrade notifications
 
