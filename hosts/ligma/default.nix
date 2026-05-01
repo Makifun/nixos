@@ -24,6 +24,7 @@
     ./apps/backrest.nix
     ./apps/distribution.nix
     ./apps/nfs.nix
+    ./apps/rclone.nix
     ./apps/vector.nix
     ./apps/autoupgrade-notify.nix
     ./apps/omni.nix

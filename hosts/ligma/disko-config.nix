@@ -60,6 +60,29 @@
           };
         };
       };
+      # 200G SSD (scsi2, serial=cache) — rclone VFS cache.
+      # New VM: disko formats on install. Existing VM: format manually first:
+      #   parted /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache -- mklabel gpt
+      #   parted /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache -- mkpart primary 1MiB 100%
+      #   mkfs.ext4 /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache-part1
+      cache = {
+        type = "disk";
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache";
+        content = {
+          type = "gpt";
+          partitions = {
+            data = {
+              size = "100%";
+              content = {
+                type = "filesystem";
+                format = "ext4";
+                mountpoint = "/rclone-cache";
+                mountOptions = [ "defaults" "discard" ];
+              };
+            };
+          };
+        };
+      };
     };
     zpool = {
       zroot = {
