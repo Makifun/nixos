@@ -11,16 +11,14 @@
   # Kubeconfig for sugma k8s cluster (homepage SA token).
   # After Flux applies k8s/infra/homepage-rbac, build the kubeconfig:
   #   TOKEN=$(kubectl get secret homepage-token -n homepage -o jsonpath='{.data.token}' | base64 -d)
-  #   CA=$(kubectl get secret homepage-token -n homepage -o jsonpath='{.data.ca\.crt}')
-  #   SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
   # Then add to secrets.yaml: sops hosts/ligma/secrets.yaml
   #   homepage-kubeconfig: |
   #     apiVersion: v1
   #     kind: Config
   #     clusters:
   #     - cluster:
-  #         certificate-authority-data: <CA>
-  #         server: <SERVER>
+  #         insecure-skip-tls-verify: true
+  #         server: https://10.10.10.29:6443
   #       name: sugma
   #     contexts:
   #     - context:
