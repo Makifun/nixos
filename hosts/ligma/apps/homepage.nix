@@ -8,6 +8,36 @@
     sopsFile = ../secrets.yaml;
   };
 
+  # Kubeconfig for sugma k8s cluster (homepage SA token).
+  # After Flux applies k8s/infra/homepage-rbac, build the kubeconfig:
+  #   TOKEN=$(kubectl get secret homepage-token -n homepage -o jsonpath='{.data.token}' | base64 -d)
+  #   CA=$(kubectl get secret homepage-token -n homepage -o jsonpath='{.data.ca\.crt}')
+  #   SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
+  # Then add to secrets.yaml: sops hosts/ligma/secrets.yaml
+  #   homepage-kubeconfig: |
+  #     apiVersion: v1
+  #     kind: Config
+  #     clusters:
+  #     - cluster:
+  #         certificate-authority-data: <CA>
+  #         server: <SERVER>
+  #       name: sugma
+  #     contexts:
+  #     - context:
+  #         cluster: sugma
+  #         user: homepage
+  #       name: homepage@sugma
+  #     current-context: homepage@sugma
+  #     users:
+  #     - name: homepage
+  #       user:
+  #         token: <TOKEN>
+  sops.secrets.homepage-kubeconfig = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner = "homepage-dashboard";
+  };
+
   # Images are served from $HOMEPAGE_CONFIG_DIR/images/ (/etc/homepage-dashboard/images/).
   # Add files to hosts/ligma/homepage_images/ and they will appear at /images/<file> in homepage.
   environment.etc."homepage-dashboard/images".source = ../homepage_images;
@@ -21,11 +51,19 @@
   };
   users.groups.homepage-dashboard = {};
 
+  systemd.services.homepage-dashboard.environment.KUBECONFIG =
+    config.sops.secrets.homepage-kubeconfig.path;
+
   services.homepage-dashboard = {
     enable = true;
     listenPort = 8082;
     allowedHosts = "localhost:8082,127.0.0.1:8082,homepage.makifun.se";
     environmentFiles = [ config.sops.secrets.homepage-env.path ];
+
+    kubernetes = {
+      mode = "default";
+      gateway = true;
+    };
 
     settings = {
       layout = [
