@@ -84,7 +84,7 @@
                   type = "filesystem";
                   format = "ext4";
                   mountpoint = "/rclone-cache";
-                  mountOptions = [ "defaults" "discard" ];
+                  mountOptions = [ "defaults" "discard" "nofail" ];
                 };
               };
             };
