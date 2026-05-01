@@ -6,15 +6,6 @@
   sops.secrets.rclone-config = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
-    # rclone config is an INI file; store as a YAML literal block in secrets.yaml:
-    #   rclone-config: |
-    #     [cloud]
-    #     type = s3
-    #     provider = Other
-    #     access_key_id = YOUR_KEY
-    #     secret_access_key = YOUR_SECRET
-    #     endpoint = YOUR_ENDPOINT
-    #     region = auto
   };
 
   systemd.tmpfiles.rules = [
@@ -33,17 +24,25 @@
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       Type = "notify";
-      ExecStart = "${pkgs.rclone}/bin/rclone mount cloud: /cloud"
+      ExecStart = "${pkgs.rclone}/bin/rclone mount crypt:/ /cloud"
         + " --config ${config.sops.secrets.rclone-config.path}"
+        + " --allow-non-empty"
         + " --allow-other"
-        + " --vfs-cache-mode full"
-        + " --cache-dir /rclone-cache"
-        + " --dir-cache-time 1h"
-        + " --poll-interval 15m"
-        + " --vfs-read-chunk-size 128M"
         + " --buffer-size 256M"
+        + " --bwlimit 25M"
+        + " --cache-dir /rclone-cache"
+        + " --dir-cache-time 10000h"
+        + " --log-level INFO"
+        + " --poll-interval 5m"
         + " --transfers 8"
-        + " --log-level INFO";
+        + " --umask 0000"
+        + " --use-mmap"
+        + " --vfs-cache-max-age 438300h"
+        + " --vfs-cache-max-size 185G"
+        + " --vfs-cache-mode full"
+        + " --vfs-read-chunk-size 128M"
+        + " --vfs-read-chunk-size-limit 1G";
+      ExecStop = "${pkgs.fuse3}/bin/fusermount3 -u /cloud";
       KillMode = "process";
       Restart = "on-failure";
       RestartSec = "10s";
