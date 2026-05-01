@@ -17,10 +17,9 @@
     after = [
       "local-fs.target"
       "network-online.target"
-      "sops-nix.service"
     ];
     wants = [ "network-online.target" ];
-    requires = [ "sops-nix.service" "local-fs.target" ];
+    requires = [ "local-fs.target" ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       Type = "notify";
