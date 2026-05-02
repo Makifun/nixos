@@ -13,7 +13,10 @@
   ];
 
   # NFS must start after rclone so it exports the FUSE mount, not the empty tmpfs.
-  systemd.services.nfs-server.after = [ "rclone-cloud.service" ];
+  # bindsTo ensures NFS stops before rclone during rebuild (stop order = reverse of start order),
+  # so /cloud is not busy when fusermount3 runs.
+  systemd.services.nfs-server.after    = [ "rclone-cloud.service" ];
+  systemd.services.nfs-server.bindsTo  = [ "rclone-cloud.service" ];
 
   systemd.services.rclone-cloud = {
     description = "rclone S3 mount at /cloud";
@@ -26,6 +29,7 @@
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       Type = "notify";
+      ExecStartPre = "-${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
       ExecStart = "${pkgs.rclone}/bin/rclone mount crypt:/ /cloud"
         + " --config ${config.sops.secrets.rclone-config.path}"
         + " --allow-non-empty"
@@ -45,7 +49,7 @@
         + " --vfs-read-chunk-size 128M"
         + " --vfs-read-chunk-size-limit 1G";
       ExecStartPost = "${pkgs.nfs-utils}/bin/exportfs -r";
-      ExecStop = "${pkgs.fuse3}/bin/fusermount3 -u /cloud";
+      ExecStop = "${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
       KillMode = "process";
       Restart = "on-failure";
       RestartSec = "10s";
