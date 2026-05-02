@@ -318,8 +318,8 @@
           { "Miniflux" = {
               icon      = "/images/miniflux.svg";
               href      = "https://{{HOMEPAGE_VAR_MINIFLUX_URL}}";
-              server    = "jonny";
-              container = "miniflux";
+              namespace = "miniflux";
+              app       = "miniflux";
               widget = {
                 type = "miniflux";
                 url  = "https://{{HOMEPAGE_VAR_MINIFLUX_URL}}";
