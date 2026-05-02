@@ -130,27 +130,6 @@
               };
             };
           }
-          { "Tautulli" = {
-              icon      = "/images/tautulli.png";
-              href      = "https://{{HOMEPAGE_VAR_TAUTULLI_URL}}";
-              server    = "jonny";
-              container = "tautulli";
-              widget = {
-                type              = "tautulli";
-                url               = "https://{{HOMEPAGE_VAR_TAUTULLI_URL}}";
-                key               = "{{HOMEPAGE_VAR_TAUTULLI_TOKEN}}";
-                enableUser        = true;
-                showEpisodeNumber = true;
-              };
-            };
-          }
-          { "Tracearr" = {
-              icon      = "/images/tracearr.png";
-              href      = "https://{{HOMEPAGE_VAR_TRACEARR_URL}}";
-              server    = "jonny";
-              container = "tracearr";
-            };
-          }
           { "Seerr" = {
               icon      = "/images/seerr.png";
               href      = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
