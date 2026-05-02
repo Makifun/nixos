@@ -458,6 +458,8 @@
           { "Omni" = {
               icon = "/images/sidero.png";
               href = "https://{{HOMEPAGE_VAR_OMNI_URL}}";
+              server    = "ligma";
+              container = "omni";
             };
           }
           { "Kopia" = {
