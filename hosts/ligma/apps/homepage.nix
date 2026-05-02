@@ -318,8 +318,8 @@
           { "Miniflux" = {
               icon      = "/images/miniflux.svg";
               href      = "https://{{HOMEPAGE_VAR_MINIFLUX_URL}}";
-              namespace = "miniflux";
-              app       = "miniflux";
+              namespace   = "miniflux";
+              podSelector = "app=miniflux";
               widget = {
                 type = "miniflux";
                 url  = "https://{{HOMEPAGE_VAR_MINIFLUX_URL}}";
