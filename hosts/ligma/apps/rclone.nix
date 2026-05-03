@@ -38,7 +38,7 @@
         + " --dir-cache-time 10000h"
         + " --jottacloud-hard-delete"
         + " --log-level INFO"
-        + " --poll-interval 5m"
+        + " --poll-interval 1h"
         + " --transfers 8"
         + " --umask 0000"
         + " --use-mmap"
