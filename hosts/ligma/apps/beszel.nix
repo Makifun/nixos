@@ -7,9 +7,10 @@ let
 in
 {
   systemd.tmpfiles.rules = [
-    "d '${beszelBase}/data' 0755 root root - -"
-    "d '/ligma/.beszelligma'     0755 root root - -"
-    "d '/persist/.beszelpersist'  0755 root root - -"
+    "d '${beszelBase}/data'         0755 root root - -"
+    "d '/ligma/.beszelligma'        0755 root root - -"
+    "d '/persist/.beszelpersist'    0755 root root - -"
+    "d '/rclone-cache/.beszelcache' 0755 root root - -"
   ];
 
   # ---------------------------------------------------------------------------
@@ -53,6 +54,7 @@ in
       "/run/podman/podman.sock:/var/run/docker.sock:ro"
       "/ligma/.beszelligma:/extra-filesystems/ligma:ro"
       "/persist/.beszelpersist:/extra-filesystems/persist:ro"
+      "/rclone-cache/.beszelcache:/extra-filesystems/rclone-cache:ro"
     ];
   };
 

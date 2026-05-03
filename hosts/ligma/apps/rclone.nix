@@ -34,7 +34,7 @@
         + " --allow-other"
         + " --buffer-size 256M"
         + " --bwlimit 25M"
-        + " --cache-dir /rclone-cache"
+        + " --cache-dir /rclone-cache/cache-dir"
         + " --dir-cache-time 10000h"
         + " --jottacloud-hard-delete"
         + " --log-level INFO"
