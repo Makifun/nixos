@@ -1,15 +1,13 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 {
   # Allow non-root users (NFS server) to access the FUSE mount.
   programs.fuse.userAllowOther = true;
 
-  sops.secrets.rclone-config = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-  };
-
+  # Config lives on zstorage (LUKS-encrypted, persists reboots, included in backrest /ligma backup).
+  # Writable at runtime so rclone can refresh OAuth tokens without SOPS involvement.
   systemd.tmpfiles.rules = [
     "d /cloud 0755 root root - -"
+    "d /ligma/ligma/rclone 0700 root root - -"
   ];
 
   # NFS must start after rclone so it exports the FUSE mount, not the empty tmpfs.
@@ -31,13 +29,14 @@
       Type = "notify";
       ExecStartPre = "-${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
       ExecStart = "${pkgs.rclone}/bin/rclone mount crypt:/ /cloud"
-        + " --config ${config.sops.secrets.rclone-config.path}"
+        + " --config /ligma/ligma/rclone/rclone.conf"
         + " --allow-non-empty"
         + " --allow-other"
         + " --buffer-size 256M"
         + " --bwlimit 25M"
         + " --cache-dir /rclone-cache"
         + " --dir-cache-time 10000h"
+        + " --jottacloud-hard-delete"
         + " --log-level INFO"
         + " --poll-interval 5m"
         + " --transfers 8"
