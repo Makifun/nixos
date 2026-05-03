@@ -76,7 +76,11 @@ Age-based encryption with two recipients: the host's SSH key (`&hosts_ligma`) an
 
 ### Network / Firewall
 
-SSH restricted to `10.10.10.0/24`. NFS exported to same subnet. NFTables firewall. IPv6 disabled globally. Only ports 80, 443, and 2049 (NFS) open externally.
+SSH restricted to `10.10.10.0/24`. NFTables firewall. IPv6 disabled globally. Only ports 80, 443, and 2049 (NFS) open externally.
+
+NFS exports (restricted to specific IPs — `hosts/ligma/apps/nfs.nix`):
+- `/ligma/sugma` → sugma nodes `10.10.10.26`, `10.10.10.27`, `10.10.10.28` (rw, nfs-provisioner PVC storage)
+- `/cloud` → jonny `10.10.10.16` (rw, rclone FUSE mount re-exported; jonny mounts at `/mnt/cloud`)
 
 ### Auto-upgrade
 
@@ -92,7 +96,9 @@ SSH restricted to `10.10.10.0/24`. NFS exported to same subnet. NFTables firewal
 | `vaultwarden.nix` | Vaultwarden | Password manager |
 | `homepage.nix` | Homepage dashboard | Port 8082; nginx on 8083 serves `/images/`; connects to sugma k8s via kubeconfig |
 | `graylog.nix` | Graylog 7 log management | Port 9099; three Podman containers on `graylog_network`: MongoDB 8, Graylog-datanode 7, Graylog 7 |
-| `backrest.nix` | Backrest backup manager | Port 9898 loopback; restic-backed; auth disabled, gated by Authentik via Traefik |
+| `backrest.nix` | Backrest backup manager | Port 9898 loopback; restic-backed; auth disabled, gated by Authentik via Traefik; backs up all of `/ligma` daily |
+| `rclone.nix` | rclone S3 FUSE mount | Mounts S3 remote at `/cloud`; config at `/ligma/ligma/rclone/rclone.conf` (writable — token refreshes multiple times/day; not SOPS); re-exported via NFS to jonny |
+| `nfs.nix` | NFS server | Exports `/ligma/sugma` (sugma nodes only) and `/cloud` (jonny only); port 2049 |
 | `omni.nix` | Sidero Omni (Talos cluster manager) | Container at port 9999 loopback (Traefik fronted); SideroLink WG UDP 50180 on `${ligmaIP}` (LAN-only); SAML auth via Authentik |
 | `autoupgrade-notify.nix` | Gotify notifier on `nixos-upgrade` | Templated `OnSuccess`/`OnFailure` units; failure path attaches the last 40 journal lines |
 
