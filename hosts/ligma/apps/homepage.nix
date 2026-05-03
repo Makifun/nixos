@@ -89,6 +89,7 @@
       { resources = { label = "/persist"; disk = "/persist"; }; }
       { resources = { label = "/ligma"; disk = "/ligma"; }; }
       { resources = { label = "/cloud"; disk = "/cloud"; }; }
+      { resources = { label = "/rclone-cache"; disk = "/rclone-cache"; }; }
       { unifi_console = {
           url      = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
           username = "{{HOMEPAGE_VAR_UNIFI_USERNAME}}";
