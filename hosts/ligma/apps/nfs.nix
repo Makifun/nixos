@@ -10,7 +10,7 @@
     enable = true;
     exports = ''
       /ligma/sugma 10.10.10.0/24(rw,sync,no_subtree_check,no_root_squash)
-      /cloud 10.10.10.0/24(ro,sync,no_subtree_check,no_root_squash,fsid=100)
+      /cloud 10.10.10.0/24(rw,sync,no_subtree_check,no_root_squash,fsid=100)
     '';
   };
 }
