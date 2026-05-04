@@ -3,7 +3,7 @@ let
   backrestPort = 9898;
   backrestBase = "/ligma/ligma/backrest";
   # renovate: datasource=docker depName=ghcr.io/garethgeorge/backrest
-  backrestTag = "v1.12.1";
+  backrestTag = "v1.13.0";
 in
 {
   sops.secrets = {
