@@ -8,9 +8,14 @@
   services.traefik.environmentFiles = [ config.sops.secrets.traefik_env.path ];
 
   networking.firewall.extraInputRules = ''
+    # OPNsense
     ip saddr 10.10.10.0/24 tcp dport 80 accept
     ip saddr 10.10.10.0/24 tcp dport 443 accept
     ip saddr 10.10.10.0/24 udp dport 443 accept
+    # WireGuard
+    ip saddr 10.10.11.0/24 tcp dport 80 accept
+    ip saddr 10.10.11.0/24 tcp dport 443 accept
+    ip saddr 10.10.11.0/24 udp dport 443 accept
   '';
 
   services.traefik.staticConfigOptions = {
