@@ -11,23 +11,23 @@
     ./disko-config.nix
     ../../common
     ../../modules/podman.nix
-    ./apps/traefik.nix
-    ./apps/forgejo.nix
-    ./apps/authentik.nix
-    ./apps/vaultwarden.nix
-    ./apps/homepage.nix
-    ./apps/graylog.nix
-    ./apps/unifi.nix
-    ./apps/beszel.nix
-    ./apps/gotify.nix
     ./apps/apprise.nix
-    ./apps/backrest.nix
-    ./apps/distribution.nix
-    ./apps/nfs.nix
-    ./apps/rclone.nix
-    ./apps/vector.nix
+    ./apps/authentik.nix
     ./apps/autoupgrade-notify.nix
+    ./apps/backrest.nix
+    ./apps/beszel.nix
+    ./apps/distribution.nix
+    ./apps/forgejo.nix
+    ./apps/gotify.nix
+    ./apps/graylog.nix
+    ./apps/homepage.nix
+    ./apps/nfs.nix
     ./apps/omni.nix
+    ./apps/rclone.nix
+    ./apps/traefik.nix
+    ./apps/unifi.nix
+    ./apps/vaultwarden.nix
+    ./apps/vector.nix
   ];
   environment.persistence."/persist" = {
     hideMounts = true;
