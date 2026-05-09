@@ -16,6 +16,7 @@
     enable = true;
     exports = ''
       /ligma/sugma 10.10.10.26(rw,sync,no_subtree_check,no_root_squash) 10.10.10.27(rw,sync,no_subtree_check,no_root_squash) 10.10.10.28(rw,sync,no_subtree_check,no_root_squash)
+      /cloud 10.10.10.16(rw,sync,no_subtree_check,no_root_squash) 10.10.10.26(ro,sync,no_subtree_check,no_root_squash) 10.10.10.27(ro,sync,no_subtree_check,no_root_squash) 10.10.10.28(ro,sync,no_subtree_check,no_root_squash)
     '';
   };
 }
