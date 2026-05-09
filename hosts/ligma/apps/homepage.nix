@@ -84,12 +84,12 @@
     };
 
     widgets = [
-      { resources = { label = "System"; cpu = true; memory = true; uptime = true; }; }
-      { resources = { label = "/"; disk = "/"; }; }
-      { resources = { label = "/persist"; disk = "/persist"; }; }
-      { resources = { label = "/ligma"; disk = "/ligma"; }; }
-      { resources = { label = "/cloud"; disk = "/cloud"; }; }
-      { resources = { label = "/rclone-cache"; disk = "/rclone-cache"; }; }
+      { resources = { label = "System"; cpu = true; memory = true; uptime = true; expanded = true; }; }
+      { resources = { label = "/"; disk = "/"; expanded = true; }; }
+      { resources = { label = "/persist"; disk = "/persist"; expanded = true; }; }
+      { resources = { label = "/ligma"; disk = "/ligma"; expanded = true; }; }
+      { resources = { label = "/cloud"; disk = "/cloud"; expanded = true; }; }
+      { resources = { label = "/rclone-cache"; disk = "/rclone-cache"; expanded = true; }; }
       { unifi_console = {
           url      = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
           username = "{{HOMEPAGE_VAR_UNIFI_USERNAME}}";
