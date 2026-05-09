@@ -1,5 +1,7 @@
 { lib, ... }:
 {
+  boot.zfs.forceImportRoot = false;
+
   # Cap ARC to 1GB so the VM doesn't pressure the Proxmox host.
   # Raise this if the VM gets more RAM assigned.
   boot.kernelParams = [ "zfs.zfs_arc_max=1073741824" ];
