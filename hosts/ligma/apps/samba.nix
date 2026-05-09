@@ -24,9 +24,6 @@
     };
   };
 
-  # smbd should start after rclone so /cloud is populated before first client connect.
-  systemd.services.smbd.after = [ "rclone-cloud.service" ];
-
   # SMB over TCP (port 445). No NetBIOS (139) needed for Linux CIFS mounts by IP.
   networking.firewall.allowedTCPPorts = [ 445 ];
 }
