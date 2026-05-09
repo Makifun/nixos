@@ -1,13 +1,17 @@
 { pkgs, ... }:
 {
+  # Allow smbd (and other non-root processes) to access the FUSE mount.
+  programs.fuse.userAllowOther = true;
+
   # Config lives on zstorage (LUKS-encrypted, persists reboots, included in backrest /ligma backup).
   # Writable at runtime so rclone can refresh OAuth tokens without SOPS involvement.
   systemd.tmpfiles.rules = [
+    "d /cloud 0755 root root - -"
     "d /ligma/ligma/rclone 0700 root root - -"
   ];
 
   systemd.services.rclone-cloud = {
-    description = "rclone NFS server for /cloud (port 2050)";
+    description = "rclone S3 FUSE mount at /cloud";
     after = [
       "local-fs.target"
       "network-online.target"
@@ -16,11 +20,12 @@
     requires = [ "local-fs.target" ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
-      Type = "simple";
-      ExecStart = "${pkgs.rclone}/bin/rclone serve nfs crypt:/"
+      Type = "notify";
+      ExecStartPre = "-${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
+      ExecStart = "${pkgs.rclone}/bin/rclone mount crypt:/ /cloud"
         + " --config /ligma/ligma/rclone/rclone.conf"
-        + " --addr :2050"
-        + " --nfs-cache-type disk"
+        + " --allow-non-empty"
+        + " --allow-other"
         + " --buffer-size 256M"
         + " --bwlimit 25M"
         + " --cache-dir /rclone-cache/cache-dir"
@@ -36,6 +41,7 @@
         + " --vfs-cache-mode full"
         + " --vfs-read-chunk-size 128M"
         + " --vfs-read-chunk-size-limit 1G";
+      ExecStop = "${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
       KillMode = "process";
       Restart = "on-failure";
       RestartSec = "10s";

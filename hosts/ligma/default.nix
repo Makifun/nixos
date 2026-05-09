@@ -24,6 +24,7 @@
     ./apps/nfs.nix
     ./apps/omni.nix
     ./apps/rclone.nix
+    ./apps/samba.nix
     ./apps/traefik.nix
     ./apps/unifi.nix
     ./apps/vaultwarden.nix

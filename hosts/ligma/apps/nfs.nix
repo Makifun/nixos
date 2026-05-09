@@ -6,11 +6,10 @@
 
   # NFSv3 requires rpcbind (111), mountd (20048), and nfsd (2049).
   # lockd/statd ports are pinned so they can be firewalled (otherwise random on each boot).
-  # Port 2050: rclone serve nfs (serves cloud remote directly to jonny — no kernel re-export).
   services.nfs.server.lockdPort = 4045;
   services.nfs.server.statdPort = 4046;
 
-  networking.firewall.allowedTCPPorts = [ 111 2049 2050 20048 4045 4046 ];
+  networking.firewall.allowedTCPPorts = [ 111 2049 20048 4045 4046 ];
   networking.firewall.allowedUDPPorts = [ 111 2049 20048 4045 4046 ];
 
   services.nfs.server = {
