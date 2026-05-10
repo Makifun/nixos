@@ -101,6 +101,7 @@ NFS exports (restricted to specific IPs — `hosts/ligma/apps/nfs.nix`):
 | `nfs.nix` | NFS server | Exports `/ligma/sugma` (sugma nodes only) and `/cloud` (jonny only); port 2049 |
 | `omni.nix` | Sidero Omni (Talos cluster manager) | Container at port 9999 loopback (Traefik fronted); SideroLink WG UDP 50180 on `${ligmaIP}` (LAN-only); SAML auth via Authentik |
 | `autoupgrade-notify.nix` | Gotify notifier on `nixos-upgrade` | Templated `OnSuccess`/`OnFailure` units; failure path attaches the last 40 journal lines |
+| `renovate.nix` | Renovate dependency updater | Hourly Podman one-shot (systemd timer); token in SOPS as `renovate-token`; `renovate-bot` admin user auto-provisioned by `forgejo-provision`; cache at `/ligma/ligma/renovate/`; **one-time bootstrap**: create token for `renovate-bot` in Forgejo → add to SOPS |
 
 ### Traefik + Authentik integration
 
