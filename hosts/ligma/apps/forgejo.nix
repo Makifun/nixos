@@ -201,6 +201,21 @@
         -d "{\"email\":\"opnsense@opnsense\",\"login_name\":\"opnsense\",\"username\":\"opnsense\",\"password\":\"$rand_pass\",\"restricted\":true,\"must_change_password\":false,\"send_notify\":false,\"source_id\":0}")"
       echo "forgejo-provision: create user opnsense → HTTP $http_code"
 
+      # Create renovate-bot user (409 if already exists — ignored)
+      # Admin=true so autodiscover can see all private repos.
+      rand_pass="$(openssl rand -base64 32)"
+      http_code="$(curl -s -o /dev/null -w "%{http_code}" \
+        -H "Authorization: token $token" -X POST "$base/admin/users" \
+        -H "Content-Type: application/json" \
+        -d "{\"email\":\"renovate@makifun.se\",\"login_name\":\"renovate-bot\",\"username\":\"renovate-bot\",\"password\":\"$rand_pass\",\"restricted\":false,\"must_change_password\":false,\"send_notify\":false,\"source_id\":0}")"
+      echo "forgejo-provision: create user renovate-bot → HTTP $http_code"
+      # Grant admin so Renovate can autodiscover all private repos.
+      http_code="$(curl -s -o /dev/null -w "%{http_code}" \
+        -H "Authorization: token $token" -X PATCH "$base/admin/users/renovate-bot" \
+        -H "Content-Type: application/json" \
+        -d "{\"admin\":true,\"source_id\":0,\"login_name\":\"renovate-bot\"}")"
+      echo "forgejo-provision: set admin renovate-bot → HTTP $http_code"
+
       # Add SSH key (422 if already exists — ignored)
       http_code="$(curl -s -o /dev/null -w "%{http_code}" \
         -H "Authorization: token $token" -X POST "$base/admin/users/opnsense/keys" \
