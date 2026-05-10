@@ -3,6 +3,7 @@ let
   # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
   renovateTag = "43.170.19";
   dataDir     = "/ligma/ligma/renovate";
+  tokenFile   = "${dataDir}/token";
   renovateConfig = pkgs.writeText "renovate-config.yaml" ''
     platform: gitea
     endpoint: https://git.makifun.se/
@@ -16,32 +17,24 @@ let
   '';
 in
 {
-  sops.secrets.renovate-token = {
-    format   = "yaml";
-    sopsFile = ../secrets.yaml;
-  };
-
-  sops.templates."renovate.env" = {
-    mode    = "0600";
-    content = ''
-      RENOVATE_TOKEN=${config.sops.placeholder.renovate-token}
-      RENOVATE_CONFIG_FILE=/config.yaml
-    '';
-  };
-
   systemd.tmpfiles.rules = [
-    "d '${dataDir}' 0750 root root - -"
+    "d '${dataDir}' 0750 ${config.services.forgejo.user} ${config.services.forgejo.group} - -"
   ];
 
   systemd.services.renovate = {
     description = "Renovate dependency updater";
-    after       = [ "network-online.target" "sops-nix.service" ];
+    after       = [ "network-online.target" "forgejo-provision.service" ];
     wants       = [ "network-online.target" ];
     path        = [ pkgs.podman ];
     serviceConfig.Type = "oneshot";
     script = ''
+      if [ ! -s ${tokenFile} ]; then
+        echo "renovate: token not yet provisioned, skipping" >&2
+        exit 0
+      fi
       podman run --rm \
-        --env-file ${config.sops.templates."renovate.env".path} \
+        -e RENOVATE_TOKEN="$(cat ${tokenFile})" \
+        -e RENOVATE_CONFIG_FILE=/config.yaml \
         -v ${renovateConfig}:/config.yaml:ro \
         -v ${dataDir}:/data \
         ghcr.io/renovatebot/renovate:${renovateTag}
