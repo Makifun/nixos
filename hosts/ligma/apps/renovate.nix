@@ -33,6 +33,7 @@ in
         exit 0
       fi
       podman run --rm \
+        --user "$(id -u ${config.services.forgejo.user})" \
         -e RENOVATE_TOKEN="$(cat ${tokenFile})" \
         -e RENOVATE_CONFIG_FILE=/config.yaml \
         -v ${renovateConfig}:/config.yaml:ro \
