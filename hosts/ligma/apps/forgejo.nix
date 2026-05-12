@@ -170,7 +170,8 @@
       RemainAfterExit = true;
       User            = config.services.forgejo.user;
     };
-    path   = [ pkgs.curl pkgs.openssl pkgs.jq ];
+    environment.FORGEJO_WORK_DIR = config.services.forgejo.stateDir;
+    path   = [ pkgs.curl pkgs.openssl pkgs.jq pkgs.sqlite config.services.forgejo.package ];
     script = ''
       base="http://127.0.0.1:3010/api/v1"
       token="$(cat /run/forgejo/provision-token 2>/dev/null || true)"
@@ -218,22 +219,24 @@
 
       # Generate renovate-bot API token and persist it to zstorage.
       # Only created once — file survives reboots on /ligma (zstorage).
-      # Uses Sudo header so admin token can act as renovate-bot.
+      # Uses CLI (direct DB access) because the Forgejo API blocks token
+      # creation via sudo impersonation ("auth method not allowed").
       token_file="/ligma/ligma/renovate/token"
       if [ ! -s "$token_file" ]; then
-        response="$(curl -s \
-          -H "Authorization: token $token" \
-          -H "Sudo: renovate-bot" \
-          -X POST "$base/users/renovate-bot/tokens" \
-          -H "Content-Type: application/json" \
-          -d '{"name":"renovate","scopes":["read:misc","read:organization","write:issue","write:repository","read:user"]}')"
-        renovate_tok="$(echo "$response" | jq -r '.sha1 // empty')"
-        if [ -n "$renovate_tok" ]; then
-          install -m 0600 /dev/null "$token_file"
-          printf '%s' "$renovate_tok" > "$token_file"
+        sqlite3 "${config.services.forgejo.settings.database.PATH}" \
+          "DELETE FROM access_token WHERE uid=(SELECT id FROM \"user\" WHERE name='renovate-bot') AND name='renovate';" \
+          2>/dev/null || true
+        install -m 0600 /dev/null "$token_file"
+        forgejo admin user generate-access-token \
+          --username renovate-bot \
+          --token-name renovate \
+          --scopes "read:misc,read:organization,write:issue,write:repository,read:user" \
+          --raw 2>/dev/null \
+          | tr -d '\n' > "$token_file"
+        if [ -s "$token_file" ]; then
           echo "forgejo-provision: renovate-bot token written to $token_file"
         else
-          echo "forgejo-provision: failed to create renovate-bot token: $response" >&2
+          echo "forgejo-provision: failed to create renovate-bot token" >&2
         fi
       else
         echo "forgejo-provision: renovate-bot token already exists, skipping"
