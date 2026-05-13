@@ -9,6 +9,7 @@ let
     endpoint: https://git.makifun.se/
     gitAuthor: "Renovate Bot <renovate@makifun.se>"
     baseDir: /data
+    binarySource: global
     repositories:
       - "makifun/authentik"
       - "makifun/graylog"
@@ -40,6 +41,7 @@ in
         -e RENOVATE_CONFIG_FILE=/config.yaml \
         -v ${renovateConfig}:/config.yaml:ro \
         -v ${dataDir}:/data \
+        -v ${pkgs.go}/bin/go:/usr/local/bin/go:ro \
         ghcr.io/renovatebot/renovate:${renovateTag}
     '';
   };
