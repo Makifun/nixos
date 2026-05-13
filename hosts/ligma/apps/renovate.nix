@@ -10,6 +10,11 @@ let
     gitAuthor: "Renovate Bot <renovate@makifun.se>"
     baseDir: /data
     binarySource: global
+    hostRules:
+      - matchHost: git.makifun.se
+        hostType: docker
+        username: renovate-bot
+        password: "{{ env.RENOVATE_TOKEN }}"
     repositories:
       - "makifun/authentik"
       - "makifun/graylog"
