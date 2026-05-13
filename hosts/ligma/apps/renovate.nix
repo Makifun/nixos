@@ -39,9 +39,11 @@ in
         --user "$(id -u ${config.services.forgejo.user})" \
         -e RENOVATE_TOKEN="$(cat ${tokenFile})" \
         -e RENOVATE_CONFIG_FILE=/config.yaml \
+        -e GOROOT=${pkgs.go}/share/go \
         -v ${renovateConfig}:/config.yaml:ro \
         -v ${dataDir}:/data \
-        -v ${pkgs.go}/bin/go:/usr/local/bin/go:ro \
+        -v ${pkgs.go}/share/go:${pkgs.go}/share/go:ro \
+        -v ${pkgs.go}/share/go/bin/go:/usr/local/bin/go:ro \
         ghcr.io/renovatebot/renovate:${renovateTag}
     '';
   };
