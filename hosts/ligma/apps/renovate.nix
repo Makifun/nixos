@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 let
   # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
-  renovateTag = "43.173.5";
+  renovateTag = "43.176.7";
   dataDir     = "/ligma/ligma/renovate";
   tokenFile   = "${dataDir}/token";
   renovateConfig = pkgs.writeText "renovate-config.yaml" ''
