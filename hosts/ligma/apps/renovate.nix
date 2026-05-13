@@ -10,8 +10,8 @@ let
     gitAuthor: "Renovate Bot <renovate@makifun.se>"
     baseDir: /data
     autodiscover: true
-    autodiscoverFilter:
-      - "**"
+    autodiscoverNamespaces:
+      - "makifun"
     onboarding: true
     requireConfig: optional
   '';
