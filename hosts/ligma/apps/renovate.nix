@@ -13,10 +13,6 @@ let
       - "makifun/authentik"
       - "makifun/graylog"
       - "makifun/makiplex-bot"
-      - "makifun/makizen"
-      - "makifun/medializr"
-      - "makifun/opnsense-config"
-      - "makifun/solN-sddm"
       - "makifun/sugma"
     onboarding: true
     requireConfig: optional
