@@ -41,7 +41,7 @@
         + " --vfs-cache-mode full"
         + " --vfs-read-chunk-size 128M"
         + " --vfs-read-chunk-size-limit 1G";
-      ExecStartPost = "+${pkgs.systemd}/bin/systemctl try-restart smbd.service";
+      ExecStartPost = "+${pkgs.systemd}/bin/systemctl try-restart samba-smbd.service";
       ExecStop = "${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
       KillMode = "process";
       Restart = "on-failure";
