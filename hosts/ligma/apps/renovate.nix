@@ -9,9 +9,15 @@ let
     endpoint: https://git.makifun.se/
     gitAuthor: "Renovate Bot <renovate@makifun.se>"
     baseDir: /data
-    autodiscover: true
-    autodiscoverNamespaces:
-      - "makifun"
+    repositories:
+      - "makifun/authentik"
+      - "makifun/graylog"
+      - "makifun/makiplex-bot"
+      - "makifun/makizen"
+      - "makifun/medializr"
+      - "makifun/opnsense-config"
+      - "makifun/solN-sddm"
+      - "makifun/sugma"
     onboarding: true
     requireConfig: optional
   '';
