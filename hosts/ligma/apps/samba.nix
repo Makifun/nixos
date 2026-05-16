@@ -10,7 +10,7 @@
         security = "user";
         "map to guest" = "bad user";
         # Restrict to jonny only at the Samba layer.
-        "hosts allow" = "10.10.10.16 127.0.0.1";
+        "hosts allow" = "10.10.10.16 10.10.10.26 10.10.10.27 10.10.10.28 127.0.0.1";
         "hosts deny" = "ALL";
       };
       cloud = {
