@@ -1,5 +1,26 @@
-{ ... }:
+{ pkgs, ... }:
 {
+  # Wait for Graylog's GELF UDP port before starting Vector.
+  # Connected UDP sockets enter a permanent error state on ECONNREFUSED and
+  # won't recover without a socket recreate (i.e. restart). The wait script
+  # avoids the race at boot; timeout after 5 min so Vector still starts if
+  # Graylog is absent (sink will log errors gracefully).
+  systemd.services.vector = {
+    after = [ "podman-graylog.service" ];
+    wants = [ "podman-graylog.service" ];
+    serviceConfig.ExecStartPre = toString (pkgs.writeShellScript "wait-graylog-gelf" ''
+      elapsed=0
+      until ${pkgs.iproute2}/bin/ss -ulnp | grep -q ':12201 '; do
+        if [ "$elapsed" -ge 300 ]; then
+          echo "Timed out waiting for Graylog GELF UDP port 12201" >&2
+          exit 0
+        fi
+        sleep 5
+        elapsed=$((elapsed + 5))
+      done
+    '');
+  };
+
   services.vector = {
     enable = true;
     journaldAccess = true;
