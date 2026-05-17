@@ -43,9 +43,15 @@
   ];
 
   sops.secrets.grafana-secret-key = {
-    format = "yaml";
+    format   = "yaml";
     sopsFile = ../secrets.yaml;
-    owner = "grafana";
+    owner    = "grafana";
+  };
+
+  sops.secrets.grafana-oauth-secret = {
+    format   = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner    = "grafana";
   };
 
   services.grafana = {
@@ -56,52 +62,50 @@
       server = {
         http_addr = "127.0.0.1";
         http_port = 3000;
-        domain = "grafana.makifun.se";
-        root_url = "https://grafana.makifun.se/";
+        domain    = "grafana.makifun.se";
+        root_url  = "https://grafana.makifun.se/";
       };
-      # Authentik injects X-authentik-username via Traefik forwardAuth.
-      # Grafana trusts it and auto-creates the account on first login.
-      "auth.proxy" = {
-        enabled = true;
-        header_name = "X-authentik-username";
-        header_property = "username";
-        auto_sign_up = true;
+      # Authentik OIDC — role determined by group membership:
+      #   grafana_admin  → Admin
+      #   grafana_viewer → Viewer
+      "auth.generic_oauth" = {
+        enabled             = true;
+        name                = "Authentik";
+        client_id           = "grafana";
+        client_secret       = "$__file{${config.sops.secrets.grafana-oauth-secret.path}}";
+        scopes              = "openid profile email groups";
+        auth_url            = "https://auth.makifun.se/application/o/grafana-sso/authorize/";
+        token_url           = "https://auth.makifun.se/application/o/grafana-sso/token/";
+        api_url             = "https://auth.makifun.se/application/o/userinfo/";
+        role_attribute_path = "contains(groups[*], 'grafana_admin') && 'Admin' || contains(groups[*], 'grafana_viewer') && 'Viewer' || 'Viewer'";
+        allow_sign_up       = true;
+        use_pkce            = true;
       };
-      users.auto_assign_org_role = "Admin";
-      security.secret_key = "$__file{${config.sops.secrets.grafana-secret-key.path}}";
+      users.auto_assign_org_role = "Viewer";
+      security.secret_key        = "$__file{${config.sops.secrets.grafana-secret-key.path}}";
       analytics.reporting_enabled = false;
     };
 
     provision = {
       enable = true;
       datasources.settings.datasources = [{
-        name = "Prometheus";
-        type = "prometheus";
-        url = "http://127.0.0.1:9090";
+        name    = "Prometheus";
+        type    = "prometheus";
+        url     = "http://127.0.0.1:9090";
         isDefault = true;
       }];
     };
   };
 
   # ---- Traefik ----------------------------------------------------------------
+  # Grafana handles auth itself via OIDC redirect — no Authentik middleware.
   # Import dashboard ID 13560 from grafana.com for rclone metrics.
   services.traefik.dynamicConfigOptions.http = {
-    routers = {
-      grafana-outpost = {
-        rule        = "Host(`grafana.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
-        priority    = 30;
-        entryPoints = [ "websecure" ];
-        service     = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
-      };
-      grafana = {
-        rule        = "Host(`grafana.makifun.se`)";
-        priority    = 1;
-        entryPoints = [ "websecure" ];
-        service     = "grafana-svc";
-        middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
-      };
+    routers.grafana = {
+      rule        = "Host(`grafana.makifun.se`)";
+      entryPoints = [ "websecure" ];
+      service     = "grafana-svc";
+      tls.certResolver = "letsencrypt";
     };
     services."grafana-svc".loadBalancer.servers = [{ url = "http://127.0.0.1:3000"; }];
   };
