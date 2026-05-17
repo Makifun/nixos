@@ -92,8 +92,8 @@
   # Wait for Authentik if it's starting, but don't hard-require it —
   # Forgejo is fully usable without Authentik (local login still works).
   systemd.services.forgejo = {
-    after  = [ "authentik.service" "authentik-worker.service" ];
-    wants  = [ "authentik.service" "authentik-worker.service" ];
+    after  = [ "podman-authentik-server.service" "podman-authentik-worker.service" ];
+    wants  = [ "podman-authentik-server.service" "podman-authentik-worker.service" ];
   };
 
   # Append admin user creation to forgejo's existing preStart.
