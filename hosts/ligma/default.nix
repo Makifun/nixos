@@ -46,6 +46,12 @@
     format = "yaml";
     sopsFile = ./secrets.yaml;
   };
+  services.journald.extraConfig = ''
+    SystemMaxUse=512M
+    MaxRetentionSec=7day
+    MaxFileSec=1day
+  '';
+
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma' 0755 root root - -"
   ];
