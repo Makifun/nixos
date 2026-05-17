@@ -1,4 +1,7 @@
 { pkgs, ... }:
+let
+  rclonePort = 6969;
+in
 {
   # Allow smbd (and other non-root processes) to access the FUSE mount.
   programs.fuse.userAllowOther = true;
@@ -36,9 +39,8 @@
         + " --rc"
         + " --rc-web-gui"
         + " --rc-web-gui-no-open-browser"
-        + " --rc-user makifun"
-        + " --rc-pass T9zK94SUwwmbcmMeLGPerB9hj7AmJBc"
-        + " --rc-addr 10.10.10.13:6969"
+        + " --rc-no-auth"
+        + " --rc-addr 127.0.0.1:${toString rclonePort}"
         + " --transfers 8"
         + " --umask 0000"
         + " --use-mmap"
@@ -53,5 +55,31 @@
       Restart = "on-failure";
       RestartSec = "10s";
     };
+  };
+
+  # ---------------------------------------------------------------------------
+  # Traefik — Authentik SSO gate
+  # ---------------------------------------------------------------------------
+  services.traefik.dynamicConfigOptions.http = {
+    routers = {
+      rclone-outpost = {
+        rule        = "Host(`rclone.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        priority    = 30;
+        entryPoints = [ "websecure" ];
+        service     = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
+      rclone = {
+        rule        = "Host(`rclone.makifun.se`)";
+        priority    = 1;
+        entryPoints = [ "websecure" ];
+        service     = "rclone-svc";
+        middlewares = [ "authentik" ];
+        tls.certResolver = "letsencrypt";
+      };
+    };
+    services."rclone-svc".loadBalancer.servers = [
+      { url = "http://127.0.0.1:${toString rclonePort}"; }
+    ];
   };
 }
