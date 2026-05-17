@@ -520,9 +520,6 @@
           { "Grafana" = {
               icon      = "/images/grafana.png";
               href      = "https://{{HOMEPAGE_VAR_GRAFANA_URL}}";
-              widget = {
-                type     = "grafana";
-              };
             };
           }
           { "Traefik Jonny" = {
