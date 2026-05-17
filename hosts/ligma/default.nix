@@ -21,6 +21,7 @@
     ./apps/gotify.nix
     ./apps/graylog.nix
     ./apps/homepage.nix
+    ./apps/monitoring.nix
     ./apps/nfs.nix
     ./apps/omni.nix
     ./apps/rclone.nix
