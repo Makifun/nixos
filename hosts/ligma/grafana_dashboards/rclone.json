@@ -75,7 +75,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 1,
@@ -92,7 +92,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -141,7 +141,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "process_start_time_seconds{instance=~\"$instance\"} * 1000",
           "legendFormat": "Start time",
@@ -155,7 +155,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -212,7 +212,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "process_open_fds{instance=~\"$instance\"}",
           "legendFormat": "process_open_fds",
@@ -226,7 +226,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "description": "Since rclone process started",
       "fieldConfig": {
@@ -284,7 +284,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rclone_checked_files_total{instance=~\"$instance\"}",
           "legendFormat": "Checked files",
@@ -293,7 +293,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rclone_files_transferred_total{instance=~\"$instance\"}",
           "legendFormat": "Transferred files",
@@ -302,7 +302,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rclone_files_renamed_total{instance=~\"$instance\"}",
           "legendFormat": "Renamed files",
@@ -311,7 +311,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rclone_files_deleted_total{instance=~\"$instance\"}",
           "legendFormat": "Deleted files",
@@ -320,7 +320,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rclone_dirs_deleted_total{instance=~\"$instance\"}",
           "legendFormat": "Deleted directories",
@@ -329,7 +329,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rclone_errors_total{instance=~\"$instance\"}",
           "legendFormat": "Transfer errors",
@@ -342,7 +342,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -422,7 +422,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "process_open_fds{instance=~\"$instance\"}",
           "legendFormat": "Open file descriptors",
@@ -431,7 +431,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "process_max_fds{instance=~\"$instance\"}",
           "legendFormat": "Max open file descriptors",
@@ -462,7 +462,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -516,7 +516,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "promhttp_metric_handler_requests_total{instance=~\"$instance\"}",
           "legendFormat": "{{code}}",
@@ -529,7 +529,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "description": "Since rclone process started",
       "fieldConfig": {
@@ -579,7 +579,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rclone_bytes_transferred_total{instance=~\"$instance\"}",
           "legendFormat": "Total bytes transferred",
@@ -593,7 +593,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "description": "Since rclone process started",
       "fieldConfig": {
@@ -651,7 +651,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rclone_speed{instance=~\"$instance\"}",
           "legendFormat": "rclone_speed",
@@ -666,7 +666,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -751,7 +751,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rate(rclone_checked_files_total{instance=~\"$instance\"}[$__rate_interval])",
           "legendFormat": "Checked files",
@@ -760,7 +760,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rate(rclone_files_transferred_total{instance=~\"$instance\"}[$__rate_interval])",
           "legendFormat": "Transferred files",
@@ -769,7 +769,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rate(rclone_files_renamed_total{instance=~\"$instance\"}[$__rate_interval])",
           "legendFormat": "Renamed files",
@@ -778,7 +778,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rate(rclone_files_deleted_total{instance=~\"$instance\"}[$__rate_interval])",
           "legendFormat": "Deleted files",
@@ -787,7 +787,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rate(rclone_dirs_deleted_total{instance=~\"$instance\"}[$__rate_interval])",
           "legendFormat": "Deleted directories",
@@ -796,7 +796,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rate(rclone_errors_total{instance=~\"$instance\"}[$__rate_interval])",
           "legendFormat": "Transfer errors",
@@ -809,7 +809,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -903,7 +903,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "increase(rclone_bytes_transferred_total{instance=~\"$instance\"}[$__rate_interval])",
           "legendFormat": "Data transferred",
@@ -916,7 +916,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -997,7 +997,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rate(rclone_bytes_transferred_total{instance=~\"$instance\"}[$__rate_interval])",
           "legendFormat": "Data transfer rate",
@@ -1010,7 +1010,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -1089,7 +1089,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "go_threads{instance=~\"$instance\"}",
           "legendFormat": "Go threads",
@@ -1098,7 +1098,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "rate(process_cpu_seconds_total{instance=~\"$instance\"}[$__rate_interval])",
           "legendFormat": "CPU seconds",
@@ -1111,7 +1111,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -1191,7 +1191,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "go_memstats_alloc_bytes{instance=~\"$instance\"}",
           "legendFormat": "Allocated bytes",
@@ -1204,7 +1204,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -1283,7 +1283,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "go_goroutines{instance=~\"$instance\"}",
           "legendFormat": "Coroutines",
@@ -1296,7 +1296,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "description": "Total number of allocated objects",
       "fieldConfig": {
@@ -1376,7 +1376,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "go_memstats_heap_objects{instance=~\"$instance\"}",
           "legendFormat": "Objects",
@@ -1389,7 +1389,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus"
       },
       "description": "**Allocated:** The amount of memory Rclone is actually using.  \n**Sys:** The amount of memory obtained from the OS.  \n**Sys requested:** The amount of memory requested from the OS.",
       "fieldConfig": {
@@ -1469,7 +1469,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "go_memstats_sys_bytes{instance=~\"$instance\"}",
           "legendFormat": "Sys requested bytes",
@@ -1478,7 +1478,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "go_memstats_heap_alloc_bytes{instance=~\"$instance\"}",
           "legendFormat": "Allocated bytes",
@@ -1487,7 +1487,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "go_memstats_heap_sys_bytes{instance=~\"$instance\"}",
           "legendFormat": "Sys bytes",
@@ -1496,7 +1496,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "go_memstats_heap_idle_bytes{instance=~\"$instance\"}",
           "legendFormat": "Idle bytes",
@@ -1505,7 +1505,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "go_memstats_heap_inuse_bytes{instance=~\"$instance\"}",
           "legendFormat": "In use bytes",
@@ -1514,7 +1514,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "expr": "go_memstats_heap_released_bytes{instance=~\"$instance\"}",
           "legendFormat": "Released bytes",
@@ -1535,7 +1535,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "prometheus"
         },
         "definition": "label_values(rclone_bytes_transferred_total, instance)",
         "hide": 0,
