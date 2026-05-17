@@ -34,6 +34,7 @@
       ncdu
       nh
       nmap
+      python3
       screen
       vim
     ];
