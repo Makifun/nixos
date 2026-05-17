@@ -24,7 +24,7 @@
     scrapeConfigs = [
       {
         job_name = "rclone";
-        static_configs = [{ targets = [ "127.0.0.1:6969" ]; }];
+        static_configs = [{ targets = [ "127.0.0.1:6970" ]; }];
       }
       {
         job_name = "node";

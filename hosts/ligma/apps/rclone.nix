@@ -1,6 +1,7 @@
 { pkgs, ... }:
 let
-  rclonePort = 6969;
+  rclonePort    = 6969;
+  metricsPort   = 6970;
 in
 {
   # Allow smbd (and other non-root processes) to access the FUSE mount.
@@ -41,6 +42,7 @@ in
         + " --rc-web-gui-no-open-browser"
         + " --rc-no-auth"
         + " --rc-addr 127.0.0.1:${toString rclonePort}"
+        + " --metrics-addr 127.0.0.1:${toString metricsPort}"
         + " --transfers 8"
         + " --umask 0000"
         + " --use-mmap"
