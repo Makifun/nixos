@@ -77,7 +77,7 @@
         auth_url            = "https://auth.makifun.se/application/o/authorize/";
         token_url           = "https://auth.makifun.se/application/o/token/";
         api_url             = "https://auth.makifun.se/application/o/userinfo/";
-        role_attribute_path = "contains(groups[*], 'grafana_admin') && 'Admin' || contains(groups[*], 'grafana_viewer') && 'Viewer' || 'Viewer'";
+        role_attribute_path = "contains(groups[*], 'grafana_admin') && 'Admin' || contains(groups[*], 'app_admins') && 'Admin' || contains(groups[*], 'grafana_viewer') && 'Viewer' || 'Viewer'";
         allow_sign_up       = true;
         use_pkce            = true;
       };
