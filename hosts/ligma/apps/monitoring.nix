@@ -74,8 +74,8 @@
         client_id           = "grafana";
         client_secret       = "$__file{${config.sops.secrets.grafana-oauth-secret.path}}";
         scopes              = "openid profile email groups";
-        auth_url            = "https://auth.makifun.se/application/o/grafana-sso/authorize/";
-        token_url           = "https://auth.makifun.se/application/o/grafana-sso/token/";
+        auth_url            = "https://auth.makifun.se/application/o/authorize/";
+        token_url           = "https://auth.makifun.se/application/o/token/";
         api_url             = "https://auth.makifun.se/application/o/userinfo/";
         role_attribute_path = "contains(groups[*], 'grafana_admin') && 'Admin' || contains(groups[*], 'grafana_viewer') && 'Viewer' || 'Viewer'";
         allow_sign_up       = true;
