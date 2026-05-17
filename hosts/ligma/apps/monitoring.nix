@@ -38,6 +38,11 @@
   };
 
   # ---- Grafana ----------------------------------------------------------------
+  environment.etc."grafana-dashboards/rclone.json" = {
+    source = ../grafana_dashboards/rclone.json;
+    mode   = "0444";
+  };
+
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/grafana' 0700 grafana grafana - -"
   ];
@@ -93,6 +98,10 @@
         type    = "prometheus";
         url     = "http://127.0.0.1:9090";
         isDefault = true;
+      }];
+      dashboards.settings.providers = [{
+        name    = "default";
+        options.path = "/etc/grafana-dashboards";
       }];
     };
   };
