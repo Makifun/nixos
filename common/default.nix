@@ -35,6 +35,7 @@
       nh
       nmap
       screen
+      vim
     ];
   };
   programs.nh = {
