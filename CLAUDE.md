@@ -51,7 +51,7 @@ sops hosts/ligma/secrets.yaml
 
 ### Flake Structure
 
-- **`flake.nix`** — Defines two outputs: `nixosConfigurations.ligma` (production) and `nixosConfigurations.minimaliso` (bootstrap ISO). Inputs: nixpkgs (25.11), disko, impermanence, sops-nix.
+- **`flake.nix`** — Defines two outputs: `nixosConfigurations.ligma` (production) and `nixosConfigurations.minimaliso` (bootstrap ISO). Inputs: nixpkgs (25.11), disko, impermanence, sops-nix. **Note: authentik-nix was removed** — Authentik now runs as Podman containers.
 - **`common/`** — Modules applied to all hosts via `common/default.nix`.
 - **`hosts/ligma/`** — Host-specific config, disk layout, and secrets.
 - **`modules/`** — Reusable custom modules (currently: podman).
@@ -91,14 +91,17 @@ NFS exports (restricted to specific IPs — `hosts/ligma/apps/nfs.nix`):
 | File | Service | Notes |
 |---|---|---|
 | `traefik.nix` | Traefik reverse proxy | Handles TLS termination for all apps |
-| `authentik.nix` | Authentik SSO | Port 9000; PostgreSQL on zstorage |
-| `forgejo.nix` | Forgejo + Actions runner | Port 3010; SSH on 22222; waits for Authentik on boot |
+| `authentik.nix` | Authentik SSO | Three Podman containers (`authentik_network`): Redis + server (port 9000) + worker. Native PostgreSQL at `/ligma/ligma/authentik/postgresql`. `/run/postgresql` bind-mounted with `trust` auth (no password). SOPS secret: `authentik_env`. |
+| `forgejo.nix` | Forgejo + Actions runner | Port 3010; SSH on 22222; waits for `podman-authentik-server` + `podman-authentik-worker` on boot |
 | `vaultwarden.nix` | Vaultwarden | Password manager |
 | `homepage.nix` | Homepage dashboard | Port 8082; nginx on 8083 serves `/images/`; connects to sugma k8s via kubeconfig |
 | `graylog.nix` | Graylog 7 log management | Port 9099; three Podman containers on `graylog_network`: MongoDB 8, Graylog-datanode 7, Graylog 7 |
+| `monitoring.nix` | Prometheus + Grafana | Prometheus port 9090, 30d retention; node_exporter port 9100 (systemd collector enabled); scrapes rclone RC `/metrics` on port 6969. Grafana port 3000, OIDC via Authentik (`grafana-sso` application), role from `groups` claim. SOPS secrets: `grafana-secret-key`, `grafana-oauth-secret`. Import dashboard ID 13560 for rclone. |
 | `backrest.nix` | Backrest backup manager | Port 9898 loopback; restic-backed; auth disabled, gated by Authentik via Traefik; backs up all of `/ligma` daily |
-| `rclone.nix` | rclone S3 FUSE mount | Mounts S3 remote at `/cloud`; config at `/ligma/ligma/rclone/rclone.conf` (writable — token refreshes multiple times/day; not SOPS); re-exported via NFS to jonny |
+| `rclone.nix` | rclone S3 FUSE mount | Mounts S3 remote at `/cloud`; RC on port 6969 (`--rc-no-auth`); Prometheus scrapes `/metrics` from this port. Config at `/ligma/ligma/rclone/rclone.conf`. Re-exported via NFS + Samba. |
+| `samba.nix` | Samba/CIFS share | Exposes `/cloud` as `\\ligma\cloud`; guest access; `hosts allow` includes sugma nodes (10.10.10.26/27/28) for SMB CSI driver mounts |
 | `nfs.nix` | NFS server | Exports `/ligma/sugma` (sugma nodes only) and `/cloud` (jonny only); port 2049 |
+| `vector.nix` | Vector log shipper | Ships all systemd journal logs to Graylog GELF UDP (port 12201). `ExecStartPre` waits for port 12201 to be bound before starting (avoids permanent ECONNREFUSED on boot race). |
 | `omni.nix` | Sidero Omni (Talos cluster manager) | Container at port 9999 loopback (Traefik fronted); SideroLink WG UDP 50180 on `${ligmaIP}` (LAN-only); SAML auth via Authentik |
 | `autoupgrade-notify.nix` | Gotify notifier on `nixos-upgrade` | Templated `OnSuccess`/`OnFailure` units; failure path attaches the last 40 journal lines |
 | `renovate.nix` | Renovate dependency updater | Hourly Podman one-shot (systemd timer); token in SOPS as `renovate-token`; `renovate-bot` admin user auto-provisioned by `forgejo-provision`; cache at `/ligma/ligma/renovate/`; **one-time bootstrap**: create token for `renovate-bot` in Forgejo → add to SOPS |
@@ -121,6 +124,24 @@ and Terraform/API token access on the same domain:
 | `graylog-outpost` | 30 | `Host + PathPrefix(/outpost.goauthentik.io)` | none | Authentik post-login callback |
 | `graylog-basic-auth` | 10 | `Host + HeaderRegexp(Authorization, ^Basic .+)` | none | Terraform API token access (bypasses SSO) |
 | `graylog` | 1 | `Host` (catch-all) | `authentik` | Browser SSO — header injected for Trusted Header Auth |
+
+### Journald retention
+
+`hosts/ligma/default.nix` caps journal at **512 MB / 7 days**. Logs ship to Graylog via Vector so unlimited local retention is unnecessary. Vacuum manually: `journalctl --vacuum-size=512M --vacuum-time=7d`.
+
+### Authentik (Podman containers)
+
+Authentik runs as three containers on a dedicated `authentik_network` bridge:
+
+| Container | Image | Role |
+|---|---|---|
+| `authentik-redis` | `redis:7-alpine` | Celery broker + cache |
+| `authentik-server` | `ghcr.io/goauthentik/server:<tag>` | Web UI + embedded outpost (port 9000) |
+| `authentik-worker` | `ghcr.io/goauthentik/server:<tag>` | Celery worker |
+
+PostgreSQL runs as a native NixOS service at `/ligma/ligma/authentik/postgresql`. Both server and worker bind-mount `/run/postgresql` and connect via Unix socket. A `local authentik authentik trust` pg_hba rule (prepended via `lib.mkBefore`) bypasses peer auth since container UIDs don't match the OS `authentik` user.
+
+**Renovate pin**: add `# renovate: datasource=docker depName=ghcr.io/goauthentik/server` above the `authTag` line in `authentik.nix`.
 
 ### Podman
 
