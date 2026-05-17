@@ -522,9 +522,11 @@
               href      = "https://{{HOMEPAGE_VAR_GRAFANA_URL}}";
               widget = {
                 type     = "grafana";
+                fields   = ["dashboards" "datasources"];
                 url      = "https://{{HOMEPAGE_VAR_GRAFANA_URL}}";
                 username = "{{HOMEPAGE_VAR_GRAFANA_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}";
+                version  = 2;
               };
             };
           }
