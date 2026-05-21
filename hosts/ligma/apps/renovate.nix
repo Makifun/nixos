@@ -16,8 +16,7 @@ let
     hostRules:
       - matchHost: git.makifun.se
         hostType: docker
-        username: renovate-bot
-        password: "{{ env.RENOVATE_TOKEN }}"
+        token: "{{ env.RENOVATE_TOKEN }}"
       - matchHost: github.com
         token: "{{ env.GITHUB_COM_TOKEN }}"
     repositories:
