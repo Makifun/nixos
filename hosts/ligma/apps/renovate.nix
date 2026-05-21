@@ -14,10 +14,10 @@ let
     prHourlyLimit: 0
     prConcurrentLimit: 0
     hostRules:
-      - matchHost: git.makifun.se
+      - matchHost: https://git.makifun.se
         hostType: docker
         token: "{{ env.RENOVATE_TOKEN }}"
-      - matchHost: github.com
+      - matchHost: https://github.com
         token: "{{ env.GITHUB_COM_TOKEN }}"
     repositories:
       - "makifun/authentik"
