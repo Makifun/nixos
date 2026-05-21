@@ -1,20 +1,25 @@
 { config, pkgs, ... }:
 let
   # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
-  renovateTag = "43.176.9";
-  dataDir     = "/ligma/ligma/renovate";
-  tokenFile   = "${dataDir}/token";
+  renovateTag    = "43.176.9";
+  dataDir        = "/ligma/ligma/renovate";
+  tokenFile      = "${dataDir}/token";
+  githubTokenFile = config.sops.secrets."renovate-github-token".path;
   renovateConfig = pkgs.writeText "renovate-config.yaml" ''
     platform: gitea
     endpoint: https://git.makifun.se/
     gitAuthor: "Renovate Bot <renovate@makifun.se>"
     baseDir: /data
     binarySource: global
+    prHourlyLimit: 0
+    prConcurrentLimit: 0
     hostRules:
       - matchHost: git.makifun.se
         hostType: docker
         username: renovate-bot
         password: "{{ env.RENOVATE_TOKEN }}"
+      - matchHost: github.com
+        token: "{{ env.GITHUB_COM_TOKEN }}"
     repositories:
       - "makifun/authentik"
       - "makifun/graylog"
@@ -25,6 +30,12 @@ let
   '';
 in
 {
+  sops.secrets."renovate-github-token" = {
+    format   = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner    = config.services.forgejo.user;
+  };
+
   systemd.tmpfiles.rules = [
     "d '${dataDir}' 0750 ${config.services.forgejo.user} ${config.services.forgejo.group} - -"
   ];
@@ -43,6 +54,7 @@ in
       podman run --rm \
         --user "$(id -u ${config.services.forgejo.user})" \
         -e RENOVATE_TOKEN="$(cat ${tokenFile})" \
+        -e GITHUB_COM_TOKEN="$(cat ${githubTokenFile})" \
         -e RENOVATE_CONFIG_FILE=/config.yaml \
         -e GOROOT=${pkgs.go}/share/go \
         -v ${renovateConfig}:/config.yaml:ro \
