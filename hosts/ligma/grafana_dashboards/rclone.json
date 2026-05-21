@@ -905,8 +905,8 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "increase(rclone_bytes_transferred_total{instance=~\"$instance\"}[$__rate_interval])",
-          "legendFormat": "Data transferred",
+          "expr": "rclone_bytes_transferred_total{instance=~\"$instance\"}",
+          "legendFormat": "Total data transferred",
           "refId": "A"
         }
       ],
