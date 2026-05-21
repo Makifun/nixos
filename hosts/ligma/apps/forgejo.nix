@@ -230,7 +230,7 @@
         forgejo admin user generate-access-token \
           --username renovate-bot \
           --token-name renovate \
-          --scopes "read:misc,read:organization,write:issue,write:repository,read:user" \
+          --scopes "read:misc,read:organization,write:issue,write:repository,read:user,read:package" \
           --raw 2>/dev/null \
           | tr -d '\n' > "$token_file"
         if [ -s "$token_file" ]; then

@@ -104,7 +104,7 @@ NFS exports (restricted to specific IPs — `hosts/ligma/apps/nfs.nix`):
 | `vector.nix` | Vector log shipper | Ships all systemd journal logs to Graylog GELF UDP (port 12201). `ExecStartPre` waits for port 12201 to be bound before starting (avoids permanent ECONNREFUSED on boot race). |
 | `omni.nix` | Sidero Omni (Talos cluster manager) | Container at port 9999 loopback (Traefik fronted); SideroLink WG UDP 50180 on `${ligmaIP}` (LAN-only); SAML auth via Authentik |
 | `autoupgrade-notify.nix` | Gotify notifier on `nixos-upgrade` | Templated `OnSuccess`/`OnFailure` units; failure path attaches the last 40 journal lines |
-| `renovate.nix` | Renovate dependency updater | Hourly Podman one-shot (systemd timer); token in SOPS as `renovate-token`; `renovate-bot` admin user auto-provisioned by `forgejo-provision`; cache at `/ligma/ligma/renovate/`; **one-time bootstrap**: create token for `renovate-bot` in Forgejo → add to SOPS |
+| `renovate.nix` | Renovate dependency updater | Hourly Podman one-shot (systemd timer); `renovate-bot` admin user + API token auto-provisioned by `forgejo-provision` on first boot; token written to `/ligma/ligma/renovate/token` (persists across reboots on zstorage); scopes: `read:misc,read:organization,write:issue,write:repository,read:user,read:package`. To regenerate token (e.g. after scope change): `rm /ligma/ligma/renovate/token && systemctl restart forgejo-provision`. GitHub token for release notes in SOPS as `renovate-github-token`, mounted into container as `GITHUB_COM_TOKEN`. |
 
 ### Traefik + Authentik integration
 
