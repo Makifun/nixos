@@ -51,8 +51,8 @@ sops hosts/ligma/secrets.yaml
 
 ### Flake Structure
 
-- **`flake.nix`** — Defines two outputs: `nixosConfigurations.ligma` (production) and `nixosConfigurations.minimaliso` (bootstrap ISO). Inputs: nixpkgs (25.11), disko, impermanence, sops-nix. **Note: authentik-nix was removed** — Authentik now runs as Podman containers.
-- **`common/`** — Modules applied to all hosts via `common/default.nix`.
+- **`flake.nix`** — Defines two outputs: `nixosConfigurations.ligma` (production) and `nixosConfigurations.minimaliso` (bootstrap ISO). Inputs: nixpkgs (unstable, stateVersion 25.11), disko, impermanence, sops-nix. **Note: authentik-nix was removed** — Authentik now runs as Podman containers.
+- **`common/`** — Modules applied to all hosts via `common/default.nix`: boot, users, sops, openssh, hardening, fail2ban, zfs-tuning, zram.
 - **`hosts/ligma/`** — Host-specific config, disk layout, and secrets.
 - **`modules/`** — Reusable custom modules (currently: podman).
 
@@ -62,9 +62,13 @@ Root `/` is a tmpfs (wiped on reboot). Persistent state lives in `/persist` (ZFS
 
 ### Disk Layout (`hosts/ligma/disko-config.nix`)
 
-Two encrypted drives:
-- **Main drive**: LUKS → ZFS pool `zroot` with datasets `/nix` and `/persist`, plus 1G EFI boot partition.
-- **Storage drive**: LUKS → ZFS pool `zstorage` with `/ligma` dataset (NFS-exported).
+Three encrypted drives:
+
+- **Main drive** (`scsi-0QEMU_QEMU_HARDDISK_nixos`): LUKS → ZFS pool `zroot` with datasets `/nix` and `/persist` (refreservation: 10G), plus 1G EFI partition.
+- **Storage drive** (`scsi-0QEMU_QEMU_HARDDISK_ligma`): LUKS → ZFS pool `zstorage` with `/ligma` dataset (refreservation: 5G). All app persistent data lives here.
+- **Cache SSD** (`scsi-0QEMU_QEMU_HARDDISK_cache`, 200 GB): LUKS → ext4 mounted at `/rclone-cache`. Used as rclone VFS cache (up to 185 GB).
+
+All ZFS pools: ashift=12, autotrim=on, compression=lz4, atime=off, xattr=sa. ARC limited to 1 GB (VM optimization).
 
 ### Secrets (`hosts/ligma/sops.nix`, `.sops.yaml`)
 
@@ -76,35 +80,41 @@ Age-based encryption with two recipients: the host's SSH key (`&hosts_ligma`) an
 
 ### Network / Firewall
 
-SSH restricted to `10.10.10.0/24`. NFTables firewall. IPv6 disabled globally. Only ports 80, 443, and 2049 (NFS) open externally.
+SSH restricted to `10.10.10.0/24`. NFTables firewall. IPv6 disabled globally. Traefik (80/443) reachable from `10.10.10.0/24` and `10.10.11.0/24` (WireGuard).
 
-NFS exports (restricted to specific IPs — `hosts/ligma/apps/nfs.nix`):
+NFS export (NFSv4 only — port 2049):
 - `/ligma/sugma` → sugma nodes `10.10.10.26`, `10.10.10.27`, `10.10.10.28` (rw, nfs-provisioner PVC storage)
-- `/cloud` → jonny `10.10.10.16` (rw, rclone FUSE mount re-exported; jonny mounts at `/mnt/cloud`)
+
+Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Sugma apps that used NFS `/cloud` (mediainfo) are currently disabled.
 
 ### Auto-upgrade
 
-`hosts/ligma/default.nix` enables `system.autoUpgrade` pulling from the GitHub flake. Changes pushed to the repo will be automatically applied.
+`hosts/ligma/default.nix` enables `system.autoUpgrade` pulling from the GitHub flake (`github:makifun/nixos`). Changes pushed to the repo are automatically applied with a randomised 30-min delay. Reboot window 03:00–06:00 (allowReboot=false means no auto-reboot outside window).
 
 ### Services (`hosts/ligma/apps/`)
 
-| File | Service | Notes |
-|---|---|---|
-| `traefik.nix` | Traefik reverse proxy | Handles TLS termination for all apps |
-| `authentik.nix` | Authentik SSO | Three Podman containers (`authentik_network`): Redis + server (port 9000) + worker. Native PostgreSQL at `/ligma/ligma/authentik/postgresql`. `/run/postgresql` bind-mounted with `trust` auth (no password). SOPS secret: `authentik_env`. |
-| `forgejo.nix` | Forgejo + Actions runner | Port 3010; SSH on 22222; waits for `podman-authentik-server` + `podman-authentik-worker` on boot |
-| `vaultwarden.nix` | Vaultwarden | Password manager |
-| `homepage.nix` | Homepage dashboard | Port 8082; nginx on 8083 serves `/images/`; connects to sugma k8s via kubeconfig |
-| `graylog.nix` | Graylog 7 log management | Port 9099; three Podman containers on `graylog_network`: MongoDB 8, Graylog-datanode 7, Graylog 7 |
-| `monitoring.nix` | Prometheus + Grafana | Prometheus port 9090, 30d retention; node_exporter port 9100 (systemd collector enabled); scrapes rclone RC `/metrics` on port 6969. Grafana port 3000, OIDC via Authentik (`grafana-sso` application), role from `groups` claim (`grafana_admin`→Admin, `app_admins`→Admin, `grafana_viewer`→Viewer). SOPS secrets: `grafana-secret-key`, `grafana-oauth-secret`. Rclone dashboard auto-provisioned from `grafana_dashboards/rclone.json` via `environment.etc` + dashboard provider at `/etc/grafana-dashboards`. |
-| `backrest.nix` | Backrest backup manager | Port 9898 loopback; restic-backed; auth disabled, gated by Authentik via Traefik; backs up all of `/ligma` daily |
-| `rclone.nix` | rclone S3 FUSE mount | Mounts S3 remote at `/cloud`; RC on port 6969 (`--rc-no-auth`); Prometheus scrapes `/metrics` from this port. Config at `/ligma/ligma/rclone/rclone.conf`. Re-exported via NFS + Samba. |
-| `samba.nix` | Samba/CIFS share | Exposes `/cloud` as `\\ligma\cloud`; guest access; `hosts allow` includes sugma nodes (10.10.10.26/27/28) for SMB CSI driver mounts |
-| `nfs.nix` | NFS server | Exports `/ligma/sugma` (sugma nodes only) and `/cloud` (jonny only); port 2049 |
-| `vector.nix` | Vector log shipper | Ships all systemd journal logs to Graylog GELF UDP (port 12201). `ExecStartPre` waits for port 12201 to be bound before starting (avoids permanent ECONNREFUSED on boot race). |
-| `omni.nix` | Sidero Omni (Talos cluster manager) | Container at port 9999 loopback (Traefik fronted); SideroLink WG UDP 50180 on `${ligmaIP}` (LAN-only); SAML auth via Authentik |
-| `autoupgrade-notify.nix` | Gotify notifier on `nixos-upgrade` | Templated `OnSuccess`/`OnFailure` units; failure path attaches the last 40 journal lines |
-| `renovate.nix` | Renovate dependency updater | Hourly Podman one-shot (systemd timer); `renovate-bot` admin user + API token auto-provisioned by `forgejo-provision` on first boot; token written to `/ligma/ligma/renovate/token` (persists across reboots on zstorage); scopes: `read:misc,read:organization,write:issue,write:repository,read:user,read:package`. To regenerate token (e.g. after scope change): `rm /ligma/ligma/renovate/token && systemctl restart forgejo-provision`. GitHub token for release notes in SOPS as `renovate-github-token`, mounted into container as `GITHUB_COM_TOKEN`. |
+| File | Service | Port | Notes |
+|---|---|---|---|
+| `traefik.nix` | Traefik reverse proxy | 80, 443, 8090 (dashboard) | TLS termination, Cloudflare DNS challenge, wildcard `*.makifun.se`. Dashboard loopback only. Trusted IP: 10.10.10.1 (OPNsense HAProxy). |
+| `authentik.nix` | Authentik SSO | 9000 (embedded outpost) | Three Podman containers (`authentik_network`): Redis + server + worker. Native PostgreSQL at `/ligma/ligma/authentik/postgresql`. `/run/postgresql` bind-mounted with `trust` auth. SOPS: `authentik_env`. |
+| `forgejo.nix` | Forgejo + Actions runner | 3010, SSH 22222 | `forgejo-provision` service auto-creates makifun/opnsense/renovate-bot users on every boot. Renovate token persists to `/ligma/ligma/renovate/token`. SOPS: `forgejo-admin-password`, `forgejo-admin-email`, `forgejo-oauth-secret`, `forgejo-runner-token`. |
+| `vaultwarden.nix` | Vaultwarden | 8310 | OIDC via Authentik. Signup disabled. fail2ban protection. SOPS: `vaultwarden_env`. |
+| `homepage.nix` | Homepage dashboard | 8082, 8083 (images) | nginx on 8083 serves `/images/` (Next.js can't serve custom public/). Connects to sugma k8s via SOPS kubeconfig. SOPS: `homepage-env`, `homepage-kubeconfig`. |
+| `graylog.nix` | Graylog 7 log management | 9099, GELF 12201/udp | Three Podman containers (`graylog_network`): MongoDB 8 + Graylog-datanode 7 + Graylog 7. Three-router priority split (see below). SOPS: `graylog-password-secret`, `graylog-root-password-sha2`. |
+| `monitoring.nix` | Prometheus + Grafana | 9090, 9100, 3000 | 30d retention. node_exporter (systemd collector). Scrapes rclone metrics on port **6970** (not RC port 6969). Grafana OIDC via Authentik, role from `groups` claim. SOPS: `grafana-secret-key`, `grafana-oauth-secret`. |
+| `backrest.nix` | Backrest backup manager | 9898 | Restic-backed S3. Backs up `/ligma/ligma` + `/ligma/sugma` (both `:ro`). `/ligma/restore` mounted rw for restore staging. Schedule: 04:00 UTC. Prune: 05:00 UTC. SOPS: `backrest-restic-password`, `backrest-repo-uri`, `backrest-aws-access-key-id`, `backrest-aws-secret-access-key`, `backrest-gotify-token`. |
+| `rclone.nix` | rclone S3 FUSE mount | 6969 (RC), 6970 (metrics) | Mounts S3 crypt remote at `/cloud`. VFS cache at `/rclone-cache` (185 GB max). `--rc-no-auth`, gated by Authentik. Restarts samba-smbd after mount. Config at `/ligma/ligma/rclone/rclone.conf`. |
+| `samba.nix` | Samba/CIFS share | 445 | Exposes `/cloud` as `\\ligma\cloud`. Guest access, force user=root (rclone FUSE owned by root). `hosts allow`: jonny (10.10.10.16) + sugma nodes (10.10.10.26-28, for SMB CSI when jellyfin/mediainfo re-enabled). |
+| `nfs.nix` | NFS server (v4 only) | 2049 | Exports `/ligma/sugma` to sugma nodes only. NFSv3 ports removed — k8s nfs-provisioner negotiates NFSv4. Includes bind mount for PVC UUID migration (see below). |
+| `vector.nix` | Vector log shipper | — | Ships journald → Graylog GELF UDP 12201. Waits for port 12201 before starting (boot race prevention). Filters: drops Graylog/Vector/distribution-registry noise to prevent loops. |
+| `omni.nix` | Sidero Omni (Talos cluster manager) | 9999 (UI), 50180/udp (WG), 8091 (machine API), 8098/6443 (k8s proxy) | Distroless container. SAML auth via Authentik. JWT key is OpenPGP ASCII-armor (not PEM). SOPS: `omni-account-uuid`, `omni-jwt-signing-key`. |
+| `gotify.nix` | Gotify push notifications | 8096 | Three-router split: `/outpost` callback, `X-Gotify-Key` header (API bypass), catch-all SSO. |
+| `apprise.nix` | Apprise notification aggregator | 8097 | Three-router split: `/outpost` callback, `/notify` path (API bypass for senders), catch-all SSO. |
+| `beszel.nix` | Beszel monitoring hub + agent | 8095 (hub), 45876 (agent) | Hub loopback. Agent runs host networking (must see host interfaces). Agent KEY from SOPS `beszel_agent_key`. Hub connects OUT to agents. |
+| `distribution.nix` | OCI registry mirrors | 5001-5004 | Four instances: dockerhub (5001), ghcr (5002), lscr (5003), quay (5004). Daily GC at 06:00 UTC. LAN-only via `mirror-lan-only` ipAllowList middleware. |
+| `unifi.nix` | UniFi Network Application | 8443 (UI), 8080 (inform), 3478/udp (STUN), 10001/udp (discovery) | Two Podman containers (`unifi_network`): MongoDB 8 + linuxserver/unifi. UI self-signed cert — Traefik uses `insecureSkipVerify`. PUID/PGID=1000, MEM_LIMIT=1024M. |
+| `autoupgrade-notify.nix` | Gotify notifier on `nixos-upgrade` | — | `OnSuccess`/`OnFailure` hooks; failure attaches last 40 journal lines (capped 3500 bytes). SOPS: `nixos-upgrade-gotify-token`. |
+| `renovate.nix` | Renovate dependency updater | — | Hourly Podman one-shot (systemd timer, 5m random delay). Token from `/ligma/ligma/renovate/token`. SOPS: `renovate-github-token` (GITHUB_COM_TOKEN, for release notes). To regenerate token: `rm /ligma/ligma/renovate/token && systemctl restart forgejo-provision`. |
 
 ### Traefik + Authentik integration
 
@@ -114,20 +124,21 @@ The Authentik embedded outpost (port 9000) injects response headers (lowercase, 
 
 Every service protected by the `authentik` middleware also needs a second router for
 `PathPrefix(/outpost.goauthentik.io)` pointing to `authentik-embedded-outpost` (no middleware)
-so the post-login callback reaches the outpost. See `traefik.nix` for the pattern.
+so the post-login callback reaches the outpost.
 
-**Graylog uses a three-router priority split** (`graylog.nix`) to support both browser SSO
-and Terraform/API token access on the same domain:
+**Three-router priority split** — used by Graylog, Gotify, and Apprise to support both browser SSO and API clients on the same domain:
 
 | Router | Priority | Rule | Middleware | Purpose |
 |--------|----------|------|------------|---------|
-| `graylog-outpost` | 30 | `Host + PathPrefix(/outpost.goauthentik.io)` | none | Authentik post-login callback |
-| `graylog-basic-auth` | 10 | `Host + HeaderRegexp(Authorization, ^Basic .+)` | none | Terraform API token access (bypasses SSO) |
-| `graylog` | 1 | `Host` (catch-all) | `authentik` | Browser SSO — header injected for Trusted Header Auth |
+| `*-outpost` | 30 | `Host + PathPrefix(/outpost.goauthentik.io)` | none | Authentik post-login callback |
+| `*-api` | 10 | Header match (e.g. `Authorization: Basic`, `X-Gotify-Key`) | none | API/token clients bypass SSO |
+| `*` | 1 | `Host` (catch-all) | `authentik` | Browser SSO |
+
+Graylog uses `Authorization: ^Basic .+` (Terraform API access). Gotify uses `X-Gotify-Key`. Apprise uses `PathPrefix(/notify)`.
 
 ### Journald retention
 
-`hosts/ligma/default.nix` caps journal at **512 MB / 7 days**. Logs ship to Graylog via Vector so unlimited local retention is unnecessary. Vacuum manually: `journalctl --vacuum-size=512M --vacuum-time=7d`.
+`hosts/ligma/default.nix` caps journal at **512 MB / 7 days**. Logs ship to Graylog via Vector. Vacuum manually: `journalctl --vacuum-size=512M --vacuum-time=7d`.
 
 ### Authentik (Podman containers)
 
@@ -145,24 +156,21 @@ PostgreSQL runs as a native NixOS service at `/ligma/ligma/authentik/postgresql`
 
 ### Podman
 
-`modules/podman.nix` configures Podman. Container images use the default location (`/var/lib/containers`), which is persisted via impermanence.
+`modules/podman.nix` configures Podman. Container images use the default location (`/var/lib/containers`), which is persisted via impermanence. All Podman bridge interfaces are trusted in the firewall (aardvark-dns). Custom networks (authentik_network, graylog_network, unifi_network) use subnets in `10.89.x.0/24`.
+
+**DNS quirk for multi-network containers**: aardvark-dns resolves Podman container names only within the same network. Containers in different networks that need to cross-resolve each other must use `10.88.0.1` (default Podman gateway) as DNS — aardvark-dns there resolves all networks. Used by unifi_network containers.
 
 ### Omni (Sidero Talos cluster manager)
 
-Self-hosted Omni runs as a Podman container on ligma. State (embedded etcd +
-SQLite) lives at `/ligma/ligma/omni/`. Auth is delegated to Authentik via SAML
-— no Traefik forwardAuth in front of the Omni router. The corresponding
-SAML provider, application, and policy binding are defined in the **authentik**
-repo at `omni.tf`; that must be `tofu apply`'d before deploying Omni so the
-metadata URL `https://auth.makifun.se/application/saml/omni/metadata/` resolves.
+Self-hosted Omni runs as a Podman container on ligma. State (embedded etcd + SQLite) lives at `/ligma/ligma/omni/`. Auth is delegated to Authentik via SAML — no Traefik forwardAuth in front of the Omni router. The corresponding SAML provider, application, and policy binding are defined in the **authentik** repo at `omni.tf`; that must be `tofu apply`'d before deploying Omni so the metadata URL resolves.
 
 Three SOPS secrets live in `hosts/ligma/secrets.yaml`:
 
 | Secret | Purpose | Format |
 |---|---|---|
-| `omni-account-uuid` | `--account-id` (passed via `OMNI_ACCOUNT_ID` from a sops-rendered env file) | bare UUID string |
+| `omni-account-uuid` | `--account-id` (passed via `OMNI_ACCOUNT_ID`) | bare UUID string |
 | `omni-jwt-signing-key` | `--private-key-source` for embedded-etcd master key encryption | **ASCII-armored OpenPGP private key** (gopenpgp), not raw PEM |
-| `omni-wireguard-key` | reserved, currently unused; Omni manages the SideroLink WG private key in its own etcd state | WG private key |
+| `omni-wireguard-key` | reserved, currently unused | WG private key |
 
 **Generate the PGP key** (one-time):
 
@@ -181,37 +189,49 @@ EOF
 nix run nixpkgs#gnupg -- --armor --export-secret-keys omni@makifun.se
 ```
 
-Paste the full `-----BEGIN PGP PRIVATE KEY BLOCK-----...END...` into sops as a
-YAML literal block (`omni-jwt-signing-key: |`). After editing the secret on a
-running ligma, `systemctl restart omni-prep podman-omni` to re-stage and
-re-load the key without a full rebuild.
+Paste the full `-----BEGIN PGP PRIVATE KEY BLOCK-----...END...` into sops as a YAML literal block (`omni-jwt-signing-key: |`). After editing the secret on a running ligma, `systemctl restart omni-prep podman-omni` to re-stage and re-load the key without a full rebuild.
 
 **SAML quirks worth knowing** (configured in the authentik repo, not here):
 
-- Provider `audience` must be `https://omni.makifun.se/saml/metadata` (the
-  metadata path), not the bare host. Omni rejects any other value.
-- The provider must include the default property mappings (email, name,
-  username, uid, upn) and pin `name_id_mapping` to the email mapping —
-  Authentik otherwise sends an empty `<saml:AttributeStatement/>` and Omni
-  cannot identify the user.
-- `--auth-saml-attribute-rules` maps Authentik's MS SOAP claim URIs
-  (`http://schemas.xmlsoap.org/ws/2005/05/identity/claims/...`) to Omni's
-  internal `identity` and `fullname` fields. Direction is
-  `saml-attr → omni-field`.
-- `--auth-saml-url` takes the metadata URL despite its name.
-  `--auth-saml-metadata` expects a local XML file path, not a URL.
+- Provider `audience` must be `https://omni.makifun.se/saml/metadata` (the metadata path), not the bare host. Omni rejects any other value.
+- The provider must include the default property mappings (email, name, username, uid, upn) and pin `name_id_mapping` to the email mapping — Authentik otherwise sends an empty `<saml:AttributeStatement/>` and Omni cannot identify the user.
+- `--auth-saml-attribute-rules` maps Authentik's MS SOAP claim URIs (`http://schemas.xmlsoap.org/ws/2005/05/identity/claims/...`) to Omni's internal `identity` and `fullname` fields.
+- `--auth-saml-url` takes the metadata URL despite its name. `--auth-saml-metadata` expects a local XML file path, not a URL.
 
 **Other gotchas:**
 
-- Omni's distroless image has no `/bin/sh` — entrypoint must be the binary
-  directly, no wrapper script.
-- The `--account-id` flag has no env-binding shown in `--help`, but cobra/viper
-  auto-binds `OMNI_ACCOUNT_ID`. We use that to keep the UUID out of `/nix/store`.
-- Required flags not obvious from `--help`: `--sqlite-storage-path`,
-  `--etcd-embedded-db-path`, `--machine-api-advertised-url`. Missing flags fail
-  with JSON-schema validation errors that name the missing config path.
-- `--initial-users` re-checks on every start and seeds new admin emails.
-  Existing users created via the UI are not touched.
+- Omni's distroless image has no `/bin/sh` — entrypoint must be the binary directly, no wrapper script.
+- The `--account-id` flag has no env-binding shown in `--help`, but cobra/viper auto-binds `OMNI_ACCOUNT_ID`.
+- Required flags not obvious from `--help`: `--sqlite-storage-path`, `--etcd-embedded-db-path`, `--machine-api-advertised-url`. Missing flags fail with JSON-schema validation errors that name the missing config path.
+- `--initial-users` re-checks on every start and seeds new admin emails. Existing users created via the UI are not touched.
+
+### Beszel monitoring
+
+Beszel hub (loopback port 8095) + agent (host networking, port 45876). Agent must run on host networking to see host interfaces. Hub connects OUT to agents — open firewall port 45876 to LAN.
+
+**Bootstrap sequence** (one-time, agent KEY not known until hub first runs):
+1. Deploy config (hub starts, agent fails without KEY — expected)
+2. Open https://beszel.makifun.se → create admin account
+3. Add system "ligma", host `10.88.0.1` (Podman gateway), port 45876
+4. Copy KEY value → `sops hosts/ligma/secrets.yaml` as `beszel_agent_key`
+5. `nh os switch` → agent picks up key and connects
+
+### Distribution registry mirrors
+
+Four OCI registry mirror instances, each a `docker.io/library/registry:3` container:
+
+| Instance | Port | Upstream |
+|---|---|---|
+| `dist-dockerhub` | 5001 | https://registry-1.docker.io |
+| `dist-ghcr` | 5002 | https://ghcr.io |
+| `dist-lscr` | 5003 | https://lscr.io |
+| `dist-quay` | 5004 | https://quay.io |
+
+Served at `{name}.mirror.makifun.se` behind `mirror-lan-only` ipAllowList middleware (10.10.10.0/24 only). Daily garbage collection at 06:00 UTC (systemd timer, stops containers → runs GC → restarts). Talos nodes and Podman are configured to pull from these mirrors. Logs filtered from Vector (OTEL disabled, debug spam suppressed).
+
+### NFS bind mount (PVC UUID migration)
+
+`nfs.nix` contains a bind mount for a PVC UUID change that happened after a miniflux restore. The old directory (`f72d460c`) is bind-mounted at the new PVC path (`c555d26d`) so NFS serves the correct data. When miniflux is fully migrated to the new PVC name (via the `pathPattern` provisioner fix in sugma), remove both the bind mount and its tmpfiles entry from `nfs.nix`.
 
 ### Homepage → Kubernetes integration
 
@@ -222,21 +242,15 @@ re-load the key without a full rebuild.
 - `KUBECONFIG` env var points to a SOPS secret rendered at runtime
 - Homepage uses the `homepage` ServiceAccount (scoped read-only ClusterRole) in the `homepage` namespace on sugma
 
-**SOPS secret `homepage-kubeconfig`** — kubeconfig YAML for the sugma cluster. Must be added to
-`secrets.yaml` after Flux applies `k8s/infra/homepage-rbac/` on sugma.
+**SOPS secret `homepage-kubeconfig`** — kubeconfig YAML for the sugma cluster. Must be added to `secrets.yaml` after Flux applies `k8s/infra/homepage-rbac/` on sugma.
 
 **One-time bootstrap** (run after `k8s/infra/homepage-rbac/` is deployed):
 
 ```bash
-# On a machine with sugma kubeconfig access:
 TOKEN=$(kubectl get secret homepage-token -n homepage -o jsonpath='{.data.token}' | base64 -d)
-SERVER="https://10.10.10.29:6443"
-
-# On ligma, add to secrets.yaml:
-sops hosts/ligma/secrets.yaml
 ```
 
-Add the following key (use `insecure-skip-tls-verify: true` since the API server uses self-signed cert):
+Add to `sops hosts/ligma/secrets.yaml`:
 
 ```yaml
 homepage-kubeconfig: |
@@ -277,17 +291,11 @@ annotations:
   gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_MYAPP_TOKEN}}"
 ```
 
-`{{HOMEPAGE_VAR_*}}` substitution works in annotations (same pipeline as YAML config).
-`pod-selector` must match actual pod labels — homepage defaults to `app.kubernetes.io/name=<name>`
-which often doesn't match. Use `gethomepage.dev/pod-selector` to override.
+`{{HOMEPAGE_VAR_*}}` substitution works in annotations. `pod-selector` must match actual pod labels — homepage defaults to `app.kubernetes.io/name=<name>` which often doesn't match.
 
 ### Auto-upgrade notifications
 
-`apps/autoupgrade-notify.nix` hooks `OnSuccess=`/`OnFailure=` on the
-`nixos-upgrade.service` to a templated oneshot (`nixos-upgrade-notify@%i`)
-that posts to `https://gotify.makifun.se`. Failure messages include the last
-40 journal lines from `nixos-upgrade.service`. The Gotify app token is in
-SOPS as `nixos-upgrade-gotify-token`. Test with:
+`apps/autoupgrade-notify.nix` hooks `OnSuccess=`/`OnFailure=` on the `nixos-upgrade.service` to a templated oneshot (`nixos-upgrade-notify@%i`) that posts to `https://gotify.makifun.se`. Failure messages include the last 40 journal lines (capped at 3500 bytes). SOPS: `nixos-upgrade-gotify-token`. Test with:
 
 ```bash
 sudo systemctl start nixos-upgrade-notify@success.service
