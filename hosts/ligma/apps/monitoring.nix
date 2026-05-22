@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 {
   # ---- Prometheus + node_exporter ---------------------------------------------
   environment.persistence."/persist".directories = [
@@ -58,6 +58,11 @@
     mode   = "0444";
   };
 
+  environment.etc."grafana-dashboards/rclone-transfers.json" = {
+    source = ../grafana_dashboards/rclone-transfers.json;
+    mode   = "0444";
+  };
+
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/grafana' 0700 grafana grafana - -"
   ];
@@ -77,6 +82,7 @@
   services.grafana = {
     enable = true;
     dataDir = "/ligma/ligma/grafana";
+    declarativePlugins = [ pkgs.grafanaPlugins.yesoreyeram-infinity-datasource ];
 
     settings = {
       server = {
@@ -104,17 +110,26 @@
       users.auto_assign_org_role = "Viewer";
       security.secret_key        = "$__file{${config.sops.secrets.grafana-secret-key.path}}";
       analytics.reporting_enabled = false;
+      # Required for Infinity datasource to query localhost URLs (rclone RC API).
+      "plugin.yesoreyeram-infinity-datasource".allow_local_mode = true;
     };
 
     provision = {
       enable = true;
-      datasources.settings.datasources = [{
-        name      = "Prometheus";
-        type      = "prometheus";
-        url       = "http://127.0.0.1:9090";
-        isDefault = true;
-        jsonData.timeInterval = "1m";
-      }];
+      datasources.settings.datasources = [
+        {
+          name      = "Prometheus";
+          type      = "prometheus";
+          url       = "http://127.0.0.1:9090";
+          isDefault = true;
+          jsonData.timeInterval = "1m";
+        }
+        {
+          name   = "Infinity";
+          type   = "yesoreyeram-infinity-datasource";
+          access = "proxy";
+        }
+      ];
       dashboards.settings.providers = [{
         name    = "default";
         options.path = "/etc/grafana-dashboards";
