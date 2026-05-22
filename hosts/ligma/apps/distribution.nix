@@ -7,10 +7,10 @@ let
   # One Distribution instance per upstream registry.
   # Each gets its own port, storage directory, and subdomain.
   registries = {
-    dockerhub = { port = 5001; upstream = "https://registry-1.docker.io"; };
-    ghcr      = { port = 5002; upstream = "https://ghcr.io";               };
-    lscr      = { port = 5003; upstream = "https://lscr.io";               };
-    quay      = { port = 5004; upstream = "https://quay.io";               };
+    dockerhub = { port = 5001; debugPort = 5011; upstream = "https://registry-1.docker.io"; };
+    ghcr      = { port = 5002; debugPort = 5012; upstream = "https://ghcr.io";               };
+    lscr      = { port = 5003; debugPort = 5013; upstream = "https://lscr.io";               };
+    quay      = { port = 5004; debugPort = 5014; upstream = "https://quay.io";               };
   };
 
   mkConfig = upstream: builtins.toJSON {
@@ -20,7 +20,16 @@ let
       filesystem.rootdirectory = "/var/lib/registry";
       delete.enabled = true;
     };
-    http.addr = ":5000";
+    http = {
+      addr = ":5000";
+      debug = {
+        addr = ":5010";
+        prometheus = {
+          enabled = true;
+          path    = "/metrics";
+        };
+      };
+    };
     proxy.remoteurl = upstream;
   };
 in
@@ -54,7 +63,10 @@ in
   virtualisation.oci-containers.containers = lib.mapAttrs' (name: cfg:
     lib.nameValuePair "dist-${name}" {
       image       = "docker.io/library/registry:${registryTag}";
-      ports       = [ "127.0.0.1:${toString cfg.port}:5000" ];
+      ports       = [
+        "127.0.0.1:${toString cfg.port}:5000"
+        "127.0.0.1:${toString cfg.debugPort}:5010"
+      ];
       environment = { OTEL_SDK_DISABLED = "true"; };
       volumes = [
         "/etc/distribution/${name}/config.json:/etc/docker/registry/config.yml:ro"
