@@ -66,7 +66,7 @@
       #   parted /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache -- mkpart primary 1MiB 100%
       #   cryptsetup luksFormat /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache-part1
       #   cryptsetup open /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache-part1 crypted_cache
-      #   mkfs.ext4 /dev/mapper/crypted_cache
+      #   mkfs.ext4 -m 1 /dev/mapper/crypted_cache
       #   cryptsetup close crypted_cache
       cache = {
         type = "disk";
@@ -85,6 +85,7 @@
                   format = "ext4";
                   mountpoint = "/rclone-cache";
                   mountOptions = [ "defaults" "discard" "nofail" ];
+                  extraArgs = [ "-m" "1" ];
                 };
               };
             };
