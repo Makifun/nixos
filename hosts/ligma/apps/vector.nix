@@ -1,7 +1,7 @@
 { pkgs, ... }:
 let
   # renovate: datasource=docker depName=timberio/vector
-  vectorTag = "0.55.0-alpine";
+  vectorTag = "0.55.0-debian";
 in
 {
   systemd.tmpfiles.rules = [
