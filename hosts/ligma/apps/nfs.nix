@@ -2,7 +2,16 @@
 {
   systemd.tmpfiles.rules = [
     "d '/ligma/sugma' 0755 root root - -"
+    # Mount point for bind — actual data lives in old PVC dir (f72d460c)
+    "d '/ligma/sugma/miniflux-minifluxdb-data-pvc-c555d26d-c845-4972-b4ca-317a40e0a8e9' 0755 root root - -"
   ];
+
+  # PVC UUID changed after restore; bind old data dir at new path so NFS serves it correctly.
+  fileSystems."/ligma/sugma/miniflux-minifluxdb-data-pvc-c555d26d-c845-4972-b4ca-317a40e0a8e9" = {
+    device  = "/ligma/sugma/miniflux-minifluxdb-data-pvc-f72d460c-88a7-4acc-8104-853c66caf7f1";
+    fsType  = "none";
+    options = [ "bind" ];
+  };
 
   # NFSv3 requires rpcbind (111), mountd (20048), and nfsd (2049).
   # lockd/statd ports are pinned so they can be firewalled (otherwise random on each boot).
