@@ -38,7 +38,7 @@ in
         {
           id   = "ligma-daily";
           repo = "ligma-s3";
-          paths = [ "/ligma" ];
+          paths = [ "/ligma/ligma" "/ligma/sugma" ];
           schedule.cron = "0 4 * * *";
           retention.policyTimeBucketed = {
             daily   = 30;
@@ -66,6 +66,7 @@ in
     "d '${backrestBase}/data'   0750 root root - -"
     "d '${backrestBase}/config' 0750 root root - -"
     "d '${backrestBase}/cache'  0750 root root - -"
+    "d '/ligma/restore'         0755 root root - -"
   ];
 
   # Write config.json on first start only — backrest may modify it via the UI thereafter.
@@ -94,7 +95,9 @@ in
       "${backrestBase}/data:/data"
       "${backrestBase}/config:/config"
       "${backrestBase}/cache:/cache"
-      "/ligma:/ligma:ro"
+      "/ligma/ligma:/ligma/ligma:ro"
+      "/ligma/sugma:/ligma/sugma:ro"
+      "/ligma/restore:/ligma/restore"
     ];
   };
 
