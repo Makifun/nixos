@@ -195,11 +195,11 @@
                 {
                   refId             = "A";
                   queryType         = "range";
-                  relativeTimeRange = { from = 600; to = 0; };
+                  relativeTimeRange = { from = 120; to = 0; };
                   datasourceUid     = "loki";
                   model = {
                     refId     = "A";
-                    expr      = ''count_over_time({job="ligma-unifi"} |= "|400|WiFi Client Connected|" [10m])'';
+                    expr      = ''count_over_time({job="ligma-unifi"} |= "|400|WiFi Client Connected|" [2m])'';
                     queryType = "range";
                     instant   = false;
                     range     = true;
@@ -236,11 +236,11 @@
                 {
                   refId             = "A";
                   queryType         = "range";
-                  relativeTimeRange = { from = 600; to = 0; };
+                  relativeTimeRange = { from = 120; to = 0; };
                   datasourceUid     = "loki";
                   model = {
                     refId     = "A";
-                    expr      = ''count_over_time({job=~"ligma-podman-authentik-.+"} |~ "Login of user .+ was successful" [10m])'';
+                    expr      = ''count_over_time({job=~"ligma-podman-authentik-.+"} |~ "Login of user .+ was successful" [2m])'';
                     queryType = "range";
                     instant   = false;
                     range     = true;
@@ -277,11 +277,11 @@
                 {
                   refId             = "A";
                   queryType         = "range";
-                  relativeTimeRange = { from = 600; to = 0; };
+                  relativeTimeRange = { from = 120; to = 0; };
                   datasourceUid     = "loki";
                   model = {
                     refId     = "A";
-                    expr      = ''count_over_time({job=~"ligma-podman-authentik-.+"} |~ "Failed to authenticate user|password mismatch" [10m])'';
+                    expr      = ''count_over_time({job=~"ligma-podman-authentik-.+"} |~ "Failed to authenticate user|password mismatch" [2m])'';
                     queryType = "range";
                     instant   = false;
                     range     = true;
