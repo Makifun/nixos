@@ -202,6 +202,13 @@ in
     wants = [ "podman.socket" ];
   };
 
+  # Restart the container whenever the config file changes in the Nix store.
+  # environment.etc creates a symlink to the Nix store; the container bind-mounts
+  # the resolved inode and won't see updates without a restart.
+  systemd.services.podman-alloy.restartTriggers = [
+    config.environment.etc."alloy/config.alloy".source
+  ];
+
   virtualisation.oci-containers.containers.alloy = {
     image        = "docker.io/grafana/alloy:${alloyTag}";
     # host + pid networking required for journal access and full node metrics.
