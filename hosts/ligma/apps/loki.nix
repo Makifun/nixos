@@ -53,15 +53,9 @@ in
     "d '${lokiBase}/rules'  0750 10001 10001 - -"
   ];
 
-  # Loki binds to the LAN interface so all hosts can push logs to it.
-  # Firewall restricts access to the homelab subnet only.
-  networking.firewall.extraInputRules = ''
-    ip saddr 10.10.10.0/24 tcp dport ${toString lokiPort} accept comment "loki from LAN"
-  '';
-
   virtualisation.oci-containers.containers.loki = {
     image   = "docker.io/grafana/loki:${lokiTag}";
-    ports   = [ "10.10.10.13:${toString lokiPort}:${toString lokiPort}" ];
+    ports   = [ "127.0.0.1:${toString lokiPort}:${toString lokiPort}" ];
     volumes = [
       "/etc/loki/config.yaml:/etc/loki/config.yaml:ro"
       "${lokiBase}:/loki"
@@ -73,5 +67,41 @@ in
   systemd.services.podman-alloy = {
     after = [ "podman-loki.service" ];
     wants = [ "podman-loki.service" ];
+  };
+
+  # ---------------------------------------------------------------------------
+  # Traefik — three-router split
+  #   priority 30: Authentik outpost callback
+  #   priority 10: /loki/api/v1/push — no SSO (Alloy agents push here)
+  #   priority  1: everything else   — Authentik SSO
+  # ---------------------------------------------------------------------------
+  services.traefik.dynamicConfigOptions.http = {
+    routers = {
+      loki-outpost = {
+        rule        = "Host(`loki.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        priority    = 30;
+        entryPoints = [ "websecure" ];
+        service     = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
+      loki-push = {
+        rule        = "Host(`loki.makifun.se`) && PathPrefix(`/loki/api/v1/push`)";
+        priority    = 10;
+        entryPoints = [ "websecure" ];
+        service     = "loki-svc";
+        tls.certResolver = "letsencrypt";
+      };
+      loki = {
+        rule        = "Host(`loki.makifun.se`)";
+        priority    = 1;
+        entryPoints = [ "websecure" ];
+        service     = "loki-svc";
+        middlewares = [ "authentik" ];
+        tls.certResolver = "letsencrypt";
+      };
+    };
+    services."loki-svc".loadBalancer.servers = [
+      { url = "http://127.0.0.1:${toString lokiPort}"; }
+    ];
   };
 }

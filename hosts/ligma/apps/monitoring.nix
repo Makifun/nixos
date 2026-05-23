@@ -13,8 +13,9 @@
   services.prometheus = {
     enable = true;
     port = 9090;
+    listenAddress = "127.0.0.1";
     retentionTime = "30d";
-    # Remote_write receiver for Alloy agents on all hosts.
+    # Remote_write receiver for Alloy agents (pushed through Traefik).
     extraFlags = [ "--web.enable-remote-write-receiver" ];
 
     scrapeConfigs = [
@@ -48,11 +49,6 @@
       }
     ];
   };
-
-  # Open Prometheus port to LAN for Alloy remote_write from other hosts.
-  networking.firewall.extraInputRules = ''
-    ip saddr 10.10.10.0/24 tcp dport 9090 accept comment "prometheus remote_write from LAN"
-  '';
 
   # ---- Grafana ----------------------------------------------------------------
   environment.etc."grafana-dashboards/rclone.json" = {
@@ -165,14 +161,45 @@
 
   # ---- Traefik ----------------------------------------------------------------
   # Grafana handles auth itself via OIDC redirect — no Authentik middleware.
-  # Import dashboard ID 13560 from grafana.com for rclone metrics.
   services.traefik.dynamicConfigOptions.http = {
-    routers.grafana = {
-      rule        = "Host(`grafana.makifun.se`)";
-      entryPoints = [ "websecure" ];
-      service     = "grafana-svc";
-      tls.certResolver = "letsencrypt";
+    routers = {
+      grafana = {
+        rule        = "Host(`grafana.makifun.se`)";
+        entryPoints = [ "websecure" ];
+        service     = "grafana-svc";
+        tls.certResolver = "letsencrypt";
+      };
+
+      # Prometheus — three-router split
+      #   priority 30: Authentik outpost callback
+      #   priority 10: /api/v1/write — no SSO (Alloy remote_write)
+      #   priority  1: everything else — Authentik SSO
+      prometheus-outpost = {
+        rule        = "Host(`prometheus.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        priority    = 30;
+        entryPoints = [ "websecure" ];
+        service     = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
+      prometheus-write = {
+        rule        = "Host(`prometheus.makifun.se`) && PathPrefix(`/api/v1/write`)";
+        priority    = 10;
+        entryPoints = [ "websecure" ];
+        service     = "prometheus-svc";
+        tls.certResolver = "letsencrypt";
+      };
+      prometheus = {
+        rule        = "Host(`prometheus.makifun.se`)";
+        priority    = 1;
+        entryPoints = [ "websecure" ];
+        service     = "prometheus-svc";
+        middlewares = [ "authentik" ];
+        tls.certResolver = "letsencrypt";
+      };
     };
-    services."grafana-svc".loadBalancer.servers = [{ url = "http://127.0.0.1:3000"; }];
+    services = {
+      "grafana-svc".loadBalancer.servers    = [{ url = "http://127.0.0.1:3000"; }];
+      "prometheus-svc".loadBalancer.servers = [{ url = "http://127.0.0.1:9090"; }];
+    };
   };
 }
