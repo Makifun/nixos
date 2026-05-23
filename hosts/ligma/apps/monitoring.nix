@@ -188,8 +188,8 @@
               title     = "WiFi Client Connected";
               condition = "C";
               "for"     = "0s";
-              annotations = { summary = "New WiFi client connected"; };
-              noDataState  = "NoData";
+              annotations = { summary = ''WiFi: {{ $labels.client }} connected''; };
+              noDataState  = "OK";
               execErrState = "Error";
               data = [
                 {
@@ -199,7 +199,7 @@
                   datasourceUid     = "loki";
                   model = {
                     refId     = "A";
-                    expr      = ''count_over_time({job="ligma-unifi"} |= "|400|WiFi Client Connected|" [2m])'';
+                    expr      = ''count_over_time({job="ligma-unifi"} |= "|400|WiFi Client Connected|" | regexp `UNIFIclientHostname=(?P<client>[^ ]+)` [2m])'';
                     queryType = "range";
                     instant   = false;
                     range     = true;
@@ -230,7 +230,7 @@
               condition = "C";
               "for"     = "0s";
               annotations = { summary = "Authentik login successful"; };
-              noDataState  = "NoData";
+              noDataState  = "OK";
               execErrState = "Error";
               data = [
                 {
@@ -271,7 +271,7 @@
               condition = "C";
               "for"     = "0s";
               annotations = { summary = "Authentik login failed"; };
-              noDataState  = "NoData";
+              noDataState  = "OK";
               execErrState = "Error";
               data = [
                 {
