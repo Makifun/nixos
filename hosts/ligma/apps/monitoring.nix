@@ -311,26 +311,35 @@
     };
   };
 
-  # Copy Infinity plugin and write Gotify token env file before Grafana starts.
-  # ExecStartPre list runs in order; both scripts run as root.
+  # systemd reads EnvironmentFile before ExecStartPre, so the env file must
+  # exist at service start time. A dedicated setup service writes it first.
+  systemd.services.grafana-env-setup = {
+    description = "Write Grafana runtime env file from SOPS secrets";
+    before      = [ "grafana.service" ];
+    requiredBy  = [ "grafana.service" ];
+    serviceConfig = {
+      Type            = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      printf 'GOTIFY_TOKEN=%s\n' \
+        "$(tr -d '\n' < ${config.sops.secrets.grafana-gotify-token.path})" \
+        > /run/grafana-env
+      chmod 400 /run/grafana-env
+    '';
+  };
+
+  # Copy Infinity plugin into Grafana's writable plugins dir before start.
   systemd.services.grafana.serviceConfig =
     let src = pkgs.grafanaPlugins.yesoreyeram-infinity-datasource;
     in {
-      ExecStartPre = [
-        (toString (pkgs.writeShellScript "grafana-install-infinity" ''
-          dst=/ligma/ligma/grafana/plugins/yesoreyeram-infinity-datasource
-          rm -rf "$dst"
-          mkdir -p "$dst"
-          cp -r --no-preserve=mode,ownership ${src}/. "$dst/"
-          chmod +x "$dst"/gpx_infinity_*
-        ''))
-        (toString (pkgs.writeShellScript "grafana-write-env" ''
-          printf 'GOTIFY_TOKEN=%s\n' \
-            "$(tr -d '\n' < ${config.sops.secrets.grafana-gotify-token.path})" \
-            > /run/grafana-env
-          chmod 400 /run/grafana-env
-        ''))
-      ];
+      ExecStartPre = toString (pkgs.writeShellScript "grafana-install-infinity" ''
+        dst=/ligma/ligma/grafana/plugins/yesoreyeram-infinity-datasource
+        rm -rf "$dst"
+        mkdir -p "$dst"
+        cp -r --no-preserve=mode,ownership ${src}/. "$dst/"
+        chmod +x "$dst"/gpx_infinity_*
+      '');
       EnvironmentFile = "/run/grafana-env";
     };
 
