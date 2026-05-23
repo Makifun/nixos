@@ -119,6 +119,7 @@
       datasources.settings.datasources = [
         {
           name      = "Prometheus";
+          uid       = "prometheus";
           type      = "prometheus";
           url       = "http://127.0.0.1:9090";
           isDefault = true;
