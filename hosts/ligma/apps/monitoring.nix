@@ -175,7 +175,7 @@
           receiver        = "Gotify";
           group_wait      = "30s";
           group_interval  = "5m";
-          repeat_interval = "1h";
+          repeat_interval = "5m";
         }];
 
         rules.settings.groups = [{
