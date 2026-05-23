@@ -36,7 +36,7 @@ in
       RemainAfterExit = true;
     };
     path   = [ pkgs.podman ];
-    script = "podman network exists authentik_network || podman network create authentik_network";
+    script = "podman network exists authentik_network || podman network create --subnet 10.89.2.0/24 authentik_network";
   };
 
   services.postgresql = {
