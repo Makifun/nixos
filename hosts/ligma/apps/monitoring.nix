@@ -145,8 +145,9 @@
     let src = pkgs.grafanaPlugins.yesoreyeram-infinity-datasource;
     in toString (pkgs.writeShellScript "grafana-install-infinity" ''
       dst=/ligma/ligma/grafana/plugins/yesoreyeram-infinity-datasource
+      rm -rf "$dst"
       mkdir -p "$dst"
-      cp -r ${src}/. "$dst/"
+      cp -r --no-preserve=mode,ownership ${src}/. "$dst/"
     '');
 
   # ---- Traefik ----------------------------------------------------------------
