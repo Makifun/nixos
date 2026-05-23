@@ -164,8 +164,9 @@
             settings = {
               url        = "https://gotify.makifun.se/message?token=\${GOTIFY_TOKEN}";
               httpMethod = "POST";
-              # message field replaces the entire HTTP body (Grafana 10+).
-              message = ''{"title":"{{ .Title }}","message":"{{ index .CommonAnnotations "summary" }}","priority":5}'';
+              # Grafana webhook always sends its own JSON body; `message` sets
+              # only the `message` field within that payload. Keep it plain text.
+              message = "{{ range .Alerts.Firing }}{{ .Annotations.summary }}\n{{ end }}";
             };
           }];
         }];
