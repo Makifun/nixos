@@ -66,6 +66,11 @@
     mode   = "0444";
   };
 
+  environment.etc."grafana-dashboards/podman-containers.json" = {
+    source = ../grafana_dashboards/podman-containers.json;
+    mode   = "0444";
+  };
+
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma/grafana' 0700 grafana grafana - -"
   ];

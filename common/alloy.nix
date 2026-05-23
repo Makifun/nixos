@@ -17,6 +17,8 @@ in
   virtualisation.podman = {
     enable = true;
     defaultNetwork.settings.dns_enabled = true;
+    # Socket required by prometheus-podman-exporter container.
+    dockerSocket.enable = true;
   };
 
   environment.etc."alloy/config.alloy".text = ''
@@ -157,6 +159,22 @@ in
       forward_to = [prometheus.relabel.node_instance.receiver]
     }
 
+    // ── Podman container metrics via prometheus-podman-exporter ───────────────
+
+    prometheus.scrape "podman_exporter" {
+      targets    = [{"__address__" = "127.0.0.1:9882"}]
+      job_name   = "podman"
+      forward_to = [prometheus.relabel.podman_instance.receiver]
+    }
+
+    prometheus.relabel "podman_instance" {
+      forward_to = [prometheus.remote_write.prometheus.receiver]
+      rule {
+        target_label = "instance"
+        replacement  = "${hostname}"
+      }
+    }
+
     // ── Prometheus remote write ────────────────────────────────────────────────
 
     prometheus.remote_write "prometheus" {
@@ -166,6 +184,23 @@ in
       external_labels = { host = "${hostname}" }
     }
   '';
+
+  # renovate: datasource=docker depName=quay.io/navidys/prometheus-podman-exporter
+  # podman-exporter uses libpod directly → needs the Podman socket.
+  # Runs as root (required for rootful Podman socket access).
+  virtualisation.oci-containers.containers.podman-exporter = {
+    image        = "quay.io/navidys/prometheus-podman-exporter:v1.21.0";
+    ports        = [ "127.0.0.1:9882:9882" ];
+    volumes      = [ "/run/podman/podman.sock:/run/podman/podman.sock" ];
+    environment  = { CONTAINER_HOST = "unix:///run/podman/podman.sock"; };
+    extraOptions = [ "-u" "root" "--security-opt" "label=type:container_runtime_t" ];
+    cmd          = [ "--collector.enable-all" ];
+  };
+
+  systemd.services.podman-podman-exporter = {
+    after = [ "podman.socket" ];
+    wants = [ "podman.socket" ];
+  };
 
   virtualisation.oci-containers.containers.alloy = {
     image        = "docker.io/grafana/alloy:${alloyTag}";
