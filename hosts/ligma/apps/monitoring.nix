@@ -14,21 +14,14 @@
     enable = true;
     port = 9090;
     retentionTime = "30d";
-    # Alloy remote_writes node metrics here.
+    # Remote_write receiver for Alloy agents on all hosts.
     extraFlags = [ "--web.enable-remote-write-receiver" ];
-
-    exporters.node = {
-      enable = true;
-      port = 9100;
-      enabledCollectors = [ "systemd" ];
-    };
 
     scrapeConfigs = [
       {
         job_name = "rclone";
         static_configs = [{ targets = [ "127.0.0.1:6970" ]; }];
       }
-      # node job removed — Alloy scrapes node_exporter and remote_writes here.
       {
         job_name = "prometheus";
         static_configs = [{ targets = [ "127.0.0.1:9090" ]; }];
@@ -47,12 +40,19 @@
         job_name = "loki";
         static_configs = [{ targets = [ "127.0.0.1:3100" ]; }];
       }
+      # Alloy agents on all hosts expose their own metrics on :12345.
+      # ligma's Alloy is on localhost; other hosts' Alloy is scraped via remote_write.
       {
         job_name = "alloy";
         static_configs = [{ targets = [ "127.0.0.1:12345" ]; }];
       }
     ];
   };
+
+  # Open Prometheus port to LAN for Alloy remote_write from other hosts.
+  networking.firewall.extraInputRules = ''
+    ip saddr 10.10.10.0/24 tcp dport 9090 accept comment "prometheus remote_write from LAN"
+  '';
 
   # ---- Grafana ----------------------------------------------------------------
   environment.etc."grafana-dashboards/rclone.json" = {
