@@ -17,8 +17,6 @@ in
   virtualisation.podman = {
     enable = true;
     defaultNetwork.settings.dns_enabled = true;
-    # Docker-compatible socket at /run/docker.sock — needed for cAdvisor container metrics.
-    dockerSocket.enable = true;
   };
 
   environment.etc."alloy/config.alloy".text = ''
@@ -159,29 +157,6 @@ in
       forward_to = [prometheus.relabel.node_instance.receiver]
     }
 
-    // ── Podman container metrics via cAdvisor ──────────────────────────────────
-    // Reads container stats from the Podman Docker-compatible socket.
-    // instance label set to hostname for multi-host dashboards.
-
-    prometheus.exporter.cadvisor "podman" {
-      docker_host            = "unix:///run/docker.sock"
-      store_container_labels = false
-    }
-
-    prometheus.scrape "cadvisor" {
-      targets    = prometheus.exporter.cadvisor.podman.targets
-      job_name   = "cadvisor"
-      forward_to = [prometheus.relabel.cadvisor_instance.receiver]
-    }
-
-    prometheus.relabel "cadvisor_instance" {
-      forward_to = [prometheus.remote_write.prometheus.receiver]
-      rule {
-        target_label = "instance"
-        replacement  = "${hostname}"
-      }
-    }
-
     // ── Prometheus remote write ────────────────────────────────────────────────
 
     prometheus.remote_write "prometheus" {
@@ -202,8 +177,6 @@ in
       "/run/log/journal:/run/log/journal:ro"
       "/etc/machine-id:/etc/machine-id:ro"
       "/:/rootfs:ro,rslave"
-      "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-      "/run/docker.sock:/run/docker.sock"
     ];
     cmd = [
       "run"
