@@ -29,7 +29,9 @@
       "version": ""
     }
   ],
-  "annotations": { "list": [] },
+  "annotations": {
+    "list": []
+  },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -37,20 +39,35 @@
   "links": [],
   "panels": [
     {
-      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_INFINITY}" },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "infinity"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "green", "value": null }]
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
           },
           "unit": "Bps"
         },
         "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
       "id": 1,
       "options": {
         "colorMode": "value",
@@ -58,7 +75,9 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "/^speed$/",
           "values": false
         },
@@ -68,36 +87,62 @@
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_INFINITY}" },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "infinity"
+          },
           "refId": "A",
           "type": "json",
           "source": "url",
           "url": "http://127.0.0.1:6969/core/stats",
-          "url_options": { "method": "GET", "data": "" },
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
           "root_selector": "",
           "columns": [
-            { "selector": "speed", "text": "speed", "type": "number" }
+            {
+              "selector": "speed",
+              "text": "speed",
+              "type": "number"
+            }
           ],
           "filters": [],
-          "format": "table"
+          "format": "table",
+          "parser": "backend"
         }
       ]
     },
     {
-      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_INFINITY}" },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "infinity"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "blue", "value": null }]
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
           },
           "unit": "bytes"
         },
         "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
       "id": 2,
       "options": {
         "colorMode": "value",
@@ -105,7 +150,9 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "/^bytes$/",
           "values": false
         },
@@ -115,36 +162,62 @@
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_INFINITY}" },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "infinity"
+          },
           "refId": "A",
           "type": "json",
           "source": "url",
           "url": "http://127.0.0.1:6969/core/stats",
-          "url_options": { "method": "GET", "data": "" },
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
           "root_selector": "",
           "columns": [
-            { "selector": "bytes", "text": "bytes", "type": "number" }
+            {
+              "selector": "bytes",
+              "text": "bytes",
+              "type": "number"
+            }
           ],
           "filters": [],
-          "format": "table"
+          "format": "table",
+          "parser": "backend"
         }
       ]
     },
     {
-      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_INFINITY}" },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "infinity"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "green", "value": null }]
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
           },
           "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
       "id": 3,
       "options": {
         "colorMode": "value",
@@ -152,7 +225,9 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["count"],
+          "calcs": [
+            "count"
+          ],
           "fields": "/^name$/",
           "values": false
         },
@@ -162,26 +237,42 @@
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_INFINITY}" },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "infinity"
+          },
           "refId": "A",
           "type": "json",
           "source": "url",
           "url": "http://127.0.0.1:6969/core/stats",
-          "url_options": { "method": "GET", "data": "" },
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
           "root_selector": "transferring",
           "columns": [
-            { "selector": "name", "text": "name", "type": "string" }
+            {
+              "selector": "name",
+              "text": "name",
+              "type": "string"
+            }
           ],
           "filters": [],
-          "format": "table"
+          "format": "table",
+          "parser": "backend"
         }
       ]
     },
     {
-      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_INFINITY}" },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "infinity"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {
             "align": "auto",
             "displayMode": "auto",
@@ -190,88 +281,199 @@
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "green", "value": null }]
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
           }
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "name" },
-            "properties": [{ "id": "displayName", "value": "File" }]
-          },
-          {
-            "matcher": { "id": "byName", "options": "size" },
+            "matcher": {
+              "id": "byName",
+              "options": "name"
+            },
             "properties": [
-              { "id": "unit", "value": "bytes" },
-              { "id": "displayName", "value": "Size" }
+              {
+                "id": "displayName",
+                "value": "File"
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "bytes" },
+            "matcher": {
+              "id": "byName",
+              "options": "size"
+            },
             "properties": [
-              { "id": "unit", "value": "bytes" },
-              { "id": "displayName", "value": "Transferred" }
+              {
+                "id": "unit",
+                "value": "bytes"
+              },
+              {
+                "id": "displayName",
+                "value": "Size"
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "speed" },
+            "matcher": {
+              "id": "byName",
+              "options": "bytes"
+            },
             "properties": [
-              { "id": "unit", "value": "Bps" },
-              { "id": "displayName", "value": "Speed" }
+              {
+                "id": "unit",
+                "value": "bytes"
+              },
+              {
+                "id": "displayName",
+                "value": "Transferred"
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "percentage" },
+            "matcher": {
+              "id": "byName",
+              "options": "speed"
+            },
             "properties": [
-              { "id": "unit", "value": "percent" },
-              { "id": "displayName", "value": "%" },
-              { "id": "custom.displayMode", "value": "gradient-gauge" },
-              { "id": "min", "value": 0 },
-              { "id": "max", "value": 100 }
+              {
+                "id": "unit",
+                "value": "Bps"
+              },
+              {
+                "id": "displayName",
+                "value": "Speed"
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "eta" },
+            "matcher": {
+              "id": "byName",
+              "options": "percentage"
+            },
             "properties": [
-              { "id": "unit", "value": "s" },
-              { "id": "displayName", "value": "ETA" }
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "displayName",
+                "value": "%"
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "gradient-gauge"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "eta"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "displayName",
+                "value": "ETA"
+              }
             ]
           }
         ]
       },
-      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 4 },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
       "id": 4,
       "options": {
-        "footer": { "show": false, "reducer": ["sum"], "fields": "" },
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "fields": ""
+        },
         "showHeader": true
       },
       "title": "Current Transfers",
       "type": "table",
       "targets": [
         {
-          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_INFINITY}" },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "infinity"
+          },
           "refId": "A",
           "type": "json",
           "source": "url",
           "url": "http://127.0.0.1:6969/core/stats",
-          "url_options": { "method": "GET", "data": "" },
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
           "root_selector": "transferring",
           "columns": [
-            { "selector": "name",       "text": "name",       "type": "string" },
-            { "selector": "size",       "text": "size",       "type": "number" },
-            { "selector": "bytes",      "text": "bytes",      "type": "number" },
-            { "selector": "speed",      "text": "speed",      "type": "number" },
-            { "selector": "percentage", "text": "percentage", "type": "number" },
-            { "selector": "eta",        "text": "eta",        "type": "number" }
+            {
+              "selector": "name",
+              "text": "name",
+              "type": "string"
+            },
+            {
+              "selector": "size",
+              "text": "size",
+              "type": "number"
+            },
+            {
+              "selector": "bytes",
+              "text": "bytes",
+              "type": "number"
+            },
+            {
+              "selector": "speed",
+              "text": "speed",
+              "type": "number"
+            },
+            {
+              "selector": "percentage",
+              "text": "percentage",
+              "type": "number"
+            },
+            {
+              "selector": "eta",
+              "text": "eta",
+              "type": "number"
+            }
           ],
           "filters": [],
-          "format": "table"
+          "format": "table",
+          "parser": "backend"
         }
       ]
     }
   ],
   "refresh": "10s",
   "schemaVersion": 38,
-  "tags": ["rclone"],
+  "tags": [
+    "rclone"
+  ],
   "templating": {
     "list": [
       {
@@ -287,7 +489,10 @@
       }
     ]
   },
-  "time": { "from": "now-5m", "to": "now" },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
   "timepicker": {},
   "timezone": "",
   "title": "rclone Live Transfers",

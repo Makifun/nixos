@@ -127,6 +127,7 @@
         }
         {
           name   = "Infinity";
+          uid    = "infinity";
           type   = "yesoreyeram-infinity-datasource";
           access = "proxy";
         }
