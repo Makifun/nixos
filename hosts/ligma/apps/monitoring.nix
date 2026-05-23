@@ -1,4 +1,13 @@
 { config, pkgs, ... }:
+let
+  # grafanaPlugin packages are flat ($out/plugin.json); Grafana needs a
+  # parent dir with a named subdirectory ($dir/<pluginId>/plugin.json).
+  grafanaPluginsDir = pkgs.runCommand "grafana-plugins" { } ''
+    mkdir -p $out/yesoreyeram-infinity-datasource
+    cp -r ${pkgs.grafanaPlugins.yesoreyeram-infinity-datasource}/. \
+          $out/yesoreyeram-infinity-datasource/
+  '';
+in
 {
   # ---- Prometheus + node_exporter ---------------------------------------------
   environment.persistence."/persist".directories = [
@@ -82,7 +91,6 @@
   services.grafana = {
     enable = true;
     dataDir = "/ligma/ligma/grafana";
-    declarativePlugins = [ pkgs.grafanaPlugins.yesoreyeram-infinity-datasource ];
 
     settings = {
       server = {
@@ -112,6 +120,8 @@
       analytics.reporting_enabled = false;
       # Required for Infinity datasource to query localhost URLs (rclone RC API).
       "plugin.yesoreyeram-infinity-datasource".allow_local_mode = true;
+      # Plugins dir: grafanaPlugin pkgs are flat; wrapped into named subdir here.
+      paths.plugins = grafanaPluginsDir;
     };
 
     provision = {
