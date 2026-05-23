@@ -17,13 +17,72 @@ in
   virtualisation.podman = {
     enable = true;
     defaultNetwork.settings.dns_enabled = true;
+    # Docker-compatible socket at /run/docker.sock — needed for cAdvisor container metrics.
+    dockerSocket.enable = true;
   };
 
   environment.etc."alloy/config.alloy".text = ''
-    // ── Journal logs → Loki ────────────────────────────────────────────────────
+    // ── Journal: Kernel logs ───────────────────────────────────────────────────
 
-    loki.relabel "journal" {
+    loki.relabel "kernel" {
       forward_to = []
+      rule {
+        target_label = "job"
+        replacement  = "${hostname}-kernel"
+      }
+      rule {
+        source_labels = ["__journal__hostname"]
+        target_label  = "host"
+      }
+      rule {
+        source_labels = ["__journal__priority_keyword"]
+        target_label  = "level"
+      }
+    }
+
+    loki.source.journal "kernel" {
+      journal_matches = ["_TRANSPORT=kernel"]
+      relabel_rules   = loki.relabel.kernel.rules
+      forward_to      = [loki.write.loki.receiver]
+    }
+
+    // ── Journal: Audit logs ────────────────────────────────────────────────────
+
+    loki.relabel "audit" {
+      forward_to = []
+      rule {
+        target_label = "job"
+        replacement  = "${hostname}-audit"
+      }
+      rule {
+        source_labels = ["__journal__hostname"]
+        target_label  = "host"
+      }
+      rule {
+        source_labels = ["__journal__priority_keyword"]
+        target_label  = "level"
+      }
+    }
+
+    loki.source.journal "audit" {
+      journal_matches = ["_TRANSPORT=audit"]
+      relabel_rules   = loki.relabel.audit.rules
+      forward_to      = [loki.write.loki.receiver]
+    }
+
+    // ── Journal: Syslog + Podman container logs ────────────────────────────────
+    // Drops kernel/audit (handled by dedicated sources above).
+    // Routes Podman container logs to job="${hostname}-podman-<container>"
+    // by detecting _SYSTEMD_UNIT=podman-*.service entries.
+
+    loki.relabel "syslog" {
+      forward_to = []
+
+      rule {
+        source_labels = ["__journal__transport"]
+        regex         = "kernel|audit"
+        action        = "drop"
+      }
       rule {
         source_labels = ["__journal__systemd_unit"]
         target_label  = "unit"
@@ -36,12 +95,31 @@ in
         source_labels = ["__journal__priority_keyword"]
         target_label  = "level"
       }
+      rule {
+        target_label = "job"
+        replacement  = "${hostname}-syslog"
+      }
+      // Extract container name from podman-<name>.service unit name.
+      rule {
+        source_labels = ["__journal__systemd_unit"]
+        regex         = "podman-(.+)\\.service"
+        target_label  = "container"
+      }
+      // If container label is set, override job to <hostname>-podman-<container>.
+      rule {
+        source_labels = ["container"]
+        regex         = "(.+)"
+        target_label  = "job"
+        replacement   = "${hostname}-podman-$1"
+      }
     }
 
-    loki.source.journal "system" {
+    loki.source.journal "syslog" {
+      relabel_rules = loki.relabel.syslog.rules
       forward_to    = [loki.write.loki.receiver]
-      relabel_rules = loki.relabel.journal.rules
     }
+
+    // ── Loki write endpoint ────────────────────────────────────────────────────
 
     loki.write "loki" {
       endpoint {
@@ -73,6 +151,31 @@ in
       forward_to = [prometheus.relabel.node_instance.receiver]
     }
 
+    // ── Podman container metrics via cAdvisor ──────────────────────────────────
+    // Reads container stats from the Podman Docker-compatible socket.
+    // instance label set to hostname for multi-host dashboards.
+
+    prometheus.exporter.cadvisor "podman" {
+      docker_host            = "unix:///run/docker.sock"
+      store_container_labels = false
+    }
+
+    prometheus.scrape "cadvisor" {
+      targets    = prometheus.exporter.cadvisor.podman.targets
+      job_name   = "cadvisor"
+      forward_to = [prometheus.relabel.cadvisor_instance.receiver]
+    }
+
+    prometheus.relabel "cadvisor_instance" {
+      forward_to = [prometheus.remote_write.prometheus.receiver]
+      rule {
+        target_label = "instance"
+        replacement  = "${hostname}"
+      }
+    }
+
+    // ── Prometheus remote write ────────────────────────────────────────────────
+
     prometheus.remote_write "prometheus" {
       endpoint {
         url = "${prometheusUrl}"
@@ -91,6 +194,8 @@ in
       "/run/log/journal:/run/log/journal:ro"
       "/etc/machine-id:/etc/machine-id:ro"
       "/:/rootfs:ro,rslave"
+      "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+      "/run/docker.sock:/run/docker.sock"
     ];
     cmd = [
       "run"
