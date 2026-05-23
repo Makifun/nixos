@@ -198,7 +198,7 @@
                   datasourceUid     = "loki";
                   model = {
                     refId     = "A";
-                    expr      = ''count_over_time({job="ligma-unifi"} |= "WiFi Client Connected" [5m])'';
+                    expr      = ''count_over_time({job="ligma-unifi"} |= "|400|WiFi Client Connected|" [5m])'';
                     queryType = "range";
                     instant   = false;
                     range     = true;

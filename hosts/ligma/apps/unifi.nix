@@ -6,11 +6,34 @@ let
   mongoTag  = "8.2.6";
   # renovate: datasource=docker depName=linuxserver/unifi-network-application registryUrl=https://lscr.io
   unifiTag  = "10.3.58";
+
+  # UniFi sends CEF embedded in BSD syslog WITHOUT a <priority> field.
+  # Alloy's loki.source.syslog rejects any message not starting with '<'.
+  # Workaround: a tiny Python service receives raw UDP datagrams and appends
+  # each line to a file that Alloy's loki.source.file tails into Loki.
+  #
+  # Two senders observed via tcpdump:
+  #   10.10.10.2  (ens18)   — UniFi APs send their own syslog directly
+  #   10.89.0.9   (podman2) — UniFi Network Application container
+  unifiSyslogRecv = pkgs.writeScript "unifi-syslog-recv" ''
+    #!${pkgs.python3}/bin/python3
+    import socket, os
+    LOG = "/var/log/unifi/events.log"
+    os.makedirs(os.path.dirname(LOG), exist_ok=True)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.bind(("0.0.0.0", 5141))
+    with open(LOG, "a", buffering=1) as f:
+        while True:
+            data, _ = sock.recvfrom(65536)
+            f.write(data.decode("utf-8", errors="replace").rstrip("\n") + "\n")
+  '';
 in
 {
   systemd.tmpfiles.rules = [
     "d '${unifiBase}/config' 0755 root root - -"
     "d '${unifiBase}/db'     0755 root root - -"
+    "d '/var/log/unifi'      0755 root root - -"
   ];
 
   # ---------------------------------------------------------------------------
@@ -64,6 +87,9 @@ in
       ];
       extraOptions = [ "--network=unifi_network" ];
     };
+
+    # Alloy needs to read /var/log/unifi/events.log.
+    alloy.volumes = [ "/var/log/unifi:/var/log/unifi:ro" ];
   };
 
   # Wait until unifi-db is running and registered in DNS before starting UniFi.
@@ -76,34 +102,52 @@ in
   '';
 
   # ---------------------------------------------------------------------------
-  # Alloy: UniFi syslog ingestion on UDP 5141 → Loki
+  # UniFi syslog receiver
+  # Receives raw UDP datagrams on port 5141 and appends them as lines to
+  # /var/log/unifi/events.log which Alloy tails into Loki.
+  # ---------------------------------------------------------------------------
+  systemd.services.unifi-syslog = {
+    description = "UniFi syslog UDP receiver → file";
+    after       = [ "network.target" ];
+    wantedBy    = [ "multi-user.target" ];
+    serviceConfig = {
+      Type      = "simple";
+      ExecStart = unifiSyslogRecv;
+      Restart   = "always";
+    };
+  };
+
+  # ---------------------------------------------------------------------------
+  # Alloy: tail /var/log/unifi/events.log → Loki
   # Appended to alloy/config.alloy (types.lines merges across modules).
   # loki.write.loki is defined in common/alloy.nix.
   # ---------------------------------------------------------------------------
   environment.etc."alloy/config.alloy".text = ''
     // ── UniFi syslog → Loki ───────────────────────────────────────────────────
+    // UniFi sends CEF in BSD syslog without <priority>; loki.source.syslog
+    // rejects it. unifi-syslog.service writes raw UDP datagrams to a file;
+    // Alloy tails the file.
 
-    loki.source.syslog "unifi" {
-      listener {
-        address       = "0.0.0.0:5141"
-        protocol      = "udp"
-        syslog_format = "rfc3164"
-        labels        = {
-          job  = "ligma-unifi",
-          host = "ligma",
-        }
-      }
+    loki.source.file "unifi" {
+      targets = [{
+        __path__ = "/var/log/unifi/events.log",
+        job      = "ligma-unifi",
+        host     = "ligma",
+      }]
       forward_to = [loki.write.loki.receiver]
     }
   '';
 
   # ---------------------------------------------------------------------------
   # Firewall
+  # Traffic arrives from two sources (both observed via tcpdump):
+  #   10.10.10.0/24  — UniFi APs on LAN send syslog directly
+  #   podman*        — UniFi container (already trusted by common/alloy.nix rule)
   # ---------------------------------------------------------------------------
   networking.firewall.extraInputRules = ''
     tcp dport 8080 ip saddr 10.10.10.0/24 accept comment "UniFi device inform"
     udp dport { 3478, 10001 } ip saddr 10.10.10.0/24 accept comment "UniFi STUN + discovery"
-    udp dport 5141 ip saddr 10.10.10.13/32 accept comment "UniFi syslog → Alloy"
+    udp dport 5141 ip saddr 10.10.10.0/24 accept comment "UniFi syslog (APs + controller)"
   '';
 
   # ---------------------------------------------------------------------------
