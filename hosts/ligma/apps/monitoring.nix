@@ -171,9 +171,9 @@
         }];
 
         policies.settings.policies = [{
-          receiver       = "Gotify";
-          group_wait     = "5m";
-          group_interval = "5m";
+          receiver        = "Gotify";
+          group_wait      = "30s";
+          group_interval  = "5m";
           repeat_interval = "1h";
         }];
 
@@ -194,11 +194,11 @@
                 {
                   refId             = "A";
                   queryType         = "range";
-                  relativeTimeRange = { from = 300; to = 0; };
+                  relativeTimeRange = { from = 600; to = 0; };
                   datasourceUid     = "loki";
                   model = {
                     refId     = "A";
-                    expr      = ''count_over_time({job="ligma-unifi"} |= "|400|WiFi Client Connected|" [5m])'';
+                    expr      = ''count_over_time({job="ligma-unifi"} |= "|400|WiFi Client Connected|" [10m])'';
                     queryType = "range";
                     instant   = false;
                     range     = true;
@@ -235,11 +235,11 @@
                 {
                   refId             = "A";
                   queryType         = "range";
-                  relativeTimeRange = { from = 300; to = 0; };
+                  relativeTimeRange = { from = 600; to = 0; };
                   datasourceUid     = "loki";
                   model = {
                     refId     = "A";
-                    expr      = ''count_over_time({job=~"ligma-podman-authentik-.+"} |~ "Login of user .+ was successful" [5m])'';
+                    expr      = ''count_over_time({job=~"ligma-podman-authentik-.+"} |~ "Login of user .+ was successful" [10m])'';
                     queryType = "range";
                     instant   = false;
                     range     = true;
@@ -276,11 +276,11 @@
                 {
                   refId             = "A";
                   queryType         = "range";
-                  relativeTimeRange = { from = 300; to = 0; };
+                  relativeTimeRange = { from = 600; to = 0; };
                   datasourceUid     = "loki";
                   model = {
                     refId     = "A";
-                    expr      = ''count_over_time({job=~"ligma-podman-authentik-.+"} |~ "Failed to authenticate user|password mismatch" [5m])'';
+                    expr      = ''count_over_time({job=~"ligma-podman-authentik-.+"} |~ "Failed to authenticate user|password mismatch" [10m])'';
                     queryType = "range";
                     instant   = false;
                     range     = true;
