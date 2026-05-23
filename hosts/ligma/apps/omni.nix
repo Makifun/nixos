@@ -119,7 +119,7 @@ in
     wants = [ "podman-authentik-server.service" ];
     preStart = ''
       echo "Waiting for Authentik (port 9000)..."
-      until ${pkgs.curl}/bin/curl -sf http://127.0.0.1:9000/-/health/ready > /dev/null 2>&1; do
+      until ${pkgs.curl}/bin/curl -sf http://127.0.0.1:9000/-/health/live/ > /dev/null 2>&1; do
         sleep 2
       done
     '';
