@@ -96,7 +96,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "$datasource" },
-          "expr": "count(podman_container_state{instance=\"$instance\", name=~\"$container\", state=\"running\"} == 1) or vector(0)",
+          "expr": "count(podman_container_state{instance=\"$instance\", state=\"running\"} * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"} == 1) or vector(0)",
           "instant": true,
           "legendFormat": "Running",
           "refId": "A"
@@ -133,7 +133,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "$datasource" },
-          "expr": "count(podman_container_state{instance=\"$instance\", name=~\"$container\", state=\"stopped\"} == 1) or vector(0)",
+          "expr": "count(podman_container_state{instance=\"$instance\", state=\"stopped\"} * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"} == 1) or vector(0)",
           "instant": true,
           "legendFormat": "Stopped",
           "refId": "A"
@@ -206,7 +206,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "$datasource" },
-          "expr": "sum(rate(podman_container_cpu_seconds_total{instance=\"$instance\", name=~\"$container\"}[5m]))",
+          "expr": "sum(rate(podman_container_cpu_seconds_total{instance=\"$instance\"}[5m]) * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"})",
           "legendFormat": "CPU",
           "refId": "A"
         }
@@ -244,7 +244,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "$datasource" },
-          "expr": "sum(podman_container_mem_usage_bytes{instance=\"$instance\", name=~\"$container\"})",
+          "expr": "sum(podman_container_mem_usage_bytes{instance=\"$instance\"} * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"})",
           "legendFormat": "Memory",
           "refId": "A"
         }
@@ -275,7 +275,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "$datasource" },
-          "expr": "rate(podman_container_cpu_seconds_total{instance=\"$instance\", name=~\"$container\"}[5m])",
+          "expr": "rate(podman_container_cpu_seconds_total{instance=\"$instance\"}[5m]) * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"}",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
@@ -306,7 +306,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "$datasource" },
-          "expr": "podman_container_mem_usage_bytes{instance=\"$instance\", name=~\"$container\"}",
+          "expr": "podman_container_mem_usage_bytes{instance=\"$instance\"} * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"}",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
@@ -347,7 +347,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "$datasource" },
-          "expr": "podman_container_mem_usage_bytes{instance=\"$instance\", name=~\"$container\"} / clamp_min(podman_container_mem_limit_bytes{instance=\"$instance\", name=~\"$container\"}, 1)",
+          "expr": "(podman_container_mem_usage_bytes{instance=\"$instance\"} / clamp_min(podman_container_mem_limit_bytes{instance=\"$instance\"}, 1)) * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"}",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
@@ -378,13 +378,13 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "$datasource" },
-          "expr": "rate(podman_container_net_input_total{instance=\"$instance\", name=~\"$container\"}[5m])",
+          "expr": "rate(podman_container_net_input_total{instance=\"$instance\"}[5m]) * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"}",
           "legendFormat": "↓ {{name}}",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "$datasource" },
-          "expr": "rate(podman_container_net_output_total{instance=\"$instance\", name=~\"$container\"}[5m])",
+          "expr": "rate(podman_container_net_output_total{instance=\"$instance\"}[5m]) * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"}",
           "legendFormat": "↑ {{name}}",
           "refId": "B"
         }
@@ -415,13 +415,13 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "$datasource" },
-          "expr": "rate(podman_container_block_input_total{instance=\"$instance\", name=~\"$container\"}[5m])",
+          "expr": "rate(podman_container_block_input_total{instance=\"$instance\"}[5m]) * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"}",
           "legendFormat": "↓ {{name}}",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "$datasource" },
-          "expr": "rate(podman_container_block_output_total{instance=\"$instance\", name=~\"$container\"}[5m])",
+          "expr": "rate(podman_container_block_output_total{instance=\"$instance\"}[5m]) * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"}",
           "legendFormat": "↑ {{name}}",
           "refId": "B"
         }
