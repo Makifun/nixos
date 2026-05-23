@@ -18,7 +18,7 @@
     {
       "id": 1,
       "type": "stat",
-      "title": "Transfer Speed",
+      "title": "Average Speed",
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
       "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "infinity" },
       "fieldConfig": {
@@ -182,10 +182,113 @@
       ]
     },
     {
+      "id": 10,
+      "type": "piechart",
+      "title": "Status Totals",
+      "description": "Since rclone process started",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
+          "decimals": 0,
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": ["value", "percent"]
+        },
+        "pieType": "donut",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rclone_checked_files_total{job=\"rclone\"}",
+          "legendFormat": "Checked files",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rclone_files_transferred_total{job=\"rclone\"}",
+          "legendFormat": "Transferred files",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rclone_files_renamed_total{job=\"rclone\"}",
+          "legendFormat": "Renamed files",
+          "refId": "C"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rclone_files_deleted_total{job=\"rclone\"}",
+          "legendFormat": "Deleted files",
+          "refId": "D"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rclone_dirs_deleted_total{job=\"rclone\"}",
+          "legendFormat": "Deleted directories",
+          "refId": "E"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rclone_errors_total{job=\"rclone\"}",
+          "legendFormat": "Transfer errors",
+          "refId": "F"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "piechart",
+      "title": "Requests by Response Code",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": ["percent", "value"]
+        },
+        "pieType": "donut",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "promhttp_metric_handler_requests_total{job=\"rclone\"}",
+          "legendFormat": "{{code}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
       "id": 5,
       "type": "table",
       "title": "Current Transfers",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 4 },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 12 },
       "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "infinity" },
       "fieldConfig": {
         "defaults": {
@@ -273,7 +376,7 @@
       "id": 6,
       "type": "timeseries",
       "title": "Transfer Rate",
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 14 },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 22 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
@@ -304,7 +407,7 @@
       "id": 7,
       "type": "timeseries",
       "title": "Files Checked per Action",
-      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 23 },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 31 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
@@ -335,7 +438,7 @@
       "id": 8,
       "type": "timeseries",
       "title": "Files Transferred",
-      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 23 },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 31 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
@@ -372,7 +475,7 @@
       "id": 9,
       "type": "logs",
       "title": "rclone Logs",
-      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 32 },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 40 },
       "datasource": { "type": "loki", "uid": "loki" },
       "fieldConfig": { "defaults": {}, "overrides": [] },
       "options": {
