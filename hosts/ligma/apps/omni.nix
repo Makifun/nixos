@@ -112,6 +112,19 @@ in
     ];
   };
 
+  # Omni fetches SAML metadata from Authentik on startup — fail if Authentik isn't up yet.
+  # Wait for port 9000 to accept connections before launching the container.
+  systemd.services."podman-omni" = {
+    after = [ "podman-authentik-server.service" ];
+    wants = [ "podman-authentik-server.service" ];
+    preStart = ''
+      echo "Waiting for Authentik (port 9000)..."
+      until ${pkgs.curl}/bin/curl -sf http://127.0.0.1:9000/-/health/ready > /dev/null 2>&1; do
+        sleep 2
+      done
+    '';
+  };
+
   networking.firewall.extraInputRules = ''
     ip saddr 10.10.10.0/24 udp dport ${toString wgPort} accept
     ip saddr 10.10.10.0/24 tcp dport ${toString machineApiPort} accept
