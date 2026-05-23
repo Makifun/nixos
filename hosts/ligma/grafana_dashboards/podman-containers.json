@@ -96,7 +96,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "$datasource" },
-          "expr": "count(podman_container_state{instance=\"$instance\", state=\"running\"} * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"} == 1) or vector(0)",
+          "expr": "count((podman_container_state{instance=\"$instance\"} == 2) * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"}) or vector(0)",
           "instant": true,
           "legendFormat": "Running",
           "refId": "A"
@@ -133,7 +133,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "$datasource" },
-          "expr": "count(podman_container_state{instance=\"$instance\", state=\"stopped\"} * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"} == 1) or vector(0)",
+          "expr": "count((podman_container_state{instance=\"$instance\"} != 2) * on(id) group_left(name) podman_container_info{instance=\"$instance\", name=~\"$container\"}) or vector(0)",
           "instant": true,
           "legendFormat": "Stopped",
           "refId": "A"
