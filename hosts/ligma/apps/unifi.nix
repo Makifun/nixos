@@ -85,9 +85,10 @@ in
 
     loki.source.syslog "unifi" {
       listener {
-        address  = "0.0.0.0:5141"
-        protocol = "udp"
-        labels   = {
+        address       = "0.0.0.0:5141"
+        protocol      = "udp"
+        syslog_format = "rfc3164"
+        labels        = {
           job  = "ligma-unifi",
           host = "ligma",
         }
