@@ -162,6 +162,7 @@
       rm -rf "$dst"
       mkdir -p "$dst"
       cp -r --no-preserve=mode,ownership ${src}/. "$dst/"
+      chmod +x "$dst"/gpx_infinity_*
     '');
 
   # ---- Traefik ----------------------------------------------------------------
