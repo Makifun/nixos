@@ -14,6 +14,8 @@
     enable = true;
     port = 9090;
     retentionTime = "30d";
+    # Alloy remote_writes node metrics here.
+    extraFlags = [ "--web.enable-remote-write-receiver" ];
 
     exporters.node = {
       enable = true;
@@ -26,10 +28,7 @@
         job_name = "rclone";
         static_configs = [{ targets = [ "127.0.0.1:6970" ]; }];
       }
-      {
-        job_name = "node";
-        static_configs = [{ targets = [ "127.0.0.1:9100" ]; }];
-      }
+      # node job removed — Alloy scrapes node_exporter and remote_writes here.
       {
         job_name = "prometheus";
         static_configs = [{ targets = [ "127.0.0.1:9090" ]; }];
@@ -43,6 +42,14 @@
           { targets = [ "127.0.0.1:5013" ]; labels = { registry = "lscr";      }; }
           { targets = [ "127.0.0.1:5014" ]; labels = { registry = "quay";      }; }
         ];
+      }
+      {
+        job_name = "loki";
+        static_configs = [{ targets = [ "127.0.0.1:3100" ]; }];
+      }
+      {
+        job_name = "alloy";
+        static_configs = [{ targets = [ "127.0.0.1:12345" ]; }];
       }
     ];
   };
@@ -123,6 +130,12 @@
           url       = "http://127.0.0.1:9090";
           isDefault = true;
           jsonData.timeInterval = "1m";
+        }
+        {
+          name = "Loki";
+          uid  = "loki";
+          type = "loki";
+          url  = "http://127.0.0.1:3100";
         }
         {
           name   = "Infinity";
