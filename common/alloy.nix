@@ -27,6 +27,11 @@ in
     loki.relabel "kernel" {
       forward_to = []
       rule {
+        source_labels = ["__journal__transport"]
+        regex         = "kernel"
+        action        = "keep"
+      }
+      rule {
         target_label = "job"
         replacement  = "${hostname}-kernel"
       }
@@ -41,15 +46,19 @@ in
     }
 
     loki.source.journal "kernel" {
-      journal_matches = ["_TRANSPORT=kernel"]
-      relabel_rules   = loki.relabel.kernel.rules
-      forward_to      = [loki.write.loki.receiver]
+      relabel_rules = loki.relabel.kernel.rules
+      forward_to    = [loki.write.loki.receiver]
     }
 
     // ── Journal: Audit logs ────────────────────────────────────────────────────
 
     loki.relabel "audit" {
       forward_to = []
+      rule {
+        source_labels = ["__journal__transport"]
+        regex         = "audit"
+        action        = "keep"
+      }
       rule {
         target_label = "job"
         replacement  = "${hostname}-audit"
@@ -65,9 +74,8 @@ in
     }
 
     loki.source.journal "audit" {
-      journal_matches = ["_TRANSPORT=audit"]
-      relabel_rules   = loki.relabel.audit.rules
-      forward_to      = [loki.write.loki.receiver]
+      relabel_rules = loki.relabel.audit.rules
+      forward_to    = [loki.write.loki.receiver]
     }
 
     // ── Journal: Syslog + Podman container logs ────────────────────────────────
