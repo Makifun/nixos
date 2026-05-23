@@ -76,11 +76,33 @@ in
   '';
 
   # ---------------------------------------------------------------------------
+  # Alloy: UniFi syslog ingestion on UDP 5141 → Loki
+  # Appended to alloy/config.alloy (types.lines merges across modules).
+  # loki.write.loki is defined in common/alloy.nix.
+  # ---------------------------------------------------------------------------
+  environment.etc."alloy/config.alloy".text = ''
+    // ── UniFi syslog → Loki ───────────────────────────────────────────────────
+
+    loki.source.syslog "unifi" {
+      listener {
+        address  = "0.0.0.0:5141"
+        protocol = "udp"
+        labels   = {
+          job  = "ligma-unifi",
+          host = "ligma",
+        }
+      }
+      forward_to = [loki.write.loki.receiver]
+    }
+  '';
+
+  # ---------------------------------------------------------------------------
   # Firewall
   # ---------------------------------------------------------------------------
   networking.firewall.extraInputRules = ''
     tcp dport 8080 ip saddr 10.10.10.0/24 accept comment "UniFi device inform"
     udp dport { 3478, 10001 } ip saddr 10.10.10.0/24 accept comment "UniFi STUN + discovery"
+    udp dport 5141 ip saddr 10.10.10.13/32 accept comment "UniFi syslog → Alloy"
   '';
 
   # ---------------------------------------------------------------------------

@@ -87,6 +87,11 @@
     owner    = "grafana";
   };
 
+  sops.secrets.grafana-gotify-token = {
+    format   = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+
   services.grafana = {
     enable = true;
     dataDir = "/ligma/ligma/grafana";
@@ -149,21 +154,185 @@
         name    = "default";
         options.path = "/etc/grafana-dashboards";
       }];
+
+      alerting = {
+        contactPoints.settings.contactPoints = [{
+          name = "Gotify";
+          receivers = [{
+            uid  = "gotify";
+            type = "webhook";
+            settings = {
+              url        = "https://gotify.makifun.se/message?token=\${GOTIFY_TOKEN}";
+              httpMethod = "POST";
+              # message field replaces the entire HTTP body (Grafana 10+).
+              message = ''{"title":"{{ .Title }}","message":"{{ index .CommonAnnotations "summary" }}","priority":5}'';
+            };
+          }];
+        }];
+
+        policies.settings.policies = [{
+          receiver       = "Gotify";
+          group_wait     = "5m";
+          group_interval = "5m";
+          repeat_interval = "1h";
+        }];
+
+        rules.settings.groups = [{
+          name     = "loki-alerts";
+          folder   = "Alerts";
+          interval = "1m";
+          rules = [
+            {
+              uid       = "unifi-wifi-connected";
+              title     = "WiFi Client Connected";
+              condition = "C";
+              "for"     = "0s";
+              annotations = { summary = "New WiFi client connected"; };
+              noDataState  = "NoData";
+              execErrState = "Error";
+              data = [
+                {
+                  refId             = "A";
+                  queryType         = "range";
+                  relativeTimeRange = { from = 300; to = 0; };
+                  datasourceUid     = "loki";
+                  model = {
+                    refId     = "A";
+                    expr      = ''count_over_time({job="ligma-unifi"} |= "WiFi Client Connected" [5m])'';
+                    queryType = "range";
+                    instant   = false;
+                    range     = true;
+                  };
+                }
+                {
+                  refId             = "C";
+                  queryType         = "";
+                  relativeTimeRange = { from = 0; to = 0; };
+                  datasourceUid     = "-100";
+                  model = {
+                    refId = "C";
+                    type  = "classic_conditions";
+                    conditions = [{
+                      type      = "query";
+                      evaluator = { type = "gt"; params = [ 0 ]; };
+                      operator  = { type = "and"; };
+                      query     = { params = [ "A" ]; };
+                      reducer   = { type = "last"; params = []; };
+                    }];
+                  };
+                }
+              ];
+            }
+            {
+              uid       = "authentik-login-success";
+              title     = "Authentik Login Success";
+              condition = "C";
+              "for"     = "0s";
+              annotations = { summary = "Authentik login successful"; };
+              noDataState  = "NoData";
+              execErrState = "Error";
+              data = [
+                {
+                  refId             = "A";
+                  queryType         = "range";
+                  relativeTimeRange = { from = 300; to = 0; };
+                  datasourceUid     = "loki";
+                  model = {
+                    refId     = "A";
+                    expr      = ''count_over_time({job=~"ligma-podman-authentik-.+"} |~ "Login of user .+ was successful" [5m])'';
+                    queryType = "range";
+                    instant   = false;
+                    range     = true;
+                  };
+                }
+                {
+                  refId             = "C";
+                  queryType         = "";
+                  relativeTimeRange = { from = 0; to = 0; };
+                  datasourceUid     = "-100";
+                  model = {
+                    refId = "C";
+                    type  = "classic_conditions";
+                    conditions = [{
+                      type      = "query";
+                      evaluator = { type = "gt"; params = [ 0 ]; };
+                      operator  = { type = "and"; };
+                      query     = { params = [ "A" ]; };
+                      reducer   = { type = "last"; params = []; };
+                    }];
+                  };
+                }
+              ];
+            }
+            {
+              uid       = "authentik-login-failure";
+              title     = "Authentik Login Failure";
+              condition = "C";
+              "for"     = "0s";
+              annotations = { summary = "Authentik login failed"; };
+              noDataState  = "NoData";
+              execErrState = "Error";
+              data = [
+                {
+                  refId             = "A";
+                  queryType         = "range";
+                  relativeTimeRange = { from = 300; to = 0; };
+                  datasourceUid     = "loki";
+                  model = {
+                    refId     = "A";
+                    expr      = ''count_over_time({job=~"ligma-podman-authentik-.+"} |~ "Failed to authenticate user|password mismatch" [5m])'';
+                    queryType = "range";
+                    instant   = false;
+                    range     = true;
+                  };
+                }
+                {
+                  refId             = "C";
+                  queryType         = "";
+                  relativeTimeRange = { from = 0; to = 0; };
+                  datasourceUid     = "-100";
+                  model = {
+                    refId = "C";
+                    type  = "classic_conditions";
+                    conditions = [{
+                      type      = "query";
+                      evaluator = { type = "gt"; params = [ 0 ]; };
+                      operator  = { type = "and"; };
+                      query     = { params = [ "A" ]; };
+                      reducer   = { type = "last"; params = []; };
+                    }];
+                  };
+                }
+              ];
+            }
+          ];
+        }];
+      };
     };
   };
 
-  # Copy Infinity plugin into Grafana's writable plugins dir before start.
-  # grafanaPlugin packages are flat ($out/plugin.json); Grafana's background
-  # installer needs a writable dir and expects a named subdirectory.
-  systemd.services.grafana.serviceConfig.ExecStartPre =
+  # Copy Infinity plugin and write Gotify token env file before Grafana starts.
+  # ExecStartPre list runs in order; both scripts run as root.
+  systemd.services.grafana.serviceConfig =
     let src = pkgs.grafanaPlugins.yesoreyeram-infinity-datasource;
-    in toString (pkgs.writeShellScript "grafana-install-infinity" ''
-      dst=/ligma/ligma/grafana/plugins/yesoreyeram-infinity-datasource
-      rm -rf "$dst"
-      mkdir -p "$dst"
-      cp -r --no-preserve=mode,ownership ${src}/. "$dst/"
-      chmod +x "$dst"/gpx_infinity_*
-    '');
+    in {
+      ExecStartPre = [
+        (toString (pkgs.writeShellScript "grafana-install-infinity" ''
+          dst=/ligma/ligma/grafana/plugins/yesoreyeram-infinity-datasource
+          rm -rf "$dst"
+          mkdir -p "$dst"
+          cp -r --no-preserve=mode,ownership ${src}/. "$dst/"
+          chmod +x "$dst"/gpx_infinity_*
+        ''))
+        (toString (pkgs.writeShellScript "grafana-write-env" ''
+          printf 'GOTIFY_TOKEN=%s\n' \
+            "$(tr -d '\n' < ${config.sops.secrets.grafana-gotify-token.path})" \
+            > /run/grafana-env
+          chmod 400 /run/grafana-env
+        ''))
+      ];
+      EnvironmentFile = "/run/grafana-env";
+    };
 
   # ---- Traefik ----------------------------------------------------------------
   # Grafana handles auth itself via OIDC redirect — no Authentik middleware.

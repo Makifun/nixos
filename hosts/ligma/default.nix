@@ -19,7 +19,6 @@
     ./apps/distribution.nix
     ./apps/forgejo.nix
     ./apps/gotify.nix
-    ./apps/graylog.nix
     ./apps/homepage.nix
     ./apps/loki.nix
     ./apps/monitoring.nix
@@ -31,7 +30,6 @@
     ./apps/traefik.nix
     ./apps/unifi.nix
     ./apps/vaultwarden.nix
-    ./apps/vector.nix
   ];
   environment.persistence."/persist" = {
     hideMounts = true;
