@@ -406,7 +406,7 @@
     {
       "id": 7,
       "type": "timeseries",
-      "title": "Files Checked per Action",
+      "title": "Open File Descriptors",
       "gridPos": { "h": 9, "w": 12, "x": 0, "y": 31 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
@@ -414,23 +414,40 @@
           "unit": "short",
           "custom": {
             "lineWidth": 1,
-            "fillOpacity": 10,
+            "fillOpacity": 25,
             "showPoints": "never",
-            "spanNulls": false
+            "spanNulls": 600000,
+            "thresholdsStyle": { "mode": "line" }
           }
         },
         "overrides": []
       },
       "options": {
-        "tooltip": { "mode": "multi", "sort": "desc" },
-        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+        "tooltip": { "mode": "multi", "sort": "none" },
+        "legend": { "calcs": ["lastNotNull", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }
       },
+      "transformations": [
+        {
+          "id": "configFromData",
+          "options": {
+            "applyTo": { "id": "byType", "options": "number" },
+            "configRefId": "B",
+            "mappings": [{ "fieldName": "Max open file descriptors", "handlerKey": "threshold1" }]
+          }
+        }
+      ],
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "increase(rclone_checked_files_total{job=\"rclone\"}[$__rate_interval])",
-          "legendFormat": "{{action}}",
+          "expr": "process_open_fds{job=\"rclone\"}",
+          "legendFormat": "Open file descriptors",
           "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "process_max_fds{job=\"rclone\"}",
+          "legendFormat": "Max open file descriptors",
+          "refId": "B"
         }
       ]
     },
