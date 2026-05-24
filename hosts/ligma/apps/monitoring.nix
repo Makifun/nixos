@@ -65,8 +65,8 @@
     mode   = "0444";
   };
 
-  environment.etc."grafana-dashboards/rclone-transfers.json" = {
-    source = ../grafana_dashboards/rclone-transfers.json;
+  environment.etc."grafana-dashboards/rclone-uptime.json" = {
+    source = ../grafana_dashboards/rclone-uptime.json;
     mode   = "0444";
   };
 
