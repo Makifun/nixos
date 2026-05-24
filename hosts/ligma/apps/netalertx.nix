@@ -1,7 +1,7 @@
 { ... }:
 let
   # renovate: datasource=docker depName=jokob-sk/netalertx registryUrl=https://ghcr.io
-  netalertxTag  = "latest";
+  netalertxTag  = "26.5.4";
   netalertxBase = "/ligma/ligma/netalertx";
 in
 {
