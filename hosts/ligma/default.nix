@@ -22,6 +22,7 @@
     ./apps/homepage.nix
     ./apps/loki.nix
     ./apps/monitoring.nix
+    ./apps/netalertx.nix
     ./apps/nfs.nix
     ./apps/omni.nix
     ./apps/rclone.nix

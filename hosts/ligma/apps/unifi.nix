@@ -1,8 +1,7 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, lib, ... }:
 let
-  unifiPort   = 8443;
-  webhookPort = 8765;
-  unifiBase   = "/ligma/ligma/unifi";
+  unifiPort = 8443;
+  unifiBase = "/ligma/ligma/unifi";
   # renovate: datasource=docker depName=mongo versioning=semver
   mongoTag  = "8.2.6";
   # renovate: datasource=docker depName=linuxserver/unifi-network-application registryUrl=https://lscr.io
@@ -30,53 +29,6 @@ let
             f.write(data.decode("utf-8", errors="replace").rstrip("\n") + "\n")
   '';
 
-  # Webhook receiver: UniFi Network Application → Gotify.
-  # Logs every payload to stderr so you can verify the format on first run:
-  #   journalctl -u unifi-webhook -f
-  unifiWebhookRecv = pkgs.writeScript "unifi-webhook-recv" ''
-    #!${pkgs.python3}/bin/python3
-    import json, os, sys, urllib.request
-    from http.server import HTTPServer, BaseHTTPRequestHandler
-
-    GOTIFY_TOKEN = os.environ["GOTIFY_TOKEN"]
-    CONNECT_KEYS = {"EVT_WU_Connected"}
-
-    def notify(title, msg, priority=5):
-        data = json.dumps({"title": title, "message": msg, "priority": priority}).encode()
-        req = urllib.request.Request(
-            "https://gotify.makifun.se/message?token=" + GOTIFY_TOKEN,
-            data=data,
-            headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req, timeout=10)
-
-    class Handler(BaseHTTPRequestHandler):
-        def log_message(self, *a): pass
-
-        def do_POST(self):
-            n = int(self.headers.get("Content-Length", 0))
-            body = self.rfile.read(n)
-            self.send_response(200)
-            self.end_headers()
-            try:
-                payload = json.loads(body)
-                print("recv:", json.dumps(payload), file=sys.stderr, flush=True)
-                events = payload.get("data", [payload])
-                for evt in events:
-                    key = evt.get("key", "")
-                    if key in CONNECT_KEYS:
-                        client = evt.get("hostname") or evt.get("client", "unknown")
-                        ssid   = evt.get("ssid", "")
-                        ap     = evt.get("ap_displayName") or evt.get("ap", "")
-                        msg    = client
-                        if ssid: msg += " -> " + ssid
-                        if ap:   msg += " @ " + ap
-                        notify("WiFi Client Connected", msg, priority=3)
-            except Exception as e:
-                print("error:", e, body[:200], file=sys.stderr, flush=True)
-
-    HTTPServer(("0.0.0.0", ${toString webhookPort}), Handler).serve_forever()
-  '';
 in
 {
   systemd.tmpfiles.rules = [
@@ -150,11 +102,6 @@ in
     done
   '';
 
-  sops.secrets.unifi-webhook-gotify-token = {
-    format   = "yaml";
-    sopsFile = ../secrets.yaml;
-  };
-
   # ---------------------------------------------------------------------------
   # UniFi syslog receiver
   # Receives raw UDP datagrams on port 5141 and appends them as lines to
@@ -169,28 +116,6 @@ in
       ExecStart = unifiSyslogRecv;
       Restart   = "always";
     };
-  };
-
-  # ---------------------------------------------------------------------------
-  # UniFi webhook receiver
-  # UniFi Network Application POSTs JSON events to this service.
-  # Configure in UniFi UI: Settings → Notifications → Webhooks
-  #   URL: http://10.89.0.1:8765/webhook
-  # ---------------------------------------------------------------------------
-  systemd.services.unifi-webhook = {
-    description = "UniFi webhook → Gotify notifier";
-    after       = [ "network.target" ];
-    wantedBy    = [ "multi-user.target" ];
-    path        = [ pkgs.coreutils ];
-    serviceConfig = {
-      Type    = "simple";
-      Restart = "always";
-      LoadCredential = "gotify-token:${config.sops.secrets.unifi-webhook-gotify-token.path}";
-    };
-    script = ''
-      export GOTIFY_TOKEN="$(cat "$CREDENTIALS_DIRECTORY/gotify-token")"
-      exec ${unifiWebhookRecv}
-    '';
   };
 
   # ---------------------------------------------------------------------------
@@ -224,7 +149,6 @@ in
     tcp dport 8080 ip saddr 10.10.10.0/24 accept comment "UniFi device inform"
     udp dport { 3478, 10001 } ip saddr 10.10.10.0/24 accept comment "UniFi STUN + discovery"
     udp dport 5141 ip saddr 10.10.10.0/24 accept comment "UniFi syslog (APs + controller)"
-    tcp dport ${toString webhookPort} ip saddr 10.89.0.0/24 accept comment "UniFi webhook receiver (unifi_network)"
   '';
 
   # ---------------------------------------------------------------------------
