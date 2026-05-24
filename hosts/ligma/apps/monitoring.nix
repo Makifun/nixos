@@ -87,6 +87,12 @@
     owner    = "grafana";
   };
 
+  sops.secrets.grafana-admin-password = {
+    format   = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner    = "grafana";
+  };
+
   sops.secrets.grafana-gotify-token = {
     format   = "yaml";
     sopsFile = ../secrets.yaml;
@@ -121,6 +127,7 @@
       };
       users.auto_assign_org_role = "Viewer";
       security.secret_key        = "$__file{${config.sops.secrets.grafana-secret-key.path}}";
+      security.admin_password    = "$__file{${config.sops.secrets.grafana-admin-password.path}}";
       analytics.reporting_enabled = false;
       # Required for Infinity datasource to query localhost URLs (rclone RC API).
       "plugin.yesoreyeram-infinity-datasource".allow_local_mode = true;
