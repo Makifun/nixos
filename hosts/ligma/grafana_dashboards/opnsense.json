@@ -3356,7 +3356,7 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values({group=\"Firewall\"},instance)",
+          "query": "label_values(opnsense_arp_table_entries,opnsense_instance)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
