@@ -48,8 +48,24 @@
         static_configs = [{ targets = [ "127.0.0.1:12345" ]; }];
       }
       {
-        job_name = "opnsense";
+        # node_exporter on OPNsense (FreeBSD node metrics).
+        # Relabel strips :9100 so instance matches opnsense-exporter's label.
+        job_name = "opnsense-node";
         static_configs = [{ targets = [ "opnsense.makifun.se:9100" ]; }];
+        relabel_configs = [{
+          source_labels = [ "__address__" ];
+          target_label  = "instance";
+          regex         = "([^:]+).*";
+          replacement   = "$1";
+        }];
+      }
+      {
+        # opnsense-exporter on ligma scrapes OPNsense API over HTTPS.
+        # honor_labels keeps the exporter's instance="opnsense.makifun.se"
+        # so node_* and opnsense_* metrics share the same instance value.
+        job_name     = "opnsense";
+        honor_labels = true;
+        static_configs = [{ targets = [ "127.0.0.1:9091" ]; }];
       }
     ];
   };
@@ -77,6 +93,11 @@
 
   environment.etc."grafana-dashboards/node-exporter-full.json" = {
     source = ../grafana_dashboards/node-exporter-full.json;
+    mode   = "0444";
+  };
+
+  environment.etc."grafana-dashboards/opnsense.json" = {
+    source = ../grafana_dashboards/opnsense.json;
     mode   = "0444";
   };
 
