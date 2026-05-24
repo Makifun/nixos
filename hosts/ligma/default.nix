@@ -30,6 +30,7 @@
     ./apps/traefik.nix
     ./apps/unifi.nix
     ./apps/vaultwarden.nix
+    ./apps/watchyourlan.nix
   ];
   environment.persistence."/persist" = {
     hideMounts = true;
