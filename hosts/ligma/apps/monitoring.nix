@@ -47,6 +47,10 @@
         job_name = "alloy";
         static_configs = [{ targets = [ "127.0.0.1:12345" ]; }];
       }
+      {
+        job_name = "opnsense";
+        static_configs = [{ targets = [ "opnsense.makifun.se:9100" ]; }];
+      }
     ];
   };
 
@@ -68,6 +72,11 @@
 
   environment.etc."grafana-dashboards/podman-containers.json" = {
     source = ../grafana_dashboards/podman-containers.json;
+    mode   = "0444";
+  };
+
+  environment.etc."grafana-dashboards/node-exporter-full.json" = {
+    source = ../grafana_dashboards/node-exporter-full.json;
     mode   = "0444";
   };
 
