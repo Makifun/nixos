@@ -440,6 +440,42 @@
               };
             };
           }
+          { "WatchYourLAN" = {
+              icon      = "/images/watchyourlan.png";
+              server    = "ligma";
+              container = "watchyourlan";
+              href = "https://{{HOMEPAGE_VAR_WATCHYOURLAN_URL}}";
+              widget = {
+                type = "customapi";
+                url = "https://{{HOMEPAGE_VAR_WATCHYOURLAN_URL}}/api/status/";
+                refreshInterval = 300000;
+                method = "GET";
+                display = "block";
+                mappings = [
+                  {
+                    field   = "Online";
+                    label   = "Online";
+                    format  = "number";
+                  }
+                  {
+                    field   = "Offline";
+                    label   = "Offline";
+                    format  = "number";
+                  }
+                  {
+                    field   = "Known";
+                    label   = "Known";
+                    format  = "number";
+                  }
+                  {
+                    field   = "Unknown";
+                    label   = "Unknown";
+                    format  = "number";
+                  }
+                ];
+              };
+            };
+          }
         ];
       }
 
@@ -551,13 +587,6 @@
                 key     = "{{HOMEPAGE_VAR_AUTHENTIK_TOKEN}}";
                 version = 2;
               };
-            };
-          }
-          { "Graylog" = {
-              icon = "/images/graylog.png";
-              server    = "ligma";
-              container = "graylog";
-              href = "https://{{HOMEPAGE_VAR_GRAYLOG_URL}}";
             };
           }
           { "Gluetun" = {
