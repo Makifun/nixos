@@ -41,7 +41,7 @@ in
         rule        = "Host(`netalertx.makifun.se`)";
         entryPoints = [ "websecure" ];
         service     = "netalertx-svc";
-        middlewares = [ "authentik" ];
+        #middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
       "netalertx-outpost" = {
