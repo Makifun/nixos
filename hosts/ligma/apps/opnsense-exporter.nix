@@ -1,7 +1,6 @@
 { config, pkgs, ... }:
 let
-  # renovate: datasource=docker depName=ghcr.io/athennamind/opnsense-exporter
-  exporterTag = "0.0.15";
+  exporterTag = "latest";
 in
 {
   sops.secrets.opnsense-api-key = {
