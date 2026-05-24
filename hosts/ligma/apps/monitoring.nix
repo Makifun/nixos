@@ -184,47 +184,6 @@
           interval = "1m";
           rules = [
             {
-              uid       = "unifi-wifi-connected";
-              title     = "WiFi Client Connected";
-              condition = "C";
-              "for"     = "0s";
-              annotations = { summary = ''WiFi: {{ $labels.client }} connected''; };
-              noDataState  = "OK";
-              execErrState = "Error";
-              data = [
-                {
-                  refId             = "A";
-                  queryType         = "range";
-                  relativeTimeRange = { from = 120; to = 0; };
-                  datasourceUid     = "loki";
-                  model = {
-                    refId     = "A";
-                    expr      = ''count_over_time({job="ligma-unifi"} |= "|400|WiFi Client Connected|" | regexp `UNIFIclientHostname=(?P<client>[^ ]+)` [2m])'';
-                    queryType = "range";
-                    instant   = false;
-                    range     = true;
-                  };
-                }
-                {
-                  refId             = "C";
-                  queryType         = "";
-                  relativeTimeRange = { from = 0; to = 0; };
-                  datasourceUid     = "-100";
-                  model = {
-                    refId = "C";
-                    type  = "classic_conditions";
-                    conditions = [{
-                      type      = "query";
-                      evaluator = { type = "gt"; params = [ 0 ]; };
-                      operator  = { type = "and"; };
-                      query     = { params = [ "A" ]; };
-                      reducer   = { type = "last"; params = []; };
-                    }];
-                  };
-                }
-              ];
-            }
-            {
               uid       = "authentik-login-success";
               title     = "Authentik Login Success";
               condition = "C";
