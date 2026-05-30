@@ -69,7 +69,7 @@ in
       ];
       environment = { OTEL_SDK_DISABLED = "true"; };
       volumes = [
-        "/etc/distribution/${name}/config.json:/etc/docker/registry/config.yml:ro"
+        "/etc/distribution/${name}/config.json:/etc/distribution/config.yml:ro"
         "${base}/${name}:/var/lib/registry"
       ];
     }
@@ -92,10 +92,10 @@ in
         gcAll    = lib.concatMapStringsSep "\n" (n: ''
           echo "GC: ${n}"
           podman run --rm \
-            -v /etc/distribution/${n}/config.json:/etc/docker/registry/config.yml:ro \
+            -v /etc/distribution/${n}/config.json:/etc/distribution/config.yml:ro \
             -v ${base}/${n}:/var/lib/registry \
             docker.io/library/registry:${registryTag} \
-            garbage-collect /etc/docker/registry/config.yml --delete-untagged=true \
+            garbage-collect /etc/distribution/config.yml --delete-untagged=true \
             || true
         '') names;
         startAll = lib.concatMapStringsSep "\n" (n:
