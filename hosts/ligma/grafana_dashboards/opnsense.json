@@ -392,12 +392,10 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "Down",
                   "color": "red",
                   "index": 0
                 },
                 "1": {
-                  "text": "Up",
                   "color": "green",
                   "index": 1
                 }
@@ -440,8 +438,8 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name",
-        "wideLayout": true,
+        "textMode": "name",
+        "wideLayout": false,
         "percentChangeColorMode": "standard",
         "showPercentChange": false
       },
@@ -3301,7 +3299,8 @@
           "instant": false,
           "range": true,
           "legendFormat": "Download",
-          "refId": "A"
+          "refId": "A",
+          "interval": "60m"
         },
         {
           "datasource": {
@@ -3314,9 +3313,11 @@
           "instant": false,
           "range": true,
           "legendFormat": "Upload",
-          "refId": "B"
+          "refId": "B",
+          "interval": "60m"
         }
-      ]
+      ],
+      "maxDataPoints": 200
     }
   ],
   "refresh": "1m",
