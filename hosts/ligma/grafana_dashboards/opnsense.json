@@ -453,15 +453,22 @@
           "editorMode": "code",
           "exemplar": false,
           "expr": "opnsense_services_status{opnsense_instance=\"$opnsense_instance\"}",
-          "instant": false,
-          "range": true,
+          "instant": true,
+          "range": false,
           "legendFormat": "{{name}}",
-          "refId": "A",
-          "format": "time_series"
+          "refId": "A"
         }
       ],
       "title": "Services Status",
-      "type": "stat"
+      "type": "stat",
+      "transformations": [
+        {
+          "id": "preparetimeseries",
+          "options": {
+            "format": "multi"
+          }
+        }
+      ]
     },
     {
       "collapsed": false,
