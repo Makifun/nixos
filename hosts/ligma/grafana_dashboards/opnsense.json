@@ -201,103 +201,6 @@
       "type": "status-history"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-GrYlRd"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 28,
-            "gradientMode": "scheme",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 1,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 7,
-        "x": 0,
-        "y": 4
-      },
-      "id": 17,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.1.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "node_cpu_temperature_celsius{instance=\"$opnsense_instance\",cpu=\"0\"}",
-          "legendFormat": "CPU Temperature",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Temperature",
-      "type": "timeseries"
-    },
-    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -1334,23 +1237,15 @@
       },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 1,
-          "mappings": [],
-          "max": 100,
+          "unit": "percent",
           "min": 0,
+          "max": 100,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
-                "value": 0
-              },
-              {
-                "color": "yellow",
-                "value": 70
+                "value": null
               },
               {
                 "color": "orange",
@@ -1362,22 +1257,15 @@
               }
             ]
           },
-          "unit": "percent"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "/dev/gpt/rootfs"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "/ Root"
-              }
-            ]
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineWidth": 2
           }
-        ]
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 6,
@@ -1387,28 +1275,18 @@
       },
       "id": 57,
       "options": {
-        "displayMode": "gradient",
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "maxVizHeight": 300,
-        "minVizHeight": 16,
-        "minVizWidth": 8,
-        "namePlacement": "left",
-        "orientation": "horizontal",
-        "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "",
-          "values": false
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         },
-        "showUnfilled": true,
-        "sizing": "auto",
-        "valueMode": "color"
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "pluginVersion": "12.1.0",
       "targets": [
@@ -1419,15 +1297,15 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "(1 - (node_filesystem_avail_bytes{instance=\"$opnsense_instance\",fstype!~\"devfs|tmpfs|procfs|linprocfs|fdescfs|nullfs\"} / node_filesystem_size_bytes{instance=\"$opnsense_instance\",fstype!~\"devfs|tmpfs|procfs|linprocfs|fdescfs|nullfs\"})) * 100 ",
-          "instant": true,
-          "legendFormat": "{{device}}",
-          "range": false,
+          "expr": "(node_filesystem_size_bytes{instance=\"$opnsense_instance\",mountpoint=\"/\"} - node_filesystem_free_bytes{instance=\"$opnsense_instance\",mountpoint=\"/\"}) / (node_filesystem_size_bytes{instance=\"$opnsense_instance\",mountpoint=\"/\"} - node_filesystem_free_bytes{instance=\"$opnsense_instance\",mountpoint=\"/\"} + node_filesystem_avail_bytes{instance=\"$opnsense_instance\",mountpoint=\"/\"}) * 100",
+          "instant": false,
+          "legendFormat": "/ usage",
+          "range": true,
           "refId": "A"
         }
       ],
       "title": "Filesystem Utilization",
-      "type": "bargauge"
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -2408,7 +2286,7 @@
           "expr": "opnsense_arp_table_entries{opnsense_instance=\"$opnsense_instance\"}",
           "format": "time_series",
           "instant": false,
-          "legendFormat": "{{mac}}",
+          "legendFormat": "{{hostname}} ({{ip}})",
           "range": true,
           "refId": "A"
         }
