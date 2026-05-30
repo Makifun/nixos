@@ -2,7 +2,7 @@
 let
   authBase = "/ligma/ligma/authentik";
   # renovate: datasource=docker depName=ghcr.io/goauthentik/server
-  authTag = "2026.5.0";
+  authTag = "2026.5.2";
   sharedEnv = {
     AUTHENTIK_POSTGRESQL__HOST = "/run/postgresql";
     AUTHENTIK_POSTGRESQL__USER = "authentik";
