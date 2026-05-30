@@ -3,7 +3,7 @@ let
   apprisePort = 8097;
   appriseBase = "/ligma/ligma/apprise";
   # renovate: datasource=docker depName=linuxserver/apprise-api registryUrl=https://lscr.io
-  appriseTag  = "1.4.1";
+  appriseTag  = "1.5.0";
 in
 {
   systemd.tmpfiles.rules = [
