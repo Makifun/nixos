@@ -2035,184 +2035,6 @@
           "color": {
             "mode": "thresholds"
           },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": false,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Received Rate"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "Bps"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Transmitted Rate"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "Bps"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 14,
-        "w": 24,
-        "x": 0,
-        "y": 44
-      },
-      "id": 80,
-      "maxDataPoints": 600,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "enablePagination": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "frameIndex": 0,
-        "showHeader": true
-      },
-      "pluginVersion": "12.1.0",
-      "targets": [
-        {
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "rate(opnsense_interfaces_received_bytes_total{opnsense_instance=\"$opnsense_instance\"}[$__rate_interval])",
-          "format": "table",
-          "instant": true,
-          "legendFormat": "RX Rate",
-          "range": false,
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          }
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "rate(opnsense_interfaces_transmitted_bytes_total{opnsense_instance=\"$opnsense_instance\"}[$__rate_interval])\n",
-          "format": "table",
-          "hide": false,
-          "instant": true,
-          "legendFormat": "TX Rate",
-          "range": false,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "opnsense_interfaces_input_errors_total{opnsense_instance=\"$opnsense_instance\"} + opnsense_interfaces_output_errors_total{opnsense_instance=\"$opnsense_instance\"}",
-          "format": "table",
-          "hide": false,
-          "instant": true,
-          "legendFormat": "Errors",
-          "range": false,
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "opnsense_interfaces_mtu_bytes{opnsense_instance=\"$opnsense_instance\"}\n",
-          "format": "table",
-          "hide": false,
-          "instant": true,
-          "legendFormat": "MTU",
-          "range": false,
-          "refId": "D"
-        }
-      ],
-      "title": "Interfaces",
-      "transformations": [
-        {
-          "id": "merge",
-          "options": {}
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true,
-              "device": true,
-              "group": true,
-              "host": true,
-              "instance": true,
-              "job": true,
-              "opnsense_instance": true,
-              "type": true
-            },
-            "includeByName": {},
-            "indexByName": {},
-            "renameByName": {
-              "Value #A": "Received Rate",
-              "Value #B": "Transmitted Rate",
-              "Value #C": "Errors",
-              "Value #D": "MTU",
-              "__name__": ""
-            }
-          }
-        }
-      ],
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -2399,9 +2221,9 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 9,
+        "w": 24,
         "x": 0,
-        "y": 53
+        "y": 44
       },
       "id": 65,
       "options": {
@@ -2513,7 +2335,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 58
+        "y": 49
       },
       "id": 78,
       "maxPerRow": 4,
@@ -2568,7 +2390,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 64
+        "y": 61
       },
       "id": 60,
       "panels": [],
@@ -2695,7 +2517,7 @@
         "h": 12,
         "w": 14,
         "x": 0,
-        "y": 65
+        "y": 62
       },
       "id": 63,
       "options": {
@@ -2909,7 +2731,7 @@
         "h": 12,
         "w": 10,
         "x": 14,
-        "y": 65
+        "y": 62
       },
       "id": 61,
       "options": {
@@ -2980,6 +2802,168 @@
       ],
       "title": "Firewall IPv4 Traffic",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "fillOpacity": 15,
+            "lineWidth": 1,
+            "gradientMode": "none"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "type": "timeseries",
+      "id": 90,
+      "title": "Input Errors",
+      "gridPos": {
+        "x": 0,
+        "y": 55,
+        "w": 8,
+        "h": 6
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "rate(opnsense_interfaces_input_errors_total{interface=~\"$interface\",opnsense_instance=\"$opnsense_instance\"}[$__rate_interval])",
+          "legendFormat": "{{interface}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "fillOpacity": 15,
+            "lineWidth": 1,
+            "gradientMode": "none"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "type": "timeseries",
+      "id": 91,
+      "title": "Output Errors",
+      "gridPos": {
+        "x": 8,
+        "y": 55,
+        "w": 8,
+        "h": 6
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "rate(opnsense_interfaces_output_errors_total{interface=~\"$interface\",opnsense_instance=\"$opnsense_instance\"}[$__rate_interval])",
+          "legendFormat": "{{interface}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "fillOpacity": 15,
+            "lineWidth": 1,
+            "gradientMode": "none"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "type": "timeseries",
+      "id": 92,
+      "title": "Collisions",
+      "gridPos": {
+        "x": 16,
+        "y": 55,
+        "w": 8,
+        "h": 6
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "rate(opnsense_interfaces_collisions_total{interface=~\"$interface\",opnsense_instance=\"$opnsense_instance\"}[$__rate_interval])",
+          "legendFormat": "{{interface}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
     }
   ],
   "refresh": "1m",
