@@ -27,11 +27,483 @@
   "panels": [
     {
       "collapsed": false,
+      "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
+      },
+      "id": 93,
+      "panels": [],
+      "title": "Summary",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "id": 94,
+      "title": "Uptime",
+      "type": "stat",
+      "pluginVersion": "12.1.0",
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true,
+        "percentChangeColorMode": "standard",
+        "showPercentChange": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "(time() - node_boot_time_seconds{instance=\"$opnsense_instance\"})",
+          "instant": true,
+          "range": false,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "id": 95,
+      "title": "Gateway Status",
+      "type": "stat",
+      "pluginVersion": "12.1.0",
+      "gridPos": {
+        "x": 4,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Offline",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "Online",
+                  "color": "green"
+                },
+                "2": {
+                  "text": "Unknown",
+                  "color": "orange"
+                },
+                "3": {
+                  "text": "Pending",
+                  "color": "yellow"
+                },
+                "4": {
+                  "text": "Packet Loss",
+                  "color": "orange"
+                },
+                "5": {
+                  "text": "High Latency",
+                  "color": "yellow"
+                },
+                "6": {
+                  "text": "Forced Offline",
+                  "color": "red"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "orange",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true,
+        "percentChangeColorMode": "standard",
+        "showPercentChange": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max by (name) (opnsense_gateways_status{opnsense_instance=\"$opnsense_instance\",name=~\"$gateway\"})",
+          "instant": true,
+          "range": false,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "id": 96,
+      "title": "WAN Download",
+      "type": "gauge",
+      "pluginVersion": "12.1.0",
+      "gridPos": {
+        "x": 8,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "max": 125000000,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 87500000.0
+              },
+              {
+                "color": "red",
+                "value": 112500000.0
+              }
+            ]
+          },
+          "unit": "Bps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "rate(opnsense_interfaces_received_bytes_total{interface=~\"$wan_interface\",opnsense_instance=\"$opnsense_instance\"}[$__rate_interval])",
+          "instant": false,
+          "range": true,
+          "legendFormat": "\u2193",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "id": 97,
+      "title": "WAN Upload",
+      "type": "gauge",
+      "pluginVersion": "12.1.0",
+      "gridPos": {
+        "x": 12,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "max": 125000000,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 87500000.0
+              },
+              {
+                "color": "red",
+                "value": 112500000.0
+              }
+            ]
+          },
+          "unit": "Bps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "rate(opnsense_interfaces_transmitted_bytes_total{interface=~\"$wan_interface\",opnsense_instance=\"$opnsense_instance\"}[$__rate_interval])",
+          "instant": false,
+          "range": true,
+          "legendFormat": "\u2191",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "id": 98,
+      "title": "Download / Hour",
+      "type": "stat",
+      "pluginVersion": "12.1.0",
+      "gridPos": {
+        "x": 16,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true,
+        "percentChangeColorMode": "standard",
+        "showPercentChange": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "increase(opnsense_interfaces_received_bytes_total{interface=~\"$wan_interface\",opnsense_instance=\"$opnsense_instance\"}[1h])",
+          "instant": true,
+          "range": false,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "id": 99,
+      "title": "Upload / Hour",
+      "type": "stat",
+      "pluginVersion": "12.1.0",
+      "gridPos": {
+        "x": 20,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true,
+        "percentChangeColorMode": "standard",
+        "showPercentChange": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "increase(opnsense_interfaces_transmitted_bytes_total{interface=~\"$wan_interface\",opnsense_instance=\"$opnsense_instance\"}[1h])",
+          "instant": true,
+          "range": false,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
       },
       "id": 76,
       "panels": [],
@@ -67,7 +539,7 @@
         "h": 3,
         "w": 7,
         "x": 0,
-        "y": 1
+        "y": 6
       },
       "id": 75,
       "options": {
@@ -161,7 +633,7 @@
         "h": 9,
         "w": 17,
         "x": 7,
-        "y": 1
+        "y": 6
       },
       "id": 83,
       "maxDataPoints": 100,
@@ -206,7 +678,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 15
       },
       "id": 37,
       "panels": [],
@@ -252,7 +724,7 @@
         "h": 6,
         "w": 3,
         "x": 0,
-        "y": 11
+        "y": 16
       },
       "id": 1,
       "options": {
@@ -361,7 +833,7 @@
         "h": 6,
         "w": 9,
         "x": 3,
-        "y": 11
+        "y": 16
       },
       "id": 73,
       "options": {
@@ -509,7 +981,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 11
+        "y": 16
       },
       "id": 9,
       "options": {
@@ -605,7 +1077,7 @@
         "h": 6,
         "w": 3,
         "x": 0,
-        "y": 17
+        "y": 22
       },
       "id": 2,
       "options": {
@@ -766,7 +1238,7 @@
         "h": 6,
         "w": 9,
         "x": 3,
-        "y": 17
+        "y": 22
       },
       "id": 24,
       "options": {
@@ -879,7 +1351,7 @@
         "h": 6,
         "w": 3,
         "x": 12,
-        "y": 17
+        "y": 22
       },
       "id": 3,
       "options": {
@@ -986,7 +1458,7 @@
         "h": 6,
         "w": 9,
         "x": 15,
-        "y": 17
+        "y": 22
       },
       "id": 74,
       "options": {
@@ -1085,7 +1557,7 @@
         "h": 4,
         "w": 12,
         "x": 0,
-        "y": 23
+        "y": 28
       },
       "id": 19,
       "options": {
@@ -1184,7 +1656,7 @@
         "h": 4,
         "w": 12,
         "x": 12,
-        "y": 23
+        "y": 28
       },
       "id": 18,
       "options": {
@@ -1223,7 +1695,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 32
       },
       "id": 41,
       "panels": [],
@@ -1271,7 +1743,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 28
+        "y": 33
       },
       "id": 57,
       "options": {
@@ -1406,7 +1878,7 @@
         "h": 6,
         "w": 9,
         "x": 6,
-        "y": 28
+        "y": 33
       },
       "id": 42,
       "options": {
@@ -1551,7 +2023,7 @@
         "h": 6,
         "w": 9,
         "x": 15,
-        "y": 28
+        "y": 33
       },
       "id": 43,
       "options": {
@@ -1606,7 +2078,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 39
       },
       "id": 88,
       "panels": [],
@@ -1675,7 +2147,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 40
       },
       "id": 81,
       "maxDataPoints": 100,
@@ -1779,7 +2251,7 @@
         "h": 5,
         "w": 8,
         "x": 0,
-        "y": 38
+        "y": 43
       },
       "id": 87,
       "options": {
@@ -1873,7 +2345,7 @@
         "h": 5,
         "w": 8,
         "x": 8,
-        "y": 38
+        "y": 43
       },
       "id": 85,
       "options": {
@@ -1979,7 +2451,7 @@
         "h": 5,
         "w": 8,
         "x": 16,
-        "y": 38
+        "y": 43
       },
       "id": 86,
       "options": {
@@ -2018,7 +2490,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 43
+        "y": 48
       },
       "id": 79,
       "panels": [],
@@ -2223,7 +2695,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 44
+        "y": 49
       },
       "id": 65,
       "options": {
@@ -2335,7 +2807,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 54
       },
       "id": 78,
       "maxPerRow": 4,
@@ -2390,7 +2862,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 61
+        "y": 66
       },
       "id": 60,
       "panels": [],
@@ -2517,7 +2989,7 @@
         "h": 12,
         "w": 14,
         "x": 0,
-        "y": 62
+        "y": 67
       },
       "id": 63,
       "options": {
@@ -2731,7 +3203,7 @@
         "h": 12,
         "w": 10,
         "x": 14,
-        "y": 62
+        "y": 67
       },
       "id": 61,
       "options": {
@@ -2839,7 +3311,7 @@
       "title": "Input Errors",
       "gridPos": {
         "x": 0,
-        "y": 55,
+        "y": 60,
         "w": 8,
         "h": 6
       },
@@ -2893,7 +3365,7 @@
       "title": "Output Errors",
       "gridPos": {
         "x": 8,
-        "y": 55,
+        "y": 60,
         "w": 8,
         "h": 6
       },
@@ -2947,7 +3419,7 @@
       "title": "Collisions",
       "gridPos": {
         "x": 16,
-        "y": 55,
+        "y": 60,
         "w": 8,
         "h": 6
       },
@@ -2982,6 +3454,23 @@
         "query": {
           "qryType": 1,
           "query": "label_values(opnsense_arp_table_entries,opnsense_instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {},
+        "definition": "label_values(opnsense_interfaces_received_bytes_total,interface)",
+        "includeAll": false,
+        "label": "WAN Interface",
+        "name": "wan_interface",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(opnsense_interfaces_received_bytes_total,interface)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
