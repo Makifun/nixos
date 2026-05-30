@@ -2086,8 +2086,8 @@
         ]
       },
       "gridPos": {
-        "h": 9,
-        "w": 9,
+        "h": 14,
+        "w": 24,
         "x": 0,
         "y": 44
       },
@@ -2202,97 +2202,6 @@
         }
       ],
       "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "scaleDistribution": {
-              "type": "linear"
-            }
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 14,
-        "w": 15,
-        "x": 9,
-        "y": 44
-      },
-      "id": 82,
-      "maxDataPoints": 100,
-      "options": {
-        "calculate": false,
-        "cellGap": 2,
-        "cellValues": {
-          "decimals": 1,
-          "unit": "none"
-        },
-        "color": {
-          "exponent": 0.1,
-          "fill": "dark-green",
-          "max": 1,
-          "min": 0,
-          "mode": "opacity",
-          "reverse": false,
-          "scale": "linear",
-          "scheme": "Greens",
-          "steps": 2
-        },
-        "exemplars": {
-          "color": "rgba(255,0,255,0.7)"
-        },
-        "filterValues": {
-          "le": 1e-09
-        },
-        "legend": {
-          "show": false
-        },
-        "rowsFrame": {
-          "layout": "auto"
-        },
-        "tooltip": {
-          "mode": "single",
-          "showColorScale": false,
-          "yHistogram": false
-        },
-        "yAxis": {
-          "axisPlacement": "left",
-          "axisWidth": 124,
-          "reverse": false,
-          "unit": "none"
-        }
-      },
-      "pluginVersion": "12.1.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "opnsense_arp_table_entries{opnsense_instance=\"$opnsense_instance\"}",
-          "format": "time_series",
-          "instant": false,
-          "legendFormat": "{{hostname}} ({{ip}})",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "ARP Table Entries ",
-      "type": "heatmap"
     },
     {
       "datasource": {
@@ -2784,7 +2693,7 @@
       },
       "gridPos": {
         "h": 12,
-        "w": 10,
+        "w": 14,
         "x": 0,
         "y": 65
       },
@@ -2997,9 +2906,9 @@
         ]
       },
       "gridPos": {
-        "h": 6,
-        "w": 14,
-        "x": 10,
+        "h": 12,
+        "w": 10,
+        "x": 14,
         "y": 65
       },
       "id": 61,
@@ -3029,7 +2938,7 @@
           },
           "editorMode": "code",
           "expr": "sum(rate(opnsense_firewall_in_ipv4_pass_packets{opnsense_instance=\"$opnsense_instance\"}[$__rate_interval]))",
-          "legendFormat": "Pass",
+          "legendFormat": "In Pass",
           "range": true,
           "refId": "A"
         },
@@ -3041,132 +2950,10 @@
           "editorMode": "code",
           "expr": "sum(rate(opnsense_firewall_in_ipv4_block_packets{opnsense_instance=\"$opnsense_instance\"}[$__rate_interval]))",
           "hide": false,
-          "legendFormat": "Block",
+          "legendFormat": "In Block",
           "range": true,
           "refId": "B"
-        }
-      ],
-      "title": "Firewall IPv4 Incoming Traffic",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 25,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "pps"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Pass"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Block"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 14,
-        "x": 10,
-        "y": 71
-      },
-      "id": 62,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max",
-            "lastNotNull"
-          ],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "12.1.0",
-      "targets": [
         {
           "datasource": {
             "type": "prometheus",
@@ -3174,9 +2961,9 @@
           },
           "editorMode": "code",
           "expr": "sum(rate(opnsense_firewall_out_ipv4_pass_packets{opnsense_instance=\"$opnsense_instance\"}[$__rate_interval]))",
-          "legendFormat": "Pass",
+          "legendFormat": "Out Pass",
           "range": true,
-          "refId": "A"
+          "refId": "C"
         },
         {
           "datasource": {
@@ -3186,12 +2973,12 @@
           "editorMode": "code",
           "expr": "sum(rate(opnsense_firewall_out_ipv4_block_packets{opnsense_instance=\"$opnsense_instance\"}[$__rate_interval]))",
           "hide": false,
-          "legendFormat": "Block",
+          "legendFormat": "Out Block",
           "range": true,
-          "refId": "B"
+          "refId": "D"
         }
       ],
-      "title": "Firewall IPv4 Outgoing Traffic",
+      "title": "Firewall IPv4 Traffic",
       "type": "timeseries"
     }
   ],
