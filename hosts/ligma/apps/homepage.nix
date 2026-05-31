@@ -44,10 +44,10 @@
   # Repeat the required fields so the merge satisfies NixOS user validation.
   users.users.homepage-dashboard = {
     isSystemUser = true;
-    group        = "homepage-dashboard";
-    extraGroups  = [ "podman" ];
+    group = "homepage-dashboard";
+    extraGroups = [ "podman" ];
   };
-  users.groups.homepage-dashboard = {};
+  users.groups.homepage-dashboard = { };
 
   systemd.services.homepage-dashboard.environment.KUBECONFIG =
     config.sops.secrets.homepage-kubeconfig.path;
@@ -65,245 +65,402 @@
 
     settings = {
       layout = [
-        { Media     = { style = "column"; }; }
-        { Downloads = { style = "column"; }; }
-        { DVR       = { style = "column"; }; }
-        { DVR4K     = { style = "column"; }; }
-        { Calendar  = { style = "column"; }; }
-        { Utilities = { style = "column"; columns = 1; }; }
-        { Network   = { style = "column"; columns = 1; }; }
-        { Server    = { style = "column"; columns = 1; }; }
+        {
+          Media = {
+            style = "column";
+          };
+        }
+        {
+          Downloads = {
+            style = "column";
+          };
+        }
+        {
+          DVR = {
+            style = "column";
+          };
+        }
+        {
+          DVR4K = {
+            style = "column";
+          };
+        }
+        {
+          Calendar = {
+            style = "column";
+          };
+        }
+        {
+          Utilities = {
+            style = "column";
+            columns = 1;
+          };
+        }
+        {
+          Network = {
+            style = "column";
+            columns = 1;
+          };
+        }
+        {
+          Server = {
+            style = "column";
+            columns = 1;
+          };
+        }
       ];
-      headerStyle      = "boxed";
-      color            = "slate";
-      theme            = "dark";
-      hideVersion      = true;
-      background       = "/images/background.png";
+      headerStyle = "boxed";
+      color = "slate";
+      theme = "dark";
+      hideVersion = true;
+      background = "/images/background.png";
       backgroundOpacity = 0.9;
-      disableCollapse  = true;
+      disableCollapse = true;
     };
 
     widgets = [
-      { resources = { label = "System"; cpu = true; memory = true; uptime = true; expanded = true; }; }
-      { resources = { label = "/"; disk = "/"; expanded = true; }; }
-      { resources = { label = "/persist"; disk = "/persist"; expanded = true; }; }
-      { resources = { label = "/ligma"; disk = "/ligma"; expanded = true; }; }
-      { resources = { label = "/cloud"; disk = "/cloud"; expanded = true; }; }
-      { resources = { label = "/rclone-cache"; disk = "/rclone-cache"; expanded = true; }; }
-      { unifi_console = {
-          url      = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
+      {
+        resources = {
+          label = "System";
+          cpu = true;
+          memory = true;
+          uptime = true;
+          expanded = true;
+        };
+      }
+      {
+        resources = {
+          label = "/";
+          disk = "/";
+          expanded = true;
+        };
+      }
+      {
+        resources = {
+          label = "/persist";
+          disk = "/persist";
+          expanded = true;
+        };
+      }
+      {
+        resources = {
+          label = "/ligma";
+          disk = "/ligma";
+          expanded = true;
+        };
+      }
+      {
+        resources = {
+          label = "/cloud";
+          disk = "/cloud";
+          expanded = true;
+        };
+      }
+      {
+        resources = {
+          label = "/rclone-cache";
+          disk = "/rclone-cache";
+          expanded = true;
+        };
+      }
+      {
+        unifi_console = {
+          url = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
           username = "{{HOMEPAGE_VAR_UNIFI_USERNAME}}";
           password = "{{HOMEPAGE_VAR_UNIFI_PASSWORD}}";
         };
       }
-      { openmeteo = {
-          label     = "{{HOMEPAGE_VAR_OPENMETEO_LABEL}}";
-          latitude  = "{{HOMEPAGE_VAR_OPENMETEO_LATITUDE}}";
+      {
+        openmeteo = {
+          label = "{{HOMEPAGE_VAR_OPENMETEO_LABEL}}";
+          latitude = "{{HOMEPAGE_VAR_OPENMETEO_LATITUDE}}";
           longitude = "{{HOMEPAGE_VAR_OPENMETEO_LONGITUDE}}";
-          units     = "metric";
-          cache     = 5;
+          units = "metric";
+          cache = 5;
         };
       }
-      { datetime = {
+      {
+        datetime = {
           locale = "sv";
-          format = { dateStyle = "long"; timeStyle = "short"; };
+          format = {
+            dateStyle = "long";
+            timeStyle = "short";
+          };
         };
       }
     ];
 
     docker = {
-      jonny = { host = "{{HOMEPAGE_VAR_SOCKET_PROXY}}"; port = 2375; };
-      ligma  = { socket = "/run/podman/podman.sock"; };
+      jonny = {
+        host = "{{HOMEPAGE_VAR_SOCKET_PROXY}}";
+        port = 2375;
+      };
+      ligma = {
+        socket = "/run/podman/podman.sock";
+      };
     };
 
     services = [
-      { "Media" = [
-          { "Plex" = {
-              icon      = "/images/plex.png";
-              href      = "https://app.plex.tv";
-              server    = "jonny";
+      {
+        "Media" = [
+          {
+            "Plex" = {
+              icon = "/images/plex.png";
+              href = "https://app.plex.tv";
+              server = "jonny";
               container = "{{HOMEPAGE_VAR_PLEX_CONTAINER}}";
               widget = {
-                type   = "plex";
-                fields = [ "streams" "movies" "tv" ];
-                url    = "https://{{HOMEPAGE_VAR_PLEX_URL}}";
-                key    = "{{HOMEPAGE_VAR_PLEX_TOKEN}}";
+                type = "plex";
+                fields = [
+                  "streams"
+                  "movies"
+                  "tv"
+                ];
+                url = "https://{{HOMEPAGE_VAR_PLEX_URL}}";
+                key = "{{HOMEPAGE_VAR_PLEX_TOKEN}}";
               };
             };
           }
-          { "Tautulli" = {
-              icon      = "/images/tautulli.png";
-              href      = "https://{{HOMEPAGE_VAR_TAUTULLI_URL}}";
+          {
+            "Tautulli" = {
+              icon = "/images/tautulli.png";
+              href = "https://{{HOMEPAGE_VAR_TAUTULLI_URL}}";
               widget = {
-                type              = "tautulli";
-                url               = "https://{{HOMEPAGE_VAR_TAUTULLI_URL}}";
-                key               = "{{HOMEPAGE_VAR_TAUTULLI_TOKEN}}";
-                enableUser        = true;
+                type = "tautulli";
+                url = "https://{{HOMEPAGE_VAR_TAUTULLI_URL}}";
+                key = "{{HOMEPAGE_VAR_TAUTULLI_TOKEN}}";
+                enableUser = true;
                 showEpisodeNumber = true;
               };
             };
           }
-          { "Tracearr" = {
-              icon      = "/images/tracearr.png";
-              href      = "https://{{HOMEPAGE_VAR_TRACEARR_URL}}";
+          {
+            "Tracearr" = {
+              icon = "/images/tracearr.png";
+              href = "https://{{HOMEPAGE_VAR_TRACEARR_URL}}";
+              widget = {
+                type = "tracearr";
+                url = "https://{{HOMEPAGE_VAR_TRACEARR_URL}}";
+                key = "{{HOMEPAGE_VAR_TRACEARR_TOKEN}}";
+                view = "both";
+                enableUser = true;
+                showEpisodeNumber = true;
+                expandOneStreamToTwoRows = false;
+              };
             };
           }
-          { "Seerr" = {
-              icon      = "/images/seerr.png";
-              href      = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
-              server    = "jonny";
+          {
+            "Seerr" = {
+              icon = "/images/seerr.png";
+              href = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
+              server = "jonny";
               container = "seerr";
               widget = {
-                type   = "seerr";
-                fields = [ "pending" "approved" "available" "processing" ];
-                url    = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
-                key    = "{{HOMEPAGE_VAR_SEERR_TOKEN}}";
+                type = "seerr";
+                fields = [
+                  "pending"
+                  "approved"
+                  "available"
+                  "processing"
+                ];
+                url = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
+                key = "{{HOMEPAGE_VAR_SEERR_TOKEN}}";
               };
             };
           }
         ];
       }
 
-      { "Downloads" = [
-          { "NZBget" = {
-              icon      = "/images/nzbget.png";
-              href      = "https://{{HOMEPAGE_VAR_NZBGET_URL}}";
-              server    = "jonny";
+      {
+        "Downloads" = [
+          {
+            "NZBget" = {
+              icon = "/images/nzbget.png";
+              href = "https://{{HOMEPAGE_VAR_NZBGET_URL}}";
+              server = "jonny";
               container = "nzbget";
               widget = {
-                type     = "nzbget";
-                url      = "https://{{HOMEPAGE_VAR_NZBGET_URL}}";
+                type = "nzbget";
+                url = "https://{{HOMEPAGE_VAR_NZBGET_URL}}";
                 username = "{{HOMEPAGE_VAR_NZBGET_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_NZBGET_PASSWORD}}";
               };
             };
           }
-          { "qBittorrent" = {
-              icon      = "/images/qbittorrent.png";
-              href      = "https://{{HOMEPAGE_VAR_QUI_URL}}";
-              server    = "jonny";
+          {
+            "qBittorrent" = {
+              icon = "/images/qbittorrent.png";
+              href = "https://{{HOMEPAGE_VAR_QUI_URL}}";
+              server = "jonny";
               container = "qbittorrent";
               widget = {
-                type                = "qbittorrent";
-                fields              = [ "leech" "download" "seed" "upload" ];
-                url                 = "https://{{HOMEPAGE_VAR_QBITTORRENT_URL}}";
+                type = "qbittorrent";
+                fields = [
+                  "leech"
+                  "download"
+                  "seed"
+                  "upload"
+                ];
+                url = "https://{{HOMEPAGE_VAR_QBITTORRENT_URL}}";
                 enableLeechProgress = true;
               };
             };
           }
-          { "autobrr" = {
-              icon      = "/images/autobrr.png";
-              href      = "https://{{HOMEPAGE_VAR_AUTOBRR_URL}}";
-              server    = "jonny";
+          {
+            "autobrr" = {
+              icon = "/images/autobrr.png";
+              href = "https://{{HOMEPAGE_VAR_AUTOBRR_URL}}";
+              server = "jonny";
               container = "autobrr";
               widget = {
-                type   = "autobrr";
-                fields = [ "approvedPushes" "rejectedPushes" "filters" "indexers" ];
-                url    = "https://{{HOMEPAGE_VAR_AUTOBRR_URL}}";
-                key    = "{{HOMEPAGE_VAR_AUTOBRR_TOKEN}}";
+                type = "autobrr";
+                fields = [
+                  "approvedPushes"
+                  "rejectedPushes"
+                  "filters"
+                  "indexers"
+                ];
+                url = "https://{{HOMEPAGE_VAR_AUTOBRR_URL}}";
+                key = "{{HOMEPAGE_VAR_AUTOBRR_TOKEN}}";
               };
             };
           }
         ];
       }
 
-      { "DVR" = [
-          { "Sonarr" = {
-              icon      = "/images/sonarr.png";
-              href      = "https://{{HOMEPAGE_VAR_SONARR_URL}}";
-              server    = "jonny";
+      {
+        "DVR" = [
+          {
+            "Sonarr" = {
+              icon = "/images/sonarr.png";
+              href = "https://{{HOMEPAGE_VAR_SONARR_URL}}";
+              server = "jonny";
               container = "sonarr";
               widget = {
-                type        = "sonarr";
-                fields      = [ "wanted" "queued" "series" ];
-                url         = "https://{{HOMEPAGE_VAR_SONARR_URL}}";
-                key         = "{{HOMEPAGE_VAR_SONARR_TOKEN}}";
+                type = "sonarr";
+                fields = [
+                  "wanted"
+                  "queued"
+                  "series"
+                ];
+                url = "https://{{HOMEPAGE_VAR_SONARR_URL}}";
+                key = "{{HOMEPAGE_VAR_SONARR_TOKEN}}";
                 enableQueue = true;
               };
             };
           }
-          { "Radarr" = {
-              icon      = "/images/radarr.png";
-              href      = "https://{{HOMEPAGE_VAR_RADARR_URL}}";
-              server    = "jonny";
+          {
+            "Radarr" = {
+              icon = "/images/radarr.png";
+              href = "https://{{HOMEPAGE_VAR_RADARR_URL}}";
+              server = "jonny";
               container = "radarr";
               widget = {
-                type        = "radarr";
-                fields      = [ "wanted" "missing" "queued" "movies" ];
-                url         = "https://{{HOMEPAGE_VAR_RADARR_URL}}";
-                key         = "{{HOMEPAGE_VAR_RADARR_TOKEN}}";
+                type = "radarr";
+                fields = [
+                  "wanted"
+                  "missing"
+                  "queued"
+                  "movies"
+                ];
+                url = "https://{{HOMEPAGE_VAR_RADARR_URL}}";
+                key = "{{HOMEPAGE_VAR_RADARR_TOKEN}}";
                 enableQueue = true;
               };
             };
           }
-          { "Bazarr" = {
-              icon      = "/images/bazarr.png";
-              href      = "https://{{HOMEPAGE_VAR_BAZARR_URL}}";
-              server    = "jonny";
+          {
+            "Bazarr" = {
+              icon = "/images/bazarr.png";
+              href = "https://{{HOMEPAGE_VAR_BAZARR_URL}}";
+              server = "jonny";
               container = "bazarr";
               widget = {
                 type = "bazarr";
-                url  = "https://{{HOMEPAGE_VAR_BAZARR_URL}}";
-                key  = "{{HOMEPAGE_VAR_BAZARR_TOKEN}}";
+                url = "https://{{HOMEPAGE_VAR_BAZARR_URL}}";
+                key = "{{HOMEPAGE_VAR_BAZARR_TOKEN}}";
               };
             };
           }
         ];
       }
 
-      { "DVR4K" = [
-          { "Sonarr4K" = {
-              icon      = "/images/sonarr4k.png";
-              href      = "https://{{HOMEPAGE_VAR_SONARR4K_URL}}";
-              server    = "jonny";
+      {
+        "DVR4K" = [
+          {
+            "Sonarr4K" = {
+              icon = "/images/sonarr4k.png";
+              href = "https://{{HOMEPAGE_VAR_SONARR4K_URL}}";
+              server = "jonny";
               container = "sonarr4k";
               widget = {
-                type        = "sonarr";
-                fields      = [ "wanted" "queued" "series" ];
-                url         = "https://{{HOMEPAGE_VAR_SONARR4K_URL}}";
-                key         = "{{HOMEPAGE_VAR_SONARR4K_TOKEN}}";
+                type = "sonarr";
+                fields = [
+                  "wanted"
+                  "queued"
+                  "series"
+                ];
+                url = "https://{{HOMEPAGE_VAR_SONARR4K_URL}}";
+                key = "{{HOMEPAGE_VAR_SONARR4K_TOKEN}}";
                 enableQueue = true;
               };
             };
           }
-          { "Radarr4K" = {
-              icon      = "/images/radarr4k.png";
-              href      = "https://{{HOMEPAGE_VAR_RADARR4K_URL}}";
-              server    = "jonny";
+          {
+            "Radarr4K" = {
+              icon = "/images/radarr4k.png";
+              href = "https://{{HOMEPAGE_VAR_RADARR4K_URL}}";
+              server = "jonny";
               container = "radarr4k";
               widget = {
-                type        = "radarr";
-                fields      = [ "wanted" "missing" "queued" "movies" ];
-                url         = "https://{{HOMEPAGE_VAR_RADARR4K_URL}}";
-                key         = "{{HOMEPAGE_VAR_RADARR4K_TOKEN}}";
+                type = "radarr";
+                fields = [
+                  "wanted"
+                  "missing"
+                  "queued"
+                  "movies"
+                ];
+                url = "https://{{HOMEPAGE_VAR_RADARR4K_URL}}";
+                key = "{{HOMEPAGE_VAR_RADARR4K_TOKEN}}";
                 enableQueue = true;
               };
             };
           }
-          { "Bazarr4K" = {
-              icon      = "/images/bazarr4k.png";
-              href      = "https://{{HOMEPAGE_VAR_BAZARR4K_URL}}";
-              server    = "jonny";
+          {
+            "Bazarr4K" = {
+              icon = "/images/bazarr4k.png";
+              href = "https://{{HOMEPAGE_VAR_BAZARR4K_URL}}";
+              server = "jonny";
               container = "bazarr4k";
               widget = {
                 type = "bazarr";
-                url  = "https://{{HOMEPAGE_VAR_BAZARR4K_URL}}";
-                key  = "{{HOMEPAGE_VAR_BAZARR4K_TOKEN}}";
+                url = "https://{{HOMEPAGE_VAR_BAZARR4K_URL}}";
+                key = "{{HOMEPAGE_VAR_BAZARR4K_TOKEN}}";
               };
             };
           }
         ];
       }
 
-      { "Calendar" = [
-          { "Calendar" = {
+      {
+        "Calendar" = [
+          {
+            "Calendar" = {
               widget = {
-                type      = "calendar";
+                type = "calendar";
                 maxEvents = 100;
-                showTime  = true;
+                showTime = true;
                 integrations = [
-                  { type = "sonarr"; service_group = "DVR"; service_name = "Sonarr"; }
-                  { type = "radarr"; service_group = "DVR"; service_name = "Radarr"; }
+                  {
+                    type = "sonarr";
+                    service_group = "DVR";
+                    service_name = "Sonarr";
+                  }
+                  {
+                    type = "radarr";
+                    service_group = "DVR";
+                    service_name = "Radarr";
+                  }
                 ];
               };
             };
@@ -311,92 +468,110 @@
         ];
       }
 
-      { "Utilities" = [
-          { "Miniflux" = {
-              icon      = "/images/miniflux.svg";
-              href      = "https://{{HOMEPAGE_VAR_MINIFLUX_URL}}";
+      {
+        "Utilities" = [
+          {
+            "Miniflux" = {
+              icon = "/images/miniflux.svg";
+              href = "https://{{HOMEPAGE_VAR_MINIFLUX_URL}}";
               widget = {
                 type = "miniflux";
-                url  = "https://{{HOMEPAGE_VAR_MINIFLUX_URL}}";
-                key  = "{{HOMEPAGE_VAR_MINIFLUX_TOKEN}}";
+                url = "https://{{HOMEPAGE_VAR_MINIFLUX_URL}}";
+                key = "{{HOMEPAGE_VAR_MINIFLUX_TOKEN}}";
               };
             };
           }
-          { "Home Assistant" = {
-              icon      = "/images/home-assistant.png";
-              href      = "https://{{HOMEPAGE_VAR_HOMEASSISTANT_URL}}";
+          {
+            "Home Assistant" = {
+              icon = "/images/home-assistant.png";
+              href = "https://{{HOMEPAGE_VAR_HOMEASSISTANT_URL}}";
               widget = {
                 type = "homeassistant";
-                url  = "https://{{HOMEPAGE_VAR_HOMEASSISTANT_URL}}";
-                key  = "{{HOMEPAGE_VAR_HOMEASSISTANT_TOKEN}}";
+                url = "https://{{HOMEPAGE_VAR_HOMEASSISTANT_URL}}";
+                key = "{{HOMEPAGE_VAR_HOMEASSISTANT_TOKEN}}";
               };
             };
           }
-          { "Forgejo" = {
-              icon      = "/images/forgejo.png";
-              href      = "https://{{HOMEPAGE_VAR_FORGEJO_URL}}";
+          {
+            "Forgejo" = {
+              icon = "/images/forgejo.png";
+              href = "https://{{HOMEPAGE_VAR_FORGEJO_URL}}";
               widget = {
-                type   = "gitea";
-                fields = [ "repositories" "issues" "pulls" ];
-                url    = "https://{{HOMEPAGE_VAR_FORGEJO_URL}}";
-                key    = "{{HOMEPAGE_VAR_FORGEJO_TOKEN}}";
+                type = "gitea";
+                fields = [
+                  "repositories"
+                  "issues"
+                  "pulls"
+                ];
+                url = "https://{{HOMEPAGE_VAR_FORGEJO_URL}}";
+                key = "{{HOMEPAGE_VAR_FORGEJO_TOKEN}}";
               };
             };
           }
-          { "Filebrowser" = {
-              icon      = "/images/filebrowser.png";
-              href      = "https://{{HOMEPAGE_VAR_FILEBROWSER_URL}}";
-              server    = "jonny";
+          {
+            "Filebrowser" = {
+              icon = "/images/filebrowser.png";
+              href = "https://{{HOMEPAGE_VAR_FILEBROWSER_URL}}";
+              server = "jonny";
               container = "filebrowser";
             };
           }
-          { "s3manager" = {
-              icon      = "/images/s3man.png";
-              href      = "https://{{HOMEPAGE_VAR_S3MANAGER_URL}}";
+          {
+            "s3manager" = {
+              icon = "/images/s3man.png";
+              href = "https://{{HOMEPAGE_VAR_S3MANAGER_URL}}";
             };
           }
-          { "Vaultwarden" = {
-              icon      = "/images/vaultwarden.png";
-              href      = "https://{{HOMEPAGE_VAR_VAULTWARDEN_URL}}";
+          {
+            "Vaultwarden" = {
+              icon = "/images/vaultwarden.png";
+              href = "https://{{HOMEPAGE_VAR_VAULTWARDEN_URL}}";
             };
           }
-          { "Gotify" = {
-              icon      = "/images/gotify.png";
-              href      = "https://{{HOMEPAGE_VAR_GOTIFY_URL}}";
-              server    = "ligma";
+          {
+            "Gotify" = {
+              icon = "/images/gotify.png";
+              href = "https://{{HOMEPAGE_VAR_GOTIFY_URL}}";
+              server = "ligma";
               container = "gotify";
             };
           }
-          { "Apprise" = {
-              icon      = "/images/apprise.png";
-              href      = "https://{{HOMEPAGE_VAR_APPRISE_URL}}";
-              server    = "ligma";
+          {
+            "Apprise" = {
+              icon = "/images/apprise.png";
+              href = "https://{{HOMEPAGE_VAR_APPRISE_URL}}";
+              server = "ligma";
               container = "apprise";
             };
           }
-          { "Prowlarr" = {
-              icon      = "/images/prowlarr.png";
-              href      = "https://{{HOMEPAGE_VAR_PROWLARR_URL}}";
-              server    = "jonny";
+          {
+            "Prowlarr" = {
+              icon = "/images/prowlarr.png";
+              href = "https://{{HOMEPAGE_VAR_PROWLARR_URL}}";
+              server = "jonny";
               container = "prowlarr";
             };
           }
-          { "MediaInfo" = {
-              icon      = "/images/mediainfo.png";
-              href      = "https://{{HOMEPAGE_VAR_MEDIAINFO_URL}}";
+          {
+            "MediaInfo" = {
+              icon = "/images/mediainfo.png";
+              href = "https://{{HOMEPAGE_VAR_MEDIAINFO_URL}}";
             };
           }
-          { "PrivateBin" = {
-              icon      = "/images/privatebin.png";
-              href      = "https://{{HOMEPAGE_VAR_PRIVATEBIN_URL}}";
+          {
+            "PrivateBin" = {
+              icon = "/images/privatebin.png";
+              href = "https://{{HOMEPAGE_VAR_PRIVATEBIN_URL}}";
             };
           }
-          { "KasmCord" = {
-              icon      = "/images/discord.png";
-              href      = "https://{{HOMEPAGE_VAR_KASMCORD_URL}}";
+          {
+            "KasmCord" = {
+              icon = "/images/discord.png";
+              href = "https://{{HOMEPAGE_VAR_KASMCORD_URL}}";
             };
           }
-          { "Rclone" = {
+          {
+            "Rclone" = {
               icon = "/images/rclone.png";
               href = "https://{{HOMEPAGE_VAR_RCLONE_URL}}";
             };
@@ -404,45 +579,50 @@
         ];
       }
 
-      { "Network" = [
-          { "OPNsense" = {
+      {
+        "Network" = [
+          {
+            "OPNsense" = {
               icon = "/images/opnsense.png";
               href = "https://{{HOMEPAGE_VAR_OPNSENSE_URL}}";
               widget = {
-                type     = "opnsense";
-                url      = "https://{{HOMEPAGE_VAR_OPNSENSE_URL}}";
+                type = "opnsense";
+                url = "https://{{HOMEPAGE_VAR_OPNSENSE_URL}}";
                 username = "{{HOMEPAGE_VAR_OPNSENSE_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_OPNSENSE_PASSWORD}}";
               };
             };
           }
-          { "Adguard" = {
+          {
+            "Adguard" = {
               icon = "/images/adguard-home.png";
               href = "https://{{HOMEPAGE_VAR_ADGUARD_URL}}";
               widget = {
-                type     = "adguard";
-                url      = "https://{{HOMEPAGE_VAR_ADGUARD_URL}}";
+                type = "adguard";
+                url = "https://{{HOMEPAGE_VAR_ADGUARD_URL}}";
                 username = "{{HOMEPAGE_VAR_ADGUARD_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_ADGUARD_PASSWORD}}";
               };
             };
           }
-          { "Unifi Controller" = {
+          {
+            "Unifi Controller" = {
               icon = "/images/unifi.png";
               href = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
-              server    = "ligma";
+              server = "ligma";
               container = "unifi";
               widget = {
-                type     = "unifi";
-                url      = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
+                type = "unifi";
+                url = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
                 username = "{{HOMEPAGE_VAR_UNIFI_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_UNIFI_PASSWORD}}";
               };
             };
           }
-          { "WatchYourLAN" = {
-              icon      = "/images/watchyourlan.png";
-              server    = "ligma";
+          {
+            "WatchYourLAN" = {
+              icon = "/images/watchyourlan.png";
+              server = "ligma";
               container = "watchyourlan";
               href = "https://{{HOMEPAGE_VAR_WATCHYOURLAN_URL}}";
               widget = {
@@ -453,24 +633,24 @@
                 display = "block";
                 mappings = [
                   {
-                    field   = "Online";
-                    label   = "Online";
-                    format  = "number";
+                    field = "Online";
+                    label = "Online";
+                    format = "number";
                   }
                   {
-                    field   = "Offline";
-                    label   = "Offline";
-                    format  = "number";
+                    field = "Offline";
+                    label = "Offline";
+                    format = "number";
                   }
                   {
-                    field   = "Known";
-                    label   = "Known";
-                    format  = "number";
+                    field = "Known";
+                    label = "Known";
+                    format = "number";
                   }
                   {
-                    field   = "Unknown";
-                    label   = "Unknown";
-                    format  = "number";
+                    field = "Unknown";
+                    label = "Unknown";
+                    format = "number";
                   }
                 ];
               };
@@ -479,140 +659,174 @@
         ];
       }
 
-      { "Server" = [
-          { "Proxmox" = {
+      {
+        "Server" = [
+          {
+            "Proxmox" = {
               icon = "/images/proxmox.png";
               href = "https://{{HOMEPAGE_VAR_PROXMOX_URL}}";
               widget = {
-                type     = "proxmox";
-                fields   = [ "vms" "resources.cpu" "resources.mem" ];
-                url      = "https://{{HOMEPAGE_VAR_PROXMOX_URL}}";
+                type = "proxmox";
+                fields = [
+                  "vms"
+                  "resources.cpu"
+                  "resources.mem"
+                ];
+                url = "https://{{HOMEPAGE_VAR_PROXMOX_URL}}";
                 username = "{{HOMEPAGE_VAR_PROXMOX_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_PROXMOX_PASSWORD}}";
               };
             };
           }
-          { "Omni" = {
+          {
+            "Omni" = {
               icon = "/images/sidero.png";
               href = "https://{{HOMEPAGE_VAR_OMNI_URL}}";
-              server    = "ligma";
+              server = "ligma";
               container = "omni";
             };
           }
-          { "Kopia" = {
+          {
+            "Kopia" = {
               icon = "/images/kopia.png";
               href = "https://{{HOMEPAGE_VAR_KOPIA_URL}}";
               widget = {
-                type         = "kopia";
-                url          = "https://{{HOMEPAGE_VAR_KOPIA_URL}}";
-                username     = "{{HOMEPAGE_VAR_KOPIA_USERNAME}}";
-                password     = "{{HOMEPAGE_VAR_KOPIA_PASSWORD}}";
+                type = "kopia";
+                url = "https://{{HOMEPAGE_VAR_KOPIA_URL}}";
+                username = "{{HOMEPAGE_VAR_KOPIA_USERNAME}}";
+                password = "{{HOMEPAGE_VAR_KOPIA_PASSWORD}}";
                 snapshotHost = "jonny";
                 snapshotPath = "/mnt/container-backup";
               };
             };
           }
-          { "Backrest" = {
+          {
+            "Backrest" = {
               icon = "/images/backrest.png";
               href = "https://{{HOMEPAGE_VAR_BACKREST_URL}}";
               widget = {
                 type = "backrest";
-                url  = "http://127.0.0.1:9898";
+                url = "http://127.0.0.1:9898";
               };
             };
           }
-          { "Jonny Beszel" = {
-              icon      = "/images/beszel.svg";
-              href      = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
-              server    = "jonny";
+          {
+            "Jonny Beszel" = {
+              icon = "/images/beszel.svg";
+              href = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+              server = "jonny";
               container = "beszel-agent";
               widget = {
-                type     = "beszel";
-                fields   = [ "cpu" "memory" "disk" "network" ];
-                url      = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+                type = "beszel";
+                fields = [
+                  "cpu"
+                  "memory"
+                  "disk"
+                  "network"
+                ];
+                url = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
                 username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
                 systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_JONNY}}";
-                version  = 2;
-              };
-            };
-          }
-          { "Ligma Beszel" = {
-              icon      = "/images/beszel.svg";
-              href      = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
-              server    = "ligma";
-              container = "beszel";
-              widget = {
-                type     = "beszel";
-                fields   = [ "cpu" "memory" "disk" "network" ];
-                url      = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
-                username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
-                password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
-                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_LIGMA}}";
-                version  = 2;
-              };
-            };
-          }
-          { "Grafana" = {
-              icon      = "/images/grafana.png";
-              href      = "https://{{HOMEPAGE_VAR_GRAFANA_URL}}";
-            };
-          }
-          { "Traefik Jonny" = {
-              icon = "/images/traefik.png";
-              server    = "jonny";
-              container = "traefik";
-              href = "https://{{HOMEPAGE_VAR_TRAEFIK_JONNY_URL}}/dashboard/";
-              widget = {
-                type = "traefik";
-                url  = "https://{{HOMEPAGE_VAR_TRAEFIK_JONNY_URL}}";
-              };
-            };
-          }
-          { "Traefik Ligma" = {
-              icon = "/images/traefik.png";
-              href = "https://{{HOMEPAGE_VAR_TRAEFIK_LIGMA_URL}}/dashboard/";
-              widget = {
-                type = "traefik";
-                url  = "https://{{HOMEPAGE_VAR_TRAEFIK_LIGMA_URL}}";
-              };
-            };
-          }
-          { "Authentik" = {
-              icon = "/images/authentik.png";
-              href = "https://{{HOMEPAGE_VAR_AUTHENTIK_URL}}";
-              widget = {
-                type    = "authentik";
-                url     = "https://{{HOMEPAGE_VAR_AUTHENTIK_URL}}";
-                key     = "{{HOMEPAGE_VAR_AUTHENTIK_TOKEN}}";
                 version = 2;
               };
             };
           }
-          { "Gluetun" = {
-              icon      = "/images/wireguard.png";
-              href      = "https://{{HOMEPAGE_VAR_GLUETUN_URL}}";
-              server    = "jonny";
-              container = "vpn";
+          {
+            "Ligma Beszel" = {
+              icon = "/images/beszel.svg";
+              href = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+              server = "ligma";
+              container = "beszel";
               widget = {
-                type   = "gluetun";
-                fields = [ "public_ip" "country" ];
-                url    = "https://{{HOMEPAGE_VAR_GLUETUN_URL}}";
-                key    = "{{HOMEPAGE_VAR_GLUETUN_TOKEN}}";
+                type = "beszel";
+                fields = [
+                  "cpu"
+                  "memory"
+                  "disk"
+                  "network"
+                ];
+                url = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+                username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
+                password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
+                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_LIGMA}}";
+                version = 2;
               };
             };
           }
-          { "Portainer" = {
-              icon      = "/images/portainer.png";
-              href      = "https://{{HOMEPAGE_VAR_PORTAINER_URL}}";
-              server    = "jonny";
+          {
+            "Grafana" = {
+              icon = "/images/grafana.png";
+              href = "https://{{HOMEPAGE_VAR_GRAFANA_URL}}";
+            };
+          }
+          {
+            "Traefik Jonny" = {
+              icon = "/images/traefik.png";
+              server = "jonny";
+              container = "traefik";
+              href = "https://{{HOMEPAGE_VAR_TRAEFIK_JONNY_URL}}/dashboard/";
+              widget = {
+                type = "traefik";
+                url = "https://{{HOMEPAGE_VAR_TRAEFIK_JONNY_URL}}";
+              };
+            };
+          }
+          {
+            "Traefik Ligma" = {
+              icon = "/images/traefik.png";
+              href = "https://{{HOMEPAGE_VAR_TRAEFIK_LIGMA_URL}}/dashboard/";
+              widget = {
+                type = "traefik";
+                url = "https://{{HOMEPAGE_VAR_TRAEFIK_LIGMA_URL}}";
+              };
+            };
+          }
+          {
+            "Authentik" = {
+              icon = "/images/authentik.png";
+              href = "https://{{HOMEPAGE_VAR_AUTHENTIK_URL}}";
+              widget = {
+                type = "authentik";
+                url = "https://{{HOMEPAGE_VAR_AUTHENTIK_URL}}";
+                key = "{{HOMEPAGE_VAR_AUTHENTIK_TOKEN}}";
+                version = 2;
+              };
+            };
+          }
+          {
+            "Gluetun" = {
+              icon = "/images/wireguard.png";
+              href = "https://{{HOMEPAGE_VAR_GLUETUN_URL}}";
+              server = "jonny";
+              container = "vpn";
+              widget = {
+                type = "gluetun";
+                fields = [
+                  "public_ip"
+                  "country"
+                ];
+                url = "https://{{HOMEPAGE_VAR_GLUETUN_URL}}";
+                key = "{{HOMEPAGE_VAR_GLUETUN_TOKEN}}";
+              };
+            };
+          }
+          {
+            "Portainer" = {
+              icon = "/images/portainer.png";
+              href = "https://{{HOMEPAGE_VAR_PORTAINER_URL}}";
+              server = "jonny";
               container = "portainer";
               widget = {
-                type   = "portainer";
-                fields = [ "running" "stopped" "total" ];
-                url    = "https://{{HOMEPAGE_VAR_PORTAINER_URL}}";
-                env    = 1;
-                key    = "{{HOMEPAGE_VAR_PORTAINER_TOKEN}}";
+                type = "portainer";
+                fields = [
+                  "running"
+                  "stopped"
+                  "total"
+                ];
+                url = "https://{{HOMEPAGE_VAR_PORTAINER_URL}}";
+                env = 1;
+                key = "{{HOMEPAGE_VAR_PORTAINER_TOKEN}}";
               };
             };
           }
@@ -625,7 +839,13 @@
   # Next.js standalone server only serves its own bundled public/ directory.
   services.nginx.enable = true;
   services.nginx.virtualHosts."homepage-images" = {
-    listen = [{ addr = "127.0.0.1"; port = 8083; ssl = false; }];
+    listen = [
+      {
+        addr = "127.0.0.1";
+        port = 8083;
+        ssl = false;
+      }
+    ];
     root = "/etc/homepage-dashboard";
     locations."/images/".extraConfig = "try_files $uri =404;";
   };
@@ -633,22 +853,22 @@
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       homepage = {
-        rule        = "Host(`homepage.makifun.se`)";
+        rule = "Host(`homepage.makifun.se`)";
         entryPoints = [ "websecure" ];
-        service     = "homepage-svc";
+        service = "homepage-svc";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
       homepage-images = {
-        rule        = "Host(`homepage.makifun.se`) && PathPrefix(`/images/`)";
+        rule = "Host(`homepage.makifun.se`) && PathPrefix(`/images/`)";
         entryPoints = [ "websecure" ];
-        service     = "homepage-images-svc";
+        service = "homepage-images-svc";
         tls.certResolver = "letsencrypt";
       };
       homepage-outpost = {
-        rule        = "Host(`homepage.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`homepage.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
-        service     = "authentik-embedded-outpost";
+        service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
     };
