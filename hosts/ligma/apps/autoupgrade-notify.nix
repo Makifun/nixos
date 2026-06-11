@@ -20,19 +20,25 @@
       LoadCredential = "token:${config.sops.secrets.nixos-upgrade-gotify-token.path}";
       Environment = "STATUS=%i";
     };
-    path = [ pkgs.curl pkgs.coreutils pkgs.systemd ];
+    path = [ pkgs.curl pkgs.coreutils pkgs.gnused pkgs.systemd ];
     script = ''
       set -u
       token="$(cat "$CREDENTIALS_DIRECTORY/token")"
-      gen="$(readlink -f /run/current-system | sed 's|.*/||')"
+      generation="$(readlink /nix/var/nix/profiles/system 2>/dev/null | sed -n 's/^.*system-\([0-9]\+\)-link$/\1/p')"
+      nixos_version="$(/run/current-system/sw/bin/nixos-version 2>/dev/null || echo unknown)"
       if [ "$STATUS" = "success" ]; then
         title="ligma upgrade ok"
         prio=3
-        msg="New generation: $gen"
+        msg="Generation: $generation
+NixOS: $nixos_version"
       else
         title="ligma upgrade FAILED"
         prio=8
-        msg="$(journalctl -u nixos-upgrade.service -n 40 --no-pager 2>&1 | tail -c 3500)"
+        journal="$(journalctl -u nixos-upgrade.service -n 40 --no-pager 2>&1 | tail -c 3500)"
+        msg="Generation: $generation
+NixOS: $nixos_version
+
+$journal"
       fi
       curl -fsS -X POST "https://gotify.makifun.se/message?token=$token" \
         -F "title=$title" \
