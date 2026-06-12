@@ -141,7 +141,7 @@ in
               RedirectURLs: ["http://localhost:53000", "http://localhost:54000"],
               UseIDToken: false,
               DisablePromptLogin: false,
-              LoginFlag: ""
+              LoginFlag: 0
             }
           }
         }' > ${base}/management.json
