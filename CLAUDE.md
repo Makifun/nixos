@@ -22,6 +22,13 @@ sudo nixos-rebuild switch --flake .#ligma
 nix flake check
 ```
 
+**Format Nix files** (run after every Nix code change):
+```bash
+nixfmt <file.nix>
+# or format entire tree:
+nixfmt **/*.nix
+```
+
 **Deploy/provision a new host from scratch:**
 ```bash
 ./nixos_install.sh <ip/hostname> ligma
@@ -52,7 +59,7 @@ sops hosts/ligma/secrets.yaml
 ### Flake Structure
 
 - **`flake.nix`** — Defines two outputs: `nixosConfigurations.ligma` (production) and `nixosConfigurations.minimaliso` (bootstrap ISO). Inputs: nixpkgs (unstable, stateVersion 25.11), disko, impermanence, sops-nix. **Note: authentik-nix was removed** — Authentik now runs as Podman containers.
-- **`common/`** — Modules applied to all hosts via `common/default.nix`: boot, users, sops, openssh, hardening, fail2ban, zfs-tuning, zram.
+- **`common/`** — Modules applied to all hosts via `common/default.nix` (auto-imports all `.nix` files in the directory): boot, users, sops, openssh, hardening, fail2ban, zfs-tuning, zram, autoupgrade, autoupgrade-notify, alloy. Add a new `.nix` file here to have it apply to every host automatically.
 - **`hosts/ligma/`** — Host-specific config, disk layout, and secrets.
 - **`modules/`** — Reusable custom modules (currently: podman).
 
@@ -85,11 +92,11 @@ SSH restricted to `10.10.10.0/24`. NFTables firewall. IPv6 disabled globally. Tr
 NFS export (NFSv4 only — port 2049):
 - `/ligma/sugma` → sugma nodes `10.10.10.26`, `10.10.10.27`, `10.10.10.28` (rw, nfs-provisioner PVC storage)
 
-Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Sugma apps that used NFS `/cloud` (mediainfo) are currently disabled.
+Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Sugma apps access `/cloud` via SMB CSI (`//10.10.10.13/cloud`, guest auth).
 
 ### Auto-upgrade
 
-`hosts/ligma/default.nix` enables `system.autoUpgrade` pulling from the GitHub flake (`github:makifun/nixos`). Changes pushed to the repo are automatically applied with a randomised 30-min delay. Reboot window 03:00–06:00 (allowReboot=false means no auto-reboot outside window).
+`common/autoupgrade.nix` enables `system.autoUpgrade` for all hosts, pulling from `github:makifun/nixos`. Changes pushed to that repo are automatically applied with a randomised 30-min delay. Reboot window 03:00–06:00 (`allowReboot=false` means no auto-reboot outside window).
 
 ### Services (`hosts/ligma/apps/`)
 
@@ -112,7 +119,7 @@ Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Su
 | `distribution.nix` | OCI registry mirrors | 5001-5004 | Four instances: dockerhub (5001), ghcr (5002), lscr (5003), quay (5004). Daily GC at 06:00 UTC. LAN-only via `mirror-lan-only` ipAllowList middleware. |
 | `unifi.nix` | UniFi Network Application | 8443 (UI), 8080 (inform), 3478/udp (STUN), 10001/udp (discovery), 5141/udp (syslog in) | Two Podman containers (`unifi_network`): MongoDB 8 + linuxserver/unifi. Syslog on 5141 ingested by Alloy → Loki (job=ligma-unifi). UI self-signed cert — Traefik uses `insecureSkipVerify`. PUID/PGID=1000, MEM_LIMIT=1024M. |
 | `watchyourlan.nix` | WatchYourLAN network presence monitor | 8840 (UI) | Lightweight ARP scanner; notifies via Shoutrrr → Gotify on new/returning devices. Host networking + NET_ADMIN/NET_RAW caps required. Config written on first boot from SOPS `watchyourlan-gotify-token`; UI changes persist (delete `config_v2.yaml` to reset). Scans `ens18` every 60s. SOPS: `watchyourlan-gotify-token`. |
-| `autoupgrade-notify.nix` | Gotify notifier on `nixos-upgrade` | — | `OnSuccess`/`OnFailure` hooks; failure attaches last 40 journal lines (capped 3500 bytes). SOPS: `nixos-upgrade-gotify-token`. |
+| `common/autoupgrade-notify.nix` | Gotify notifier on `nixos-upgrade` | — | `OnSuccess`/`OnFailure` hooks; title uses hostname; includes generation + NixOS version; failure attaches last 40 journal lines (capped 3500 bytes). SOPS: `nixos-upgrade-gotify-token`. |
 | `renovate.nix` | Renovate dependency updater | — | Hourly Podman one-shot (systemd timer, 5m random delay). Token from `/ligma/ligma/renovate/token`. SOPS: `renovate-github-token` (GITHUB_COM_TOKEN, for release notes). To regenerate token: `rm /ligma/ligma/renovate/token && systemctl restart forgejo-provision`. |
 
 ### Traefik + Authentik integration
@@ -294,7 +301,7 @@ annotations:
 
 ### Auto-upgrade notifications
 
-`apps/autoupgrade-notify.nix` hooks `OnSuccess=`/`OnFailure=` on the `nixos-upgrade.service` to a templated oneshot (`nixos-upgrade-notify@%i`) that posts to `https://gotify.makifun.se`. Failure messages include the last 40 journal lines (capped at 3500 bytes). SOPS: `nixos-upgrade-gotify-token`. Test with:
+`common/autoupgrade-notify.nix` hooks `OnSuccess=`/`OnFailure=` on `nixos-upgrade.service` to a templated oneshot (`nixos-upgrade-notify@%i`) that posts to `https://gotify.makifun.se`. Title uses `config.networking.hostName`. Failure messages include generation number, NixOS version, and last 40 journal lines (capped at 3500 bytes). sopsFile resolves to `hosts/<hostname>/secrets.yaml` automatically. SOPS key: `nixos-upgrade-gotify-token`. Test with:
 
 ```bash
 sudo systemctl start nixos-upgrade-notify@success.service
