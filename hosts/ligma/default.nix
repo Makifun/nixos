@@ -13,7 +13,6 @@
     ../../modules/podman.nix
     ./apps/apprise.nix
     ./apps/authentik.nix
-    ./apps/autoupgrade-notify.nix
     ./apps/backrest.nix
     ./apps/beszel.nix
     ./apps/distribution.nix
@@ -63,17 +62,5 @@
     hostId = "324bbd6b";
   };
   services.qemuGuest.enable = true;
-  system = {
-    stateVersion = "25.11";
-    autoUpgrade = {
-      flake = "github:makifun/nixos";
-      enable = true;
-      randomizedDelaySec = "30min";
-      allowReboot = false;
-      rebootWindow = {
-        lower = "03:00";
-        upper = "06:00";
-      };
-    };
-  };
+  system.stateVersion = "25.11";
 }
