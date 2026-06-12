@@ -6,15 +6,13 @@
 }:
 let
   # renovate: datasource=docker depName=netbirdio/management
-  managementTag = "v0.72.4";
+  managementTag = "0.72.4";
   # renovate: datasource=docker depName=netbirdio/signal
-  signalTag = "v0.72.4";
+  signalTag = "0.72.4";
   # renovate: datasource=docker depName=netbirdio/relay
-  relayTag = "v0.72.4";
+  relayTag = "0.72.4";
   # renovate: datasource=docker depName=netbirdio/dashboard
   dashboardTag = "v2.39.0";
-  # renovate: datasource=docker depName=coturn/coturn
-  coturnTag = "4.12.0";
 
   base = "/ligma/ligma/netbird";
   domain = "netbird.makifun.se";
@@ -42,16 +40,12 @@ in
     format = "yaml";
     sopsFile = ../secrets.yaml;
   };
-  sops.secrets.netbird-turn-password = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-  };
 
   # ---------------------------------------------------------------------------
   # Config generation
-  # Writes management.json, turnserver.conf, and relay.env from SOPS secrets.
+  # Writes management.json and relay.env from SOPS secrets.
   # Re-runs on every boot so secrets are always current.
-  # To force a re-run mid-session: systemctl restart netbird-config
+  # To force a re-run: systemctl restart netbird-config
   # then restart the affected containers.
   # ---------------------------------------------------------------------------
   systemd.services.netbird-config = {
@@ -59,12 +53,10 @@ in
     before = [
       "podman-netbird-management.service"
       "podman-netbird-relay.service"
-      "podman-netbird-coturn.service"
     ];
     requiredBy = [
       "podman-netbird-management.service"
       "podman-netbird-relay.service"
-      "podman-netbird-coturn.service"
     ];
     serviceConfig = {
       Type = "oneshot";
@@ -72,7 +64,6 @@ in
       LoadCredential = [
         "datastore-key:${config.sops.secrets.netbird-datastore-key.path}"
         "relay-secret:${config.sops.secrets.netbird-relay-secret.path}"
-        "turn-password:${config.sops.secrets.netbird-turn-password.path}"
       ];
     };
     path = [
@@ -80,98 +71,84 @@ in
       pkgs.jq
     ];
     script = ''
-            DATASTORE_KEY=$(tr -d '[:space:]' < "$CREDENTIALS_DIRECTORY/datastore-key")
-            RELAY_SECRET=$(tr -d '[:space:]' < "$CREDENTIALS_DIRECTORY/relay-secret")
-            TURN_PASSWORD=$(tr -d '[:space:]' < "$CREDENTIALS_DIRECTORY/turn-password")
+      DATASTORE_KEY=$(tr -d '[:space:]' < "$CREDENTIALS_DIRECTORY/datastore-key")
+      RELAY_SECRET=$(tr -d '[:space:]' < "$CREDENTIALS_DIRECTORY/relay-secret")
 
-            jq -n \
-              --arg turn_pass "$TURN_PASSWORD" \
-              --arg relay_secret "$RELAY_SECRET" \
-              --arg datastore_key "$DATASTORE_KEY" \
-              '{
-                Stuns: [{ Proto: "udp", URI: "stun:${domain}:3478", Username: "", Password: null }],
-                TURNConfig: {
-                  Turns: [{ Proto: "udp", URI: "turn:${domain}:3478", Username: "netbird", Password: $turn_pass }],
-                  CredentialsTTL: "12h",
-                  Secret: "secret",
-                  TimeBasedCredentials: false
-                },
-                Relay: {
-                  Addresses: ["rels://${domain}:443/relay"],
-                  CredentialsTTL: "24h",
-                  Secret: $relay_secret
-                },
-                Signal: { Proto: "https", URI: "${domain}:443", Username: "", Password: null },
-                ReverseProxy: {
-                  TrustedHTTPProxies: [],
-                  TrustedHTTPProxiesCount: 0,
-                  TrustedPeers: ["0.0.0.0/0"]
-                },
-                DisableDefaultPolicy: false,
-                Datadir: "",
-                DataStoreEncryptionKey: $datastore_key,
-                StoreConfig: { Engine: "sqlite3" },
-                HttpConfig: {
-                  Address: "0.0.0.0:33073",
-                  AuthIssuer: "${authIssuer}",
-                  AuthAudience: "${clientId}",
-                  AuthKeysLocation: "${authJwks}",
-                  AuthUserIDClaim: "",
-                  CertFile: "",
-                  CertKey: "",
-                  IdpSignKeyRefreshEnabled: false,
-                  OIDCConfigEndpoint: "${authOidc}"
-                },
-                IdpManagerConfig: {
-                  ManagerType: "none",
-                  ClientConfig: { Issuer: "", TokenEndpoint: "", ClientID: "", ClientSecret: "", GrantType: "client_credentials" },
-                  ExtraConfig: null,
-                  Auth0ClientCredentials: null,
-                  AzureClientCredentials: null,
-                  KeycloakClientCredentials: null,
-                  ZitadelClientCredentials: null
-                },
-                DeviceAuthorizationFlow: {
-                  Provider: "none",
-                  ProviderConfig: {
-                    Audience: "", AuthorizationEndpoint: "", Domain: "",
-                    ClientID: "", ClientSecret: "", TokenEndpoint: "",
-                    DeviceAuthEndpoint: "", Scope: "openid",
-                    UseIDToken: false, RedirectURLs: null
-                  }
-                },
-                PKCEAuthorizationFlow: {
-                  ProviderConfig: {
-                    Audience: "${clientId}",
-                    ClientID: "${clientId}",
-                    ClientSecret: "",
-                    Domain: "",
-                    AuthorizationEndpoint: "${authAuthorize}",
-                    TokenEndpoint: "${authToken}",
-                    Scope: "openid email profile",
-                    RedirectURLs: ["http://localhost:53000", "http://localhost:54000"],
-                    UseIDToken: false,
-                    DisablePromptLogin: false,
-                    LoginFlag: ""
-                  }
-                }
-              }' > ${base}/management.json
+      jq -n \
+        --arg relay_secret "$RELAY_SECRET" \
+        --arg datastore_key "$DATASTORE_KEY" \
+        '{
+          Stuns: [{ Proto: "udp", URI: "stun:stun.cloudflare.com:3478", Username: "", Password: null }],
+          TURNConfig: {
+            Turns: [],
+            CredentialsTTL: "12h",
+            Secret: "secret",
+            TimeBasedCredentials: false
+          },
+          Relay: {
+            Addresses: ["rels://${domain}:443/relay"],
+            CredentialsTTL: "24h",
+            Secret: $relay_secret
+          },
+          Signal: { Proto: "https", URI: "${domain}:443", Username: "", Password: null },
+          ReverseProxy: {
+            TrustedHTTPProxies: [],
+            TrustedHTTPProxiesCount: 0,
+            TrustedPeers: ["0.0.0.0/0"]
+          },
+          DisableDefaultPolicy: false,
+          Datadir: "",
+          DataStoreEncryptionKey: $datastore_key,
+          StoreConfig: { Engine: "sqlite3" },
+          HttpConfig: {
+            Address: "0.0.0.0:33073",
+            AuthIssuer: "${authIssuer}",
+            AuthAudience: "${clientId}",
+            AuthKeysLocation: "${authJwks}",
+            AuthUserIDClaim: "",
+            CertFile: "",
+            CertKey: "",
+            IdpSignKeyRefreshEnabled: false,
+            OIDCConfigEndpoint: "${authOidc}"
+          },
+          IdpManagerConfig: {
+            ManagerType: "none",
+            ClientConfig: { Issuer: "", TokenEndpoint: "", ClientID: "", ClientSecret: "", GrantType: "client_credentials" },
+            ExtraConfig: null,
+            Auth0ClientCredentials: null,
+            AzureClientCredentials: null,
+            KeycloakClientCredentials: null,
+            ZitadelClientCredentials: null
+          },
+          DeviceAuthorizationFlow: {
+            Provider: "none",
+            ProviderConfig: {
+              Audience: "", AuthorizationEndpoint: "", Domain: "",
+              ClientID: "", ClientSecret: "", TokenEndpoint: "",
+              DeviceAuthEndpoint: "", Scope: "openid",
+              UseIDToken: false, RedirectURLs: null
+            }
+          },
+          PKCEAuthorizationFlow: {
+            ProviderConfig: {
+              Audience: "${clientId}",
+              ClientID: "${clientId}",
+              ClientSecret: "",
+              Domain: "",
+              AuthorizationEndpoint: "${authAuthorize}",
+              TokenEndpoint: "${authToken}",
+              Scope: "openid email profile",
+              RedirectURLs: ["http://localhost:53000", "http://localhost:54000"],
+              UseIDToken: false,
+              DisablePromptLogin: false,
+              LoginFlag: ""
+            }
+          }
+        }' > ${base}/management.json
 
-            # turnserver.conf — TURN credentials substituted at runtime
-            cat > ${base}/turnserver.conf << 'TURNEOF'
-      listening-port=3478
-      fingerprint
-      log-file=stdout
-      user=netbird:TURN_PASSWORD_PLACEHOLDER
-      total-quota=100
-      realm=${domain}
-      lt-cred-mech
-      TURNEOF
-            sed -i "s/TURN_PASSWORD_PLACEHOLDER/$TURN_PASSWORD/" ${base}/turnserver.conf
-
-            # relay env file loaded by the relay container
-            printf 'NB_AUTH_SECRET=%s\n' "$RELAY_SECRET" > ${base}/relay.env
-            chmod 600 ${base}/relay.env
+      # relay env file loaded by the relay container
+      printf 'NB_AUTH_SECRET=%s\n' "$RELAY_SECRET" > ${base}/relay.env
+      chmod 600 ${base}/relay.env
     '';
   };
 
@@ -265,21 +242,7 @@ in
       ports = [ "127.0.0.1:33080:33080" ];
       extraOptions = [ "--network=netbird_network" ];
     };
-
-    # Coturn uses host networking — needs direct UDP 3478 access
-    netbird-coturn = {
-      image = "docker.io/coturn/coturn:${coturnTag}";
-      volumes = [ "${base}/turnserver.conf:/etc/turnserver.conf:ro" ];
-      cmd = [
-        "-c"
-        "/etc/turnserver.conf"
-      ];
-      extraOptions = [ "--network=host" ];
-    };
   };
-
-  # UDP 3478 for STUN/TURN (coturn on host network)
-  networking.firewall.allowedUDPPorts = [ 3478 ];
 
   # ---------------------------------------------------------------------------
   # Traefik
