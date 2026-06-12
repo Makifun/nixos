@@ -44,6 +44,15 @@ in
     '';
   };
 
+  systemd.services."podman-syncstorage".after = [
+    "postgresql.service"
+    "syncstorage-db-setup.service"
+  ];
+  systemd.services."podman-syncstorage".requires = [
+    "postgresql.service"
+    "syncstorage-db-setup.service"
+  ];
+
   virtualisation.oci-containers.containers.syncstorage = {
     image = "ghcr.io/mozilla-services/syncstorage-rs-postgres:${syncTag}";
     environment = {

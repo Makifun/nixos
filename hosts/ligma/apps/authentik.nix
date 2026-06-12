@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   authBase = "/ligma/ligma/authentik";
   # renovate: datasource=docker depName=ghcr.io/goauthentik/server
@@ -7,9 +12,9 @@ let
     AUTHENTIK_POSTGRESQL__HOST = "/run/postgresql";
     AUTHENTIK_POSTGRESQL__USER = "authentik";
     AUTHENTIK_POSTGRESQL__NAME = "authentik";
-    AUTHENTIK_REDIS__HOST      = "redis";
+    AUTHENTIK_REDIS__HOST = "redis";
     AUTHENTIK_DISABLE_STARTUP_ANALYTICS = "true";
-    AUTHENTIK_AVATARS          = "none";
+    AUTHENTIK_AVATARS = "none";
   };
   sharedVolumes = [
     "${authBase}/media:/media"
@@ -20,22 +25,22 @@ let
 in
 {
   systemd.services.podman-create-authentik-network = {
-    description   = "Create authentik_network podman network";
-    before        = [
+    description = "Create authentik_network podman network";
+    before = [
       "podman-authentik-redis.service"
       "podman-authentik-server.service"
       "podman-authentik-worker.service"
     ];
-    requiredBy    = [
+    requiredBy = [
       "podman-authentik-redis.service"
       "podman-authentik-server.service"
       "podman-authentik-worker.service"
     ];
     serviceConfig = {
-      Type            = "oneshot";
+      Type = "oneshot";
       RemainAfterExit = true;
     };
-    path   = [ pkgs.podman ];
+    path = [ pkgs.podman ];
     script = "podman network exists authentik_network || podman network create --subnet 10.89.2.0/24 authentik_network";
   };
 
@@ -43,16 +48,26 @@ in
     enable = true;
     dataDir = "${authBase}/postgresql";
     ensureDatabases = [ "authentik" ];
-    ensureUsers = [{
-      name = "authentik";
-      ensureDBOwnership = true;
-    }];
+    ensureUsers = [
+      {
+        name = "authentik";
+        ensureDBOwnership = true;
+      }
+    ];
     # Trust the authentik user on Unix socket — container bind-mounts
     # /run/postgresql so peer auth won't match (different UID inside container).
     authentication = lib.mkBefore ''
       local authentik authentik trust
     '';
   };
+
+  # Ensure containers start after PostgreSQL socket exists — without this the
+  # bind mount of /run/postgresql captures an empty directory and never sees
+  # the socket even after PG starts.
+  systemd.services."podman-authentik-server".after = [ "postgresql.service" ];
+  systemd.services."podman-authentik-server".requires = [ "postgresql.service" ];
+  systemd.services."podman-authentik-worker".after = [ "postgresql.service" ];
+  systemd.services."podman-authentik-worker".requires = [ "postgresql.service" ];
 
   systemd.tmpfiles.rules = [
     "d '${authBase}'                  0755 root     root     - -"
@@ -63,46 +78,49 @@ in
   ];
 
   sops.secrets.authentik_env = {
-    format   = "yaml";
+    format = "yaml";
     sopsFile = ../secrets.yaml;
   };
 
   virtualisation.oci-containers.containers = {
     authentik-redis = {
-      image   = "docker.io/redis:7-alpine";
+      image = "docker.io/redis:7-alpine";
       volumes = [ "${authBase}/redis:/data" ];
       extraOptions = sharedExtraOptions ++ [ "--hostname=redis" ];
     };
 
     authentik-server = {
-      image            = "ghcr.io/goauthentik/server:${authTag}";
-      cmd              = [ "server" ];
-      dependsOn        = [ "authentik-redis" ];
+      image = "ghcr.io/goauthentik/server:${authTag}";
+      cmd = [ "server" ];
+      dependsOn = [ "authentik-redis" ];
       environmentFiles = [ config.sops.secrets.authentik_env.path ];
-      environment      = sharedEnv;
-      ports            = [ "127.0.0.1:9000:9000" "127.0.0.1:9443:9443" ];
-      volumes          = sharedVolumes;
-      extraOptions     = sharedExtraOptions ++ [ "--hostname=authentik-server" ];
+      environment = sharedEnv;
+      ports = [
+        "127.0.0.1:9000:9000"
+        "127.0.0.1:9443:9443"
+      ];
+      volumes = sharedVolumes;
+      extraOptions = sharedExtraOptions ++ [ "--hostname=authentik-server" ];
     };
 
     authentik-worker = {
-      image            = "ghcr.io/goauthentik/server:${authTag}";
-      cmd              = [ "worker" ];
-      dependsOn        = [ "authentik-redis" ];
+      image = "ghcr.io/goauthentik/server:${authTag}";
+      cmd = [ "worker" ];
+      dependsOn = [ "authentik-redis" ];
       environmentFiles = [ config.sops.secrets.authentik_env.path ];
-      environment      = sharedEnv;
-      volumes          = sharedVolumes;
-      extraOptions     = sharedExtraOptions ++ [ "--hostname=authentik-worker" ];
+      environment = sharedEnv;
+      volumes = sharedVolumes;
+      extraOptions = sharedExtraOptions ++ [ "--hostname=authentik-worker" ];
     };
   };
 
   services.traefik.dynamicConfigOptions.http = {
     routers.authentik = {
-      rule             = "Host(`auth.makifun.se`)";
-      entryPoints      = [ "websecure" ];
-      service          = "authentik";
+      rule = "Host(`auth.makifun.se`)";
+      entryPoints = [ "websecure" ];
+      service = "authentik";
       tls.certResolver = "letsencrypt";
     };
-    services.authentik.loadBalancer.servers = [{ url = "http://127.0.0.1:9000"; }];
+    services.authentik.loadBalancer.servers = [ { url = "http://127.0.0.1:9000"; } ];
   };
 }
