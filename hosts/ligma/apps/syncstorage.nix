@@ -5,8 +5,11 @@
   ...
 }:
 let
-  # renovate: datasource=docker depName=ghcr.io/mozilla-services/syncstorage-rs-postgres
-  syncTag = "0.23.0";
+  # mozilla/syncstorage-rs has no semantic versioned public image.
+  # GHCR images are private (Mozilla internal). Docker Hub publishes
+  # commit-hash tagged images with -postgres suffix; update manually.
+  # Latest as of 2026-03-03: 9db210d5a526aaa677f8a3cc844b4f7191f8911b
+  syncImage = "docker.io/mozilla/syncstorage-rs:9db210d5a526aaa677f8a3cc844b4f7191f8911b-postgres";
 in
 {
   sops.secrets.syncstorage_env = {
@@ -54,7 +57,7 @@ in
   ];
 
   virtualisation.oci-containers.containers.syncstorage = {
-    image = "ghcr.io/mozilla-services/syncstorage-rs-postgres:${syncTag}";
+    image = syncImage;
     environment = {
       SYNC_HOST = "0.0.0.0";
       SYNC_PORT = "8000";
