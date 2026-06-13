@@ -137,10 +137,10 @@ in
               Domain: "",
               AuthorizationEndpoint: "${authAuthorize}",
               TokenEndpoint: "${authToken}",
-              Scope: "openid email profile",
+              Scope: "openid email profile offline_access",
               RedirectURLs: ["http://localhost:53000", "http://localhost:54000"],
               UseIDToken: false,
-              DisablePromptLogin: false,
+              DisablePromptLogin: true,
               LoginFlag: 0
             }
           }
