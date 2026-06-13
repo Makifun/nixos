@@ -99,7 +99,7 @@ in
           DisableDefaultPolicy: false,
           Datadir: "",
           DataStoreEncryptionKey: $datastore_key,
-          StoreConfig: { Engine: "sqlite3" },
+          StoreConfig: { Engine: "sqlite" },
           HttpConfig: {
             Address: "0.0.0.0:33073",
             AuthIssuer: "${authIssuer}",
