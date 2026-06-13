@@ -87,7 +87,6 @@ in
         --arg datastore_key "$DATASTORE_KEY" \
         --arg client_secret "$CLIENT_SECRET" \
         '{
-          Stuns: [{ Proto: "udp", URI: "stun:stun.cloudflare.com:3478", Username: "", Password: null }],
           TURNConfig: {
             Turns: [],
             CredentialsTTL: "12h",
@@ -121,8 +120,14 @@ in
             OIDCConfigEndpoint: "${authOidc}"
           },
           IdpManagerConfig: {
-            ManagerType: "none",
-            ClientConfig: { Issuer: "", TokenEndpoint: "", ClientID: "", ClientSecret: "", GrantType: "client_credentials" },
+            ManagerType: "authentik",
+            ClientConfig: {
+              Issuer: "${authIssuer}",
+              TokenEndpoint: "${authToken}",
+              ClientID: "${clientId}",
+              ClientSecret: "",
+              GrantType: "client_credentials"
+            },
             ExtraConfig: null,
             Auth0ClientCredentials: null,
             AzureClientCredentials: null,
@@ -142,12 +147,12 @@ in
             ProviderConfig: {
               Audience: "${clientId}",
               ClientID: "${clientId}",
-              ClientSecret: $client_secret,
+              ClientSecret: "",
               Domain: "",
               AuthorizationEndpoint: "${authAuthorize}",
               TokenEndpoint: "${authToken}",
-              Scope: "openid email profile offline_access",
-              RedirectURLs: ["http://localhost:53000", "http://localhost:54000"],
+              Scope: "openid email profile offline_access api",
+              RedirectURLs: null,
               UseIDToken: false,
               DisablePromptLogin: true,
               LoginFlag: 0
@@ -199,14 +204,13 @@ in
       environment = {
         NETBIRD_MGMT_API_ENDPOINT = "https://${domain}";
         NETBIRD_MGMT_GRPC_API_ENDPOINT = "https://${domain}";
-        AUTH_AUDIENCE = "";
+        AUTH_AUDIENCE = clientId;
         AUTH_CLIENT_ID = clientId;
         AUTH_AUTHORITY = authIssuer;
         USE_AUTH0 = "false";
-        AUTH_SUPPORTED_SCOPES = "openid email profile offline_access";
+        AUTH_SUPPORTED_SCOPES = "openid email profile offline_access api";
         AUTH_REDIRECT_URI = "/#callback";
         AUTH_SILENT_REDIRECT_URI = "/#silent-callback";
-        NETBIRD_TOKEN_SOURCE = "accessToken";
       };
       # AUTH_CLIENT_SECRET injected at runtime from netbird-config-generated dashboard.env
       environmentFiles = [ "${base}/dashboard.env" ];
