@@ -199,7 +199,7 @@ in
       environment = {
         NETBIRD_MGMT_API_ENDPOINT = "https://${domain}";
         NETBIRD_MGMT_GRPC_API_ENDPOINT = "https://${domain}";
-        AUTH_AUDIENCE = clientId;
+        AUTH_AUDIENCE = "";
         AUTH_CLIENT_ID = clientId;
         AUTH_AUTHORITY = authIssuer;
         USE_AUTH0 = "false";
