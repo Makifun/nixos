@@ -2,9 +2,9 @@
 {
   boot.zfs.forceImportRoot = false;
 
-  # Cap ARC to 1GB so the VM doesn't pressure the Proxmox host.
-  # Raise this if the VM gets more RAM assigned.
-  boot.kernelParams = [ "zfs.zfs_arc_max=1073741824" ];
+  # Cap ARC to 512MB. 1GB caused constant arc_prune thrash (40% CPU).
+  # Raise this if the VM gets more RAM assigned and arc_prune stays idle.
+  boot.kernelParams = [ "zfs.zfs_arc_max=536870912" ];
 
   boot.extraModprobeConfig = ''
     # Disable prefetcher in VM - prefetching into ARC is less effective
