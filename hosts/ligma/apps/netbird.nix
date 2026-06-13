@@ -120,14 +120,8 @@ in
             OIDCConfigEndpoint: "${authOidc}"
           },
           IdpManagerConfig: {
-            ManagerType: "authentik",
-            ClientConfig: {
-              Issuer: "${authIssuer}",
-              TokenEndpoint: "${authToken}",
-              ClientID: "${clientId}",
-              ClientSecret: "",
-              GrantType: "client_credentials"
-            },
+            ManagerType: "none",
+            ClientConfig: { Issuer: "", TokenEndpoint: "", ClientID: "", ClientSecret: "", GrantType: "client_credentials" },
             ExtraConfig: null,
             Auth0ClientCredentials: null,
             AzureClientCredentials: null,
@@ -147,12 +141,12 @@ in
             ProviderConfig: {
               Audience: "${clientId}",
               ClientID: "${clientId}",
-              ClientSecret: "",
+              ClientSecret: $client_secret,
               Domain: "",
               AuthorizationEndpoint: "${authAuthorize}",
               TokenEndpoint: "${authToken}",
-              Scope: "openid email profile offline_access api",
-              RedirectURLs: null,
+              Scope: "openid email profile offline_access",
+              RedirectURLs: ["http://localhost:53000", "http://localhost:54000"],
               UseIDToken: false,
               DisablePromptLogin: true,
               LoginFlag: 0
@@ -204,7 +198,7 @@ in
       environment = {
         NETBIRD_MGMT_API_ENDPOINT = "https://${domain}";
         NETBIRD_MGMT_GRPC_API_ENDPOINT = "https://${domain}";
-        AUTH_AUDIENCE = clientId;
+        AUTH_AUDIENCE = "";
         AUTH_CLIENT_ID = clientId;
         AUTH_AUTHORITY = authIssuer;
         USE_AUTH0 = "false";
