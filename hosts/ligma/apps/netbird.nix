@@ -203,8 +203,8 @@ in
         AUTH_AUTHORITY = authIssuer;
         USE_AUTH0 = "false";
         AUTH_SUPPORTED_SCOPES = "openid email profile offline_access api";
-        AUTH_REDIRECT_URI = "https://${domain}/#callback";
-        AUTH_SILENT_REDIRECT_URI = "https://${domain}/#silent-callback";
+        AUTH_REDIRECT_URI = "/#callback";
+        AUTH_SILENT_REDIRECT_URI = "/#silent-callback";
       };
       # AUTH_CLIENT_SECRET injected at runtime from netbird-config-generated dashboard.env
       environmentFiles = [ "${base}/dashboard.env" ];
