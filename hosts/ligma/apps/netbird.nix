@@ -40,6 +40,10 @@ in
     format = "yaml";
     sopsFile = ../secrets.yaml;
   };
+  sops.secrets.netbird-client-secret = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
 
   # ---------------------------------------------------------------------------
   # Config generation
@@ -51,10 +55,12 @@ in
   systemd.services.netbird-config = {
     description = "Generate NetBird config files from SOPS secrets";
     before = [
+      "podman-netbird-dashboard.service"
       "podman-netbird-management.service"
       "podman-netbird-relay.service"
     ];
     requiredBy = [
+      "podman-netbird-dashboard.service"
       "podman-netbird-management.service"
       "podman-netbird-relay.service"
     ];
@@ -64,6 +70,7 @@ in
       LoadCredential = [
         "datastore-key:${config.sops.secrets.netbird-datastore-key.path}"
         "relay-secret:${config.sops.secrets.netbird-relay-secret.path}"
+        "client-secret:${config.sops.secrets.netbird-client-secret.path}"
       ];
     };
     path = [
@@ -73,10 +80,12 @@ in
     script = ''
       DATASTORE_KEY=$(tr -d '[:space:]' < "$CREDENTIALS_DIRECTORY/datastore-key")
       RELAY_SECRET=$(tr -d '[:space:]' < "$CREDENTIALS_DIRECTORY/relay-secret")
+      CLIENT_SECRET=$(tr -d '[:space:]' < "$CREDENTIALS_DIRECTORY/client-secret")
 
       jq -n \
         --arg relay_secret "$RELAY_SECRET" \
         --arg datastore_key "$DATASTORE_KEY" \
+        --arg client_secret "$CLIENT_SECRET" \
         '{
           Stuns: [{ Proto: "udp", URI: "stun:stun.cloudflare.com:3478", Username: "", Password: null }],
           TURNConfig: {
@@ -133,7 +142,7 @@ in
             ProviderConfig: {
               Audience: "${clientId}",
               ClientID: "${clientId}",
-              ClientSecret: "",
+              ClientSecret: $client_secret,
               Domain: "",
               AuthorizationEndpoint: "${authAuthorize}",
               TokenEndpoint: "${authToken}",
@@ -149,6 +158,10 @@ in
       # relay env file loaded by the relay container
       printf 'NB_AUTH_SECRET=%s\n' "$RELAY_SECRET" > ${base}/relay.env
       chmod 600 ${base}/relay.env
+
+      # dashboard env file with OAuth2 client secret
+      printf 'AUTH_CLIENT_SECRET=%s\n' "$CLIENT_SECRET" > ${base}/dashboard.env
+      chmod 600 ${base}/dashboard.env
     '';
   };
 
@@ -188,14 +201,15 @@ in
         NETBIRD_MGMT_GRPC_API_ENDPOINT = "https://${domain}";
         AUTH_AUDIENCE = clientId;
         AUTH_CLIENT_ID = clientId;
-        AUTH_CLIENT_SECRET = "";
         AUTH_AUTHORITY = authIssuer;
         USE_AUTH0 = "false";
-        AUTH_SUPPORTED_SCOPES = "openid email profile";
-        AUTH_REDIRECT_URI = "/peers";
-        AUTH_SILENT_REDIRECT_URI = "/add-peers";
+        AUTH_SUPPORTED_SCOPES = "openid email profile offline_access";
+        AUTH_REDIRECT_URI = "/#callback";
+        AUTH_SILENT_REDIRECT_URI = "/#silent-callback";
         NETBIRD_TOKEN_SOURCE = "accessToken";
       };
+      # AUTH_CLIENT_SECRET injected at runtime from netbird-config-generated dashboard.env
+      environmentFiles = [ "${base}/dashboard.env" ];
       ports = [ "127.0.0.1:8811:80" ];
       extraOptions = [ "--network=netbird_network" ];
     };
