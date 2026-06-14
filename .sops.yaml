@@ -1,4 +1,5 @@
 keys:
+  - &hosts_bofa age1glvzqy9ulsvakalafhgey58k3rntlkd68a9wajn9k9jdv3mrtars2gs35r
   - &hosts_ligma age1xfz2m2x6qffpyl7kgcgvgfhuxkefcl9zf3d9ds0mrdu0r32ny3aqgcx6mh
   - &makifun age100c08p2hlc5vw258ug23wg4p5z7c99j4w30rayjyj5avtrfeegjqk9ylmk
 creation_rules:
@@ -10,4 +11,5 @@ creation_rules:
   - path_regex: ^hosts/bofa/[^/]+\.(yaml|json|env|ini|conf)$
     key_groups:
       - age:
+          - *hosts_bofa
           - *makifun
