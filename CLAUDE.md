@@ -4,7 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-NixOS flake-based system configuration for a single production host (`ligma`) running on Proxmox. Key features: ephemeral root (tmpfs), full disk encryption (LUKS+ZFS), SOPS secrets, and impermanence.
+NixOS flake-based system configuration for two hosts on Proxmox:
+
+- **ligma** — production services host; ephemeral root (tmpfs), LUKS+ZFS, SOPS, impermanence.
+- **bofa** (VM 888) — dedicated database host; ephemeral root (tmpfs), LUKS+XFS+LVM (no ZFS — lower overhead for DB workloads), SOPS, impermanence. Currently hosts TimescaleDB for tracearr.
 
 ## Common Commands
 
@@ -32,6 +35,7 @@ nixfmt **/*.nix
 **Deploy/provision a new host from scratch:**
 ```bash
 ./nixos_install.sh <ip/hostname> ligma
+./nixos_install.sh <ip/hostname> bofa
 ```
 
 **Refresh SOPS keys** (after adding/changing age keys):
@@ -58,16 +62,17 @@ sops hosts/ligma/secrets.yaml
 
 ### Flake Structure
 
-- **`flake.nix`** — Defines two outputs: `nixosConfigurations.ligma` (production) and `nixosConfigurations.minimaliso` (bootstrap ISO). Inputs: nixpkgs (unstable, stateVersion 25.11), disko, impermanence, sops-nix. **Note: authentik-nix was removed** — Authentik now runs as Podman containers.
-- **`common/`** — Modules applied to all hosts via `common/default.nix` (auto-imports all `.nix` files in the directory): boot, users, sops, openssh, hardening, fail2ban, zfs-tuning, zram, autoupgrade, autoupgrade-notify, alloy. Add a new `.nix` file here to have it apply to every host automatically.
-- **`hosts/ligma/`** — Host-specific config, disk layout, and secrets.
+- **`flake.nix`** — Defines three outputs: `nixosConfigurations.ligma`, `nixosConfigurations.bofa`, and `nixosConfigurations.minimaliso`. Inputs: nixpkgs (unstable, stateVersion 25.11), disko, impermanence, sops-nix.
+- **`common/`** — Modules applied to all hosts via `common/default.nix` (auto-imports all `.nix` files in the directory): boot (initrd SSH), users, sops, openssh, hardening, fail2ban, zram, autoupgrade, autoupgrade-notify, alloy. **ZFS-specific config is NOT in common** — it lives in `hosts/ligma/default.nix` only (bofa uses XFS).
+- **`hosts/ligma/`** — ligma-specific config, disk layout (ZFS), and secrets.
+- **`hosts/bofa/`** — bofa-specific config, disk layout (XFS+LVM), and secrets.
 - **`modules/`** — Reusable custom modules (currently: podman).
 
 ### Ephemeral Root + Impermanence
 
 Root `/` is a tmpfs (wiped on reboot). Persistent state lives in `/persist` (ZFS dataset on `zroot`). SSH host keys, systemd state, logs, and podman storage are explicitly persisted via the impermanence module. Any new service needing persistent state must declare it explicitly.
 
-### Disk Layout (`hosts/ligma/disko-config.nix`)
+### Disk Layout — ligma (`hosts/ligma/disko-config.nix`)
 
 Three encrypted drives:
 
@@ -75,7 +80,16 @@ Three encrypted drives:
 - **Storage drive** (`scsi-0QEMU_QEMU_HARDDISK_ligma`): LUKS → ZFS pool `zstorage` with `/ligma` dataset (refreservation: 5G). All app persistent data lives here.
 - **Cache SSD** (`scsi-0QEMU_QEMU_HARDDISK_cache`, 200 GB): LUKS → ext4 mounted at `/rclone-cache`. Used as rclone VFS cache (up to 185 GB).
 
-All ZFS pools: ashift=12, autotrim=on, compression=lz4, atime=off, xattr=sa. ARC limited to 1 GB (VM optimization).
+All ZFS pools: ashift=12, autotrim=on, compression=lz4, atime=off, xattr=sa. ARC limited to 512 MB.
+
+### Disk Layout — bofa (`hosts/bofa/disko-config.nix`)
+
+Two encrypted drives (no ZFS — lower overhead for DB workloads):
+
+- **OS disk** (50 G, `scsi-0QEMU_QEMU_HARDDISK_nixos`): 1 G EFI + LUKS(`crypted_nixos`) → LVM `vg_nixos` → XFS `/nix` (25 G) + XFS `/persist` (~24 G). Single passphrase for both via LVM.
+- **Data disk** (100 G, `scsi-0QEMU_QEMU_HARDDISK_bofa`): LUKS(`crypted_bofa`) → XFS `/bofa`. All app data lives here (postgresql, backrest, beszel).
+
+XFS mount options: `noatime,discard`.
 
 ### Secrets (`hosts/ligma/sops.nix`, `.sops.yaml`)
 
@@ -123,6 +137,19 @@ Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Su
 | `renovate.nix` | Renovate dependency updater | — | Hourly Podman one-shot (systemd timer, 5m random delay). Token from `/ligma/ligma/renovate/token`. SOPS: `renovate-github-token` (GITHUB_COM_TOKEN, for release notes). To regenerate token: `rm /ligma/ligma/renovate/token && systemctl restart forgejo-provision`. |
 | `netbird.nix` | NetBird VPN management | 8811 (dashboard), 33073 (mgmt), 10000/10080 (signal), 33080 (relay), 3478/udp (STUN/TURN) | 5 containers on `netbird_network` (10.89.3.0/24). Coturn uses host network. Secrets in `netbird-config.service` oneshot (SOPS: `netbird-datastore-key`, `netbird-relay-secret`, `netbird-turn-password`). Authentik public PKCE OIDC (`client_id=netbird`); no forwardAuth. gRPC paths use `h2c://` backend scheme in Traefik. Dashboard: `https://netbird.makifun.se`. CLI: `netbird up --management-url https://netbird.makifun.se`. **`netbird-datastore-key` must be exactly 32 bytes** — generate with `openssl rand -base64 32` (produces 44-char base64 string; Netbird hashes it internally to 32 bytes). `openssl rand -base64 24` (32 chars) is NOT accepted. |
 | `syncstorage.nix` | Firefox Sync (syncstorage-rs) | 8000 | Mozilla syncstorage-rs postgres variant. Tokenserver enabled; authenticates via Mozilla FxA OAuth (no Authentik). Two PostgreSQL DBs (`syncstorage`, `tokenserver`) owned by `syncstorage` user; provisioned by `syncstorage-db-setup.service`. Connects via Unix socket bind-mount. SOPS: `syncstorage_env` (must contain `SYNC_MASTER_SECRET=...`). Firefox client URL: `https://firefox.makifun.se/1.0/sync/1.5`. |
+| `backrest-bofa.nix` | Traefik proxy to bofa backrest | — | Routes `backrest-bofa.makifun.se` → `http://<BOFA_IP>:9898` via Authentik SSO. Replace `REPLACE_WITH_BOFA_IP` in the file with bofa's actual IP. |
+
+### Services (`hosts/bofa/apps/`)
+
+| File | Service | Port | Notes |
+|---|---|---|---|
+| `timescaledb.nix` | TimescaleDB (Podman) | 5432 | `timescale/timescaledb-ha:pg18.1-ts2.25.0`. Data at `/bofa/bofa/postgresql`. `POSTGRES_USER=tracearr`, `POSTGRES_DB=tracearr`. Password from SOPS `timescaledb-tracearr-password` via `sops.templates."timescaledb.env"`. Port open to sugma nodes 10.10.10.26-28 only. SOPS: `timescaledb-tracearr-password`. |
+| `backrest.nix` | Backrest backup manager | 9898 | Restic-backed S3. Backs up `/bofa/bofa`. Port 9898 open to ligma (10.10.10.13) only for Traefik proxy. Schedule: 05:00 UTC. Prune: 06:00 UTC. SOPS: same keys as ligma backrest. |
+| `beszel.nix` | Beszel agent | 45876 | Monitors bofa; reports disk usage of `/bofa` and `/persist`. Port 45876 open to ligma only. |
+
+**To add a new bofa secret:** `sops hosts/bofa/secrets.yaml`, add the key, reference in the app `.nix` file.
+
+**Pending TODO:** Replace `REPLACE_WITH_BOFA_IP` in `hosts/ligma/apps/backrest-bofa.nix` and `sugma/k8s/apps/tracearr/netpol-extra.yaml` and `sugma/k8s/apps/tracearr/helmrelease.yaml` with bofa's actual LAN IP (check OPNsense DHCP → bofa MAC `2E:7A:45:73:8C:64`).
 
 ### Traefik + Authentik integration
 
