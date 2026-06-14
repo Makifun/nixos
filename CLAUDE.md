@@ -149,7 +149,7 @@ Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Su
 
 **To add a new bofa secret:** `sops hosts/bofa/secrets.yaml`, add the key, reference in the app `.nix` file.
 
-**Pending TODO:** Replace `REPLACE_WITH_BOFA_IP` in `hosts/ligma/apps/backrest-bofa.nix` and `sugma/k8s/apps/tracearr/netpol-extra.yaml` and `sugma/k8s/apps/tracearr/helmrelease.yaml` with bofa's actual LAN IP (check OPNsense DHCP → bofa MAC `2E:7A:45:73:8C:64`).
+**bofa IP:** `10.10.10.14` (MAC `2E:7A:45:73:8C:64`, static DHCP reservation recommended).
 
 ### Traefik + Authentik integration
 

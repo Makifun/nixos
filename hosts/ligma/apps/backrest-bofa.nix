@@ -1,7 +1,6 @@
 { ... }:
 let
-  # TODO: replace with bofa's actual LAN IP (check OPNsense DHCP leases or `ip addr` on bofa).
-  bofaIp = "REPLACE_WITH_BOFA_IP";
+  bofaIp = "10.10.10.14";
   backrestPort = 9898;
 in
 {
