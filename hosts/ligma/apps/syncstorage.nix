@@ -69,7 +69,7 @@ in
       SYNC_TOKENSERVER__FXA_OAUTH_SERVER_URL = "https://oauth.accounts.firefox.com";
       # Diesel/libpq Unix socket URL — container bind-mounts /run/postgresql
       SYNC_SYNCSTORAGE__DATABASE_URL = "postgresql:///syncstorage?host=/run/postgresql&user=syncstorage";
-      SYNC_TOKENSERVER__DATABASE_URL = "postgresql:///tokenserver?host=/run/postgresql&user=syncstorage";
+      SYNC_TOKENSERVER__DATABASE_URL = "postgres:///tokenserver?host=/run/postgresql&user=syncstorage";
     };
     # syncstorage_env must contain: SYNC_MASTER_SECRET=<long-random-string>
     environmentFiles = [ config.sops.secrets.syncstorage_env.path ];
