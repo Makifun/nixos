@@ -7,3 +7,7 @@ creation_rules:
       - age:
           - *hosts_ligma
           - *makifun
+  - path_regex: ^hosts/bofa/[^/]+\.(yaml|json|env|ini|conf)$
+    key_groups:
+      - age:
+          - *makifun
