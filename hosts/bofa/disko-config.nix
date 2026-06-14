@@ -74,7 +74,6 @@
         type = "lvm_vg";
         lvs = {
           nix = {
-            type = "lvm_lv";
             size = "25G";
             content = {
               type = "filesystem";
@@ -87,7 +86,6 @@
             };
           };
           persist = {
-            type = "lvm_lv";
             size = "100%FREE";
             content = {
               type = "filesystem";
