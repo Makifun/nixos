@@ -17,7 +17,7 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d '${pgData}' 0755 root root - -"
+    "d '${pgData}' 0750 1000 1000 - -"
   ];
 
   virtualisation.oci-containers.containers.timescaledb = {
