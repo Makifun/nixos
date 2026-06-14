@@ -31,6 +31,12 @@
             ./hosts/ligma
           ];
         };
+        bofa = nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = defaultModules ++ [
+            ./hosts/bofa
+          ];
+        };
         minimaliso = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [
