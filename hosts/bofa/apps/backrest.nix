@@ -95,7 +95,6 @@ in
       "local-fs.target"
       "sops-nix.service"
     ];
-    requires = [ "sops-nix.service" ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
