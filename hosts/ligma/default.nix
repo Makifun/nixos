@@ -11,6 +11,7 @@
     ./disko-config.nix
     ../../common
     ../../modules/podman.nix
+    ./apps/backrest-bofa.nix
     ./apps/apprise.nix
     ./apps/authentik.nix
     ./apps/backrest.nix
@@ -65,4 +66,18 @@
   };
   services.qemuGuest.enable = true;
   system.stateVersion = "25.11";
+
+  # ZFS — ligma-only (bofa uses XFS).
+  boot.supportedFilesystems = [ "zfs" ];
+  boot.zfs.devNodes = "/dev/mapper";
+  boot.zfs.forceImportRoot = false;
+  # Cap ARC to 512 MB. 1 GB caused constant arc_prune thrash (40% CPU).
+  boot.kernelParams = [ "zfs.zfs_arc_max=536870912" ];
+  boot.extraModprobeConfig = ''
+    options zfs zfs_prefetch_disable=1
+  '';
+  boot.initrd.systemd.services."zfs-import-zroot" = {
+    after = [ "dev-mapper-crypted_zroot.device" ];
+    requires = [ "dev-mapper-crypted_zroot.device" ];
+  };
 }

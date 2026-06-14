@@ -5,16 +5,10 @@
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
     };
-    supportedFilesystems = [ "zfs" ];
-    zfs.devNodes = "/dev/mapper";
     initrd = {
       systemd = {
         enable = true;
         users.root.shell = "/bin/systemd-tty-ask-password-agent";
-        services."zfs-import-zroot" = {
-          after = [ "dev-mapper-crypted_zroot.device" ];
-          requires = [ "dev-mapper-crypted_zroot.device" ];
-        };
       };
       network = {
         enable = true;
