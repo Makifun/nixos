@@ -121,7 +121,7 @@ in
     ];
   };
 
-  # Only ligma's Traefik needs to reach backrest.
+  # Only ligma's Traefik + homepage needs to reach backrest.
   networking.firewall.extraInputRules = ''
     tcp dport ${toString backrestPort} ip saddr 10.10.10.13/32 accept comment "Backrest from ligma"
   '';

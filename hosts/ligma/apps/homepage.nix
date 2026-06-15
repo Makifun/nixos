@@ -706,7 +706,7 @@
               href = "https://{{HOMEPAGE_VAR_BACKREST_LIGMA_URL}}";
               widget = {
                 type = "backrest";
-                url = "https://{{HOMEPAGE_VAR_BACKREST_LIGMA_URL}}";
+                url = "http://127.0.0.1:9898";
               };
             };
           }
@@ -716,7 +716,7 @@
               href = "https://{{HOMEPAGE_VAR_BACKREST_BOFA_URL}}";
               widget = {
                 type = "backrest";
-                url = "https://{{HOMEPAGE_VAR_BACKREST_BOFA_URL}}";
+                url = "http://10.10.10.14:9898";
               };
             };
           }
