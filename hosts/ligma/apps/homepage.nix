@@ -701,17 +701,27 @@
             };
           }
           {
-            "Backrest" = {
+            "Backrest Ligma" = {
               icon = "/images/backrest.png";
-              href = "https://{{HOMEPAGE_VAR_BACKREST_URL}}";
+              href = "https://{{HOMEPAGE_VAR_BACKREST_LIGMA_URL}}";
               widget = {
                 type = "backrest";
-                url = "http://127.0.0.1:9898";
+                url = "https://{{HOMEPAGE_VAR_BACKREST_LIGMA_URL}}";
               };
             };
           }
           {
-            "Jonny Beszel" = {
+            "Backrest Bofa" = {
+              icon = "/images/backrest.png";
+              href = "https://{{HOMEPAGE_VAR_BACKREST_BOFA_URL}}";
+              widget = {
+                type = "backrest";
+                url = "https://{{HOMEPAGE_VAR_BACKREST_BOFA_URL}}";
+              };
+            };
+          }
+          {
+            "Beszel Jonny" = {
               icon = "/images/beszel.svg";
               href = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
               server = "jonny";
@@ -733,7 +743,7 @@
             };
           }
           {
-            "Ligma Beszel" = {
+            "Beszel Ligma" = {
               icon = "/images/beszel.svg";
               href = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
               server = "ligma";
@@ -755,7 +765,7 @@
             };
           }
           {
-            "Bofa Beszel" = {
+            "Beszel Bofa" = {
               icon = "/images/beszel.svg";
               href = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
               widget = {
