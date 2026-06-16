@@ -5,7 +5,7 @@ let
   # renovate: datasource=docker depName=mongo versioning=semver
   mongoTag  = "8.2.6";
   # renovate: datasource=docker depName=linuxserver/unifi-network-application registryUrl=https://lscr.io
-  unifiTag  = "10.3.58";
+  unifiTag  = "10.4.57";
 
   # UniFi sends CEF embedded in BSD syslog WITHOUT a <priority> field.
   # Alloy's loki.source.syslog rejects any message not starting with '<'.
