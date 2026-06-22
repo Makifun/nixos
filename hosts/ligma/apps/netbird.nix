@@ -6,7 +6,7 @@
 }:
 let
   # renovate: datasource=docker depName=netbirdio/management
-  managementTag = "0.73.0";
+  managementTag = "0.73.2";
   # renovate: datasource=docker depName=netbirdio/signal
   signalTag = "0.73.0";
   # renovate: datasource=docker depName=netbirdio/relay
