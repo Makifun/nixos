@@ -12,7 +12,7 @@ let
   # renovate: datasource=docker depName=netbirdio/relay
   relayTag = "0.73.2";
   # renovate: datasource=docker depName=netbirdio/dashboard
-  dashboardTag = "v2.39.0";
+  dashboardTag = "v2.80.0";
 
   base = "/ligma/ligma/netbird";
   domain = "netbird.makifun.se";
