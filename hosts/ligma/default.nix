@@ -23,7 +23,7 @@
     ./apps/loki.nix
     ./apps/monitoring.nix
     ./apps/opnsense-exporter.nix
-    ./apps/netbird.nix
+    #./apps/netbird.nix
     ./apps/nfs.nix
     ./apps/omni.nix
     ./apps/rclone.nix
