@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 let
   # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
-  renovateTag    = "43.176.9";
+  renovateTag    = "43.251.3";
   dataDir        = "/ligma/ligma/renovate";
   tokenFile      = "${dataDir}/token";
   githubTokenFile = config.sops.secrets."renovate-github-token".path;
