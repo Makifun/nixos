@@ -222,19 +222,6 @@
             };
           }
           {
-            "Tautulli" = {
-              icon = "/images/tautulli.png";
-              href = "https://{{HOMEPAGE_VAR_TAUTULLI_URL}}";
-              widget = {
-                type = "tautulli";
-                url = "https://{{HOMEPAGE_VAR_TAUTULLI_URL}}";
-                key = "{{HOMEPAGE_VAR_TAUTULLI_TOKEN}}";
-                enableUser = true;
-                showEpisodeNumber = true;
-              };
-            };
-          }
-          {
             "Tracearr" = {
               icon = "/images/tracearr.png";
               href = "https://{{HOMEPAGE_VAR_TRACEARR_URL}}";
