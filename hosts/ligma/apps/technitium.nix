@@ -36,6 +36,13 @@ in
       "${technitiumBase}:/etc/dns"
       "${config.sops.secrets.technitium-admin-password.path}:${config.sops.secrets.technitium-admin-password.path}:ro"
     ];
+    # Technitium's default local endpoints are 0.0.0.0 and ::. NixOS disabling
+    # IPv6 globally doesn't remove AF_INET6 — the container still opens a
+    # dual-stack `::` socket first, which silently claims the IPv4 port too,
+    # so the subsequent explicit 0.0.0.0 bind fails with EADDRINUSE. Disabling
+    # IPv6 inside the container's own netns makes the `::` bind fail cleanly
+    # instead, so the IPv4 bind succeeds.
+    extraOptions = [ "--sysctl=net.ipv6.conf.all.disable_ipv6=1" ];
   };
 
   # ---------------------------------------------------------------------------
