@@ -16,33 +16,30 @@ in
   # ---------------------------------------------------------------------------
   # Technitium DNS Server — primary LAN resolver.
   #
+  # Host networking, not bridge+port-publish: with modules/podman.nix's
+  # defaultNetwork dns_enabled=true, netavark reserves host port 53 globally
+  # for aardvark-dns across every network, so `-p 53:53` always fails with
+  # "listen tcp4 :53: bind: address already in use" regardless of which
+  # network/IP the container is on (confirmed: any other port publishes fine,
+  # only 53 fails). Host networking bypasses netavark's port-publish path
+  # entirely. Web console restricted to loopback via env var since host
+  # networking has no per-container port isolation to do it for us.
+  #
   # DNS_SERVER_ADMIN_PASSWORD_FILE is only read on first boot (no config.json
   # yet); UI password changes persist afterward in ${technitiumBase}.
-  # Port 53 published on all interfaces; firewall below restricts source to
-  # LAN/WG. Web console stays loopback-only, reached through Traefik.
   # ---------------------------------------------------------------------------
   virtualisation.oci-containers.containers.technitium = {
     image = "docker.io/technitium/dns-server:${technitiumTag}";
-    ports = [
-      "53:53/udp"
-      "53:53/tcp"
-      "127.0.0.1:5380:5380/tcp"
-    ];
     environment = {
       DNS_SERVER_DOMAIN = "technitium.makifun.se";
       DNS_SERVER_ADMIN_PASSWORD_FILE = config.sops.secrets.technitium-admin-password.path;
+      DNS_SERVER_WEB_SERVICE_LOCAL_ADDRESSES = "127.0.0.1";
     };
     volumes = [
       "${technitiumBase}:/etc/dns"
       "${config.sops.secrets.technitium-admin-password.path}:${config.sops.secrets.technitium-admin-password.path}:ro"
     ];
-    # Technitium's default local endpoints are 0.0.0.0 and ::. NixOS disabling
-    # IPv6 globally doesn't remove AF_INET6 — the container still opens a
-    # dual-stack `::` socket first, which silently claims the IPv4 port too,
-    # so the subsequent explicit 0.0.0.0 bind fails with EADDRINUSE. Disabling
-    # IPv6 inside the container's own netns makes the `::` bind fail cleanly
-    # instead, so the IPv4 bind succeeds.
-    extraOptions = [ "--sysctl=net.ipv6.conf.all.disable_ipv6=1" ];
+    extraOptions = [ "--network=host" ];
   };
 
   # ---------------------------------------------------------------------------
