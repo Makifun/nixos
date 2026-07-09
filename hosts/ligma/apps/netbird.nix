@@ -6,11 +6,7 @@
 }:
 let
   # renovate: datasource=docker depName=netbirdio/management
-  managementTag = "0.74.3";
-  # renovate: datasource=docker depName=netbirdio/signal
-  signalTag = "0.74.3";
-  # renovate: datasource=docker depName=netbirdio/relay
-  relayTag = "0.74.3";
+  managementsignalrelayTag = "0.74.3";
   # renovate: datasource=docker depName=netbirdio/dashboard
   dashboardTag = "v2.90.3";
 
@@ -213,7 +209,7 @@ in
     };
 
     netbird-signal = {
-      image = "docker.io/netbirdio/signal:${signalTag}";
+      image = "docker.io/netbirdio/signal:${managementsignalrelayTag}";
       volumes = [ "${base}/signal:/var/lib/netbird" ];
       ports = [
         "127.0.0.1:10080:80"
@@ -223,7 +219,7 @@ in
     };
 
     netbird-management = {
-      image = "docker.io/netbirdio/management:${managementTag}";
+      image = "docker.io/netbirdio/management:${managementsignalrelayTag}";
       volumes = [
         "${base}/management:/var/lib/netbird"
         "${base}/management.json:/etc/netbird/management.json:ro"
@@ -244,7 +240,7 @@ in
     };
 
     netbird-relay = {
-      image = "docker.io/netbirdio/relay:${relayTag}";
+      image = "docker.io/netbirdio/relay:${managementsignalrelayTag}";
       environment = {
         NB_LOG_LEVEL = "info";
         NB_LISTEN_ADDRESS = ":33080";
