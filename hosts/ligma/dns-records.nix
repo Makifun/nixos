@@ -44,7 +44,7 @@ let
         RestartSec = "30s";
         StartLimitIntervalSec = 0;
       };
-      path = [ pkgs.bind ];
+      path = [ pkgs.bind.dnsutils ];
       script = ''
         nsupdate -y "hmac-sha256:${keyName}:$(tr -d '\n' < ${tsigKeyFile})" <<EOF
         server ${server}
