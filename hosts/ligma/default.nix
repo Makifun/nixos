@@ -29,7 +29,6 @@
     ./apps/renovate.nix
     ./apps/samba.nix
     ./apps/syncstorage.nix
-    ./apps/technitium.nix
     ./apps/traefik.nix
     ./apps/unifi.nix
     ./apps/vaultwarden.nix
