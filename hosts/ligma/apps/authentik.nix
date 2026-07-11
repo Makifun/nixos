@@ -123,4 +123,6 @@ in
     };
     services.authentik.loadBalancer.servers = [ { url = "http://127.0.0.1:9000"; } ];
   };
+
+  ligma.dnsRecords."auth.makifun.se".value = "10.10.10.13";
 }

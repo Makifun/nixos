@@ -7,6 +7,7 @@
 }:
 {
   imports = [
+    ./dns-records.nix
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disko-config.nix
     ../../common

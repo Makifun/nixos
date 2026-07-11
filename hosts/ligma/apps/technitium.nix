@@ -36,4 +36,6 @@ in
     };
     serversTransports."technitium-transport".insecureSkipVerify = true;
   };
+
+  ligma.dnsRecords."technitium.makifun.se".value = "10.10.10.13";
 }
