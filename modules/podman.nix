@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 {
   # Trust all podman bridge interfaces so aardvark-dns can bind on each
   # network's gateway and containers can query DNS. These are host-only
@@ -67,6 +67,25 @@
         enable = true;
         dates = "weekly";
       };
+    };
+  };
+
+  # autoPrune only removes dangling (untagged) images; prune ALL unused images weekly.
+  systemd.services.podman-image-prune = {
+    description = "Podman: prune all unused images";
+    serviceConfig = {
+      Type = "oneshot";
+    };
+    path = [ pkgs.podman ];
+    script = "podman image prune -af";
+  };
+
+  systemd.timers.podman-image-prune = {
+    description = "Weekly Podman image prune";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "Sun *-*-* 07:30:00";
+      Persistent = true;
     };
   };
 }
