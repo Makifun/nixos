@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   services.forgejo = {
     enable = true;
@@ -92,8 +97,14 @@
   # Wait for Authentik if it's starting, but don't hard-require it —
   # Forgejo is fully usable without Authentik (local login still works).
   systemd.services.forgejo = {
-    after  = [ "podman-authentik-server.service" "podman-authentik-worker.service" ];
-    wants  = [ "podman-authentik-server.service" "podman-authentik-worker.service" ];
+    after = [
+      "podman-authentik-server.service"
+      "podman-authentik-worker.service"
+    ];
+    wants = [
+      "podman-authentik-server.service"
+      "podman-authentik-worker.service"
+    ];
   };
 
   # Append admin user creation to forgejo's existing preStart.
@@ -162,16 +173,22 @@
   # ---------------------------------------------------------------------------
   systemd.services.forgejo-provision = {
     description = "Provision Forgejo service accounts";
-    after       = [ "forgejo.service" ];
-    wants       = [ "forgejo.service" ];
-    wantedBy    = [ "multi-user.target" ];
+    after = [ "forgejo.service" ];
+    wants = [ "forgejo.service" ];
+    wantedBy = [ "multi-user.target" ];
     serviceConfig = {
-      Type            = "oneshot";
+      Type = "oneshot";
       RemainAfterExit = true;
-      User            = config.services.forgejo.user;
+      User = config.services.forgejo.user;
     };
     environment.FORGEJO_WORK_DIR = config.services.forgejo.stateDir;
-    path   = [ pkgs.curl pkgs.openssl pkgs.jq pkgs.sqlite config.services.forgejo.package ];
+    path = [
+      pkgs.curl
+      pkgs.openssl
+      pkgs.jq
+      pkgs.sqlite
+      config.services.forgejo.package
+    ];
     script = ''
       base="http://127.0.0.1:3010/api/v1"
       token="$(cat /run/forgejo/provision-token 2>/dev/null || true)"
@@ -316,4 +333,6 @@
     };
     services.forgejo.loadBalancer.servers = [ { url = "http://127.0.0.1:3010"; } ];
   };
+
+  ligma.dnsRecords."git.makifun.se".value = "10.10.10.13";
 }

@@ -54,8 +54,8 @@ in
   ];
 
   virtualisation.oci-containers.containers.loki = {
-    image   = "docker.io/grafana/loki:${lokiTag}";
-    ports   = [ "127.0.0.1:${toString lokiPort}:${toString lokiPort}" ];
+    image = "docker.io/grafana/loki:${lokiTag}";
+    ports = [ "127.0.0.1:${toString lokiPort}:${toString lokiPort}" ];
     volumes = [
       "/etc/loki/config.yaml:/etc/loki/config.yaml:ro"
       "${lokiBase}:/loki"
@@ -78,24 +78,24 @@ in
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       loki-outpost = {
-        rule        = "Host(`loki.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
-        priority    = 30;
+        rule = "Host(`loki.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        priority = 30;
         entryPoints = [ "websecure" ];
-        service     = "authentik-embedded-outpost";
+        service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
       loki-push = {
-        rule        = "Host(`loki.makifun.se`) && PathPrefix(`/loki/api/v1/push`)";
-        priority    = 10;
+        rule = "Host(`loki.makifun.se`) && PathPrefix(`/loki/api/v1/push`)";
+        priority = 10;
         entryPoints = [ "websecure" ];
-        service     = "loki-svc";
+        service = "loki-svc";
         tls.certResolver = "letsencrypt";
       };
       loki = {
-        rule        = "Host(`loki.makifun.se`)";
-        priority    = 1;
+        rule = "Host(`loki.makifun.se`)";
+        priority = 1;
         entryPoints = [ "websecure" ];
-        service     = "loki-svc";
+        service = "loki-svc";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
@@ -104,4 +104,6 @@ in
       { url = "http://127.0.0.1:${toString lokiPort}"; }
     ];
   };
+
+  ligma.dnsRecords."loki.makifun.se".value = "10.10.10.13";
 }

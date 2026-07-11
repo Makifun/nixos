@@ -71,4 +71,6 @@
     };
     services.vaultwarden.loadBalancer.servers = [ { url = "http://127.0.0.1:8310"; } ];
   };
+
+  ligma.dnsRecords."vault.makifun.se".value = "10.10.10.13";
 }

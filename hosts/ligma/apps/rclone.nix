@@ -1,7 +1,7 @@
 { pkgs, ... }:
 let
-  rclonePort    = 6969;
-  metricsPort   = 6970;
+  rclonePort = 6969;
+  metricsPort = 6970;
 in
 {
   # Allow smbd (and other non-root processes) to access the FUSE mount.
@@ -26,7 +26,8 @@ in
     serviceConfig = {
       Type = "notify";
       ExecStartPre = "-${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
-      ExecStart = "${pkgs.rclone}/bin/rclone mount crypt:/ /cloud"
+      ExecStart =
+        "${pkgs.rclone}/bin/rclone mount crypt:/ /cloud"
         + " --config /ligma/ligma/rclone/rclone.conf"
         + " --allow-non-empty"
         + " --allow-other"
@@ -66,17 +67,17 @@ in
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       rclone-outpost = {
-        rule        = "Host(`rclone.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
-        priority    = 30;
+        rule = "Host(`rclone.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        priority = 30;
         entryPoints = [ "websecure" ];
-        service     = "authentik-embedded-outpost";
+        service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
       rclone = {
-        rule        = "Host(`rclone.makifun.se`)";
-        priority    = 1;
+        rule = "Host(`rclone.makifun.se`)";
+        priority = 1;
         entryPoints = [ "websecure" ];
-        service     = "rclone-svc";
+        service = "rclone-svc";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
@@ -85,4 +86,6 @@ in
       { url = "http://127.0.0.1:${toString rclonePort}"; }
     ];
   };
+
+  ligma.dnsRecords."rclone.makifun.se".value = "10.10.10.13";
 }

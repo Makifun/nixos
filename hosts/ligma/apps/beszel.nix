@@ -3,7 +3,7 @@ let
   beszelPort = 8095;
   beszelBase = "/ligma/ligma/beszel";
   # renovate: datasource=docker depName=henrygd/beszel
-  beszelTag  = "0.18.7";
+  beszelTag = "0.18.7";
 in
 {
   systemd.tmpfiles.rules = [
@@ -19,8 +19,8 @@ in
   # Web UI served on localhost:8095 → Traefik only.
   # ---------------------------------------------------------------------------
   virtualisation.oci-containers.containers.beszel = {
-    image   = "henrygd/beszel:${beszelTag}";
-    ports   = [ "127.0.0.1:${toString beszelPort}:8090" ];
+    image = "henrygd/beszel:${beszelTag}";
+    ports = [ "127.0.0.1:${toString beszelPort}:8090" ];
     volumes = [ "${beszelBase}/data:/beszel_data" ];
   };
 
@@ -45,12 +45,14 @@ in
   #   5. Redeploy → agent starts and hub shows ligma as connected
   # ---------------------------------------------------------------------------
   virtualisation.oci-containers.containers.beszel-agent = {
-    image            = "henrygd/beszel-agent:${beszelTag}";
-    environment      = { PORT = "45876"; };
+    image = "henrygd/beszel-agent:${beszelTag}";
+    environment = {
+      PORT = "45876";
+    };
     environmentFiles = [ config.sops.secrets.beszel_agent_key.path ];
-    extraOptions     = [ "--network=host" ];
+    extraOptions = [ "--network=host" ];
     # Mount the Podman socket so Beszel can report container stats.
-    volumes          = [
+    volumes = [
       "/run/podman/podman.sock:/var/run/docker.sock:ro"
       "/ligma/.beszelligma:/extra-filesystems/ligma:ro"
       "/persist/.beszelpersist:/extra-filesystems/persist:ro"
@@ -60,11 +62,11 @@ in
 
   # Ensure podman.socket is active before the agent container starts,
   # so /run/podman/podman.sock exists when Podman tries to bind-mount it.
-  systemd.services.podman-beszel-agent.after    = [ "podman.socket" ];
+  systemd.services.podman-beszel-agent.after = [ "podman.socket" ];
   systemd.services.podman-beszel-agent.requires = [ "podman.socket" ];
 
   sops.secrets.beszel_agent_key = {
-    format   = "yaml";
+    format = "yaml";
     sopsFile = ../secrets.yaml;
   };
 
@@ -84,16 +86,16 @@ in
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       beszel = {
-        rule        = "Host(`beszel.makifun.se`)";
+        rule = "Host(`beszel.makifun.se`)";
         entryPoints = [ "websecure" ];
-        service     = "beszel-svc";
+        service = "beszel-svc";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
       beszel-outpost = {
-        rule        = "Host(`beszel.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`beszel.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
-        service     = "authentik-embedded-outpost";
+        service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
     };
@@ -101,4 +103,5 @@ in
       { url = "http://127.0.0.1:${toString beszelPort}"; }
     ];
   };
+  ligma.dnsRecords."beszel.makifun.se".value = "10.10.10.13";
 }

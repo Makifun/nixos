@@ -128,4 +128,6 @@
       { url = "http://localhost:9000"; }
     ];
   };
+
+  ligma.dnsRecords."traefik-ligma.makifun.se".value = "10.10.10.13";
 }

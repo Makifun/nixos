@@ -896,4 +896,6 @@
       { url = "http://localhost:8082"; }
     ];
   };
+
+  ligma.dnsRecords."homepage.makifun.se".value = "10.10.10.13";
 }

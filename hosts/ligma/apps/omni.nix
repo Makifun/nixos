@@ -1,13 +1,18 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
-  base                 = "/ligma/ligma/omni";
+  base = "/ligma/ligma/omni";
   k8sProxyPortExternal = 6443;
-  k8sProxyPort         = 8098;
-  machineApiPort       = 8091;
-  uiPort               = 9999;
-  wgPort               = 50180;
-  ligmaIP              = "10.10.10.13";
-  initialUser          = "makifun@pm.me";
+  k8sProxyPort = 8098;
+  machineApiPort = 8091;
+  uiPort = 9999;
+  wgPort = 50180;
+  ligmaIP = "10.10.10.13";
+  initialUser = "makifun@pm.me";
   # renovate: datasource=docker depName=ghcr.io/siderolabs/omni
   omniTag = "v1.9.1";
 
@@ -15,13 +20,19 @@ let
   # Map SAML attribute name → Omni identity field.
   samlAttributeRules = builtins.toJSON {
     "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress" = "identity";
-    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"         = "fullname";
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name" = "fullname";
   };
 in
 {
   sops.secrets = {
-    omni-account-uuid    = { format = "yaml"; sopsFile = ../secrets.yaml; };
-    omni-jwt-signing-key = { format = "yaml"; sopsFile = ../secrets.yaml; };
+    omni-account-uuid = {
+      format = "yaml";
+      sopsFile = ../secrets.yaml;
+    };
+    omni-jwt-signing-key = {
+      format = "yaml";
+      sopsFile = ../secrets.yaml;
+    };
     # omni-wireguard-key is reserved — Omni currently auto-generates and
     # persists the SideroLink WG private key in its embedded etcd state.
   };
@@ -47,12 +58,18 @@ in
   # listener (Traefik handles the public LE cert; this only protects loopback).
   systemd.services.omni-prep = {
     description = "Prepare Omni keys + self-signed TLS";
-    wantedBy    = [ "podman-omni.service" ];
-    before      = [ "podman-omni.service" ];
-    after       = [ "local-fs.target" "sops-nix.service" ];
-    path        = [ pkgs.openssl pkgs.coreutils ];
+    wantedBy = [ "podman-omni.service" ];
+    before = [ "podman-omni.service" ];
+    after = [
+      "local-fs.target"
+      "sops-nix.service"
+    ];
+    path = [
+      pkgs.openssl
+      pkgs.coreutils
+    ];
     serviceConfig = {
-      Type            = "oneshot";
+      Type = "oneshot";
       RemainAfterExit = true;
     };
     script = ''
@@ -140,25 +157,27 @@ in
 
   services.traefik.dynamicConfigOptions.http = {
     routers.omni = {
-      rule             = "Host(`omni.makifun.se`)";
-      entryPoints      = [ "websecure" ];
-      service          = "omni-svc";
+      rule = "Host(`omni.makifun.se`)";
+      entryPoints = [ "websecure" ];
+      service = "omni-svc";
       tls.certResolver = "letsencrypt";
     };
     routers."omni-k8s-proxy" = {
-      rule             = "Host(`omni.makifun.se`)";
-      entryPoints      = [ "k8s-proxy" ];
-      service          = "omni-k8s-proxy-svc";
+      rule = "Host(`omni.makifun.se`)";
+      entryPoints = [ "k8s-proxy" ];
+      service = "omni-k8s-proxy-svc";
       tls.certResolver = "letsencrypt";
     };
     services."omni-svc".loadBalancer = {
       serversTransport = "omni-self-signed";
-      servers          = [ { url = "https://127.0.0.1:${toString uiPort}"; } ];
+      servers = [ { url = "https://127.0.0.1:${toString uiPort}"; } ];
     };
     services."omni-k8s-proxy-svc".loadBalancer = {
       serversTransport = "omni-self-signed";
-      servers          = [ { url = "https://127.0.0.1:${toString k8sProxyPort}"; } ];
+      servers = [ { url = "https://127.0.0.1:${toString k8sProxyPort}"; } ];
     };
     serversTransports."omni-self-signed".insecureSkipVerify = true;
   };
+
+  ligma.dnsRecords."omni.makifun.se".value = "10.10.10.13";
 }

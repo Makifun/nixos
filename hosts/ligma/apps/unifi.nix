@@ -3,9 +3,9 @@ let
   unifiPort = 8443;
   unifiBase = "/ligma/ligma/unifi";
   # renovate: datasource=docker depName=mongo versioning=semver
-  mongoTag  = "8.2.6";
+  mongoTag = "8.2.6";
   # renovate: datasource=docker depName=linuxserver/unifi-network-application registryUrl=https://lscr.io
-  unifiTag  = "10.4.57";
+  unifiTag = "10.4.57";
 
   # UniFi sends CEF embedded in BSD syslog WITHOUT a <priority> field.
   # Alloy's loki.source.syslog rejects any message not starting with '<'.
@@ -41,12 +41,21 @@ in
   # Isolated Podman network for unifi + unifi-db.
   # ---------------------------------------------------------------------------
   systemd.services.podman-create-unifi-network = {
-    description    = "Create unifi_network podman network";
-    before         = [ "podman-unifi-db.service" "podman-unifi.service" ];
-    requiredBy     = [ "podman-unifi-db.service" "podman-unifi.service" ];
-    serviceConfig  = { Type = "oneshot"; RemainAfterExit = true; };
-    path           = [ pkgs.podman ];
-    script         = "podman network exists unifi_network || podman network create --subnet 10.89.0.0/24 unifi_network";
+    description = "Create unifi_network podman network";
+    before = [
+      "podman-unifi-db.service"
+      "podman-unifi.service"
+    ];
+    requiredBy = [
+      "podman-unifi-db.service"
+      "podman-unifi.service"
+    ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    path = [ pkgs.podman ];
+    script = "podman network exists unifi_network || podman network create --subnet 10.89.0.0/24 unifi_network";
   };
 
   # ---------------------------------------------------------------------------
@@ -59,32 +68,32 @@ in
   virtualisation.oci-containers.containers = {
 
     unifi-db = {
-      image   = "docker.io/amd64/mongo:${mongoTag}";
+      image = "docker.io/amd64/mongo:${mongoTag}";
       volumes = [ "${unifiBase}/db:/data/db" ];
       extraOptions = [ "--network=unifi_network" ];
     };
 
     unifi = {
-      image     = "lscr.io/linuxserver/unifi-network-application:${unifiTag}";
+      image = "lscr.io/linuxserver/unifi-network-application:${unifiTag}";
       dependsOn = [ "unifi-db" ];
       environment = {
-        PUID         = "1000";
-        PGID         = "1000";
-        TZ           = "Europe/Stockholm";
-        MONGO_USER   = "unifi";
-        MONGO_PASS   = "unifi";
-        MONGO_HOST   = "unifi-db";
-        MONGO_PORT   = "27017";
+        PUID = "1000";
+        PGID = "1000";
+        TZ = "Europe/Stockholm";
+        MONGO_USER = "unifi";
+        MONGO_PASS = "unifi";
+        MONGO_HOST = "unifi-db";
+        MONGO_PORT = "27017";
         MONGO_DBNAME = "unifi";
-        MEM_LIMIT    = "1024";
-        MEM_STARTUP  = "1024";
+        MEM_LIMIT = "1024";
+        MEM_STARTUP = "1024";
       };
       volumes = [ "${unifiBase}/config:/config" ];
-      ports   = [
-        "127.0.0.1:${toString unifiPort}:${toString unifiPort}"  # web UI → Traefik only
-        "0.0.0.0:8080:8080"        # device inform
-        "0.0.0.0:3478:3478/udp"    # STUN
-        "0.0.0.0:10001:10001/udp"  # AP discovery
+      ports = [
+        "127.0.0.1:${toString unifiPort}:${toString unifiPort}" # web UI → Traefik only
+        "0.0.0.0:8080:8080" # device inform
+        "0.0.0.0:3478:3478/udp" # STUN
+        "0.0.0.0:10001:10001/udp" # AP discovery
       ];
       extraOptions = [ "--network=unifi_network" ];
     };
@@ -109,12 +118,12 @@ in
   # ---------------------------------------------------------------------------
   systemd.services.unifi-syslog = {
     description = "UniFi syslog UDP receiver → file";
-    after       = [ "network.target" ];
-    wantedBy    = [ "multi-user.target" ];
+    after = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
     serviceConfig = {
-      Type      = "simple";
+      Type = "simple";
       ExecStart = unifiSyslogRecv;
-      Restart   = "always";
+      Restart = "always";
     };
   };
 
@@ -160,23 +169,25 @@ in
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       unifi = {
-        rule        = "Host(`unifi.makifun.se`)";
+        rule = "Host(`unifi.makifun.se`)";
         entryPoints = [ "websecure" ];
-        service     = "unifi-svc";
+        service = "unifi-svc";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
       "unifi-outpost" = {
-        rule        = "Host(`unifi.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`unifi.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
-        service     = "authentik-embedded-outpost";
+        service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
     };
     services."unifi-svc".loadBalancer = {
-      servers          = [{ url = "https://127.0.0.1:${toString unifiPort}"; }];
+      servers = [ { url = "https://127.0.0.1:${toString unifiPort}"; } ];
       serversTransport = "unifi-transport";
     };
     serversTransports."unifi-transport".insecureSkipVerify = true;
   };
+
+  ligma.dnsRecords."unifi.makifun.se".value = "10.10.10.13";
 }

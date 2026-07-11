@@ -38,4 +38,5 @@ in
   };
 
   ligma.dnsRecords."technitium.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."doh.makifun.se".value = "10.10.10.13";
 }

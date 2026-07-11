@@ -6,8 +6,8 @@
 #
 # Prerequisites (one-time, manual):
 #   1. Generate key:
-#        nix run nixpkgs#bind -- tsig-keygen -a hmac-sha256 ligma-key
-#      Note only the base64 secret (the "secret" line).
+#      Technitium WebGUI → Settings → TSIG → Add → Name: ligma-key → Save Settings
+#      (Key is auto generated)
 #   2. Technitium WebGUI → Zones → makifun.se → TSIG Keys: add ligma-key
 #   3. Enable "Allow Dynamic Updates" on the zone, restrict to ligma-key TSIG
 #   4. Add SOPS secret:

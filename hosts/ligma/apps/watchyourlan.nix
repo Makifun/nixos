@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 let
   # renovate: datasource=docker depName=aceberg/watchyourlan
-  wylTag  = "2.1.4";
+  wylTag = "2.1.4";
   wylBase = "/ligma/ligma/watchyourlan";
 in
 {
@@ -10,7 +10,7 @@ in
   ];
 
   sops.secrets.watchyourlan-gotify-token = {
-    format   = "yaml";
+    format = "yaml";
     sopsFile = ../secrets.yaml;
   };
 
@@ -21,31 +21,34 @@ in
   # ---------------------------------------------------------------------------
   systemd.services.watchyourlan-config = {
     description = "Write WatchYourLAN initial config_v2.yaml";
-    before      = [ "podman-watchyourlan.service" ];
-    requiredBy  = [ "podman-watchyourlan.service" ];
+    before = [ "podman-watchyourlan.service" ];
+    requiredBy = [ "podman-watchyourlan.service" ];
     serviceConfig = {
-      Type            = "oneshot";
+      Type = "oneshot";
       RemainAfterExit = true;
     };
-    path = [ pkgs.coreutils pkgs.gnused ];
+    path = [
+      pkgs.coreutils
+      pkgs.gnused
+    ];
     script = ''
-      CONFIG="${wylBase}/config_v2.yaml"
-      if [ ! -f "$CONFIG" ]; then
-        TOKEN=$(tr -d '\n' < ${config.sops.secrets.watchyourlan-gotify-token.path})
-        cat > "$CONFIG" <<'WYL_CONF'
-color: dark
-host: 0.0.0.0
-ifaces: ens18
-log_level: info
-port: "8840"
-shoutrrr_url: "gotify://gotify.makifun.se/__TOKEN__/?title=WatchYourLAN"
-theme: sand
-timeout: 60
-trim_hist: 48
-use_db: sqlite
-WYL_CONF
-        sed -i "s/__TOKEN__/$TOKEN/" "$CONFIG"
-      fi
+            CONFIG="${wylBase}/config_v2.yaml"
+            if [ ! -f "$CONFIG" ]; then
+              TOKEN=$(tr -d '\n' < ${config.sops.secrets.watchyourlan-gotify-token.path})
+              cat > "$CONFIG" <<'WYL_CONF'
+      color: dark
+      host: 0.0.0.0
+      ifaces: ens18
+      log_level: info
+      port: "8840"
+      shoutrrr_url: "gotify://gotify.makifun.se/__TOKEN__/?title=WatchYourLAN"
+      theme: sand
+      timeout: 60
+      trim_hist: 48
+      use_db: sqlite
+      WYL_CONF
+              sed -i "s/__TOKEN__/$TOKEN/" "$CONFIG"
+            fi
     '';
   };
 
@@ -60,7 +63,7 @@ WYL_CONF
       "${wylBase}:/data/WatchYourLAN"
     ];
     environment = {
-      TZ    = "Europe/Stockholm";
+      TZ = "Europe/Stockholm";
       IFACES = "ens18";
     };
     extraOptions = [
@@ -74,19 +77,21 @@ WYL_CONF
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       watchyourlan = {
-        rule        = "Host(`watchyourlan.makifun.se`)";
+        rule = "Host(`watchyourlan.makifun.se`)";
         entryPoints = [ "websecure" ];
-        service     = "watchyourlan-svc";
+        service = "watchyourlan-svc";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
       "watchyourlan-outpost" = {
-        rule        = "Host(`watchyourlan.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`watchyourlan.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
-        service     = "authentik-embedded-outpost";
+        service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
     };
-    services."watchyourlan-svc".loadBalancer.servers = [{ url = "http://127.0.0.1:8840"; }];
+    services."watchyourlan-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:8840"; } ];
   };
+
+  ligma.dnsRecords."watchyourlan.makifun.se".value = "10.10.10.13";
 }

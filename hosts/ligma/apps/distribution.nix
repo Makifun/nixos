@@ -7,52 +7,70 @@ let
   # One Distribution instance per upstream registry.
   # Each gets its own port, storage directory, and subdomain.
   registries = {
-    dockerhub = { port = 5001; debugPort = 5011; upstream = "https://registry-1.docker.io"; };
-    ghcr      = { port = 5002; debugPort = 5012; upstream = "https://ghcr.io";               };
-    lscr      = { port = 5003; debugPort = 5013; upstream = "https://lscr.io";               };
-    quay      = { port = 5004; debugPort = 5014; upstream = "https://quay.io";               };
+    dockerhub = {
+      port = 5001;
+      debugPort = 5011;
+      upstream = "https://registry-1.docker.io";
+    };
+    ghcr = {
+      port = 5002;
+      debugPort = 5012;
+      upstream = "https://ghcr.io";
+    };
+    lscr = {
+      port = 5003;
+      debugPort = 5013;
+      upstream = "https://lscr.io";
+    };
+    quay = {
+      port = 5004;
+      debugPort = 5014;
+      upstream = "https://quay.io";
+    };
   };
 
-  mkConfig = upstream: builtins.toJSON {
-    version = "0.1";
-    log.level = "warn";
-    storage = {
-      filesystem.rootdirectory = "/var/lib/registry";
-      delete.enabled = true;
-    };
-    http = {
-      addr = ":5000";
-      debug = {
-        addr = ":5010";
-        prometheus = {
-          enabled = true;
-          path    = "/metrics";
+  mkConfig =
+    upstream:
+    builtins.toJSON {
+      version = "0.1";
+      log.level = "warn";
+      storage = {
+        filesystem.rootdirectory = "/var/lib/registry";
+        delete.enabled = true;
+      };
+      http = {
+        addr = ":5000";
+        debug = {
+          addr = ":5010";
+          prometheus = {
+            enabled = true;
+            path = "/metrics";
+          };
         };
       };
+      proxy.remoteurl = upstream;
     };
-    proxy.remoteurl = upstream;
-  };
 in
 {
   # ---------------------------------------------------------------------------
   # Config files — one per instance, mounted read-only into each container.
   # ---------------------------------------------------------------------------
-  environment.etc = lib.mapAttrs' (name: cfg:
-    lib.nameValuePair "distribution/${name}/config.json" { text = mkConfig cfg.upstream; }
+  environment.etc = lib.mapAttrs' (
+    name: cfg: lib.nameValuePair "distribution/${name}/config.json" { text = mkConfig cfg.upstream; }
   ) registries;
 
   # ---------------------------------------------------------------------------
   # Storage directories
   # ---------------------------------------------------------------------------
-  systemd.tmpfiles.rules = lib.mapAttrsToList (name: _:
-    "d '${base}/${name}' 0755 root root - -"
+  systemd.tmpfiles.rules = lib.mapAttrsToList (
+    name: _: "d '${base}/${name}' 0755 root root - -"
   ) registries;
 
   environment.persistence."/persist".directories = lib.mapAttrsToList (name: _: {
     directory = "${base}/${name}";
-    user      = "root";
-    group     = "root";
-    mode      = "0755";
+    user = "root";
+    group = "root";
+    mode = "0755";
   }) registries;
 
   # ---------------------------------------------------------------------------
@@ -60,14 +78,17 @@ in
   # Podman mirrors are configured to hit 127.0.0.1:<port> directly (no TLS).
   # External access (e.g. from jonny) goes through Traefik subdomains below.
   # ---------------------------------------------------------------------------
-  virtualisation.oci-containers.containers = lib.mapAttrs' (name: cfg:
+  virtualisation.oci-containers.containers = lib.mapAttrs' (
+    name: cfg:
     lib.nameValuePair "dist-${name}" {
-      image       = "docker.io/library/registry:${registryTag}";
-      ports       = [
+      image = "docker.io/library/registry:${registryTag}";
+      ports = [
         "127.0.0.1:${toString cfg.port}:5000"
         "127.0.0.1:${toString cfg.debugPort}:5010"
       ];
-      environment = { OTEL_SDK_DISABLED = "true"; };
+      environment = {
+        OTEL_SDK_DISABLED = "true";
+      };
       volumes = [
         "/etc/distribution/${name}/config.json:/etc/distribution/config.yml:ro"
         "${base}/${name}:/var/lib/registry"
@@ -82,14 +103,18 @@ in
   # ---------------------------------------------------------------------------
   systemd.services.distribution-gc = {
     description = "Distribution Registry garbage collection";
-    serviceConfig = { Type = "oneshot"; };
-    path = [ pkgs.podman pkgs.systemd ];
+    serviceConfig = {
+      Type = "oneshot";
+    };
+    path = [
+      pkgs.podman
+      pkgs.systemd
+    ];
     script =
       let
-        names    = builtins.attrNames registries;
-        stopAll  = lib.concatMapStringsSep "\n" (n:
-          "systemctl stop podman-dist-${n}.service || true") names;
-        gcAll    = lib.concatMapStringsSep "\n" (n: ''
+        names = builtins.attrNames registries;
+        stopAll = lib.concatMapStringsSep "\n" (n: "systemctl stop podman-dist-${n}.service || true") names;
+        gcAll = lib.concatMapStringsSep "\n" (n: ''
           echo "GC: ${n}"
           podman run --rm \
             -v /etc/distribution/${n}/config.json:/etc/distribution/config.yml:ro \
@@ -98,9 +123,11 @@ in
             garbage-collect /etc/distribution/config.yml --delete-untagged=true \
             || true
         '') names;
-        startAll = lib.concatMapStringsSep "\n" (n:
-          "systemctl start podman-dist-${n}.service || true") names;
-      in ''
+        startAll = lib.concatMapStringsSep "\n" (
+          n: "systemctl start podman-dist-${n}.service || true"
+        ) names;
+      in
+      ''
         ${stopAll}
         ${gcAll}
         ${startAll}
@@ -109,10 +136,10 @@ in
 
   systemd.timers.distribution-gc = {
     description = "Daily Distribution Registry garbage collection at 06:00";
-    wantedBy    = [ "timers.target" ];
+    wantedBy = [ "timers.target" ];
     timerConfig = {
       OnCalendar = "*-*-* 06:00:00";
-      Persistent  = true;
+      Persistent = true;
     };
   };
 
@@ -125,19 +152,25 @@ in
     middlewares."mirror-lan-only".ipAllowList.sourceRange = [
       "10.10.10.0/24"
     ];
-    routers = lib.mapAttrs' (name: cfg:
+    routers = lib.mapAttrs' (
+      name: cfg:
       lib.nameValuePair "dist-${name}" {
-        rule        = "Host(`${name}.mirror.makifun.se`)";
+        rule = "Host(`${name}.mirror.makifun.se`)";
         entryPoints = [ "websecure" ];
-        service     = "dist-${name}-svc";
+        service = "dist-${name}-svc";
         middlewares = [ "mirror-lan-only" ];
         tls.certResolver = "letsencrypt";
       }
     ) registries;
-    services = lib.mapAttrs' (name: cfg:
+    services = lib.mapAttrs' (
+      name: cfg:
       lib.nameValuePair "dist-${name}-svc" {
-        loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
+        loadBalancer.servers = [ { url = "http://127.0.0.1:${toString cfg.port}"; } ];
       }
     ) registries;
   };
+
+  ligma.dnsRecords = lib.mapAttrs' (
+    name: _: lib.nameValuePair "${name}.mirror.makifun.se" { value = "10.10.10.13"; }
+  ) registries;
 }

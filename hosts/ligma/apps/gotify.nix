@@ -3,7 +3,7 @@ let
   gotifyPort = 8096;
   gotifyBase = "/ligma/ligma/gotify";
   # renovate: datasource=docker depName=gotify/server
-  gotifyTag  = "2.9.1";
+  gotifyTag = "2.9.1";
 in
 {
   systemd.tmpfiles.rules = [
@@ -11,10 +11,12 @@ in
   ];
 
   virtualisation.oci-containers.containers.gotify = {
-    image       = "docker.io/gotify/server:${gotifyTag}";
-    ports       = [ "127.0.0.1:${toString gotifyPort}:80" ];
-    environment = { TZ = "Europe/Stockholm"; };
-    volumes     = [ "${gotifyBase}:/app/data" ];
+    image = "docker.io/gotify/server:${gotifyTag}";
+    ports = [ "127.0.0.1:${toString gotifyPort}:80" ];
+    environment = {
+      TZ = "Europe/Stockholm";
+    };
+    volumes = [ "${gotifyBase}:/app/data" ];
   };
 
   # ---------------------------------------------------------------------------
@@ -29,24 +31,24 @@ in
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       gotify-outpost = {
-        rule        = "Host(`gotify.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
-        priority    = 30;
+        rule = "Host(`gotify.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        priority = 30;
         entryPoints = [ "websecure" ];
-        service     = "authentik-embedded-outpost";
+        service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
       gotify-token = {
-        rule        = "Host(`gotify.makifun.se`) && HeaderRegexp(`X-Gotify-Key`, `.+`)";
-        priority    = 10;
+        rule = "Host(`gotify.makifun.se`) && HeaderRegexp(`X-Gotify-Key`, `.+`)";
+        priority = 10;
         entryPoints = [ "websecure" ];
-        service     = "gotify-svc";
+        service = "gotify-svc";
         tls.certResolver = "letsencrypt";
       };
       gotify = {
-        rule        = "Host(`gotify.makifun.se`)";
-        priority    = 1;
+        rule = "Host(`gotify.makifun.se`)";
+        priority = 1;
         entryPoints = [ "websecure" ];
-        service     = "gotify-svc";
+        service = "gotify-svc";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
@@ -55,4 +57,6 @@ in
       { url = "http://127.0.0.1:${toString gotifyPort}"; }
     ];
   };
+
+  ligma.dnsRecords."gotify.makifun.se".value = "10.10.10.13";
 }
