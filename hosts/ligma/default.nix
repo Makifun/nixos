@@ -28,6 +28,7 @@
     ./apps/rclone.nix
     ./apps/renovate.nix
     ./apps/samba.nix
+    ./apps/technitium.nix
     ./apps/traefik.nix
     ./apps/unifi.nix
     ./apps/vaultwarden.nix
