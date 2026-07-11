@@ -593,6 +593,17 @@
             };
           }
           {
+            "Technitium" = {
+              icon = "/images/technitium.png";
+              href = "https://{{HOMEPAGE_VAR_TECHNITIUM_URL}}";
+              widget = {
+                type = "technitium";
+                url = "https://{{HOMEPAGE_VAR_TECHNITIUM_URL}}";
+                key = "{{HOMEPAGE_VAR_TECHNITIUM_TOKEN}}";
+              };
+            };
+          }
+          {
             "Unifi Controller" = {
               icon = "/images/unifi.png";
               href = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
