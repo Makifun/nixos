@@ -480,6 +480,12 @@
             };
           }
           {
+            "HAVC" = {
+              icon = "/images/havc.png";
+              href = "https://{{HOMEPAGE_VAR_HAVC_URL}}";
+            };
+          }
+          {
             "Forgejo" = {
               icon = "/images/forgejo.png";
               href = "https://{{HOMEPAGE_VAR_FORGEJO_URL}}";
