@@ -592,6 +592,12 @@
               href = "https://{{HOMEPAGE_VAR_TECHNITIUM_URL}}";
               widget = {
                 type = "technitium";
+                fields = [
+                  "totalQueries"
+                  "totalAuthoritative"
+                  "totalCached"
+                  "totalBlocked"
+                ];
                 url = "https://{{HOMEPAGE_VAR_TECHNITIUM_URL}}";
                 key = "{{HOMEPAGE_VAR_TECHNITIUM_TOKEN}}";
               };
