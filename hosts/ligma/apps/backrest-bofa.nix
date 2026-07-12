@@ -26,5 +26,6 @@ in
       { url = "http://${bofaIp}:${toString backrestPort}"; }
     ];
   };
+
   ligma.dnsRecords."backrest-bofa.makifun.se".value = "10.10.10.13";
 }

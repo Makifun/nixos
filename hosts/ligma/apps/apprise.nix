@@ -63,5 +63,6 @@ in
       { url = "http://127.0.0.1:${toString apprisePort}"; }
     ];
   };
+
   ligma.dnsRecords."apprise.makifun.se".value = "10.10.10.13";
 }

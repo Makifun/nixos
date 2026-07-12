@@ -103,5 +103,6 @@ in
       { url = "http://127.0.0.1:${toString beszelPort}"; }
     ];
   };
+
   ligma.dnsRecords."beszel.makifun.se".value = "10.10.10.13";
 }
