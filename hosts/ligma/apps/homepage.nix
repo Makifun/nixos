@@ -581,18 +581,6 @@
             };
           }
           {
-            "Adguard" = {
-              icon = "/images/adguard-home.png";
-              href = "https://{{HOMEPAGE_VAR_ADGUARD_URL}}";
-              widget = {
-                type = "adguard";
-                url = "https://{{HOMEPAGE_VAR_ADGUARD_URL}}";
-                username = "{{HOMEPAGE_VAR_ADGUARD_USERNAME}}";
-                password = "{{HOMEPAGE_VAR_ADGUARD_PASSWORD}}";
-              };
-            };
-          }
-          {
             "Technitium" = {
               icon = "/images/technitium.png";
               href = "https://{{HOMEPAGE_VAR_TECHNITIUM_URL}}";
