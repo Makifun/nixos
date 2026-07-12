@@ -180,5 +180,4 @@ in
   };
 
   ligma.dnsRecords."omni.makifun.se".value = "10.10.10.13";
-  ligma.dnsRecords."*.omni.makifun.se".value = "10.10.10.13";
 }
