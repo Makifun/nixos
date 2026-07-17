@@ -14,6 +14,7 @@
     ./apps/backrest.nix
     ./apps/beszel.nix
     ./apps/timescaledb.nix
+    ./apps/pg-dump.nix
   ];
   environment.persistence."/persist" = {
     hideMounts = true;

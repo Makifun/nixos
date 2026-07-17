@@ -148,6 +148,7 @@ Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Su
 | `timescaledb.nix` | TimescaleDB (Podman) | 5432 | `timescale/timescaledb-ha:pg18.1-ts2.25.0`. Data at `/bofa/bofa/postgresql`. `POSTGRES_USER=tracearr`, `POSTGRES_DB=tracearr`. Password from SOPS `timescaledb-tracearr-password` via `sops.templates."timescaledb.env"`. Port open to sugma nodes 10.10.10.26-28 only. SOPS: `timescaledb-tracearr-password`. |
 | `backrest.nix` | Backrest backup manager | 9898 | Restic-backed S3. Backs up `/bofa/bofa`. Port 9898 open to ligma (10.10.10.13) only for Traefik proxy. Schedule: 05:00 UTC. Prune: 06:00 UTC. SOPS: same keys as ligma backrest. |
 | `beszel.nix` | Beszel agent | 45876 | Monitors bofa; reports disk usage of `/bofa` and `/persist`. Port 45876 open to ligma only. |
+| `pg-dump.nix` | PostgreSQL logical dump | — | `pg_dump -Fc` (zlib-compressed custom format) via `podman exec timescaledb`. Dumps to `/bofa/dumps/tracearr_<stamp>.dump`. Daily at 03:00 UTC (±15 min). 30-day on-disk retention. Password from SOPS `timescaledb-tracearr-password`. |
 
 **To add a new bofa secret:** `sops hosts/bofa/secrets.yaml`, add the key, reference in the app `.nix` file.
 
