@@ -3,7 +3,7 @@ let
   backrestPort = 9898;
   backrestBase = "/bofa/bofa/backrest";
   # renovate: datasource=docker depName=ghcr.io/garethgeorge/backrest
-  backrestTag = "v1.13.0";
+  backrestTag = "v1.14.1";
 in
 {
   sops.secrets = {
