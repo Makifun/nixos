@@ -55,6 +55,7 @@ in
           repo = "bofa-s3";
           paths = [
             "/bofa/bofa"
+            "/bofa/dumps"
           ];
           schedule.cron = "0 5 * * *";
           retention.policyTimeBucketed = {
