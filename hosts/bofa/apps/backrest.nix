@@ -118,6 +118,7 @@ in
       "${backrestBase}/config:/config"
       "${backrestBase}/cache:/cache"
       "/bofa/bofa:/bofa/bofa:ro"
+      "/bofa/dumps:/bofa/dumps:ro"
       "/bofa/restore:/bofa/restore"
     ];
   };
