@@ -2,6 +2,8 @@
 {
   systemd.tmpfiles.rules = [
     "d '/ligma/sugma' 0755 root root - -"
+    "z '/slowmeme' 0775 1000 1000 - -"
+    "z '/nicememe' 0775 1000 1000 - -"
   ];
 
   # NFSv4 only — sugma k8s negotiates v4, jonny uses CIFS (Samba). Port 2049 only.
