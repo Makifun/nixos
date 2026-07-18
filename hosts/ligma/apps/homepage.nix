@@ -158,6 +158,20 @@
       }
       {
         resources = {
+          label = "/nicememe";
+          disk = "/nicememe";
+          expanded = true;
+        };
+      }
+      {
+        resources = {
+          label = "/slowmeme";
+          disk = "/slowmeme";
+          expanded = true;
+        };
+      }
+      {
+        resources = {
           label = "/rclone-cache";
           disk = "/rclone-cache";
           expanded = true;
