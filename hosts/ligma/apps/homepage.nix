@@ -839,25 +839,6 @@
               };
             };
           }
-          {
-            "Portainer" = {
-              icon = "/images/portainer.png";
-              href = "https://{{HOMEPAGE_VAR_PORTAINER_URL}}";
-              server = "jonny";
-              container = "portainer";
-              widget = {
-                type = "portainer";
-                fields = [
-                  "running"
-                  "stopped"
-                  "total"
-                ];
-                url = "https://{{HOMEPAGE_VAR_PORTAINER_URL}}";
-                env = 1;
-                key = "{{HOMEPAGE_VAR_PORTAINER_TOKEN}}";
-              };
-            };
-          }
         ];
       }
     ];
