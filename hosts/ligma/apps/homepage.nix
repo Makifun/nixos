@@ -351,6 +351,25 @@
             };
           }
           {
+            "Sonarrpg" = {
+              icon = "/images/sonarr.png";
+              href = "https://{{HOMEPAGE_VAR_SONARRPG_URL}}";
+              namespace = "sonarrpg";
+              app = "sonarrpg";
+              widget = {
+                type = "sonarr";
+                fields = [
+                  "wanted"
+                  "queued"
+                  "series"
+                ];
+                url = "https://{{HOMEPAGE_VAR_SONARRPG_URL}}";
+                key = "{{HOMEPAGE_VAR_SONARRPG_TOKEN}}";
+                enableQueue = true;
+              };
+            };
+          }
+          {
             "Radarr" = {
               icon = "/images/radarr.png";
               href = "https://{{HOMEPAGE_VAR_RADARR_URL}}";
@@ -366,6 +385,26 @@
                 ];
                 url = "https://{{HOMEPAGE_VAR_RADARR_URL}}";
                 key = "{{HOMEPAGE_VAR_RADARR_TOKEN}}";
+                enableQueue = true;
+              };
+            };
+          }
+          {
+            "Radarrpg" = {
+              icon = "/images/radarr.png";
+              href = "https://{{HOMEPAGE_VAR_RADARRPG_URL}}";
+              namespace = "radarrpg";
+              app = "radarrpg";
+              widget = {
+                type = "radarr";
+                fields = [
+                  "wanted"
+                  "missing"
+                  "queued"
+                  "movies"
+                ];
+                url = "https://{{HOMEPAGE_VAR_RADARRPG_URL}}";
+                key = "{{HOMEPAGE_VAR_RADARRPG_TOKEN}}";
                 enableQueue = true;
               };
             };
@@ -408,6 +447,25 @@
             };
           }
           {
+            "Sonarr4Kpg" = {
+              icon = "/images/sonarr4k.png";
+              href = "https://{{HOMEPAGE_VAR_SONARR4KPG_URL}}";
+              namespace = "sonarr4kpg";
+              app = "sonarr4kpg";
+              widget = {
+                type = "sonarr";
+                fields = [
+                  "wanted"
+                  "queued"
+                  "series"
+                ];
+                url = "https://{{HOMEPAGE_VAR_SONARR4KPG_URL}}";
+                key = "{{HOMEPAGE_VAR_SONARR4KPG_TOKEN}}";
+                enableQueue = true;
+              };
+            };
+          }
+          {
             "Radarr4K" = {
               icon = "/images/radarr4k.png";
               href = "https://{{HOMEPAGE_VAR_RADARR4K_URL}}";
@@ -423,6 +481,26 @@
                 ];
                 url = "https://{{HOMEPAGE_VAR_RADARR4K_URL}}";
                 key = "{{HOMEPAGE_VAR_RADARR4K_TOKEN}}";
+                enableQueue = true;
+              };
+            };
+          }
+          {
+            "Radarr4Kpg" = {
+              icon = "/images/radarr4k.png";
+              href = "https://{{HOMEPAGE_VAR_RADARR4KPG_URL}}";
+              namespace = "radarr4kpg";
+              app = "radarr4kpg";
+              widget = {
+                type = "radarr";
+                fields = [
+                  "wanted"
+                  "missing"
+                  "queued"
+                  "movies"
+                ];
+                url = "https://{{HOMEPAGE_VAR_RADARR4KPG_URL}}";
+                key = "{{HOMEPAGE_VAR_RADARR4KPG_TOKEN}}";
                 enableQueue = true;
               };
             };
