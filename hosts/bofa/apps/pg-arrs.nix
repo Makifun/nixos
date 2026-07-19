@@ -8,6 +8,10 @@ let
     "sonarr4k"
     "radarr"
     "radarr4k"
+    "sonarrpg"
+    "sonarr4kpg"
+    "radarrpg"
+    "radarr4kpg"
   ];
 
   setupScript = pkgs.writeShellScript "pg-setup-arrs" ''
