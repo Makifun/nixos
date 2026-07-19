@@ -254,8 +254,8 @@
             "Seerr" = {
               icon = "/images/seerr.png";
               href = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
-              server = "jonny";
-              container = "seerr";
+              namespace = "seerr";
+              app = "seerr";
               widget = {
                 type = "seerr";
                 fields = [
@@ -278,8 +278,8 @@
             "NZBget" = {
               icon = "/images/nzbget.png";
               href = "https://{{HOMEPAGE_VAR_NZBGET_URL}}";
-              server = "jonny";
-              container = "nzbget";
+              namespace = "nzbget";
+              app = "nzbget";
               widget = {
                 type = "nzbget";
                 url = "https://{{HOMEPAGE_VAR_NZBGET_URL}}";
@@ -292,8 +292,8 @@
             "qBittorrent" = {
               icon = "/images/qbittorrent.png";
               href = "https://{{HOMEPAGE_VAR_QUI_URL}}";
-              server = "jonny";
-              container = "qbittorrent";
+              namespace = "media";
+              app = "media";
               widget = {
                 type = "qbittorrent";
                 fields = [
@@ -311,8 +311,8 @@
             "autobrr" = {
               icon = "/images/autobrr.png";
               href = "https://{{HOMEPAGE_VAR_AUTOBRR_URL}}";
-              server = "jonny";
-              container = "autobrr";
+              namespace = "media";
+              app = "media";
               widget = {
                 type = "autobrr";
                 fields = [
@@ -335,8 +335,8 @@
             "Sonarr" = {
               icon = "/images/sonarr.png";
               href = "https://{{HOMEPAGE_VAR_SONARR_URL}}";
-              server = "jonny";
-              container = "sonarr";
+              namespace = "sonarr";
+              app = "sonarr";
               widget = {
                 type = "sonarr";
                 fields = [
@@ -354,8 +354,8 @@
             "Radarr" = {
               icon = "/images/radarr.png";
               href = "https://{{HOMEPAGE_VAR_RADARR_URL}}";
-              server = "jonny";
-              container = "radarr";
+              namespace = "radarr";
+              app = "radarr";
               widget = {
                 type = "radarr";
                 fields = [
@@ -374,8 +374,8 @@
             "Bazarr" = {
               icon = "/images/bazarr.png";
               href = "https://{{HOMEPAGE_VAR_BAZARR_URL}}";
-              server = "jonny";
-              container = "bazarr";
+              namespace = "bazarr";
+              app = "bazarr";
               widget = {
                 type = "bazarr";
                 url = "https://{{HOMEPAGE_VAR_BAZARR_URL}}";
@@ -392,8 +392,8 @@
             "Sonarr4K" = {
               icon = "/images/sonarr4k.png";
               href = "https://{{HOMEPAGE_VAR_SONARR4K_URL}}";
-              server = "jonny";
-              container = "sonarr4k";
+              namespace = "sonarr4k";
+              app = "sonarr4k";
               widget = {
                 type = "sonarr";
                 fields = [
@@ -411,8 +411,8 @@
             "Radarr4K" = {
               icon = "/images/radarr4k.png";
               href = "https://{{HOMEPAGE_VAR_RADARR4K_URL}}";
-              server = "jonny";
-              container = "radarr4k";
+              namespace = "radarr4k";
+              app = "radarr4k";
               widget = {
                 type = "radarr";
                 fields = [
@@ -431,8 +431,8 @@
             "Bazarr4K" = {
               icon = "/images/bazarr4k.png";
               href = "https://{{HOMEPAGE_VAR_BAZARR4K_URL}}";
-              server = "jonny";
-              container = "bazarr4k";
+              namespace = "bazarr4k";
+              app = "bazarr4k";
               widget = {
                 type = "bazarr";
                 url = "https://{{HOMEPAGE_VAR_BAZARR4K_URL}}";
@@ -519,8 +519,8 @@
             "Filebrowser" = {
               icon = "/images/filebrowser.png";
               href = "https://{{HOMEPAGE_VAR_FILEBROWSER_URL}}";
-              server = "jonny";
-              container = "filebrowser";
+              namespace = "filebrowser";
+              app = "filebrowser";
             };
           }
           {
@@ -555,8 +555,8 @@
             "Prowlarr" = {
               icon = "/images/prowlarr.png";
               href = "https://{{HOMEPAGE_VAR_PROWLARR_URL}}";
-              server = "jonny";
-              container = "prowlarr";
+              namespace = "media";
+              app = "media";
             };
           }
           {
@@ -840,8 +840,8 @@
             "Gluetun" = {
               icon = "/images/wireguard.png";
               href = "https://{{HOMEPAGE_VAR_GLUETUN_URL}}";
-              server = "jonny";
-              container = "vpn";
+              namespace = "media";
+              app = "media";
               widget = {
                 type = "gluetun";
                 fields = [
