@@ -19,6 +19,7 @@
     ./apps/beszel.nix
     ./apps/distribution.nix
     ./apps/forgejo.nix
+    ./apps/pgadmin.nix
     ./apps/gotify.nix
     ./apps/homepage.nix
     ./apps/loki.nix
