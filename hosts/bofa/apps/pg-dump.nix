@@ -3,6 +3,14 @@ let
   dumpDir = "/bofa/dumps";
   retentionDays = 30;
   tracearrPasswordFile = config.sops.secrets.timescaledb-tracearr-password.path;
+  arrsPasswordFile = config.sops.secrets.pg-arrs-password.path;
+
+  arrsApps = [
+    "sonarrpg"
+    "sonarr4kpg"
+    "radarrpg"
+    "radarr4kpg"
+  ];
 
   # All databases to dump: [ { db, user, passwordFile } ]
   databases = [
@@ -11,47 +19,19 @@ let
       user = "tracearr";
       passwordFile = tracearrPasswordFile;
     }
+  ]
+  ++ builtins.concatMap (app: [
     {
-      db = "sonarr-main";
-      user = "tracearr";
-      passwordFile = tracearrPasswordFile;
+      db = "${app}-main";
+      user = app;
+      passwordFile = arrsPasswordFile;
     }
     {
-      db = "sonarr-log";
-      user = "tracearr";
-      passwordFile = tracearrPasswordFile;
+      db = "${app}-log";
+      user = app;
+      passwordFile = arrsPasswordFile;
     }
-    {
-      db = "sonarr4k-main";
-      user = "tracearr";
-      passwordFile = tracearrPasswordFile;
-    }
-    {
-      db = "sonarr4k-log";
-      user = "tracearr";
-      passwordFile = tracearrPasswordFile;
-    }
-    {
-      db = "radarr-main";
-      user = "tracearr";
-      passwordFile = tracearrPasswordFile;
-    }
-    {
-      db = "radarr-log";
-      user = "tracearr";
-      passwordFile = tracearrPasswordFile;
-    }
-    {
-      db = "radarr4k-main";
-      user = "tracearr";
-      passwordFile = tracearrPasswordFile;
-    }
-    {
-      db = "radarr4k-log";
-      user = "tracearr";
-      passwordFile = tracearrPasswordFile;
-    }
-  ];
+  ]) arrsApps;
 
   dumpOneDb =
     {
