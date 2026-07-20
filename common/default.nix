@@ -35,7 +35,9 @@
       nh
       nmap
       python3
+      ripgrep
       screen
+      tree
       vim
     ];
   };
