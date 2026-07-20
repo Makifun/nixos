@@ -332,25 +332,6 @@
       {
         "DVR" = [
           {
-            "Sonarr" = {
-              icon = "/images/sonarr.png";
-              href = "https://{{HOMEPAGE_VAR_SONARR_URL}}";
-              namespace = "sonarr";
-              app = "sonarr";
-              widget = {
-                type = "sonarr";
-                fields = [
-                  "wanted"
-                  "queued"
-                  "series"
-                ];
-                url = "https://{{HOMEPAGE_VAR_SONARR_URL}}";
-                key = "{{HOMEPAGE_VAR_SONARR_TOKEN}}";
-                enableQueue = true;
-              };
-            };
-          }
-          {
             "Sonarrpg" = {
               icon = "/images/sonarr.png";
               href = "https://{{HOMEPAGE_VAR_SONARRPG_URL}}";
@@ -365,26 +346,6 @@
                 ];
                 url = "https://{{HOMEPAGE_VAR_SONARRPG_URL}}";
                 key = "{{HOMEPAGE_VAR_SONARRPG_TOKEN}}";
-                enableQueue = true;
-              };
-            };
-          }
-          {
-            "Radarr" = {
-              icon = "/images/radarr.png";
-              href = "https://{{HOMEPAGE_VAR_RADARR_URL}}";
-              namespace = "radarr";
-              app = "radarr";
-              widget = {
-                type = "radarr";
-                fields = [
-                  "wanted"
-                  "missing"
-                  "queued"
-                  "movies"
-                ];
-                url = "https://{{HOMEPAGE_VAR_RADARR_URL}}";
-                key = "{{HOMEPAGE_VAR_RADARR_TOKEN}}";
                 enableQueue = true;
               };
             };
@@ -428,25 +389,6 @@
       {
         "DVR4K" = [
           {
-            "Sonarr4K" = {
-              icon = "/images/sonarr4k.png";
-              href = "https://{{HOMEPAGE_VAR_SONARR4K_URL}}";
-              namespace = "sonarr4k";
-              app = "sonarr4k";
-              widget = {
-                type = "sonarr";
-                fields = [
-                  "wanted"
-                  "queued"
-                  "series"
-                ];
-                url = "https://{{HOMEPAGE_VAR_SONARR4K_URL}}";
-                key = "{{HOMEPAGE_VAR_SONARR4K_TOKEN}}";
-                enableQueue = true;
-              };
-            };
-          }
-          {
             "Sonarr4Kpg" = {
               icon = "/images/sonarr4k.png";
               href = "https://{{HOMEPAGE_VAR_SONARR4KPG_URL}}";
@@ -461,26 +403,6 @@
                 ];
                 url = "https://{{HOMEPAGE_VAR_SONARR4KPG_URL}}";
                 key = "{{HOMEPAGE_VAR_SONARR4KPG_TOKEN}}";
-                enableQueue = true;
-              };
-            };
-          }
-          {
-            "Radarr4K" = {
-              icon = "/images/radarr4k.png";
-              href = "https://{{HOMEPAGE_VAR_RADARR4K_URL}}";
-              namespace = "radarr4k";
-              app = "radarr4k";
-              widget = {
-                type = "radarr";
-                fields = [
-                  "wanted"
-                  "missing"
-                  "queued"
-                  "movies"
-                ];
-                url = "https://{{HOMEPAGE_VAR_RADARR4K_URL}}";
-                key = "{{HOMEPAGE_VAR_RADARR4K_TOKEN}}";
                 enableQueue = true;
               };
             };
