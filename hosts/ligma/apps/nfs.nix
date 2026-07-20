@@ -12,10 +12,15 @@
 
   services.nfs.server = {
     enable = true;
+    # async on slowmeme/nicememe: torrent/usenet data tolerates server-crash loss.
+    # sync on /ligma/sugma: k8s PVC data (app databases, configs).
     exports = ''
       /ligma/sugma 10.10.10.26(rw,sync,no_subtree_check,no_root_squash) 10.10.10.27(rw,sync,no_subtree_check,no_root_squash) 10.10.10.28(rw,sync,no_subtree_check,no_root_squash)
-      /slowmeme 10.10.10.26(rw,sync,no_subtree_check,no_root_squash) 10.10.10.27(rw,sync,no_subtree_check,no_root_squash) 10.10.10.28(rw,sync,no_subtree_check,no_root_squash)
-      /nicememe 10.10.10.26(rw,sync,no_subtree_check,no_root_squash) 10.10.10.27(rw,sync,no_subtree_check,no_root_squash) 10.10.10.28(rw,sync,no_subtree_check,no_root_squash)
+      /slowmeme 10.10.10.26(rw,async,no_subtree_check,no_root_squash) 10.10.10.27(rw,async,no_subtree_check,no_root_squash) 10.10.10.28(rw,async,no_subtree_check,no_root_squash)
+      /nicememe 10.10.10.26(rw,async,no_subtree_check,no_root_squash) 10.10.10.27(rw,async,no_subtree_check,no_root_squash) 10.10.10.28(rw,async,no_subtree_check,no_root_squash)
+    '';
+    extraNfsdConfig = ''
+      threads=32
     '';
   };
 }

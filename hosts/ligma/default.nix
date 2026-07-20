@@ -71,9 +71,11 @@
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.devNodes = "/dev/mapper";
   boot.zfs.forceImportRoot = false;
-  # Cap ARC to 512 MB. 1 GB caused constant arc_prune thrash (40% CPU).
-  boot.kernelParams = [ "zfs.zfs_arc_max=536870912" ];
+  # ARC tuning — ligma now has 16 GB RAM; 6 GB ARC leaves 10 GB for services.
+  # Previous 512 MB limit caused constant arc_prune thrash under NFS load.
+  boot.kernelParams = [ "zfs.zfs_arc_max=6442450944" ];
   boot.extraModprobeConfig = ''
+    options zfs zfs_arc_min=2147483648
     options zfs zfs_prefetch_disable=1
   '';
   boot.initrd.systemd.services."zfs-import-zroot" = {
