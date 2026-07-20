@@ -4,10 +4,6 @@ let
   arrsPasswordFile = config.sops.secrets.pg-arrs-password.path;
 
   apps = [
-    "sonarr"
-    "sonarr4k"
-    "radarr"
-    "radarr4k"
     "sonarrpg"
     "sonarr4kpg"
     "radarrpg"

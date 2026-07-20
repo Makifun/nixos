@@ -84,7 +84,7 @@ Three encrypted drives:
 
 Both new disks use XFS with `noatime,nofail`. LUKS passphrases entered via initrd SSH at boot (same as other disks). **New VM install:** disko formats on `nixos_install.sh`. **Existing VM adding these disks:** must manually partition + luksFormat + mkfs.xfs before `nh os switch` — see comments in `disko-config.nix`.
 
-All ZFS pools: ashift=12, autotrim=on, compression=lz4, atime=off, xattr=sa. ARC limited to 512 MB.
+All ZFS pools: ashift=12, autotrim=on, compression=lz4, atime=off, xattr=sa. ARC max=6 GB, min=2 GB (ligma has 16 GB RAM). Prefetch disabled (`zfs_prefetch_disable=1`).
 
 ### Disk Layout — bofa (`hosts/bofa/disko-config.nix`)
 
