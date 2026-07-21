@@ -9,7 +9,6 @@
     ./disko-config.nix
     ../../common
     ../../modules/podman.nix
-    ./dns-records.nix
     ./apps/backrest.nix
     ./apps/beszel.nix
     ./apps/rclone.nix

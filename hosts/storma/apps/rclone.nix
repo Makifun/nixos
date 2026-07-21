@@ -34,7 +34,7 @@ in
         + " --dir-cache-time 10000h"
         + " --jottacloud-hard-delete"
         + " --log-level INFO"
-        + " --metrics-addr 127.0.0.1:${toString metricsPort}"
+        + " --metrics-addr 0.0.0.0:${toString metricsPort}"
         + " --poll-interval 10000h"
         + " --rc-addr 0.0.0.0:${toString rclonePort}"
         + " --rc-no-auth"
@@ -61,5 +61,6 @@ in
   # Only ligma's Traefik proxies the rclone RC web UI.
   networking.firewall.extraInputRules = ''
     tcp dport ${toString rclonePort} ip saddr 10.10.10.13/32 accept comment "rclone RC from ligma"
+    tcp dport ${toString metricsPort} ip saddr 10.10.10.13/32 accept comment "rclone metrics from ligma"
   '';
 }
