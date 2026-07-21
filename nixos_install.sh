@@ -7,21 +7,24 @@ fi
 HOST="$1"
 FLAKE_NAME="$2"
 
+wait_port() {
+    local port="$1" desc="$2"
+    echo "Waiting for $desc on $HOST:$port..."
+    until nc -z -w 2 "$HOST" "$port" 2>/dev/null; do sleep 2; done
+    echo "$desc reachable."
+}
+
 echo "Pre-install: Refreshing sops keys for $FLAKE_NAME"
 ./sops_refresh_key.sh "$HOST" "$FLAKE_NAME" --no-push
 
 echo "Installing flake .#$FLAKE_NAME on $HOST"
 nix run github:nix-community/nixos-anywhere -- --flake .#$FLAKE_NAME --copy-host-keys $HOST
 
-echo "Waiting for VM to boot up (15s)"
-sleep 15
-
+wait_port 2222 "initrd SSH (LUKS unlock)"
 echo "Unlocking LUKS partitions"
 ssh -o ConnectTimeout=10 root@$HOST -p 2222
 
-echo "Waiting for NixOS to be ready (15s)"
-sleep 15
-
+wait_port 22 "NixOS SSH"
 echo "Post-install: Refreshing sops keys for $FLAKE_NAME"
 ./sops_refresh_key.sh "$HOST" "$FLAKE_NAME"
 
