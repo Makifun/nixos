@@ -20,6 +20,7 @@
     ./apps/distribution.nix
     ./apps/forgejo.nix
     ./apps/pgadmin.nix
+    ./apps/rclone-storma.nix
     ./apps/gotify.nix
     ./apps/homepage.nix
     ./apps/loki.nix

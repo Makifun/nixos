@@ -14,7 +14,6 @@
     ./apps/beszel.nix
     ./apps/rclone.nix
     ./apps/samba.nix
-    ./apps/traefik.nix
   ];
   environment.persistence."/persist" = {
     hideMounts = true;

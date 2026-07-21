@@ -4,7 +4,6 @@ let
   metricsPort = 6970;
 in
 {
-  # Allow smbd (and other non-root processes) to access the FUSE mount.
   programs.fuse.userAllowOther = true;
 
   systemd.tmpfiles.rules = [
@@ -37,7 +36,7 @@ in
         + " --log-level INFO"
         + " --metrics-addr 127.0.0.1:${toString metricsPort}"
         + " --poll-interval 10000h"
-        + " --rc-addr 127.0.0.1:${toString rclonePort}"
+        + " --rc-addr 0.0.0.0:${toString rclonePort}"
         + " --rc-no-auth"
         + " --rc-web-gui-no-open-browser"
         + " --rc-web-gui"
@@ -59,31 +58,8 @@ in
     };
   };
 
-  # ---------------------------------------------------------------------------
-  # Traefik — Authentik SSO gate
-  # ---------------------------------------------------------------------------
-  services.traefik.dynamicConfigOptions.http = {
-    routers = {
-      rclone-outpost = {
-        rule = "Host(`rclone-storma.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
-        priority = 30;
-        entryPoints = [ "websecure" ];
-        service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
-      };
-      rclone = {
-        rule = "Host(`rclone-storma.makifun.se`)";
-        priority = 1;
-        entryPoints = [ "websecure" ];
-        service = "rclone-svc";
-        middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
-      };
-    };
-    services."rclone-svc".loadBalancer.servers = [
-      { url = "http://127.0.0.1:${toString rclonePort}"; }
-    ];
-  };
-
-  storma.dnsRecords."rclone-storma.makifun.se".value = "10.10.10.12";
+  # Only ligma's Traefik proxies the rclone RC web UI.
+  networking.firewall.extraInputRules = ''
+    tcp dport ${toString rclonePort} ip saddr 10.10.10.13/32 accept comment "rclone RC from ligma"
+  '';
 }
