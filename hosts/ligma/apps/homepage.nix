@@ -326,6 +326,19 @@
               };
             };
           }
+          {
+            "Prowlarrpg" = {
+              icon = "/images/prowlarr.png";
+              href = "https://{{HOMEPAGE_VAR_PROWLARRPG_URL}}";
+              namespace = "media";
+              app = "media";
+              widget = {
+                type = "prowlarr";
+                url = "https://{{HOMEPAGE_VAR_PROWLARRPG_URL}}";
+                key = "{{HOMEPAGE_VAR_PROWLARRPG_TOKEN}}";
+              }
+            };
+          }
         ];
       }
 
@@ -559,14 +572,6 @@
               href = "https://{{HOMEPAGE_VAR_APPRISE_URL}}";
               server = "ligma";
               container = "apprise";
-            };
-          }
-          {
-            "Prowlarr" = {
-              icon = "/images/prowlarr.png";
-              href = "https://{{HOMEPAGE_VAR_PROWLARR_URL}}";
-              namespace = "media";
-              app = "media";
             };
           }
           {
