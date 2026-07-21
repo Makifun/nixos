@@ -42,7 +42,7 @@
       type = "lvm_vg";
       lvs = {
         nix = {
-          size = "25G";
+          size = "15G";
           content = {
             type = "filesystem";
             format = "xfs";
@@ -66,7 +66,7 @@
           };
         };
         storma = {
-          size = "10G";
+          size = "5G";
           content = {
             type = "filesystem";
             format = "xfs";

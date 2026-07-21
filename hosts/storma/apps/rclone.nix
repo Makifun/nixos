@@ -45,7 +45,7 @@ in
         + " --umask 0000"
         + " --use-mmap"
         + " --vfs-cache-max-age 438300h"
-        + " --vfs-cache-max-size 185G"
+        + " --vfs-cache-max-size 85G"
         + " --vfs-cache-min-free-space 10G"
         + " --vfs-cache-mode full"
         + " --vfs-read-chunk-size 128M"
