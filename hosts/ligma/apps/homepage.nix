@@ -551,19 +551,27 @@
             };
           }
           {
-            "Gotify" = {
-              icon = "/images/gotify.png";
-              href = "https://{{HOMEPAGE_VAR_GOTIFY_URL}}";
-              server = "ligma";
-              container = "gotify";
-            };
-          }
-          {
             "pgAdmin" = {
               icon = "/images/pgadmin.png";
               href = "https://{{HOMEPAGE_VAR_PGADMIN_URL}}";
               server = "ligma";
               container = "pgadmin";
+            };
+          }
+          {
+            "Profilarr" = {
+              icon = "/images/profilarr.png";
+              href = "https://{{HOMEPAGE_VAR_PROFILARR_URL}}";
+              namespace = "profilarr";
+              app = "profilarr";
+            };
+          }
+          {
+            "Gotify" = {
+              icon = "/images/gotify.png";
+              href = "https://{{HOMEPAGE_VAR_GOTIFY_URL}}";
+              server = "ligma";
+              container = "gotify";
             };
           }
           {
