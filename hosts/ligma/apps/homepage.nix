@@ -527,6 +527,8 @@
             "s3manager" = {
               icon = "/images/s3man.png";
               href = "https://{{HOMEPAGE_VAR_S3MANAGER_URL}}";
+              namespace = "s3manager";
+              app = "s3manager";
             };
           }
           {
