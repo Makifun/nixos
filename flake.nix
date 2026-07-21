@@ -37,6 +37,12 @@
             ./hosts/bofa
           ];
         };
+        storma = nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = defaultModules ++ [
+            ./hosts/storma
+          ];
+        };
         minimaliso = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [

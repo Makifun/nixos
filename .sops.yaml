@@ -1,4 +1,5 @@
 keys:
+  - &hosts_storma age1fapu88qsm40arl5ncx507z0k6yem2zyhc4af4vjsduvy3x97nseqvf423s
   - &hosts_bofa age165yts9pqqffgurw853f7jfslt2p3sav3jxmftqs4uv8hak8qdqlsfalnmc
   - &hosts_ligma age1xfz2m2x6qffpyl7kgcgvgfhuxkefcl9zf3d9ds0mrdu0r32ny3aqgcx6mh
   - &makifun age100c08p2hlc5vw258ug23wg4p5z7c99j4w30rayjyj5avtrfeegjqk9ylmk
@@ -12,4 +13,9 @@ creation_rules:
     key_groups:
       - age:
           - *hosts_bofa
+          - *makifun
+  - path_regex: ^hosts/storma/[^/]+\.(yaml|json|env|ini|conf)$
+    key_groups:
+      - age:
+          - *hosts_storma
           - *makifun
