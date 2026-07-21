@@ -12,6 +12,11 @@ let
     "radarr4kpg"
   ];
 
+  bazarrApps = [
+    "bazarr"
+    "bazarr4k"
+  ];
+
   # All databases to dump: [ { db, user, passwordFile } ]
   databases = [
     {
@@ -31,7 +36,12 @@ let
       user = app;
       passwordFile = arrsPasswordFile;
     }
-  ]) arrsApps;
+  ]) arrsApps
+  ++ map (app: {
+    db = app;
+    user = app;
+    passwordFile = arrsPasswordFile;
+  }) bazarrApps;
 
   dumpOneDb =
     {

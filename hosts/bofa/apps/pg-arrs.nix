@@ -3,11 +3,18 @@ let
   tracearrPasswordFile = config.sops.secrets.timescaledb-tracearr-password.path;
   arrsPasswordFile = config.sops.secrets.pg-arrs-password.path;
 
-  apps = [
+  # sonarr/radarr: two databases each (main + log) with full-text search extensions
+  arrsApps = [
     "sonarrpg"
     "sonarr4kpg"
     "radarrpg"
     "radarr4kpg"
+  ];
+
+  # bazarr: single database, no extensions needed
+  bazarrApps = [
+    "bazarr"
+    "bazarr4k"
   ];
 
   setupScript = pkgs.writeShellScript "pg-setup-arrs" ''
@@ -24,7 +31,7 @@ let
 
     ARRS_PASS=$(cat ${arrsPasswordFile})
 
-    setup_app() {
+    setup_arr_app() {
       local app=$1
 
       psql_exec -tc "SELECT 1 FROM pg_roles WHERE rolname='$app'" \
@@ -41,7 +48,21 @@ let
       done
     }
 
-    ${builtins.concatStringsSep "\n" (map (a: "setup_app ${a}") apps)}
+    setup_bazarr_app() {
+      local app=$1
+
+      psql_exec -tc "SELECT 1 FROM pg_roles WHERE rolname='$app'" \
+        | grep -q 1 \
+        || psql_exec -c "CREATE USER \"$app\" WITH PASSWORD '$ARRS_PASS'"
+      psql_exec -c "ALTER USER \"$app\" WITH PASSWORD '$ARRS_PASS'"
+
+      psql_exec -tc "SELECT 1 FROM pg_database WHERE datname='$app'" \
+        | grep -q 1 \
+        || psql_exec -c "CREATE DATABASE \"$app\" OWNER \"$app\""
+    }
+
+    ${builtins.concatStringsSep "\n" (map (a: "setup_arr_app ${a}") arrsApps)}
+    ${builtins.concatStringsSep "\n" (map (a: "setup_bazarr_app ${a}") bazarrApps)}
   '';
 in
 {
