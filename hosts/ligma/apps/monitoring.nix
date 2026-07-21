@@ -21,7 +21,16 @@
     scrapeConfigs = [
       {
         job_name = "rclone";
-        static_configs = [ { targets = [ "127.0.0.1:6970" ]; } ];
+        static_configs = [
+          {
+            targets = [ "127.0.0.1:6970" ];
+            labels.instance = "ligma";
+          }
+          {
+            targets = [ "10.10.10.12:6970" ];
+            labels.instance = "storma";
+          }
+        ];
       }
       {
         job_name = "prometheus";
