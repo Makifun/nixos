@@ -9,6 +9,7 @@ let
     "sonarr4kpg"
     "radarrpg"
     "radarr4kpg"
+    "prowlarrpg"
   ];
 
   # bazarr: single database, no extensions needed

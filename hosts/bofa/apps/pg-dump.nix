@@ -10,6 +10,7 @@ let
     "sonarr4kpg"
     "radarrpg"
     "radarr4kpg"
+    "prowlarrpg"
   ];
 
   bazarrApps = [
