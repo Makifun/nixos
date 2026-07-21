@@ -336,7 +336,7 @@
                 type = "prowlarr";
                 url = "https://{{HOMEPAGE_VAR_PROWLARRPG_URL}}";
                 key = "{{HOMEPAGE_VAR_PROWLARRPG_TOKEN}}";
-              }
+              };
             };
           }
         ];
