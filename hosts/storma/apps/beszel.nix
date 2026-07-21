@@ -1,6 +1,7 @@
 { config, ... }:
 let
   beszelBase = "/storma/storma/beszel";
+  beszelPort = "45876";
   # renovate: datasource=docker depName=henrygd/beszel
   beszelTag = "0.18.7";
 in
@@ -17,7 +18,7 @@ in
   virtualisation.oci-containers.containers.beszel-agent = {
     image = "henrygd/beszel-agent:${beszelTag}";
     environment = {
-      PORT = "45876";
+      PORT = beszelPort;
     };
     environmentFiles = [ config.sops.secrets.beszel_agent_key.path ];
     extraOptions = [ "--network=host" ];
@@ -43,6 +44,6 @@ in
   # Firewall
   # ---------------------------------------------------------------------------
   networking.firewall.extraInputRules = ''
-    tcp dport 45876 ip saddr 10.10.10.13/32 accept comment "Beszel agent"
+    tcp dport ${beszelPort} ip saddr 10.10.10.13/32 accept comment "Beszel agent"
   '';
 }

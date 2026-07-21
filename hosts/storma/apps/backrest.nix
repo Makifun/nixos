@@ -55,7 +55,6 @@ in
           repo = "storma-s3";
           paths = [
             "/storma/storma"
-            "/storma/dumps"
           ];
           schedule.cron = "0 5 * * *";
           retention.policyTimeBucketed = {
@@ -118,7 +117,6 @@ in
       "${backrestBase}/config:/config"
       "${backrestBase}/cache:/cache"
       "/storma/storma:/storma/storma:ro"
-      "/storma/dumps:/storma/dumps:ro"
       "/storma/restore:/storma/restore"
     ];
   };
