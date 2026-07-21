@@ -516,6 +516,12 @@
             };
           }
           {
+            "Vaultwarden" = {
+              icon = "/images/vaultwarden.png";
+              href = "https://{{HOMEPAGE_VAR_VAULTWARDEN_URL}}";
+            };
+          }
+          {
             "Filebrowser" = {
               icon = "/images/filebrowser.png";
               href = "https://{{HOMEPAGE_VAR_FILEBROWSER_URL}}";
@@ -532,17 +538,19 @@
             };
           }
           {
-            "Vaultwarden" = {
-              icon = "/images/vaultwarden.png";
-              href = "https://{{HOMEPAGE_VAR_VAULTWARDEN_URL}}";
-            };
-          }
-          {
             "Gotify" = {
               icon = "/images/gotify.png";
               href = "https://{{HOMEPAGE_VAR_GOTIFY_URL}}";
               server = "ligma";
               container = "gotify";
+            };
+          }
+          {
+            "pgAdmin" = {
+              icon = "/images/pgadmin.png";
+              href = "https://{{HOMEPAGE_VAR_PGADMIN_URL}}";
+              server = "ligma";
+              container = "pgadmin";
             };
           }
           {
