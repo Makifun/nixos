@@ -16,7 +16,7 @@ let
   bazarrApps = [
     "bazarr"
     "bazarr4k"
-    "seernew"
+    "seerr"
   ];
 
   setupScript = pkgs.writeShellScript "pg-setup-arrs" ''
