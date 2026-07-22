@@ -20,12 +20,14 @@ The `--refresh` flag pulls the latest flake from GitHub before building. Alterna
 sudo nixos-rebuild switch --flake .#ligma
 ```
 
-**Check flake without building:**
+**Pre-commit sequence (mandatory for every Nix change):**
 ```bash
-nix flake check
+nixfmt <changed-file>.nix   # 1. format
+nix flake check              # 2. validate all nixosConfigurations
+git commit                   # 3. only then commit
 ```
 
-**Format Nix files** (run after every Nix code change):
+**Format Nix files:**
 ```bash
 nixfmt <file.nix>
 # or format entire tree:
