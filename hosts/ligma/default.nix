@@ -28,9 +28,9 @@
     ./apps/opnsense-exporter.nix
     ./apps/nfs.nix
     ./apps/omni.nix
-    ./apps/rclone.nix
+    #./apps/rclone.nix
     ./apps/renovate.nix
-    ./apps/samba.nix
+    #./apps/samba.nix
     ./apps/technitium.nix
     ./apps/traefik.nix
     ./apps/unifi.nix
