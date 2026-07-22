@@ -21,7 +21,36 @@
   "title": "rclone",
   "uid": "rclone-transfers",
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "storma",
+          "value": "http://10.10.10.12:6969"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Instance",
+        "multi": false,
+        "name": "instance",
+        "options": [
+          {
+            "selected": false,
+            "text": "ligma",
+            "value": "http://127.0.0.1:6969"
+          },
+          {
+            "selected": true,
+            "text": "storma",
+            "value": "http://10.10.10.12:6969"
+          }
+        ],
+        "query": "ligma : http://127.0.0.1:6969,storma : http://10.10.10.12:6969",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
   },
   "panels": [
     {
@@ -80,7 +109,7 @@
           "refId": "A",
           "type": "json",
           "source": "url",
-          "url": "http://127.0.0.1:6969/core/stats",
+          "url": "${instance}/core/stats",
           "url_options": {
             "method": "POST",
             "data": ""
@@ -155,7 +184,7 @@
           "refId": "A",
           "type": "json",
           "source": "url",
-          "url": "http://127.0.0.1:6969/core/stats",
+          "url": "${instance}/core/stats",
           "url_options": {
             "method": "POST",
             "data": ""
@@ -235,7 +264,7 @@
           "refId": "A",
           "type": "json",
           "source": "url",
-          "url": "http://127.0.0.1:6969/core/stats",
+          "url": "${instance}/core/stats",
           "url_options": {
             "method": "POST",
             "data": ""
@@ -315,7 +344,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "time() - process_start_time_seconds{job=\"rclone\"}",
+          "expr": "time() - process_start_time_seconds{job=\"rclone\", instance=~\"${instance:text}\"}",
           "instant": true,
           "legendFormat": "Uptime",
           "refId": "A"
@@ -385,7 +414,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rclone_checked_files_total{job=\"rclone\"}",
+          "expr": "rclone_checked_files_total{job=\"rclone\", instance=~\"${instance:text}\"}",
           "legendFormat": "Checked files",
           "refId": "A"
         },
@@ -394,7 +423,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rclone_files_transferred_total{job=\"rclone\"}",
+          "expr": "rclone_files_transferred_total{job=\"rclone\", instance=~\"${instance:text}\"}",
           "legendFormat": "Transferred files",
           "refId": "B"
         },
@@ -403,7 +432,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rclone_files_renamed_total{job=\"rclone\"}",
+          "expr": "rclone_files_renamed_total{job=\"rclone\", instance=~\"${instance:text}\"}",
           "legendFormat": "Renamed files",
           "refId": "C"
         },
@@ -412,7 +441,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rclone_files_deleted_total{job=\"rclone\"}",
+          "expr": "rclone_files_deleted_total{job=\"rclone\", instance=~\"${instance:text}\"}",
           "legendFormat": "Deleted files",
           "refId": "D"
         },
@@ -421,7 +450,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rclone_dirs_deleted_total{job=\"rclone\"}",
+          "expr": "rclone_dirs_deleted_total{job=\"rclone\", instance=~\"${instance:text}\"}",
           "legendFormat": "Deleted directories",
           "refId": "E"
         },
@@ -430,7 +459,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rclone_errors_total{job=\"rclone\"}",
+          "expr": "rclone_errors_total{job=\"rclone\", instance=~\"${instance:text}\"}",
           "legendFormat": "Transfer errors",
           "refId": "F"
         }
@@ -496,7 +525,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "promhttp_metric_handler_requests_total{job=\"rclone\"}",
+          "expr": "promhttp_metric_handler_requests_total{job=\"rclone\", instance=~\"${instance:text}\"}",
           "legendFormat": "{{code}}",
           "refId": "A"
         }
@@ -663,7 +692,7 @@
           "refId": "A",
           "type": "json",
           "source": "url",
-          "url": "http://127.0.0.1:6969/core/stats",
+          "url": "${instance}/core/stats",
           "url_options": {
             "method": "POST",
             "data": ""
@@ -750,7 +779,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(rclone_bytes_transferred_total{job=\"rclone\"}[$__rate_interval])",
+          "expr": "rate(rclone_bytes_transferred_total{job=\"rclone\", instance=~\"${instance:text}\"}[$__rate_interval])",
           "legendFormat": "Transfer rate",
           "refId": "A"
         }
@@ -825,7 +854,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "process_open_fds{job=\"rclone\"}",
+          "expr": "process_open_fds{job=\"rclone\", instance=~\"${instance:text}\"}",
           "legendFormat": "Open file descriptors",
           "refId": "A"
         },
@@ -834,7 +863,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "process_max_fds{job=\"rclone\"}",
+          "expr": "process_max_fds{job=\"rclone\", instance=~\"${instance:text}\"}",
           "legendFormat": "Max open file descriptors",
           "refId": "B"
         }
@@ -883,7 +912,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "increase(rclone_files_transferred_total{job=\"rclone\"}[$__rate_interval])",
+          "expr": "increase(rclone_files_transferred_total{job=\"rclone\", instance=~\"${instance:text}\"}[$__rate_interval])",
           "legendFormat": "Files transferred",
           "refId": "A"
         },
@@ -892,7 +921,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "increase(rclone_files_deleted_on_destination_total{job=\"rclone\"}[$__rate_interval])",
+          "expr": "increase(rclone_files_deleted_on_destination_total{job=\"rclone\", instance=~\"${instance:text}\"}[$__rate_interval])",
           "legendFormat": "Files deleted (dst)",
           "refId": "B"
         }
@@ -932,7 +961,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "{job=\"ligma-syslog\", unit=\"rclone-cloud.service\"}",
+          "expr": "{job=\"${instance:text}-syslog\", unit=\"rclone-cloud.service\"}",
           "legendFormat": "",
           "refId": "A"
         }
