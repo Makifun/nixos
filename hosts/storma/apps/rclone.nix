@@ -33,7 +33,7 @@ in
     script = ''
       dest=/storma/storma/rclone/rclone.conf
       if [ ! -f "$dest" ]; then
-        install -m 0600 ${"\${config.sops.secrets.rclone-config-stage.path}"} "$dest"
+        install -m 0600 ${config.sops.secrets.rclone-config-stage.path} "$dest"
       fi
     '';
   };
