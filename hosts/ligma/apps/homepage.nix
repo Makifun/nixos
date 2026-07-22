@@ -254,8 +254,8 @@
             "Seerr" = {
               icon = "/images/seerr.png";
               href = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
-              namespace = "seerrnew";
-              app = "seerrnew";
+              namespace = "seerr";
+              app = "seerr";
               widget = {
                 type = "seerr";
                 fields = [
