@@ -17,6 +17,14 @@
             size = "1M";
             type = "EF02";
           };
+          boot = {
+            size = "1G";
+            content = {
+              type = "filesystem";
+              format = "ext4";
+              mountpoint = "/boot";
+            };
+          };
           luks = {
             size = "100%";
             content = {

@@ -6,13 +6,16 @@
 }:
 {
   # Physical machine — Legacy BIOS only, no UEFI firmware support.
-  # Override common/boot.nix which enables systemd-boot (EFI-only).
+  # Override common/boot.nix (systemd-boot = EFI-only).
+  # copyKernels: kernels copied to /boot (unencrypted) so GRUB can read
+  # them without needing to unlock LUKS itself — initrd SSH handles unlock.
   boot.loader = {
     systemd-boot.enable = lib.mkForce false;
     efi.canTouchEfiVariables = lib.mkForce false;
     grub = {
-      enable = true;
-      device = "/dev/disk/by-id/ata-ADATA_SP550_1F3520274890";
+      enable = lib.mkForce true;
+      efiSupport = false;
+      copyKernels = true;
     };
   };
   imports = [
