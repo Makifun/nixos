@@ -94,14 +94,14 @@ in
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       rclone-outpost = {
-        rule = "Host(`rclone.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`rclone-ligma.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
       rclone = {
-        rule = "Host(`rclone.makifun.se`)";
+        rule = "Host(`rclone-ligma.makifun.se`)";
         priority = 1;
         entryPoints = [ "websecure" ];
         service = "rclone-svc";
@@ -114,5 +114,5 @@ in
     ];
   };
 
-  ligma.dnsRecords."rclone.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."rclone-ligma.makifun.se".value = "10.10.10.13";
 }

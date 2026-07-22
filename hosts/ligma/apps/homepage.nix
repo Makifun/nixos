@@ -601,9 +601,15 @@
             };
           }
           {
-            "Rclone" = {
+            "Rclone Ligma" = {
               icon = "/images/rclone.png";
-              href = "https://{{HOMEPAGE_VAR_RCLONE_URL}}";
+              href = "https://{{HOMEPAGE_VAR_RCLONELIGMA_URL}}";
+            };
+          }
+          {
+            "Rclone Storma" = {
+              icon = "/images/rclone.png";
+              href = "https://{{HOMEPAGE_VAR_RCLONESTORMA_URL}}";
             };
           }
         ];
