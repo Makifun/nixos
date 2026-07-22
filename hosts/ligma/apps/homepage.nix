@@ -251,11 +251,30 @@
             };
           }
           {
-            "Seerr" = {
+            "SeerrOld" = {
               icon = "/images/seerr.png";
-              href = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
+              href = "https://{{HOMEPAGE_VAR_SEERROLD_URL}}";
               namespace = "seerr";
               app = "seerr";
+              widget = {
+                type = "seerr";
+                fields = [
+                  "pending"
+                  "approved"
+                  "available"
+                  "processing"
+                ];
+                url = "https://{{HOMEPAGE_VAR_SEERROLD_URL}}";
+                key = "{{HOMEPAGE_VAR_SEERROLD_TOKEN}}";
+              };
+            };
+          }
+          {
+            "Seerrnew" = {
+              icon = "/images/seerr.png";
+              href = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
+              namespace = "seerrnew";
+              app = "seerrnew";
               widget = {
                 type = "seerr";
                 fields = [
