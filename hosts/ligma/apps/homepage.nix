@@ -820,6 +820,26 @@
             };
           }
           {
+            "Beszel Storma" = {
+              icon = "/images/beszel.svg";
+              href = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+              widget = {
+                type = "beszel";
+                fields = [
+                  "cpu"
+                  "memory"
+                  "disk"
+                  "network"
+                ];
+                url = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+                username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
+                password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
+                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_STORMA}}";
+                version = 2;
+              };
+            };
+          }
+          {
             "Grafana" = {
               icon = "/images/grafana.png";
               href = "https://{{HOMEPAGE_VAR_GRAFANA_URL}}";
