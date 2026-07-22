@@ -14,6 +14,33 @@ in
     "d /ligma/ligma/rclone 0700 root root - -"
   ];
 
+  sops.secrets.rclone-config-stage = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+
+  sops.secrets.rclone-config-prod = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+
+  systemd.services.rclone-config-init = {
+    description = "Bootstrap rclone.conf from sops secret (stage) if missing";
+    before = [ "rclone-cloud.service" ];
+    requiredBy = [ "rclone-cloud.service" ];
+    after = [ "sops-nix.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      dest=/ligma/ligma/rclone/rclone.conf
+      if [ ! -f "$dest" ]; then
+        install -m 0600 ${config.sops.secrets.rclone-config-stage.path} "$dest"
+      fi
+    '';
+  };
+
   systemd.services.rclone-cloud = {
     description = "rclone S3 FUSE mount at /cloud";
     after = [
