@@ -5,19 +5,10 @@
   ...
 }:
 {
-  # Physical machine — Legacy BIOS only, no UEFI firmware support.
-  # Override common/boot.nix (systemd-boot = EFI-only).
-  # copyKernels: kernels copied to /boot (unencrypted) so GRUB can read
-  # them without needing to unlock LUKS itself — initrd SSH handles unlock.
-  boot.loader = {
-    systemd-boot.enable = lib.mkForce false;
-    efi.canTouchEfiVariables = lib.mkForce false;
-    grub = {
-      enable = lib.mkForce true;
-      efiSupport = false;
-      copyKernels = true;
-    };
-  };
+  # ASUS K56CB doesn't register EFI NVRAM entries reliably.
+  # bootctl always installs to \EFI\BOOT\BOOTX64.EFI regardless; disabling
+  # canTouchEfiVariables just skips the NVRAM write that would fail silently.
+  boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
   imports = [
     ./disko-config.nix
     ../../common
