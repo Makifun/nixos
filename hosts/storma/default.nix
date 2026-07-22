@@ -5,6 +5,16 @@
   ...
 }:
 {
+  # Physical machine — Legacy BIOS only, no UEFI firmware support.
+  # Override common/boot.nix which enables systemd-boot (EFI-only).
+  boot.loader = {
+    systemd-boot.enable = lib.mkForce false;
+    efi.canTouchEfiVariables = lib.mkForce false;
+    grub = {
+      enable = true;
+      device = "/dev/disk/by-id/ata-ADATA_SP550_1F3520274890";
+    };
+  };
   imports = [
     ./disko-config.nix
     ../../common

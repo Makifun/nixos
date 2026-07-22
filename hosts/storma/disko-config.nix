@@ -13,15 +13,9 @@
       content = {
         type = "gpt";
         partitions = {
-          ESP = {
-            size = "1G";
-            type = "EF00";
-            content = {
-              type = "filesystem";
-              format = "vfat";
-              mountpoint = "/boot";
-              mountOptions = [ "umask=0077" ];
-            };
+          bios = {
+            size = "1M";
+            type = "EF02";
           };
           luks = {
             size = "100%";
