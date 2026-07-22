@@ -9,6 +9,9 @@
   # bootctl always installs to \EFI\BOOT\BOOTX64.EFI regardless; disabling
   # canTouchEfiVariables just skips the NVRAM write that would fail silently.
   boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
+
+  # Realtek RTL8111/8168 NIC — must be in initrd for LUKS unlock SSH on :2222.
+  boot.initrd.kernelModules = [ "r8169" ];
   imports = [
     ./disko-config.nix
     ../../common
