@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 let
   rclonePort = 6969;
   metricsPort = 6970;
