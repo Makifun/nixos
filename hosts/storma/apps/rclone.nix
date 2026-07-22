@@ -11,6 +11,16 @@ in
     "d /storma/storma/rclone 0700 root root - -"
   ];
 
+  sops.secrets.rclone-config-stage = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+
+  sops.secrets.rclone-config-prod = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+
   systemd.services.rclone-cloud = {
     description = "rclone S3 FUSE mount at /cloud";
     after = [
