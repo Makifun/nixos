@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 let
   rclonePort = 6969;
   metricsPort = 6970;
@@ -19,6 +19,23 @@ in
   sops.secrets.rclone-config-prod = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
+  };
+
+  systemd.services.rclone-config-init = {
+    description = "Bootstrap rclone.conf from sops secret (stage) if missing";
+    before = [ "rclone-cloud.service" ];
+    requiredBy = [ "rclone-cloud.service" ];
+    after = [ "sops-nix.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      dest=/storma/storma/rclone/rclone.conf
+      if [ ! -f "$dest" ]; then
+        install -m 0600 ${"\${config.sops.secrets.rclone-config-stage.path}"} "$dest"
+      fi
+    '';
   };
 
   systemd.services.rclone-cloud = {
