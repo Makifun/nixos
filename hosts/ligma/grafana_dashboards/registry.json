@@ -1261,7 +1261,7 @@
     },
     {
       "type": "logs",
-      "title": "Registry Pull Logs (dist-* containers)",
+      "title": "Registry Pull Logs (client IP + image)",
       "datasource": {
         "type": "loki",
         "uid": "loki"
@@ -1284,7 +1284,7 @@
       },
       "targets": [
         {
-          "expr": "{job=~\"ligma-podman-dist-.+\"} | regexp `\"(?:GET|HEAD) /v2/(?P<image>[^/]+/[^/]+)/(?P<otype>blobs|manifests)/(?P<ref>[^ ]+) HTTP/[0-9.]+\" (?P<status>[0-9]+)` | otype != \"\" | line_format `{{.image}}  [{{.otype}}]  status={{.status}}  ref={{.ref | substr 0 20}}`",
+          "expr": "{job=\"ligma-syslog\", unit=\"traefik.service\"} | json | RouterName =~ \"dist-.+\" | RequestMethod =~ \"GET|HEAD\" | line_format `{{.ClientHost}}  {{.RouterName}}  {{.RequestPath | substr 0 80}}  status={{.DownstreamStatus}}`",
           "refId": "A"
         }
       ]

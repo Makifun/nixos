@@ -21,6 +21,7 @@
   services.traefik.staticConfigOptions = {
     global.sendAnonymousUsage = false;
     log.level = "INFO";
+    accessLog.format = "json";
 
     # Dashboard accessible on port 8090 (firewalled, internal only).
     # Port 8080 is reserved for the UniFi device inform endpoint.
