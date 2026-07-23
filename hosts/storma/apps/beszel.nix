@@ -7,9 +7,11 @@ let
 in
 {
   systemd.tmpfiles.rules = [
-    "d '${beszelBase}/data'         0755 root root - -"
-    "d '/storma/.beszelstorma'          0755 root root - -"
-    "d '/persist/.beszelpersist'    0755 root root - -"
+    "d '${beszelBase}/data'               0755 root root - -"
+    "d '/nix/.beszelnixos'                0755 root root - -"
+    "d '/storma/.beszelstorma'            0755 root root - -"
+    "d '/persist/.beszelpersist'          0755 root root - -"
+    "d '/rclone-cache/.beszelrclone'      0755 root root - -"
   ];
 
   # ---------------------------------------------------------------------------
@@ -25,8 +27,10 @@ in
     # Mount the Podman socket so Beszel can report container stats.
     volumes = [
       "/run/podman/podman.sock:/var/run/docker.sock:ro"
-      "/storma/.beszelstorma:/extra-filesystems/storma:ro"
-      "/persist/.beszelpersist:/extra-filesystems/persist:ro"
+      "/nix/.beszelnixos:/extra-filesystems/nixos__nix:ro"
+      "/storma/.beszelstorma:/extra-filesystems/storma__storma:ro"
+      "/persist/.beszelpersist:/extra-filesystems/persist__persist:ro"
+      "/rclone-cache/.beszelrclone:/extra-filesystems/rclone-cache__rclone-cache:ro"
     ];
   };
 
