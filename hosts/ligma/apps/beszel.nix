@@ -8,12 +8,13 @@ in
 {
   systemd.tmpfiles.rules = [
     "d '${beszelBase}/data'           0755 root root - -"
+    "d '/.beszelroot'                 0755 root root - -"
     "d '/nix/.beszelnixos'            0755 root root - -"
     "d '/ligma/.beszelligma'          0755 root root - -"
     "d '/persist/.beszelpersist'      0755 root root - -"
     "d '/rclone-cache/.beszelrclone'  0755 root root - -"
     "d '/nicememe/.beszelnicememe'    0755 root root - -"
-    "d '/slowmeme/.beszelslowmeme'     0755 root root - -"
+    "d '/slowmeme/.beszelslowmeme'    0755 root root - -"
   ];
 
   # ---------------------------------------------------------------------------
@@ -51,12 +52,14 @@ in
     image = "henrygd/beszel-agent:${beszelTag}";
     environment = {
       PORT = "45876";
+      FILESYSTEM = "/extra-filesystems/root__root";
     };
     environmentFiles = [ config.sops.secrets.beszel_agent_key.path ];
     extraOptions = [ "--network=host" ];
     # Mount the Podman socket so Beszel can report container stats.
     volumes = [
       "/run/podman/podman.sock:/var/run/docker.sock:ro"
+      "/.beszelroot:/extra-filesystems/root__root:ro"
       "/nix/.beszelnixos:/extra-filesystems/nixos__nix:ro"
       "/ligma/.beszelligma:/extra-filesystems/ligma__ligma:ro"
       "/persist/.beszelpersist:/extra-filesystems/persist__persist:ro"
