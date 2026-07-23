@@ -25,7 +25,7 @@ in
         token_value: $(tr -d '\n' < ${config.sops.secrets.proxmox-pve-token-value.path})
         verify_ssl: true
       EOF
-      chmod 400 /run/pve-exporter.yml
+      chmod 444 /run/pve-exporter.yml
     '';
   };
 
