@@ -33,7 +33,7 @@ let
     upstream:
     builtins.toJSON {
       version = "0.1";
-      log.level = "warn";
+      log.level = "info";
       storage = {
         filesystem.rootdirectory = "/var/lib/registry";
         delete.enabled = true;

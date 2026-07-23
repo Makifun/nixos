@@ -218,7 +218,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "registry_storage_cache_total{instance=\"$instance\",type=\"Request\"}",
+          "expr": "registry_storage_cache_requests_total{instance=\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ type }}",
@@ -300,7 +300,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "registry_storage_cache_total{instance=\"$instance\",type=\"Hit\"}",
+          "expr": "registry_storage_cache_hits_total{instance=\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ type }}",
@@ -382,7 +382,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "registry_storage_cache_total{instance=\"$instance\",type=\"Miss\"}",
+          "expr": "registry_storage_cache_requests_total{instance=\"$instance\"} - registry_storage_cache_hits_total{instance=\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ type }}",
@@ -975,7 +975,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "ceil(rate(registry_storage_cache_total{instance=\"$instance\"}[5m]))",
+          "expr": "ceil(rate(registry_storage_cache_requests_total{instance=\"$instance\"}[5m]))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ type }}",
@@ -1246,65 +1246,6 @@
       "gridPos": {
         "h": 7,
         "w": 8,
-        "x": 0,
-        "y": 27
-      },
-      "heatmap": {},
-      "highlightCards": true,
-      "id": 2,
-      "legend": {
-        "show": false
-      },
-      "links": [],
-      "targets": [
-        {
-          "expr": "rate(registry_http_request_duration_seconds_bucket{handler=\"blob_upload\"}[10m])",
-          "format": "heatmap",
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "title": "Upload HTTP Request Latencies in seconds (blob_upload)",
-      "tooltip": {
-        "show": true,
-        "showHistogram": false
-      },
-      "type": "heatmap",
-      "xAxis": {
-        "show": true
-      },
-      "xBucketNumber": null,
-      "xBucketSize": null,
-      "yAxis": {
-        "decimals": null,
-        "format": "short",
-        "logBase": 1,
-        "max": null,
-        "min": "0",
-        "show": true,
-        "splitFactor": null
-      },
-      "yBucketBound": "auto",
-      "yBucketNumber": null,
-      "yBucketSize": null
-    },
-    {
-      "cards": {
-        "cardPadding": null,
-        "cardRound": null
-      },
-      "color": {
-        "cardColor": "#b4ff00",
-        "colorScale": "sqrt",
-        "colorScheme": "interpolateOranges",
-        "exponent": 0.5,
-        "mode": "spectrum"
-      },
-      "dataFormat": "timeseries",
-      "datasource": "prometheus",
-      "gridPos": {
-        "h": 7,
-        "w": 8,
         "x": 8,
         "y": 27
       },
@@ -1348,63 +1289,89 @@
       "yBucketSize": null
     },
     {
-      "cards": {
-        "cardPadding": null,
-        "cardRound": null
+      "type": "timeseries",
+      "title": "Proxy Cache Hit / Miss Rate",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
       },
-      "color": {
-        "cardColor": "#b4ff00",
-        "colorScale": "sqrt",
-        "colorScheme": "interpolateOranges",
-        "exponent": 0.5,
-        "mode": "spectrum"
-      },
-      "dataFormat": "timeseries",
-      "datasource": "prometheus",
       "gridPos": {
-        "h": 7,
-        "w": 8,
-        "x": 16,
-        "y": 27
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
       },
-      "heatmap": {},
-      "highlightCards": true,
-      "id": 40,
-      "legend": {
-        "show": false
-      },
-      "links": [],
+      "id": 200,
       "targets": [
         {
-          "expr": "rate(registry_http_request_duration_seconds_bucket{handler=\"catalog\"}[10m])",
-          "format": "heatmap",
-          "intervalFactor": 1,
+          "expr": "rate(registry_proxy_hits_total{instance=\"$instance\"}[5m])",
+          "legendFormat": "hits",
           "refId": "A"
+        },
+        {
+          "expr": "rate(registry_proxy_misses_total{instance=\"$instance\"}[5m])",
+          "legendFormat": "misses",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(registry_proxy_pulled_bytes_total{instance=\"$instance\"}[5m])",
+          "legendFormat": "bytes pulled from upstream",
+          "refId": "C"
         }
       ],
-      "title": "Catalog HTTP Request Latencies in seconds (catalog)",
-      "tooltip": {
-        "show": true,
-        "showHistogram": false
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bytes pulled from upstream"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "Bps"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "logs",
+      "title": "Registry Pull Logs (dist-* containers)",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
       },
-      "type": "heatmap",
-      "xAxis": {
-        "show": true
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 50
       },
-      "xBucketNumber": null,
-      "xBucketSize": null,
-      "yAxis": {
-        "decimals": null,
-        "format": "short",
-        "logBase": 1,
-        "max": null,
-        "min": "0",
-        "show": true,
-        "splitFactor": null
+      "id": 201,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
       },
-      "yBucketBound": "auto",
-      "yBucketNumber": null,
-      "yBucketSize": null
+      "targets": [
+        {
+          "expr": "{job=~\"ligma-podman-dist-.+\"} |~ \"(?i)(GET|HEAD) /v2/.*(blobs|manifests)\"",
+          "refId": "A"
+        }
+      ]
     }
   ],
   "refresh": "10s",
