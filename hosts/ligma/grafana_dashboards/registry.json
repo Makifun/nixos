@@ -218,7 +218,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "registry_storage_cache_requests_total{instance=\"$instance\"}",
+          "expr": "registry_proxy_requests_total{instance=\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ type }}",
@@ -226,8 +226,8 @@
         }
       ],
       "thresholds": "",
-      "title": "Total Cache Requests",
-      "type": "singlestat",
+      "title": "Total Proxy Requests",
+      "type": "stat",
       "valueFontSize": "150%",
       "valueMaps": [
         {
@@ -236,7 +236,38 @@
           "value": "null"
         }
       ],
-      "valueName": "max"
+      "valueName": "current",
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
     },
     {
       "cacheTimeout": null,
@@ -300,7 +331,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "registry_storage_cache_hits_total{instance=\"$instance\"}",
+          "expr": "registry_proxy_hits_total{instance=\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ type }}",
@@ -308,8 +339,8 @@
         }
       ],
       "thresholds": "",
-      "title": "Total Hit Cache Requests",
-      "type": "singlestat",
+      "title": "Total Cache Hits",
+      "type": "stat",
       "valueFontSize": "150%",
       "valueMaps": [
         {
@@ -318,7 +349,38 @@
           "value": "null"
         }
       ],
-      "valueName": "max"
+      "valueName": "current",
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
     },
     {
       "cacheTimeout": null,
@@ -382,7 +444,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "registry_storage_cache_requests_total{instance=\"$instance\"} - registry_storage_cache_hits_total{instance=\"$instance\"}",
+          "expr": "registry_proxy_misses_total{instance=\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ type }}",
@@ -390,8 +452,8 @@
         }
       ],
       "thresholds": "",
-      "title": "Total Missed Cache Requests",
-      "type": "singlestat",
+      "title": "Total Cache Misses",
+      "type": "stat",
       "valueFontSize": "150%",
       "valueMaps": [
         {
@@ -400,7 +462,38 @@
           "value": "null"
         }
       ],
-      "valueName": "max"
+      "valueName": "current",
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
     },
     {
       "cacheTimeout": null,
@@ -975,7 +1068,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "ceil(rate(registry_storage_cache_requests_total{instance=\"$instance\"}[5m]))",
+          "expr": "ceil(rate(registry_proxy_requests_total{instance=\"$instance\"}[5m]))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ type }}",
