@@ -22,7 +22,7 @@
   # Podman falls back to the upstream registry if the mirror is unreachable.
   # External hosts (e.g. jonny) use <name>.mirror.makifun.se instead.
   # ---------------------------------------------------------------------------
-  environment.etc."containers/registries.conf.d/distribution-mirrors.conf".text = lib.mkForce ''
+  environment.etc."containers/registries.conf.d/distribution-mirrors.conf".text = ''
     [[registry]]
     prefix   = "docker.io"
     location = "docker.io"
