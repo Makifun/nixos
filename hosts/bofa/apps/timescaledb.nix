@@ -36,8 +36,7 @@ in
       "--shm-size=512m"
       "--stop-timeout=60"
     ];
-    # Match settings from the tracearr Helm chart (tuned for 4 GB limit, SSD).
-    # bofa has 8 GB RAM so shared_buffers is bumped to 2 GB.
+    # Tuned for 8 GB RAM (balloon: 5 GB min / 8 GB max), SSD. shared_buffers=25% of max.
     cmd = [
       "-c"
       "timescaledb.license=timescale"
