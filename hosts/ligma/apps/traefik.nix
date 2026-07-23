@@ -66,12 +66,6 @@
       keyType = "EC384";
       dnsChallenge = {
         provider = "cloudflare";
-        # Use public resolvers — local Technitium is authoritative for
-        # makifun.se internally but doesn't have the ACME challenge TXT.
-        resolvers = [
-          "1.1.1.1:53"
-          "8.8.8.8:53"
-        ];
         propagation = {
           delayBeforeChecks = "30s";
         };
