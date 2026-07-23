@@ -106,7 +106,7 @@
         params = {
           module = [ "default" ];
         };
-        static_configs = [ { targets = [ "proxmoxifun" ]; } ];
+        static_configs = [ { targets = [ "proxmoxifun.makifun.se" ]; } ];
         relabel_configs = [
           {
             source_labels = [ "__address__" ];

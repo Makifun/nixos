@@ -23,7 +23,7 @@ in
         user: prometheus@pve
         token_name: prometheus
         token_value: $(tr -d '\n' < ${config.sops.secrets.proxmox-pve-token-value.path})
-        verify_ssl: false
+        verify_ssl: true
       EOF
       chmod 400 /run/pve-exporter.yml
     '';
