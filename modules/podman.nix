@@ -18,9 +18,7 @@
 
   # ---------------------------------------------------------------------------
   # Registry mirrors — route pulls through the local Distribution cache first.
-  # Uses localhost ports directly (no TLS overhead for on-host pulls).
   # Podman falls back to the upstream registry if the mirror is unreachable.
-  # External hosts (e.g. jonny) use <name>.mirror.makifun.se instead.
   # ---------------------------------------------------------------------------
   environment.etc."containers/registries.conf.d/distribution-mirrors.conf".text = ''
     [[registry]]
