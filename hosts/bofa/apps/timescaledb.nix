@@ -65,6 +65,8 @@ in
       "random_page_cost=1.1"
       "-c"
       "effective_io_concurrency=200"
+      "-c"
+      "max_connections=200"
     ];
   };
 
