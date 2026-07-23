@@ -48,30 +48,4 @@
   services.qemuGuest.enable = true;
   system.stateVersion = "25.11";
 
-  # Override registry mirrors — on bofa these are remote HTTPS endpoints, not localhost.
-  environment.etc."containers/registries.conf.d/distribution-mirrors.conf".text = lib.mkForce ''
-    [[registry]]
-    prefix   = "docker.io"
-    location = "docker.io"
-    [[registry.mirror]]
-    location = "dist-dockerhub.mirror.makifun.se"
-
-    [[registry]]
-    prefix   = "ghcr.io"
-    location = "ghcr.io"
-    [[registry.mirror]]
-    location = "dist-ghcr.mirror.makifun.se"
-
-    [[registry]]
-    prefix   = "lscr.io"
-    location = "lscr.io"
-    [[registry.mirror]]
-    location = "dist-lscr.mirror.makifun.se"
-
-    [[registry]]
-    prefix   = "quay.io"
-    location = "quay.io"
-    [[registry.mirror]]
-    location = "dist-quay.mirror.makifun.se"
-  '';
 }

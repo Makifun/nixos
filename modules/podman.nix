@@ -22,34 +22,30 @@
   # Podman falls back to the upstream registry if the mirror is unreachable.
   # External hosts (e.g. jonny) use <name>.mirror.makifun.se instead.
   # ---------------------------------------------------------------------------
-  environment.etc."containers/registries.conf.d/distribution-mirrors.conf".text = ''
+  environment.etc."containers/registries.conf.d/distribution-mirrors.conf".text = lib.mkForce ''
     [[registry]]
     prefix   = "docker.io"
     location = "docker.io"
     [[registry.mirror]]
-    location = "127.0.0.1:5001"
-    insecure  = true
+    location = "dockerhub.mirror.makifun.se"
 
     [[registry]]
     prefix   = "ghcr.io"
     location = "ghcr.io"
     [[registry.mirror]]
-    location = "127.0.0.1:5002"
-    insecure  = true
+    location = "ghcr.mirror.makifun.se"
 
     [[registry]]
     prefix   = "lscr.io"
     location = "lscr.io"
     [[registry.mirror]]
-    location = "127.0.0.1:5003"
-    insecure  = true
+    location = "lscr.mirror.makifun.se"
 
     [[registry]]
     prefix   = "quay.io"
     location = "quay.io"
     [[registry.mirror]]
-    location = "127.0.0.1:5004"
-    insecure  = true
+    location = "quay.mirror.makifun.se"
   '';
 
   virtualisation = {
