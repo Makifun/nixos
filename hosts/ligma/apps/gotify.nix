@@ -1,42 +1,64 @@
-{ ... }:
+{ config, ... }:
 let
   gotifyPort = 8096;
   gotifyBase = "/ligma/ligma/gotify";
   # renovate: datasource=docker depName=gotify/server
-  gotifyTag = "2.9.1";
+  gotifyTag = "3.0.0";
 in
 {
   systemd.tmpfiles.rules = [
     "d '${gotifyBase}' 0755 root root - -"
   ];
 
+  sops.secrets.gotify-oidc-secret = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+
+  # Write OIDC client secret to a runtime env file so the container picks it up.
+  systemd.services.gotify-env-setup = {
+    description = "Write Gotify runtime env file from SOPS secrets";
+    before = [ "podman-gotify.service" ];
+    requiredBy = [ "podman-gotify.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      printf 'GOTIFY_OIDC_CLIENTSECRET=%s\n' \
+        "$(tr -d '\n' < ${config.sops.secrets.gotify-oidc-secret.path})" \
+        > /run/gotify-oidc.env
+      chmod 400 /run/gotify-oidc.env
+    '';
+  };
+
   virtualisation.oci-containers.containers.gotify = {
     image = "docker.io/gotify/server:${gotifyTag}";
     ports = [ "127.0.0.1:${toString gotifyPort}:80" ];
     environment = {
       TZ = "Europe/Stockholm";
+      # Traefik is on 127.0.0.1 — trust it as reverse proxy for real client IPs.
+      GOTIFY_SERVER_TRUSTEDPROXIES = "127.0.0.1";
+      GOTIFY_OIDC_ENABLED = "true";
+      GOTIFY_OIDC_ISSUER = "https://auth.makifun.se/application/o/gotify/";
+      GOTIFY_OIDC_CLIENTID = "gotify";
+      GOTIFY_OIDC_REDIRECTURL = "https://gotify.makifun.se/auth/oidc/callback";
+      # Link OIDC logins to existing local users with matching usernames.
+      GOTIFY_OIDC_LINK_BY_USERNAME = "true";
     };
+    environmentFiles = [ "/run/gotify-oidc.env" ];
     volumes = [ "${gotifyBase}:/app/data" ];
   };
 
   # ---------------------------------------------------------------------------
   # Traefik
   #
-  # Three routers, explicit priorities:
-  #   gotify-outpost (30)  — Authentik post-login callback, no middleware
-  #   gotify-token   (10)  — requests with X-Gotify-Key header bypass Authentik
-  #                          so push senders and API clients work without SSO
-  #   gotify          (1)  — catch-all, Authentik gate for browser access
+  # Two routers (Gotify v3 handles auth natively via OIDC — no Authentik proxy):
+  #   gotify-token (10) — X-Gotify-Key header bypasses OIDC for push senders
+  #   gotify        (1) — catch-all, no middleware (Gotify does OIDC itself)
   # ---------------------------------------------------------------------------
   services.traefik.dynamicConfigOptions.http = {
     routers = {
-      gotify-outpost = {
-        rule = "Host(`gotify.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
-        priority = 30;
-        entryPoints = [ "websecure" ];
-        service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
-      };
       gotify-token = {
         rule = "Host(`gotify.makifun.se`) && HeaderRegexp(`X-Gotify-Key`, `.+`)";
         priority = 10;
@@ -49,7 +71,6 @@ in
         priority = 1;
         entryPoints = [ "websecure" ];
         service = "gotify-svc";
-        middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
     };
