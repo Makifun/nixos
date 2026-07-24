@@ -91,6 +91,36 @@ in
     ];
   };
 
+  # timescale/timescaledb-ha installs TimescaleDB in template1 so every database
+  # created by *arr apps inherits it. Each database with the extension spawns a
+  # scheduler background worker on startup, exhausting max_background_workers.
+  # This service drops the extension from template1 and all non-tracearr databases
+  # on every NixOS switch so the problem cannot recur.
+  systemd.services.timescaledb-cleanup = {
+    description = "Remove TimescaleDB from non-tracearr databases";
+    after = [ "podman-timescaledb.service" ];
+    requires = [ "podman-timescaledb.service" ];
+    wantedBy = [ "multi-user.target" ];
+    path = [ pkgs.podman ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      until podman exec timescaledb psql -U tracearr -c "SELECT 1" >/dev/null 2>&1; do
+        sleep 2
+      done
+      podman exec timescaledb psql -U tracearr -d template1 \
+        -c "DROP EXTENSION IF EXISTS timescaledb;"
+      podman exec timescaledb psql -U tracearr -tAc \
+        "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'tracearr';" \
+      | while read -r db; do
+        [ -n "$db" ] && podman exec timescaledb psql -U tracearr -d "$db" \
+          -c "DROP EXTENSION IF EXISTS timescaledb;" 2>/dev/null || true
+      done
+    '';
+  };
+
   # Allow sugma cluster nodes to reach PostgreSQL.
   networking.firewall.extraInputRules = ''
     tcp dport ${toString pgPort} ip saddr { 10.10.10.26/32, 10.10.10.27/32, 10.10.10.28/32 } accept comment "TimescaleDB from sugma"
