@@ -124,7 +124,8 @@
       }
       {
         job_name = "unpackerr";
-        static_configs = [ { targets = [ "unpackerr-metrics.makifun.se:80" ]; } ];
+        scheme = "https";
+        static_configs = [ { targets = [ "unpackerr-metrics.makifun.se:443" ]; } ];
       }
     ];
   };
