@@ -12,6 +12,7 @@ in
     "d '/nix/.beszelnixos'                0755 root root - -"
     "d '/storma/.beszelstorma'            0755 root root - -"
     "d '/persist/.beszelpersist'          0755 root root - -"
+    "d '/rclone-cache/.beszelrclone'      0755 root root - -"
   ];
 
   # ---------------------------------------------------------------------------
@@ -32,6 +33,7 @@ in
       "/nix/.beszelnixos:/extra-filesystems/nixos__nix:ro"
       "/storma/.beszelstorma:/extra-filesystems/storma__storma:ro"
       "/persist/.beszelpersist:/extra-filesystems/persist__persist:ro"
+      "/rclone-cache/.beszelrclone:/extra-filesystems/rclone-cache__rclone-cache:ro"
     ];
   };
 
