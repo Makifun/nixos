@@ -122,6 +122,10 @@
           }
         ];
       }
+      {
+        job_name = "unpackerr";
+        static_configs = [ { targets = [ "unpackerr-metrics.makifun.se:80" ]; } ];
+      }
     ];
   };
 
@@ -158,6 +162,11 @@
 
   environment.etc."grafana-dashboards/proxmox.json" = {
     source = ../grafana_dashboards/proxmox.json;
+    mode = "0444";
+  };
+
+  environment.etc."grafana-dashboards/unpackerr.json" = {
+    source = ../grafana_dashboards/unpackerr.json;
     mode = "0444";
   };
 
