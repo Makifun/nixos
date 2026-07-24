@@ -68,6 +68,8 @@ in
       "max_connections=200"
       "-c"
       "max_worker_processes=32"
+      "-c"
+      "timescaledb.max_background_workers=8"
     ];
   };
 
