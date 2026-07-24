@@ -69,9 +69,9 @@ in
       "-c"
       "max_worker_processes=32"
       "-c"
-      "timescaledb.max_background_workers=8"
+      "timescaledb.max_background_workers=16"
       "-c"
-      "max_parallel_workers=8"
+      "max_parallel_workers=16"
     ];
   };
 
