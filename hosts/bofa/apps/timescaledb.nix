@@ -37,6 +37,8 @@ in
       "--stop-timeout=60"
     ];
     # Tuned for 8 GB RAM (balloon: 5 GB min / 8 GB max), SSD. shared_buffers=25% of max.
+    # max_worker_processes=32: pgtune says 4 (CPU count) but TimescaleDB needs
+    # timescaledb.max_background_workers + max_parallel_workers + autovacuum(3) ≥ 23.
     cmd = [
       "-c"
       "timescaledb.license=timescale"
@@ -51,19 +53,31 @@ in
       "-c"
       "effective_cache_size=6GB"
       "-c"
-      "work_mem=32MB"
+      "work_mem=5140kB"
       "-c"
       "maintenance_work_mem=512MB"
       "-c"
-      "wal_buffers=64MB"
+      "wal_buffers=16MB"
+      "-c"
+      "min_wal_size=1GB"
       "-c"
       "max_wal_size=4GB"
       "-c"
       "checkpoint_completion_target=0.9"
       "-c"
+      "default_statistics_target=100"
+      "-c"
       "random_page_cost=1.1"
       "-c"
       "effective_io_concurrency=200"
+      "-c"
+      "jit=off"
+      "-c"
+      "wal_compression=lz4"
+      "-c"
+      "io_method=io_uring"
+      "-c"
+      "huge_pages=try"
       "-c"
       "max_connections=200"
       "-c"
@@ -71,7 +85,11 @@ in
       "-c"
       "timescaledb.max_background_workers=16"
       "-c"
-      "max_parallel_workers=16"
+      "max_parallel_workers=4"
+      "-c"
+      "max_parallel_workers_per_gather=2"
+      "-c"
+      "max_parallel_maintenance_workers=2"
     ];
   };
 
