@@ -75,8 +75,6 @@ in
       "-c"
       "wal_compression=lz4"
       "-c"
-      "io_method=io_uring"
-      "-c"
       "huge_pages=try"
       "-c"
       "max_connections=200"
