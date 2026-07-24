@@ -1,11 +1,11 @@
 { config, ... }:
 let
-  hostname      = config.networking.hostName;
-  lokiUrl       = "https://loki.makifun.se/loki/api/v1/push";
+  hostname = config.networking.hostName;
+  lokiUrl = "https://loki.makifun.se/loki/api/v1/push";
   prometheusUrl = "https://prometheus.makifun.se/api/v1/write";
-  alloyPort     = 12345;
+  alloyPort = 12345;
   # renovate: datasource=docker depName=grafana/alloy
-  alloyTag = "v1.17.1";
+  alloyTag = "v1.18.0";
 in
 {
   # Trust podman bridge interfaces for aardvark-dns.
@@ -189,12 +189,19 @@ in
   # podman-exporter uses libpod directly → needs the Podman socket.
   # Runs as root (required for rootful Podman socket access).
   virtualisation.oci-containers.containers.podman-exporter = {
-    image        = "quay.io/navidys/prometheus-podman-exporter:v1.21.0";
-    ports        = [ "127.0.0.1:9882:9882" ];
-    volumes      = [ "/run/podman/podman.sock:/run/podman/podman.sock" ];
-    environment  = { CONTAINER_HOST = "unix:///run/podman/podman.sock"; };
-    extraOptions = [ "-u" "root" "--security-opt" "label=type:container_runtime_t" ];
-    cmd          = [ "--collector.enable-all" ];
+    image = "quay.io/navidys/prometheus-podman-exporter:v1.21.0";
+    ports = [ "127.0.0.1:9882:9882" ];
+    volumes = [ "/run/podman/podman.sock:/run/podman/podman.sock" ];
+    environment = {
+      CONTAINER_HOST = "unix:///run/podman/podman.sock";
+    };
+    extraOptions = [
+      "-u"
+      "root"
+      "--security-opt"
+      "label=type:container_runtime_t"
+    ];
+    cmd = [ "--collector.enable-all" ];
   };
 
   systemd.services.podman-podman-exporter = {
@@ -210,9 +217,12 @@ in
   ];
 
   virtualisation.oci-containers.containers.alloy = {
-    image        = "docker.io/grafana/alloy:${alloyTag}";
+    image = "docker.io/grafana/alloy:${alloyTag}";
     # host + pid networking required for journal access and full node metrics.
-    extraOptions = [ "--network=host" "--pid=host" ];
+    extraOptions = [
+      "--network=host"
+      "--pid=host"
+    ];
     volumes = [
       "/etc/alloy/config.alloy:/etc/alloy/config.alloy:ro"
       "/var/log/journal:/var/log/journal:ro"
