@@ -131,11 +131,6 @@
   };
 
   # ---- Grafana ----------------------------------------------------------------
-  environment.etc."grafana-dashboards/rclone.json" = {
-    source = ../grafana_dashboards/rclone.json;
-    mode = "0444";
-  };
-
   environment.etc."grafana-dashboards/registry.json" = {
     source = ../grafana_dashboards/registry.json;
     mode = "0444";
