@@ -32,6 +32,17 @@ in
     '';
   };
 
+  # Wait for Authentik server before starting — Gotify does OIDC discovery at
+  # startup and fails with 503 if Authentik is still initialising.
+  systemd.services.podman-gotify = {
+    after = [ "podman-authentik-server.service" ];
+    wants = [ "podman-authentik-server.service" ];
+    serviceConfig = {
+      RestartSec = "30s";
+      StartLimitBurst = 10;
+    };
+  };
+
   virtualisation.oci-containers.containers.gotify = {
     image = "docker.io/gotify/server:${gotifyTag}";
     ports = [ "127.0.0.1:${toString gotifyPort}:80" ];
