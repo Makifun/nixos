@@ -551,6 +551,8 @@
             "Vaultwarden" = {
               icon = "/images/vaultwarden.png";
               href = "https://{{HOMEPAGE_VAR_VAULTWARDEN_URL}}";
+              server = "ligma";
+              container = "vaultwarden";
             };
           }
           {
