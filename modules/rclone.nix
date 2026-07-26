@@ -20,12 +20,12 @@ in
 
   sops.secrets.rclone-config-stage = {
     format = "yaml";
-    sopsFile = ../hosts + "/${hostname}/secrets.yaml";
+    sopsFile = ../common/secrets.yaml;
   };
 
   sops.secrets.rclone-config-prod = {
     format = "yaml";
-    sopsFile = ../hosts + "/${hostname}/secrets.yaml";
+    sopsFile = ../common/secrets.yaml;
   };
 
   systemd.services.rclone-config-init = {
