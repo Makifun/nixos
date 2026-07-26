@@ -48,5 +48,5 @@
     hostId = "deadb33f";
   };
   services.qemuGuest.enable = true;
-  system.stateVersion = "26.11";
+  system.stateVersion = "25.11";
 }
