@@ -14,8 +14,8 @@
     ../../modules/rclone.nix
     ../../modules/backrest.nix
     ../../modules/beszel.nix
-    ./apps/backrest.nix
-    ./apps/beszel.nix
+    ./apps/backrest-extra.nix
+    ./apps/beszel-extra.nix
     ./apps/samba.nix
     ./apps/plex.nix
   ];
