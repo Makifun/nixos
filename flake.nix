@@ -25,8 +25,8 @@
       hosts = {
         opnsense = "10.10.10.1";
         technitium = "10.10.10.3";
-        ligma = "10.10.10.13";
         storma = "10.10.10.12";
+        ligma = "10.10.10.13";
         bofa = "10.10.10.14";
         playma = "10.10.10.15";
         jonny = "10.10.10.16";
@@ -52,7 +52,6 @@
         playma = mkSystem [ ./hosts/playma ];
         minimaliso = nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit hosts; };
           modules = [
             (
               {
