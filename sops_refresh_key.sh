@@ -41,11 +41,18 @@ else
     echo "No secrets file found at $SECRETS_FILE to re-encrypt."
 fi
 
+COMMON_SECRETS="common/secrets.yaml"
+if [[ -f "$COMMON_SECRETS" ]]; then
+    echo "Re-encrypting $COMMON_SECRETS with the updated keys..."
+    sops updatekeys -y "$COMMON_SECRETS"
+fi
+
 if [[ "$NO_PUSH" == true ]]; then
     echo "Not pushing because of --no-push."
 else
     git add .sops.yaml
     [[ -f "$SECRETS_FILE" ]] && git add "$SECRETS_FILE"
+    [[ -f "$COMMON_SECRETS" ]] && git add "$COMMON_SECRETS"
 
     if ! git diff --cached --quiet; then
         COMMIT_MSG="Update sops keys for $FLAKE_NAME - $(date +'%Y-%m-%d %H:%M:%S')"
