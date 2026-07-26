@@ -1,6 +1,5 @@
-{ ... }:
+{ hosts, ... }:
 let
-  stormaIp = "10.10.10.12";
   rclonePort = 6969;
 in
 {
@@ -23,9 +22,9 @@ in
       };
     };
     services."rclone-storma-svc".loadBalancer.servers = [
-      { url = "http://${stormaIp}:${toString rclonePort}"; }
+      { url = "http://${hosts.storma}:${toString rclonePort}"; }
     ];
   };
 
-  ligma.dnsRecords."rclone-storma.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."rclone-storma.makifun.se".value = hosts.ligma;
 }
