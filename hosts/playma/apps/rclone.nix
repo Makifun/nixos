@@ -1,5 +1,11 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  hosts,
+  ...
+}:
 let
+  rcloneBase = "/playma/playma/rclone";
   rclonePort = 6969;
   metricsPort = 6970;
 in
@@ -8,7 +14,7 @@ in
 
   systemd.tmpfiles.rules = [
     "d /cloud 0755 root root - -"
-    "d /playma/playma/rclone 0700 root root - -"
+    "d ${rcloneBase} 0700 root root - -"
   ];
 
   sops.secrets.rclone-config-stage = {
@@ -31,7 +37,7 @@ in
       RemainAfterExit = true;
     };
     script = ''
-      dest=/playma/playma/rclone/rclone.conf
+      dest=${rcloneBase}/rclone.conf
       if [ ! -f "$dest" ]; then
         install -m 0600 ${config.sops.secrets.rclone-config-stage.path} "$dest"
       fi
@@ -52,7 +58,7 @@ in
       ExecStartPre = "-${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
       ExecStart =
         "${pkgs.rclone}/bin/rclone mount crypt:/ /cloud"
-        + " --config /playma/playma/rclone/rclone.conf"
+        + " --config ${rcloneBase}/rclone.conf"
         + " --allow-non-empty"
         + " --allow-other"
         + " --buffer-size 256M"
@@ -87,7 +93,7 @@ in
 
   # Only ligma's Traefik proxies the rclone RC web UI.
   networking.firewall.extraInputRules = ''
-    tcp dport ${toString rclonePort} ip saddr 10.10.10.13/32 accept comment "rclone RC from ligma"
-    tcp dport ${toString metricsPort} ip saddr 10.10.10.13/32 accept comment "rclone metrics from ligma"
+    tcp dport ${toString rclonePort} ip saddr ${hosts.ligma}/32 accept comment "rclone RC from ligma"
+    tcp dport ${toString metricsPort} ip saddr ${hosts.ligma}/32 accept comment "rclone metrics from ligma"
   '';
 }
