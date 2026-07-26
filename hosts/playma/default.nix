@@ -11,9 +11,9 @@
     ./disko-config.nix
     ../../common
     ../../modules/podman.nix
+    ../../modules/rclone.nix
     ./apps/backrest.nix
     ./apps/beszel.nix
-    ./apps/rclone.nix
     ./apps/samba.nix
     ./apps/plex.nix
   ];
@@ -46,5 +46,5 @@
     hostId = "deadb33f";
   };
   services.qemuGuest.enable = true;
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.11";
 }

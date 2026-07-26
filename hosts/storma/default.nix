@@ -16,9 +16,9 @@
     ./disko-config.nix
     ../../common
     ../../modules/podman.nix
+    ../../modules/rclone.nix
     ./apps/backrest.nix
     ./apps/beszel.nix
-    ./apps/rclone.nix
     ./apps/samba.nix
   ];
   environment.persistence."/persist" = {
