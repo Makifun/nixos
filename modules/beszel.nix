@@ -23,7 +23,7 @@ in
   ];
 
   virtualisation.oci-containers.containers.beszel-agent = {
-    image = "henrygd/beszel-agent:${beszelTag}";
+    image = "docker.io/henrygd/beszel-agent:${beszelTag}";
     environment = {
       PORT = "45876";
       FILESYSTEM = "/extra-filesystems/root__root";
