@@ -1,10 +1,10 @@
 #!/bin/zsh
-ID=888
-NAME="bofa"
-RAM_MIN=5120
+ID=999
+NAME="playma"
+RAM_MIN=4096
 RAM_MAX=8192
 CPU=4
-MAC="2E:7A:45:73:8C:64"
+MAC="3f:91:5c:2d:88:7e"
 
 echo "Creating VM $NAME"
 ssh proxmox << EOF
@@ -23,7 +23,8 @@ qm create $ID \
   --net0 virtio=$MAC,bridge=vmbr0,firewall=1,queues=4 \
   --scsihw virtio-scsi-single \
   --scsi0 wdblacksn850x:50,discard=on,iothread=1,ssd=1,serial=nixos,backup=0 \
-  --scsi1 wdblacksn850x:100,discard=on,iothread=1,ssd=1,serial=bofa \
+  --scsi1 wdblacksn850x:100,discard=on,iothread=1,ssd=1,serial=playma \
+  --scsi2 evo860:50,discard=on,iothread=1,ssd=1,serial=transcode,backup=0 \
   --efidisk0 wdblacksn850x:4,efitype=4m \
   --ide2 local:iso/nixos-minimal-x86_64-linux.iso,media=cdrom \
   --boot "order=scsi0;ide2"
