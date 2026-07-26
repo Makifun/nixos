@@ -2,20 +2,9 @@
 let
   plexBase = "/playma/playma/plex";
   # renovate: datasource=docker depName=lscr.io/linuxserver/plex
-  plexTag = "1.41.3.9314-a0bfb8370-ls244";
+  plexTag = "1.43.3";
 in
 {
-  # PLEX_CLAIM token links the server to a Plex account on first boot.
-  # Expires after 5 minutes — only needed once. Get from plex.tv/claim.
-  sops.secrets.plex-claim = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-  };
-
-  sops.templates."plex.env" = {
-    content = "PLEX_CLAIM=${config.sops.placeholder.plex-claim}\n";
-  };
-
   systemd.tmpfiles.rules = [
     "d '${plexBase}/config' 0750 root root - -"
   ];
@@ -28,14 +17,20 @@ in
 
   virtualisation.oci-containers.containers.plex = {
     image = "lscr.io/linuxserver/plex:${plexTag}";
-    extraOptions = [ "--network=host" ];
+    extraOptions = [
+      "--network=host"
+      "--health-cmd=nc localhost 32400 -vzw1 || exit 1"
+      "--health-interval=5m"
+      "--health-timeout=3s"
+      "--health-retries=3"
+      "--health-start-period=2m"
+    ];
     environment = {
       PUID = "1000";
       PGID = "1000";
       TZ = "Europe/Stockholm";
       VERSION = "docker";
     };
-    environmentFiles = [ config.sops.templates."plex.env".path ];
     volumes = [
       "${plexBase}/config:/config"
       "/cloud:/cloud:ro"
@@ -45,7 +40,6 @@ in
 
   networking.firewall.allowedTCPPorts = [
     32400 # Plex web UI + API
-    32469 # Plex DLNA
   ];
   networking.firewall.allowedUDPPorts = [
     32410
