@@ -2,7 +2,7 @@
 {
   sops.secrets.nixos-upgrade-gotify-token = {
     format = "yaml";
-    sopsFile = ../hosts + "/${config.networking.hostName}/secrets.yaml";
+    sopsFile = ../common/secrets.yaml;
   };
 
   systemd.services."nixos-upgrade".unitConfig = {
