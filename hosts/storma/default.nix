@@ -49,6 +49,9 @@
     useDHCP = true;
     hostId = "c01d5701";
   };
+  # rclone FUSE drop during upgrade causes sonarr/radarr to mark media as missing
+  system.autoUpgrade.enable = lib.mkForce false;
+
   system.stateVersion = "25.11";
 
 }
