@@ -1,10 +1,10 @@
 #!/bin/zsh
 ID=999
 NAME="playma"
-RAM_MIN=4096
-RAM_MAX=8192
+RAM_MIN=2048
+RAM_MAX=4096
 CPU=4
-MAC="3f:91:5c:2d:88:7e"
+MAC="3E:91:5C:2D:88:7E"
 
 echo "Creating VM $NAME"
 ssh proxmox << EOF
