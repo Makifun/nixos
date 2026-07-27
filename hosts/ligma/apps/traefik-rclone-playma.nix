@@ -1,6 +1,6 @@
-{ ... }:
+{ hosts, ... }:
 let
-  playmaIp = "10.10.10.15";
+  playmaIp = hosts.playma;
   rclonePort = 6969;
 in
 {
@@ -27,5 +27,5 @@ in
     ];
   };
 
-  ligma.dnsRecords."rclone-playma.makifun.se".value = playmaIp;
+  ligma.dnsRecords."rclone-playma.makifun.se".value = hosts.ligma;
 }
