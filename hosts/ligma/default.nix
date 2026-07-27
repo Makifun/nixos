@@ -12,26 +12,27 @@
     ./disko-config.nix
     ../../common
     ../../modules/podman.nix
-    ./apps/backrest-bofa.nix
     ./apps/apprise.nix
     ./apps/authentik.nix
     ./apps/backrest.nix
     ./apps/beszel.nix
     ./apps/distribution.nix
     ./apps/forgejo.nix
-    ./apps/pgadmin.nix
-    ./apps/rclone-storma.nix
     ./apps/gotify.nix
     ./apps/homepage.nix
     ./apps/loki.nix
     ./apps/monitoring.nix
-    ./apps/opnsense-exporter.nix
-    ./apps/pve-exporter.nix
     ./apps/nfs.nix
     ./apps/omni.nix
+    ./apps/opnsense-exporter.nix
+    ./apps/pgadmin.nix
+    ./apps/pve-exporter.nix
     ./apps/renovate.nix
-    #./apps/samba.nix
     ./apps/technitium.nix
+    ./apps/traefik-backrest-bofa.nix
+    ./apps/traefik-backrest-playma.nix
+    ./apps/traefik-rclone-playma.nix
+    ./apps/traefik-rclone-storma.nix
     ./apps/traefik.nix
     ./apps/unifi.nix
     ./apps/vaultwarden.nix
