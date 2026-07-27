@@ -7,6 +7,7 @@ in
 {
   systemd.tmpfiles.rules = [
     "d '${plexBase}/config' 0750 root root - -"
+    "d '/transcode'         0775 1000 1000 - -"
   ];
 
   # Start after rclone mounts /cloud so media is available on startup.
