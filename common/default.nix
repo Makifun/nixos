@@ -34,6 +34,7 @@
       ncdu
       nh
       nmap
+      parted
       python3
       ripgrep
       screen
