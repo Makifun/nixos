@@ -30,6 +30,10 @@
             targets = [ "10.10.10.12:6970" ];
             labels.instance = "storma";
           }
+          {
+            targets = [ "10.10.10.15:6970" ];
+            labels.instance = "playma";
+          }
         ];
       }
       {
