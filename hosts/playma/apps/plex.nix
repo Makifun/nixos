@@ -33,6 +33,7 @@ in
       PGID = "1000";
       TZ = "Europe/Stockholm";
       VERSION = "docker";
+      LIBVA_DRIVER_NAME = "iHD";
     };
     volumes = [
       "${plexBase}/config:/config"
