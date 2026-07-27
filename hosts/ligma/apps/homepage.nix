@@ -798,28 +798,6 @@
             };
           }
           {
-            "Beszel Jonny" = {
-              icon = "/images/beszel.svg";
-              href = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
-              server = "jonny";
-              container = "beszel-agent";
-              widget = {
-                type = "beszel";
-                fields = [
-                  "cpu"
-                  "memory"
-                  "disk"
-                  "network"
-                ];
-                url = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
-                username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
-                password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
-                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_JONNY}}";
-                version = 2;
-              };
-            };
-          }
-          {
             "Beszel Ligma" = {
               icon = "/images/beszel.svg";
               href = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
@@ -857,6 +835,26 @@
                 username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
                 systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_BOFA}}";
+                version = 2;
+              };
+            };
+          }
+          {
+            "Beszel Playma" = {
+              icon = "/images/beszel.svg";
+              href = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+              widget = {
+                type = "beszel";
+                fields = [
+                  "cpu"
+                  "memory"
+                  "disk"
+                  "network"
+                ];
+                url = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+                username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
+                password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
+                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_PLAYMA}}";
                 version = 2;
               };
             };
