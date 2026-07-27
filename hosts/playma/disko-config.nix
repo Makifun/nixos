@@ -8,9 +8,9 @@
       ];
     };
     disk = {
+      # 50 G SSD (scsi0, serial=nixos) — OS
       nixos = {
         type = "disk";
-        # 50 G OS disk (scsi0, serial=nixos)
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_nixos";
         content = {
           type = "gpt";
@@ -31,7 +31,6 @@
                 type = "luks";
                 name = "crypted_nixos";
                 settings.allowDiscards = true;
-                # Single LUKS → LVM so both /nix and /persist share one passphrase.
                 content = {
                   type = "lvm_pv";
                   vg = "vg_nixos";
@@ -41,9 +40,9 @@
           };
         };
       };
+      # 100G SSD (scsi1, serial=playma) — all app data
       playma = {
         type = "disk";
-        # 100 G data disk (scsi1, serial=playma) — all app data
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_playma";
         content = {
           type = "gpt";
@@ -68,9 +67,9 @@
           };
         };
       };
+      # 50G SSD (scsi2, serial=transcode) — Plex transcoder scratch
       transcode = {
         type = "disk";
-        # 50 G transcode disk (scsi2, serial=transcode) — Plex transcoder scratch
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_transcode";
         content = {
           type = "gpt";
@@ -96,13 +95,6 @@
         };
       };
       # 200G SSD (scsi3, serial=cache) — rclone VFS cache, LUKS-encrypted.
-      # New VM: disko formats on install. Existing VM: format manually first:
-      #   parted /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache -- mklabel gpt
-      #   parted /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache -- mkpart primary 1MiB 100%
-      #   cryptsetup luksFormat /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache-part1
-      #   cryptsetup open /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache-part1 crypted_cache
-      #   mkfs.xfs /dev/mapper/crypted_cache
-      #   cryptsetup close crypted_cache
       cache = {
         type = "disk";
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache";
