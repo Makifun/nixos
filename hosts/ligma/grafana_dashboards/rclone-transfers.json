@@ -50,7 +50,7 @@
             "value": "http://10.10.10.15:6969"
           }
         ],
-        "query": "ligma : http://127.0.0.1:6969,storma : http://10.10.10.12:6969",
+        "query": "ligma : http://127.0.0.1:6969,storma : http://10.10.10.12:6969,playma : http://10.10.10.15:6969",
         "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"
