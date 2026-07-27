@@ -33,11 +33,16 @@ in
       PGID = "1000";
       TZ = "Europe/Stockholm";
       VERSION = "docker";
-      LIBVA_DRIVER_NAME = "iHD";
     };
     volumes = [
       "${plexBase}/config:/config"
-      "/cloud:/cloud:ro"
+      "/cloud/Serie:/tv:ro"
+      "/cloud/Serie4k:/tv4k:ro"
+      "/cloud/Anime:/anime:ro"
+      "/cloud/Film:/movies:ro"
+      "/cloud/Film4k:/movies4k:ro"
+      "/cloud/Asian:/asian:ro"
+      "/cloud/FilmSWE:/moviesswe:ro"
       "/transcode/plex:/transcode"
     ];
   };
