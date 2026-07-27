@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 let
   plexBase = "/playma/playma/plex";
   # renovate: datasource=docker depName=lscr.io/linuxserver/plex
@@ -6,14 +6,15 @@ let
 in
 {
   systemd.tmpfiles.rules = [
-    "d '${plexBase}/config' 0750 root root - -"
-    "d '/transcode'         0775 1000 1000 - -"
+    "d '${plexBase}/config'   0750 root root - -"
+    "d '/transcode/plex'      0775 1000 1000 - -"
   ];
 
   # Start after rclone mounts /cloud so media is available on startup.
   systemd.services.podman-plex = {
     after = [ "rclone-cloud.service" ];
     wants = [ "rclone-cloud.service" ];
+    serviceConfig.ExecStartPre = "${pkgs.coreutils}/bin/sleep 10";
   };
 
   virtualisation.oci-containers.containers.plex = {
@@ -36,7 +37,7 @@ in
     volumes = [
       "${plexBase}/config:/config"
       "/cloud:/cloud:ro"
-      "/transcode:/transcode"
+      "/transcode/plex:/transcode"
     ];
   };
 
