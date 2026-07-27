@@ -190,16 +190,6 @@
       }
     ];
 
-    docker = {
-      jonny = {
-        host = "{{HOMEPAGE_VAR_SOCKET_PROXY}}";
-        port = 2375;
-      };
-      ligma = {
-        socket = "/run/podman/podman.sock";
-      };
-    };
-
     services = [
       {
         "Media" = [
@@ -207,8 +197,6 @@
             "Plex" = {
               icon = "/images/plex.png";
               href = "https://app.plex.tv";
-              server = "jonny";
-              container = "{{HOMEPAGE_VAR_PLEX_CONTAINER}}";
               widget = {
                 type = "plex";
                 fields = [
