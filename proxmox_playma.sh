@@ -5,6 +5,7 @@ RAM_MIN=2048
 RAM_MAX=4096
 CPU=4
 MAC="3E:91:5C:2D:88:7E"
+ORDER=5
 
 echo "Creating VM $NAME"
 ssh proxmox << EOF
@@ -20,7 +21,7 @@ qm create $ID \
   --cpu host \
   --numa 1 \
   --onboot 1 \
-  --startup order=5 \
+  --startup order=$ORDER \
   --tablet 0 \
   --agent enabled=1,fstrim_cloned_disks=1 \
   --hostpci0 0000:00:02.0,mdev=i915-GVTg_V5_4,pcie=1 \
