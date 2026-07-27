@@ -19,6 +19,7 @@ in
     image = "lscr.io/linuxserver/plex:${plexTag}";
     extraOptions = [
       "--network=host"
+      "--device=/dev/dri:/dev/dri"
       "--health-cmd=nc localhost 32400 -vzw1 || exit 1"
       "--health-interval=5m"
       "--health-timeout=3s"
