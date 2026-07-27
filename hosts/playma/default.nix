@@ -49,5 +49,7 @@
     hostId = "deadb33f";
   };
   services.qemuGuest.enable = true;
+  # Temp disable auto upgrade
+  system.autoUpgrade.enable = lib.mkForce false;
   system.stateVersion = "26.11";
 }
