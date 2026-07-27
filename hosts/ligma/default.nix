@@ -29,7 +29,6 @@
     ./apps/pve-exporter.nix
     ./apps/nfs.nix
     ./apps/omni.nix
-    #./apps/rclone.nix
     ./apps/renovate.nix
     #./apps/samba.nix
     ./apps/technitium.nix

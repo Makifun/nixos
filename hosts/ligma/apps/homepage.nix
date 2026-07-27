@@ -171,13 +171,6 @@
         };
       }
       {
-        resources = {
-          label = "/rclone-cache";
-          disk = "/rclone-cache";
-          expanded = true;
-        };
-      }
-      {
         unifi_console = {
           url = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
           username = "{{HOMEPAGE_VAR_UNIFI_USERNAME}}";

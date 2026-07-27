@@ -12,7 +12,6 @@ in
     "d '/nix/.beszelnixos'            0755 root root - -"
     "d '/ligma/.beszelligma'          0755 root root - -"
     "d '/persist/.beszelpersist'      0755 root root - -"
-    "d '/rclone-cache/.beszelrclone'  0755 root root - -"
     "d '/nicememe/.beszelnicememe'    0755 root root - -"
     "d '/slowmeme/.beszelslowmeme'    0755 root root - -"
   ];
@@ -63,7 +62,6 @@ in
       "/nix/.beszelnixos:/extra-filesystems/nixos__nix:ro"
       "/ligma/.beszelligma:/extra-filesystems/ligma__ligma:ro"
       "/persist/.beszelpersist:/extra-filesystems/persist__persist:ro"
-      "/rclone-cache/.beszelrclone:/extra-filesystems/rclone-cache__rclone-cache:ro"
       "/nicememe/.beszelnicememe:/extra-filesystems/nicememe__nicememe:ro"
       "/slowmeme/.beszelslowmeme:/extra-filesystems/slowmeme__slowmeme:ro"
     ];
