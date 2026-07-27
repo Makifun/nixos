@@ -63,6 +63,12 @@
       gateway = true;
     };
 
+    docker = {
+      ligma = {
+        socket = "/run/podman/podman.sock";
+      };
+    };
+
     settings = {
       layout = [
         {
