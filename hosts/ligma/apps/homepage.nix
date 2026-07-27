@@ -239,6 +239,8 @@
             "Tracearr" = {
               icon = "/images/tracearr.png";
               href = "https://{{HOMEPAGE_VAR_TRACEARR_URL}}";
+              namespace = "tracearr";
+              app = "tracearr";
               widget = {
                 type = "tracearr";
                 url = "https://{{HOMEPAGE_VAR_TRACEARR_URL}}";
@@ -507,6 +509,8 @@
             "Miniflux" = {
               icon = "/images/miniflux.svg";
               href = "https://{{HOMEPAGE_VAR_MINIFLUX_URL}}";
+              namespace = "miniflux";
+              app = "miniflux";
               widget = {
                 type = "miniflux";
                 url = "https://{{HOMEPAGE_VAR_MINIFLUX_URL}}";
@@ -518,6 +522,8 @@
             "Home Assistant" = {
               icon = "/images/home-assistant.png";
               href = "https://{{HOMEPAGE_VAR_HOMEASSISTANT_URL}}";
+              namespace = "homeassistant";
+              app = "homeassistant";
               widget = {
                 type = "homeassistant";
                 url = "https://{{HOMEPAGE_VAR_HOMEASSISTANT_URL}}";
@@ -529,6 +535,8 @@
             "HAVC" = {
               icon = "/images/havc.png";
               href = "https://{{HOMEPAGE_VAR_HAVC_URL}}";
+              namespace = "homeassistant";
+              app = "homeassistant";
             };
           }
           {
@@ -607,18 +615,24 @@
             "MediaInfo" = {
               icon = "/images/mediainfo.png";
               href = "https://{{HOMEPAGE_VAR_MEDIAINFO_URL}}";
+              namespace = "mediainfo";
+              app = "mediainfo";
             };
           }
           {
             "PrivateBin" = {
               icon = "/images/privatebin.png";
               href = "https://{{HOMEPAGE_VAR_PRIVATEBIN_URL}}";
+              namespace = "privatebin";
+              app = "privatebin";
             };
           }
           {
             "KasmCord" = {
               icon = "/images/discord.png";
               href = "https://{{HOMEPAGE_VAR_KASMCORD_URL}}";
+              namespace = "kasmcord";
+              app = "kasmcord";
             };
           }
           {
@@ -631,6 +645,12 @@
             "Rclone Storma" = {
               icon = "/images/rclone.png";
               href = "https://{{HOMEPAGE_VAR_RCLONESTORMA_URL}}";
+            };
+          }
+          {
+            "Rclone Playma" = {
+              icon = "/images/rclone.png";
+              href = "https://{{HOMEPAGE_VAR_RCLONEPLAYMA_URL}}";
             };
           }
         ];
@@ -766,6 +786,8 @@
             "Backrest Ligma" = {
               icon = "/images/backrest.png";
               href = "https://{{HOMEPAGE_VAR_BACKREST_LIGMA_URL}}";
+              server = "ligma";
+              container = "backrest";
               widget = {
                 type = "backrest";
                 url = "http://127.0.0.1:9898";
@@ -898,6 +920,8 @@
             "Authentik" = {
               icon = "/images/authentik.png";
               href = "https://{{HOMEPAGE_VAR_AUTHENTIK_URL}}";
+              server = "ligma";
+              container = "authentik-server";
               widget = {
                 type = "authentik";
                 url = "https://{{HOMEPAGE_VAR_AUTHENTIK_URL}}";
