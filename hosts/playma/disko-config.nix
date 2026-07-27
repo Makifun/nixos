@@ -95,6 +95,45 @@
           };
         };
       };
+      # 200G SSD (scsi3, serial=cache) — rclone VFS cache, LUKS-encrypted.
+      # New VM: disko formats on install. Existing VM: format manually first:
+      #   parted /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache -- mklabel gpt
+      #   parted /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache -- mkpart primary 1MiB 100%
+      #   cryptsetup luksFormat /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache-part1
+      #   cryptsetup open /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache-part1 crypted_cache
+      #   mkfs.ext4 -m 1 /dev/mapper/crypted_cache
+      #   cryptsetup close crypted_cache
+      cache = {
+        type = "disk";
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache";
+        content = {
+          type = "gpt";
+          partitions = {
+            luks = {
+              size = "100%";
+              content = {
+                type = "luks";
+                name = "crypted_cache";
+                settings.allowDiscards = true;
+                content = {
+                  type = "filesystem";
+                  format = "ext4";
+                  mountpoint = "/rclone-cache";
+                  mountOptions = [
+                    "defaults"
+                    "discard"
+                    "nofail"
+                  ];
+                  extraArgs = [
+                    "-m"
+                    "1"
+                  ];
+                };
+              };
+            };
+          };
+        };
+      };
     };
     lvm_vg = {
       vg_nixos = {
