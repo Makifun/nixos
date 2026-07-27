@@ -34,10 +34,7 @@ in
     before = [ "rclone-cloud.service" ];
     requiredBy = [ "rclone-cloud.service" ];
     after = [ "sops-nix.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-    };
+    serviceConfig.Type = "oneshot";
     script = ''
       dest=${rcloneBase}/rclone.conf
       if [ ! -f "$dest" ]; then
