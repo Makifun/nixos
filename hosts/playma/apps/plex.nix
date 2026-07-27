@@ -13,7 +13,7 @@ in
   # Start after rclone mounts /cloud so media is available on startup.
   systemd.services.podman-plex = {
     after = [ "rclone-cloud.service" ];
-    wants = [ "rclone-cloud.service" ];
+    bindsTo = [ "rclone-cloud.service" ];
     serviceConfig.ExecStartPre = "${pkgs.coreutils}/bin/sleep 10";
   };
 
