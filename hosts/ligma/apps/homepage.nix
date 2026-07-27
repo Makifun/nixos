@@ -151,13 +151,6 @@
       }
       {
         resources = {
-          label = "/cloud";
-          disk = "/cloud";
-          expanded = true;
-        };
-      }
-      {
-        resources = {
           label = "/nicememe";
           disk = "/nicememe";
           expanded = true;
@@ -629,12 +622,6 @@
             };
           }
           {
-            "Rclone Ligma" = {
-              icon = "/images/rclone.png";
-              href = "https://{{HOMEPAGE_VAR_RCLONELIGMA_URL}}";
-            };
-          }
-          {
             "Rclone Storma" = {
               icon = "/images/rclone.png";
               href = "https://{{HOMEPAGE_VAR_RCLONESTORMA_URL}}";
@@ -762,20 +749,6 @@
             };
           }
           {
-            "Kopia" = {
-              icon = "/images/kopia.png";
-              href = "https://{{HOMEPAGE_VAR_KOPIA_URL}}";
-              widget = {
-                type = "kopia";
-                url = "https://{{HOMEPAGE_VAR_KOPIA_URL}}";
-                username = "{{HOMEPAGE_VAR_KOPIA_USERNAME}}";
-                password = "{{HOMEPAGE_VAR_KOPIA_PASSWORD}}";
-                snapshotHost = "jonny";
-                snapshotPath = "/mnt/container-backup";
-              };
-            };
-          }
-          {
             "Backrest Ligma" = {
               icon = "/images/backrest.png";
               href = "https://{{HOMEPAGE_VAR_BACKREST_LIGMA_URL}}";
@@ -794,6 +767,16 @@
               widget = {
                 type = "backrest";
                 url = "http://10.10.10.14:9898";
+              };
+            };
+          }
+          {
+            "Backrest Playma" = {
+              icon = "/images/backrest.png";
+              href = "https://{{HOMEPAGE_VAR_BACKREST_PLAYMA_URL}}";
+              widget = {
+                type = "backrest";
+                url = "http://10.10.10.15:9898";
               };
             };
           }
@@ -883,18 +866,6 @@
             "Grafana" = {
               icon = "/images/grafana.png";
               href = "https://{{HOMEPAGE_VAR_GRAFANA_URL}}";
-            };
-          }
-          {
-            "Traefik Jonny" = {
-              icon = "/images/traefik.png";
-              server = "jonny";
-              container = "traefik";
-              href = "https://{{HOMEPAGE_VAR_TRAEFIK_JONNY_URL}}/dashboard/";
-              widget = {
-                type = "traefik";
-                url = "https://{{HOMEPAGE_VAR_TRAEFIK_JONNY_URL}}";
-              };
             };
           }
           {
