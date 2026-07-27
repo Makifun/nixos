@@ -16,6 +16,7 @@ in
   systemd.tmpfiles.rules = [
     "d /cloud 0755 root root - -"
     "d ${rcloneBase} 0700 root root - -"
+    "d /rclone-cache 0700 root root - -"
   ];
 
   sops.secrets.rclone-config-stage = {
