@@ -696,7 +696,7 @@
           {
             "Proxmox" = {
               icon = "/images/proxmox.png";
-              href = "https://proxmox.${baseFacts.domainName}";
+              href = "https://proxmoxifun.${baseFacts.domainName}:8006";
               widget = {
                 type = "proxmox";
                 fields = [
@@ -704,7 +704,7 @@
                   "resources.cpu"
                   "resources.mem"
                 ];
-                url = "https://proxmox.${baseFacts.domainName}";
+                url = "https://proxmoxifun.${baseFacts.domainName}:8006";
                 username = "{{HOMEPAGE_VAR_PROXMOX_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_PROXMOX_PASSWORD}}";
               };
