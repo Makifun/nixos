@@ -726,7 +726,7 @@
               container = "backrest";
               widget = {
                 type = "backrest";
-                url = "https://backrest-ligma.${baseFacts.domainName}";
+                url = "http://127.0.0.1:9898";
               };
             };
           }
@@ -736,7 +736,7 @@
               href = "https://backrest-bofa.${baseFacts.domainName}";
               widget = {
                 type = "backrest";
-                url = "https://backrest-bofa.${baseFacts.domainName}";
+                url = "http://${hosts.bofa}:9898";
               };
             };
           }
@@ -746,7 +746,7 @@
               href = "https://backrest-playma.${baseFacts.domainName}";
               widget = {
                 type = "backrest";
-                url = "https://backrest-playma.${baseFacts.domainName}";
+                url = "http://${hosts.playma}:9898";
               };
             };
           }
