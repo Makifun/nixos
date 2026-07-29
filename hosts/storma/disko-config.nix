@@ -8,6 +8,7 @@
       ];
     };
     disk.storma = {
+      # 120 G SSD (ata, model=ADATA_SP550_1F3520274890) — OS + Apps + Cache
       type = "disk";
       device = "/dev/disk/by-id/ata-ADATA_SP550_1F3520274890";
       content = {
