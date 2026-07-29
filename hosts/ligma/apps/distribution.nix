@@ -148,7 +148,7 @@ in
   # Traefik — <name>.mirror.${baseFacts.domainName} per instance.
   # ----------------------------------------------------
   services.traefik.dynamicConfigOptions.http = {
-    middlewares."mirror-lan-only".ipAllowList.sourceRange = [ baseFacts.lan ];
+    middlewares."mirror-lan-only".ipAllowList.sourceRange = [ hosts.lan ];
     routers = lib.mapAttrs' (
       name: cfg:
       lib.nameValuePair "dist-${name}" {

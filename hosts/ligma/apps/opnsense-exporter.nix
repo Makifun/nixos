@@ -1,16 +1,21 @@
-{ config, pkgs, ... }:
+{
+  baseFacts,
+  config,
+  pkgs,
+  ...
+}:
 let
   # renovate: datasource=docker depName=ghcr.io/athennamind/opnsense-exporter
   exporterTag = "0.0.16";
 in
 {
   sops.secrets.opnsense-api-key = {
-    format   = "yaml";
+    format = "yaml";
     sopsFile = ../secrets.yaml;
   };
 
   sops.secrets.opnsense-api-secret = {
-    format   = "yaml";
+    format = "yaml";
     sopsFile = ../secrets.yaml;
   };
 
@@ -18,10 +23,10 @@ in
   # directly as env vars to OCI containers.
   systemd.services.opnsense-exporter-env = {
     description = "Write opnsense-exporter env file from SOPS secrets";
-    before      = [ "podman-opnsense-exporter.service" ];
-    requiredBy  = [ "podman-opnsense-exporter.service" ];
+    before = [ "podman-opnsense-exporter.service" ];
+    requiredBy = [ "podman-opnsense-exporter.service" ];
     serviceConfig = {
-      Type            = "oneshot";
+      Type = "oneshot";
       RemainAfterExit = true;
     };
     script = ''
@@ -45,8 +50,8 @@ in
     environmentFiles = [ "/run/opnsense-exporter-env" ];
     cmd = [
       "--opnsense.protocol=https"
-      "--opnsense.address=opnsense.makifun.se"
-      "--exporter.instance-label=opnsense.makifun.se"
+      "--opnsense.address=opnsense.${baseFacts.domainName}"
+      "--exporter.instance-label=opnsense.${baseFacts.domainName}"
       "--web.listen-address=:9091"
       "--log.level=info"
     ];

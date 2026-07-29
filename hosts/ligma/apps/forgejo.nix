@@ -1,25 +1,54 @@
 {
+  baseFacts,
   config,
+  hosts,
   lib,
   pkgs,
   ...
 }:
+let
+  hostname = config.networking.hostName;
+in
 {
+  sops.secrets.forgejo-admin-email = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner = config.services.forgejo.user;
+  };
+
+  sops.secrets.forgejo-admin-password = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner = config.services.forgejo.user;
+  };
+
+  sops.secrets.forgejo-oauth-secret = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner = config.services.forgejo.user;
+  };
+
+  sops.secrets.forgejo-runner-token = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner = "gitea-runner";
+  };
+
   services.forgejo = {
     enable = true;
     package = pkgs.forgejo;
-    stateDir = "/ligma/ligma/forgejo";
+    stateDir = "/${hostname}/${hostname}/forgejo";
     lfs.enable = true;
 
     settings = {
       DEFAULT.APP_NAME = "Forgejo";
 
       server = {
-        DOMAIN = "git.makifun.se";
+        DOMAIN = "git.${baseFacts.domainName}";
         HTTP_ADDR = "127.0.0.1";
         HTTP_PORT = 3010;
-        ROOT_URL = "https://git.makifun.se/";
-        SSH_DOMAIN = "git.makifun.se";
+        ROOT_URL = "https://git.${baseFacts.domainName}/";
+        SSH_DOMAIN = "git.${baseFacts.domainName}";
         SSH_PORT = 22222;
         SSH_LISTEN_PORT = 22222;
         START_SSH_SERVER = true;
@@ -71,27 +100,9 @@
       };
 
       migrations = {
-        ALLOWED_DOMAINS = "github.com, *.github.com, *.githubusercontent.com, *.makifun.se";
+        ALLOWED_DOMAINS = "github.com, *.github.com, *.githubusercontent.com, *.${baseFacts.domainName}";
       };
     };
-  };
-
-  sops.secrets.forgejo-admin-password = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-    owner = config.services.forgejo.user;
-  };
-
-  sops.secrets.forgejo-admin-email = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-    owner = config.services.forgejo.user;
-  };
-
-  sops.secrets.forgejo-oauth-secret = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-    owner = config.services.forgejo.user;
   };
 
   # Wait for Authentik if it's starting, but don't hard-require it —
@@ -112,7 +123,7 @@
   systemd.services.forgejo.preStart = lib.mkAfter ''
     ${lib.getExe config.services.forgejo.package} admin user create \
       --admin \
-      --username makifun \
+      --username ${baseFacts.userName} \
       --email "$(tr -d '\n' < ${config.sops.secrets.forgejo-admin-email.path})" \
       --password "$(tr -d '\n' < ${config.sops.secrets.forgejo-admin-password.path})" \
       || true
@@ -126,11 +137,11 @@
         --id "$_auth_id" \
         --key "forgejo" \
         --secret "$(tr -d '\n' < ${config.sops.secrets.forgejo-oauth-secret.path})" \
-        --auto-discover-url "https://auth.makifun.se/application/o/forgejo-sso/.well-known/openid-configuration" \
+        --auto-discover-url "https://auth.${baseFacts.domainName}/application/o/forgejo-sso/.well-known/openid-configuration" \
         --scopes "openid email profile groups" \
         --group-claim-name "groups" \
         --admin-group "git_admins" \
-        --image-url "https://homepage.makifun.se/images/authentik.png" \
+        --image-url "https://homepage.${baseFacts.domainName}/images/authentik.png" \
         --skip-local-2fa \
         || true
     else
@@ -139,11 +150,11 @@
         --provider openidConnect \
         --key "forgejo" \
         --secret "$(tr -d '\n' < ${config.sops.secrets.forgejo-oauth-secret.path})" \
-        --auto-discover-url "https://auth.makifun.se/application/o/forgejo-sso/.well-known/openid-configuration" \
+        --auto-discover-url "https://auth.${baseFacts.domainName}/application/o/forgejo-sso/.well-known/openid-configuration" \
         --scopes "openid email profile groups" \
         --group-claim-name "groups" \
         --admin-group "git_admins" \
-        --image-url "https://homepage.makifun.se/images/authentik.png" \
+        --image-url "https://homepage.${baseFacts.domainName}/images/authentik.png" \
         --skip-local-2fa \
         || true
     fi
@@ -156,7 +167,7 @@
       "DELETE FROM access_token WHERE name='forgejo-provision';" 2>/dev/null || true
     install -d -m 700 /run/forgejo
     ${lib.getExe config.services.forgejo.package} admin user generate-access-token \
-      --username makifun \
+      --username ${baseFacts.userName} \
       --token-name forgejo-provision \
       --scopes write:admin,read:admin,write:user,read:user \
       --raw 2>/dev/null \
@@ -225,7 +236,7 @@
       http_code="$(curl -s -o /dev/null -w "%{http_code}" \
         -H "Authorization: token $token" -X POST "$base/admin/users" \
         -H "Content-Type: application/json" \
-        -d "{\"email\":\"renovate@makifun.se\",\"login_name\":\"renovate-bot\",\"username\":\"renovate-bot\",\"password\":\"$rand_pass\",\"restricted\":false,\"must_change_password\":false,\"send_notify\":false,\"source_id\":0}")"
+        -d "{\"email\":\"renovate@${baseFacts.domainName}\",\"login_name\":\"renovate-bot\",\"username\":\"renovate-bot\",\"password\":\"$rand_pass\",\"restricted\":false,\"must_change_password\":false,\"send_notify\":false,\"source_id\":0}")"
       echo "forgejo-provision: create user renovate-bot → HTTP $http_code"
       # Grant admin so Renovate can autodiscover all private repos.
       http_code="$(curl -s -o /dev/null -w "%{http_code}" \
@@ -235,10 +246,10 @@
       echo "forgejo-provision: set admin renovate-bot → HTTP $http_code"
 
       # Generate renovate-bot API token and persist it to zstorage.
-      # Only created once — file survives reboots on /ligma (zstorage).
+      # Only created once — file survives reboots on /${hostname} (zstorage).
       # Uses CLI (direct DB access) because the Forgejo API blocks token
       # creation via sudo impersonation ("auth method not allowed").
-      token_file="/ligma/ligma/renovate/token"
+      token_file="/${hostname}/${hostname}/renovate/token"
       if [ ! -s "$token_file" ]; then
         sqlite3 "${config.services.forgejo.settings.database.PATH}" \
           "DELETE FROM access_token WHERE uid=(SELECT id FROM \"user\" WHERE name='renovate-bot') AND name='renovate';" \
@@ -268,18 +279,12 @@
     '';
   };
 
-  sops.secrets.forgejo-runner-token = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-    owner = "gitea-runner";
-  };
-
   services.gitea-actions-runner = {
     package = pkgs.forgejo-runner;
     instances.default = {
       enable = true;
       name = "monolith";
-      url = "https://git.makifun.se";
+      url = "https://git.${baseFacts.domainName}";
       tokenFile = config.sops.secrets.forgejo-runner-token.path;
       labels = [
         "go-builder:docker://golang:alpine"
@@ -321,12 +326,12 @@
   ];
 
   networking.firewall.extraInputRules = ''
-    tcp dport 22222 ip saddr 10.10.10.0/24 accept comment "Forgejo SSH"
+    tcp dport 22222 ip saddr ${hosts.lan} accept comment "Forgejo SSH"
   '';
 
   services.traefik.dynamicConfigOptions.http = {
     routers.forgejo = {
-      rule = "Host(`git.makifun.se`)";
+      rule = "Host(`git.${baseFacts.domainName}`)";
       entryPoints = [ "websecure" ];
       service = "forgejo";
       tls.certResolver = "letsencrypt";
@@ -334,5 +339,5 @@
     services.forgejo.loadBalancer.servers = [ { url = "http://127.0.0.1:3010"; } ];
   };
 
-  ligma.dnsRecords."git.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."git.${baseFacts.domainName}".value = hosts.ligma;
 }

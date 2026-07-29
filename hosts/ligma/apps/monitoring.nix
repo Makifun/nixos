@@ -1,6 +1,38 @@
-{ config, pkgs, ... }:
 {
-  # ---- Prometheus + node_exporter ---------------------------------------------
+  baseFacts,
+  config,
+  hosts,
+  pkgs,
+  ...
+}:
+let
+  hostname = config.networking.hostName;
+in
+{
+  sops.secrets.grafana-secret-key = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner = "grafana";
+  };
+
+  sops.secrets.grafana-oauth-secret = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner = "grafana";
+  };
+
+  sops.secrets.grafana-admin-password = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner = "grafana";
+  };
+
+  sops.secrets.grafana-gotify-token = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+
+  # ---- Prometheus ----------------------------------------------------------------
   environment.persistence."/persist".directories = [
     {
       directory = "/var/lib/prometheus2";
@@ -23,15 +55,11 @@
         job_name = "rclone";
         static_configs = [
           {
-            targets = [ "127.0.0.1:6970" ];
-            labels.instance = "ligma";
-          }
-          {
-            targets = [ "10.10.10.12:6970" ];
+            targets = [ "${hosts.storma}:6970" ];
             labels.instance = "storma";
           }
           {
-            targets = [ "10.10.10.15:6970" ];
+            targets = [ "${hosts.playma}:6970" ];
             labels.instance = "playma";
           }
         ];
@@ -84,7 +112,7 @@
         # node_exporter on OPNsense (FreeBSD node metrics).
         # Relabel strips :9100 so instance matches opnsense-exporter's label.
         job_name = "opnsense-node";
-        static_configs = [ { targets = [ "opnsense.makifun.se:9100" ]; } ];
+        static_configs = [ { targets = [ "opnsense.${baseFacts.domainName}:9100" ]; } ];
         relabel_configs = [
           {
             source_labels = [ "__address__" ];
@@ -96,7 +124,7 @@
       }
       {
         # opnsense-exporter on ligma scrapes OPNsense API over HTTPS.
-        # honor_labels keeps the exporter's instance="opnsense.makifun.se"
+        # honor_labels keeps the exporter's instance="opnsense.${baseFacts.domainName}"
         # so node_* and opnsense_* metrics share the same instance value.
         job_name = "opnsense";
         honor_labels = true;
@@ -110,7 +138,7 @@
         params = {
           module = [ "default" ];
         };
-        static_configs = [ { targets = [ "proxmoxifun.makifun.se" ]; } ];
+        static_configs = [ { targets = [ "proxmox.${baseFacts.domainName}" ]; } ];
         relabel_configs = [
           {
             source_labels = [ "__address__" ];
@@ -129,12 +157,16 @@
       {
         job_name = "unpackerr";
         scheme = "https";
-        static_configs = [ { targets = [ "unpackerr-metrics.makifun.se:443" ]; } ];
+        static_configs = [ { targets = [ "unpackerr-metrics.${baseFacts.domainName}:443" ]; } ];
       }
     ];
   };
 
   # ---- Grafana ----------------------------------------------------------------
+  systemd.tmpfiles.rules = [
+    "d '/${hostname}/${hostname}/grafana' 0700 grafana grafana - -"
+  ];
+
   environment.etc."grafana-dashboards/registry.json" = {
     source = ../grafana_dashboards/registry.json;
     mode = "0444";
@@ -170,43 +202,16 @@
     mode = "0444";
   };
 
-  systemd.tmpfiles.rules = [
-    "d '/ligma/ligma/grafana' 0700 grafana grafana - -"
-  ];
-
-  sops.secrets.grafana-secret-key = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-    owner = "grafana";
-  };
-
-  sops.secrets.grafana-oauth-secret = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-    owner = "grafana";
-  };
-
-  sops.secrets.grafana-admin-password = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-    owner = "grafana";
-  };
-
-  sops.secrets.grafana-gotify-token = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-  };
-
   services.grafana = {
     enable = true;
-    dataDir = "/ligma/ligma/grafana";
+    dataDir = "/${hostname}/${hostname}/grafana";
 
     settings = {
       server = {
         http_addr = "127.0.0.1";
         http_port = 3000;
-        domain = "grafana.makifun.se";
-        root_url = "https://grafana.makifun.se/";
+        domain = "grafana.${baseFacts.domainName}";
+        root_url = "https://grafana.${baseFacts.domainName}/";
       };
       # Authentik OIDC — role determined by group membership:
       #   grafana_admin  → Admin
@@ -217,9 +222,9 @@
         client_id = "grafana";
         client_secret = "$__file{${config.sops.secrets.grafana-oauth-secret.path}}";
         scopes = "openid profile email groups";
-        auth_url = "https://auth.makifun.se/application/o/authorize/";
-        token_url = "https://auth.makifun.se/application/o/token/";
-        api_url = "https://auth.makifun.se/application/o/userinfo/";
+        auth_url = "https://auth.${baseFacts.domainName}/application/o/authorize/";
+        token_url = "https://auth.${baseFacts.domainName}/application/o/token/";
+        api_url = "https://auth.${baseFacts.domainName}/application/o/userinfo/";
         role_attribute_path = "contains(groups[*], 'grafana_admin') && 'Admin' || contains(groups[*], 'app_admins') && 'Admin' || contains(groups[*], 'grafana_viewer') && 'Viewer' || 'Viewer'";
         allow_sign_up = true;
         use_pkce = true;
@@ -272,7 +277,7 @@
                 uid = "gotify";
                 type = "webhook";
                 settings = {
-                  url = "https://gotify.makifun.se/message?token=\${GOTIFY_TOKEN}";
+                  url = "https://gotify.${baseFacts.domainName}/message?token=\${GOTIFY_TOKEN}";
                   httpMethod = "POST";
                   # Grafana webhook always sends its own JSON body; `message` sets
                   # only the `message` field within that payload. Keep it plain text.
@@ -337,7 +342,7 @@
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       grafana = {
-        rule = "Host(`grafana.makifun.se`)";
+        rule = "Host(`grafana.${baseFacts.domainName}`)";
         entryPoints = [ "websecure" ];
         service = "grafana-svc";
         tls.certResolver = "letsencrypt";
@@ -348,21 +353,21 @@
       #   priority 10: /api/v1/write — no SSO (Alloy remote_write)
       #   priority  1: everything else — Authentik SSO
       prometheus-outpost = {
-        rule = "Host(`prometheus.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`prometheus.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
       prometheus-write = {
-        rule = "Host(`prometheus.makifun.se`) && PathPrefix(`/api/v1/write`)";
+        rule = "Host(`prometheus.${baseFacts.domainName}`) && PathPrefix(`/api/v1/write`)";
         priority = 10;
         entryPoints = [ "websecure" ];
         service = "prometheus-svc";
         tls.certResolver = "letsencrypt";
       };
       prometheus = {
-        rule = "Host(`prometheus.makifun.se`)";
+        rule = "Host(`prometheus.${baseFacts.domainName}`)";
         priority = 1;
         entryPoints = [ "websecure" ];
         service = "prometheus-svc";
@@ -376,6 +381,6 @@
     };
   };
 
-  ligma.dnsRecords."grafana.makifun.se".value = "10.10.10.13";
-  ligma.dnsRecords."prometheus.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."grafana.${baseFacts.domainName}".value = hosts.ligma;
+  ligma.dnsRecords."prometheus.${baseFacts.domainName}".value = hosts.ligma;
 }

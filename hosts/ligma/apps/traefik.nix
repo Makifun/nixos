@@ -1,21 +1,44 @@
-{ config, ... }:
 {
-  services.traefik.enable = true;
+  baseFacts,
+  config,
+  hosts,
+  ...
+}:
+let
+  hostname = config.networking.hostName;
+in
+{
+  # traefik_env: |
+  #   CF_DNS_API_TOKEN=<token>
+  sops.secrets.traefik_env = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+    owner = "traefik";
+  };
 
-  # Cloudflare DNS API token for wildcard cert challenge.
-  # Secret file must contain: CF_DNS_API_TOKEN=<token>
-  # Token needs Zone:DNS:Edit permission for makifun.se.
-  services.traefik.environmentFiles = [ config.sops.secrets.traefik_env.path ];
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/traefik";
+      user = "traefik";
+      group = "traefik";
+      mode = "0700";
+    }
+  ];
+
+  services.traefik = {
+    enable = true;
+    environmentFiles = [ config.sops.secrets.traefik_env.path ];
+  };
 
   networking.firewall.extraInputRules = ''
     # OPNsense
-    ip saddr 10.10.10.0/24 tcp dport 80 accept
-    ip saddr 10.10.10.0/24 tcp dport 443 accept
-    ip saddr 10.10.10.0/24 udp dport 443 accept
+    ip saddr ${hosts.lan} tcp dport 80 accept
+    ip saddr ${hosts.lan} tcp dport 443 accept
+    ip saddr ${hosts.lan} udp dport 443 accept
     # WireGuard
-    ip saddr 10.10.11.0/24 tcp dport 80 accept
-    ip saddr 10.10.11.0/24 tcp dport 443 accept
-    ip saddr 10.10.11.0/24 udp dport 443 accept
+    ip saddr ${hosts.wireguard} tcp dport 80 accept
+    ip saddr ${hosts.wireguard} tcp dport 443 accept
+    ip saddr ${hosts.wireguard} udp dport 443 accept
   '';
 
   services.traefik.staticConfigOptions = {
@@ -23,15 +46,15 @@
     log.level = "INFO";
     accessLog.format = "json";
 
-    # Dashboard accessible on port 8090 (firewalled, internal only).
-    # Port 8080 is reserved for the UniFi device inform endpoint.
     api = {
       dashboard = true;
       insecure = true;
     };
-    entryPoints.traefik.address = "127.0.0.1:8090";
 
     entryPoints = {
+      traefik = {
+        address = "127.0.0.1:8090";
+      };
       web = {
         address = ":80";
         http.redirections.entryPoint = {
@@ -43,17 +66,17 @@
       websecure = {
         address = ":443";
         http3.advertisedPort = 443;
-        # Trust X-Forwarded-For from HAProxy on OPNsense (10.10.10.1).
+        # Trust X-Forwarded-For from HAProxy on OPNsense.
         # HAProxy sets it from CF-Connecting-IP so Authentik/apps see the real client IP.
-        forwardedHeaders.trustedIPs = [ "10.10.10.1/32" ];
+        forwardedHeaders.trustedIPs = [ hosts.opnsense ];
         http.tls = {
           certResolver = "letsencrypt";
           domains = [
             {
-              main = "makifun.se";
+              main = baseFacts.domainName;
               sans = [
-                "*.makifun.se"
-                "*.mirror.makifun.se"
+                "*.${baseFacts.domainName}"
+                "*.mirror.${baseFacts.domainName}"
               ];
             }
           ];
@@ -62,7 +85,7 @@
     };
 
     certificatesResolvers.letsencrypt.acme = {
-      email = "admin@makifun.se";
+      email = "admin@${baseFacts.domainName}";
       storage = "/var/lib/traefik/acme.json";
       keyType = "EC384";
       dnsChallenge = {
@@ -72,39 +95,19 @@
         };
       };
     };
-
-  };
-
-  # Persist ACME certificates and Traefik state across reboots
-  environment.persistence."/persist".directories = [
-    {
-      directory = "/var/lib/traefik";
-      user = "traefik";
-      group = "traefik";
-      mode = "0700";
-    }
-  ];
-
-  # Traefik Cloudflare token (CF_DNS_API_TOKEN=<token>)
-  sops.secrets.traefik_env = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-    owner = "traefik";
   };
 
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       traefik-dashboard = {
-        rule = "Host(`traefik-ligma.makifun.se`)";
+        rule = "Host(`traefik-${hostname}.${baseFacts.domainName}`)";
         entryPoints = [ "websecure" ];
         service = "api@internal";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
-      # Routes the post-login callback back to the embedded outpost.
-      # Authentik redirects here after authentication to set the session cookie.
       traefik-dashboard-outpost = {
-        rule = "Host(`traefik-ligma.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`traefik-${hostname}.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
@@ -133,5 +136,5 @@
     ];
   };
 
-  ligma.dnsRecords."traefik-ligma.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."traefik-${hostname}.${baseFacts.domainName}".value = hosts.ligma;
 }

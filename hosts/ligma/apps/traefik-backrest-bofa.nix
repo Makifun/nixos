@@ -1,20 +1,19 @@
-{ hosts, ... }:
+{ baseFacts, hosts, ... }:
 let
-  bofaIp = hosts.bofa;
   backrestPort = 9898;
 in
 {
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       backrest-bofa-outpost = {
-        rule = "Host(`backrest-bofa.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`backrest-bofa.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
       backrest-bofa = {
-        rule = "Host(`backrest-bofa.makifun.se`)";
+        rule = "Host(`backrest-bofa.${baseFacts.domainName}`)";
         priority = 1;
         entryPoints = [ "websecure" ];
         service = "backrest-bofa-svc";
@@ -23,9 +22,9 @@ in
       };
     };
     services."backrest-bofa-svc".loadBalancer.servers = [
-      { url = "http://${bofaIp}:${toString backrestPort}"; }
+      { url = "http://${hosts.bofa}:${toString backrestPort}"; }
     ];
   };
 
-  ligma.dnsRecords."backrest-bofa.makifun.se".value = hosts.ligma;
+  ligma.dnsRecords."backrest-bofa.${baseFacts.domainName}".value = hosts.ligma;
 }

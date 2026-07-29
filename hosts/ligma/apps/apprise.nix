@@ -1,7 +1,13 @@
-{ ... }:
+{
+  config,
+  baseFacts,
+  hosts,
+  ...
+}:
 let
+  hostname = config.networking.hostName;
   apprisePort = 8097;
-  appriseBase = "/ligma/ligma/apprise";
+  appriseBase = "/${hostname}/${hostname}/apprise";
   # renovate: datasource=docker depName=linuxserver/apprise-api registryUrl=https://lscr.io
   appriseTag = "1.5.1";
 in
@@ -17,7 +23,7 @@ in
     environment = {
       PUID = "1000";
       PGID = "1000";
-      TZ = "Europe/Stockholm";
+      TZ = baseFacts.timeZone;
     };
     volumes = [
       "${appriseBase}/config:/config"
@@ -25,33 +31,24 @@ in
     ];
   };
 
-  # ---------------------------------------------------------------------------
-  # Traefik
-  #
-  # Three routers, explicit priorities:
-  #   apprise-outpost (30) — Authentik post-login callback, no middleware
-  #   apprise-api     (10) — /notify paths bypass Authentik so external
-  #                          services can send notifications without SSO
-  #   apprise          (1) — catch-all, Authentik gate for browser access
-  # ---------------------------------------------------------------------------
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       apprise-outpost = {
-        rule = "Host(`apprise.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`apprise.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
       apprise-api = {
-        rule = "Host(`apprise.makifun.se`) && PathPrefix(`/notify`)";
+        rule = "Host(`apprise.${baseFacts.domainName}`) && PathPrefix(`/notify`)";
         priority = 10;
         entryPoints = [ "websecure" ];
         service = "apprise-svc";
         tls.certResolver = "letsencrypt";
       };
       apprise = {
-        rule = "Host(`apprise.makifun.se`)";
+        rule = "Host(`apprise.${baseFacts.domainName}`)";
         priority = 1;
         entryPoints = [ "websecure" ];
         service = "apprise-svc";
@@ -64,5 +61,5 @@ in
     ];
   };
 
-  ligma.dnsRecords."apprise.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."apprise.${baseFacts.domainName}".value = hosts.ligma;
 }

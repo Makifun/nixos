@@ -1,29 +1,37 @@
-{ config, ... }:
+{
+  baseFacts,
+  config,
+  hosts,
+  ...
+}:
 let
+  hostname = config.networking.hostName;
   vaultwardenPort = 8310;
-  vaultwardenBase = "/ligma/ligma/vaultwarden";
+  vaultwardenBase = "/${hostname}/${hostname}/vaultwarden";
   # renovate: datasource=docker depName=vaultwarden/server
   vaultwardenTag = "1.37.0";
 in
 {
-  # Data dir owned by UID/GID 1000 — vaultwarden container runs as that user.
-  systemd.tmpfiles.rules = [
-    "d '${vaultwardenBase}' 0700 1000 1000 - -"
-  ];
-
+  # vaultwarden_env: |
+  #   ADMIN_TOKEN=<token>
+  #   SSO_CLIENT_SECRET=<secret>
   sops.secrets.vaultwarden_env = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
     owner = "root";
   };
 
+  # Data dir owned by UID/GID 1000 — vaultwarden container runs as that user.
+  systemd.tmpfiles.rules = [
+    "d '${vaultwardenBase}' 0700 1000 1000 - -"
+  ];
+
   virtualisation.oci-containers.containers.vaultwarden = {
     image = "docker.io/vaultwarden/server:${vaultwardenTag}";
-    # Bind to loopback only; container listens on port 80 by default.
     ports = [ "127.0.0.1:${toString vaultwardenPort}:80" ];
     environment = {
       DATA_FOLDER = "/data";
-      DOMAIN = "https://vault.makifun.se";
+      DOMAIN = "https://vault.${baseFacts.domainName}";
       SIGNUPS_ALLOWED = "false";
       INVITATIONS_ALLOWED = "false";
       SHOW_PASSWORD_HINT = "false";
@@ -31,12 +39,11 @@ in
       EXTENDED_LOGGING = "true";
       SSO_ENABLED = "true";
       SSO_CLIENT_ID = "vaultwarden";
-      SSO_AUTHORITY = "https://auth.makifun.se/application/o/vaultwarden-sso/";
+      SSO_AUTHORITY = "https://auth.${baseFacts.domainName}/application/o/vaultwarden-sso/";
       SSO_SCOPES = "email profile offline_access";
       SSO_SIGNUPS_MATCH_EMAIL = "true";
       SSO_CLIENT_CACHE_EXPIRATION = "0";
     };
-    # ADMIN_TOKEN and SSO_CLIENT_SECRET come from SOPS secret.
     environmentFiles = [ config.sops.secrets.vaultwarden_env.path ];
     volumes = [ "${vaultwardenBase}:/data" ];
   };
@@ -68,7 +75,7 @@ in
 
   services.traefik.dynamicConfigOptions.http = {
     routers.vaultwarden = {
-      rule = "Host(`vault.makifun.se`)";
+      rule = "Host(`vault.${baseFacts.domainName}`)";
       entryPoints = [ "websecure" ];
       service = "vaultwarden";
       tls.certResolver = "letsencrypt";
@@ -78,5 +85,5 @@ in
     ];
   };
 
-  ligma.dnsRecords."vault.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."vault.${baseFacts.domainName}".value = hosts.ligma;
 }

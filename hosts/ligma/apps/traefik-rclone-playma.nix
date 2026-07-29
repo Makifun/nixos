@@ -1,20 +1,19 @@
-{ hosts, ... }:
+{ baseFacts, hosts, ... }:
 let
-  playmaIp = hosts.playma;
   rclonePort = 6969;
 in
 {
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       rclone-playma-outpost = {
-        rule = "Host(`rclone-playma.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`rclone-playma.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
       rclone-playma = {
-        rule = "Host(`rclone-playma.makifun.se`)";
+        rule = "Host(`rclone-playma.${baseFacts.domainName}`)";
         priority = 1;
         entryPoints = [ "websecure" ];
         service = "rclone-playma-svc";
@@ -23,9 +22,9 @@ in
       };
     };
     services."rclone-playma-svc".loadBalancer.servers = [
-      { url = "http://${playmaIp}:${toString rclonePort}"; }
+      { url = "http://${hosts.playma}:${toString rclonePort}"; }
     ];
   };
 
-  ligma.dnsRecords."rclone-playma.makifun.se".value = hosts.ligma;
+  ligma.dnsRecords."rclone-playma.${baseFacts.domainName}".value = hosts.ligma;
 }

@@ -1,18 +1,19 @@
 {
   config,
+  baseFacts,
+  hosts,
   lib,
   pkgs,
   ...
 }:
 let
-  base = "/ligma/ligma/omni";
+  hostname = config.networking.hostName;
+  omniBase = "/${hostname}/${hostname}/omni";
   k8sProxyPortExternal = 6443;
   k8sProxyPort = 8098;
   machineApiPort = 8091;
   uiPort = 9999;
   wgPort = 50180;
-  ligmaIP = "10.10.10.13";
-  initialUser = "makifun@pm.me";
   # renovate: datasource=docker depName=ghcr.io/siderolabs/omni
   omniTag = "v1.9.3";
 
@@ -25,6 +26,10 @@ let
 in
 {
   sops.secrets = {
+    omni-initial-user = {
+      format = "yaml";
+      sopsFile = ../secrets.yaml;
+    };
     omni-account-uuid = {
       format = "yaml";
       sopsFile = ../secrets.yaml;
@@ -47,11 +52,11 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d '${base}'      0750 root root - -"
-    "d '${base}/db'   0750 root root - -"
-    "d '${base}/etcd' 0750 root root - -"
-    "d '${base}/keys' 0750 root root - -"
-    "d '${base}/tls'  0750 root root - -"
+    "d '${omniBase}'      0750 root root - -"
+    "d '${omniBase}/db'   0750 root root - -"
+    "d '${omniBase}/etcd' 0750 root root - -"
+    "d '${omniBase}/keys' 0750 root root - -"
+    "d '${omniBase}/tls'  0750 root root - -"
   ];
 
   # Stage JWT signing key from sops, generate self-signed TLS for the API
@@ -73,15 +78,15 @@ in
       RemainAfterExit = true;
     };
     script = ''
-      install -m 0640 ${config.sops.secrets.omni-jwt-signing-key.path} ${base}/keys/jwt.pem
+      install -m 0640 ${config.sops.secrets.omni-jwt-signing-key.path} ${omniBase}/keys/jwt.pem
 
-      cert=${base}/tls/server.crt
-      key=${base}/tls/server.key
+      cert=${omniBase}/tls/server.crt
+      key=${omniBase}/tls/server.key
       if [ ! -f "$cert" ]; then
         openssl req -x509 -nodes -newkey rsa:2048 -days 3650 \
           -keyout "$key" -out "$cert" \
-          -subj "/CN=omni.makifun.se" \
-          -addext "subjectAltName=DNS:omni.makifun.se,DNS:localhost,IP:127.0.0.1,IP:${ligmaIP}"
+          -subj "/CN=omni.${baseFacts.domainName}" \
+          -addext "subjectAltName=DNS:omni.${baseFacts.domainName},DNS:localhost,IP:127.0.0.1,IP:${hosts.ligma}"
         chmod 0640 "$key" "$cert"
       fi
     '';
@@ -95,37 +100,37 @@ in
     ];
     environmentFiles = [ config.sops.templates."omni.env".path ];
     cmd = [
-      "--advertised-api-url=https://omni.makifun.se/"
-      "--advertised-kubernetes-proxy-url=https://omni.makifun.se:${toString k8sProxyPortExternal}"
+      "--advertised-api-url=https://omni.${baseFacts.domainName}/"
+      "--advertised-kubernetes-proxy-url=https://omni.${baseFacts.domainName}:${toString k8sProxyPortExternal}"
       "--auth-saml-attribute-rules=${samlAttributeRules}"
       "--auth-saml-enabled"
-      "--auth-saml-url=https://auth.makifun.se/application/saml/omni/metadata/?download"
+      "--auth-saml-url=https://auth.${baseFacts.domainName}/application/saml/omni/metadata/?download"
       "--bind-addr=0.0.0.0:${toString uiPort}"
       "--cert=/tls/server.crt"
       "--etcd-embedded-db-path=/_out/etcd"
       "--etcd-embedded"
-      "--initial-users=${initialUser}"
+      "--initial-users=${config.sops.secrets.omni-initial-user.path}"
       "--k8s-proxy-bind-addr=0.0.0.0:${toString k8sProxyPort}"
       "--key=/tls/server.key"
-      "--machine-api-advertised-url=grpc://${ligmaIP}:${toString machineApiPort}"
+      "--machine-api-advertised-url=grpc://${hosts.ligma}:${toString machineApiPort}"
       "--machine-api-bind-addr=0.0.0.0:${toString machineApiPort}"
-      "--name=ligma"
+      "--name=${hostname}"
       "--private-key-source=file:///keys/jwt.pem"
-      "--siderolink-wireguard-advertised-addr=${ligmaIP}:${toString wgPort}"
+      "--siderolink-wireguard-advertised-addr=${hosts.ligma}:${toString wgPort}"
       "--siderolink-wireguard-bind-addr=0.0.0.0:${toString wgPort}"
       "--sqlite-storage-path=/_out/db/omni.db"
     ];
     ports = [
       "127.0.0.1:${toString uiPort}:${toString uiPort}"
-      "${ligmaIP}:${toString wgPort}:${toString wgPort}/udp"
-      "${ligmaIP}:${toString machineApiPort}:${toString machineApiPort}"
       "127.0.0.1:${toString k8sProxyPort}:${toString k8sProxyPort}"
+      "${hosts.ligma}:${toString wgPort}:${toString wgPort}/udp"
+      "${hosts.ligma}:${toString machineApiPort}:${toString machineApiPort}"
     ];
     volumes = [
-      "${base}/etcd:/_out/etcd"
-      "${base}/db:/_out/db"
-      "${base}/keys:/keys:ro"
-      "${base}/tls:/tls:ro"
+      "${omniBase}/etcd:/_out/etcd"
+      "${omniBase}/db:/_out/db"
+      "${omniBase}/keys:/keys:ro"
+      "${omniBase}/tls:/tls:ro"
     ];
   };
 
@@ -143,9 +148,9 @@ in
   };
 
   networking.firewall.extraInputRules = ''
-    ip saddr 10.10.10.0/24 udp dport ${toString wgPort} accept
-    ip saddr 10.10.10.0/24 tcp dport ${toString machineApiPort} accept
-    ip saddr 10.10.10.0/24 tcp dport ${toString k8sProxyPortExternal} accept
+    ip saddr ${hosts.lan} udp dport ${toString wgPort} accept
+    ip saddr ${hosts.lan} tcp dport ${toString machineApiPort} accept
+    ip saddr ${hosts.lan} tcp dport ${toString k8sProxyPortExternal} accept
   '';
 
   # Traefik — TLS termination + proxy to the container's HTTPS listeners.
@@ -157,13 +162,13 @@ in
 
   services.traefik.dynamicConfigOptions.http = {
     routers.omni = {
-      rule = "Host(`omni.makifun.se`)";
+      rule = "Host(`omni.${baseFacts.domainName}`)";
       entryPoints = [ "websecure" ];
       service = "omni-svc";
       tls.certResolver = "letsencrypt";
     };
     routers."omni-k8s-proxy" = {
-      rule = "Host(`omni.makifun.se`)";
+      rule = "Host(`omni.${baseFacts.domainName}`)";
       entryPoints = [ "k8s-proxy" ];
       service = "omni-k8s-proxy-svc";
       tls.certResolver = "letsencrypt";
@@ -179,5 +184,5 @@ in
     serversTransports."omni-self-signed".insecureSkipVerify = true;
   };
 
-  ligma.dnsRecords."omni.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."omni.${baseFacts.domainName}".value = hosts.ligma;
 }

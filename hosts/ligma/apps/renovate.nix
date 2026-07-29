@@ -1,20 +1,26 @@
-{ config, pkgs, ... }:
+{
+  baseFacts,
+  config,
+  pkgs,
+  ...
+}:
 let
+  hostname = config.networking.hostName;
   # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
-  renovateTag    = "43.251.3";
-  dataDir        = "/ligma/ligma/renovate";
-  tokenFile      = "${dataDir}/token";
+  renovateTag = "43.251.3";
+  dataDir = "/${hostname}/${hostname}/renovate";
+  tokenFile = "${dataDir}/token";
   githubTokenFile = config.sops.secrets."renovate-github-token".path;
   renovateConfig = pkgs.writeText "renovate-config.yaml" ''
     platform: gitea
-    endpoint: https://git.makifun.se/
-    gitAuthor: "Renovate Bot <renovate@makifun.se>"
+    endpoint: https://git.${baseFacts.domainName}/
+    gitAuthor: "Renovate Bot <renovate@${baseFacts.domainName}>"
     baseDir: /data
     binarySource: global
     prHourlyLimit: 0
     prConcurrentLimit: 0
     hostRules:
-      - matchHost: https://git.makifun.se
+      - matchHost: https://git.${baseFacts.domainName}
         hostType: docker
         username: renovate-bot
         password: "{{ env.RENOVATE_TOKEN }}"
@@ -22,7 +28,6 @@ let
         token: "{{ env.GITHUB_COM_TOKEN }}"
     repositories:
       - "makifun/authentik"
-      - "makifun/graylog"
       - "makifun/makiplex-bot"
       - "makifun/sugma"
     onboarding: true
@@ -31,9 +36,9 @@ let
 in
 {
   sops.secrets."renovate-github-token" = {
-    format   = "yaml";
+    format = "yaml";
     sopsFile = ../secrets.yaml;
-    owner    = config.services.forgejo.user;
+    owner = config.services.forgejo.user;
   };
 
   systemd.tmpfiles.rules = [
@@ -42,9 +47,12 @@ in
 
   systemd.services.renovate = {
     description = "Renovate dependency updater";
-    after       = [ "network-online.target" "forgejo-provision.service" ];
-    wants       = [ "network-online.target" ];
-    path        = [ pkgs.podman ];
+    after = [
+      "network-online.target"
+      "forgejo-provision.service"
+    ];
+    wants = [ "network-online.target" ];
+    path = [ pkgs.podman ];
     serviceConfig.Type = "oneshot";
     script = ''
       if [ ! -s ${tokenFile} ]; then
@@ -66,10 +74,10 @@ in
   };
 
   systemd.timers.renovate = {
-    wantedBy    = [ "timers.target" ];
+    wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnCalendar         = "hourly";
-      Persistent         = true;
+      OnCalendar = "hourly";
+      Persistent = true;
       RandomizedDelaySec = "5min";
     };
   };

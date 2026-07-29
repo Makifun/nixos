@@ -1,4 +1,4 @@
-{ hosts, ... }:
+{ baseFacts, hosts, ... }:
 let
   backrestPort = 9898;
 in
@@ -6,14 +6,14 @@ in
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       backrest-outpost = {
-        rule = "Host(`backrest-ligma.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`backrest-ligma.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
       backrest = {
-        rule = "Host(`backrest-ligma.makifun.se`)";
+        rule = "Host(`backrest-ligma.${baseFacts.domainName}`)";
         priority = 1;
         entryPoints = [ "websecure" ];
         service = "backrest-svc";
@@ -26,5 +26,5 @@ in
     ];
   };
 
-  ligma.dnsRecords."backrest-ligma.makifun.se".value = hosts.ligma;
+  ligma.dnsRecords."backrest-ligma.${baseFacts.domainName}".value = hosts.ligma;
 }

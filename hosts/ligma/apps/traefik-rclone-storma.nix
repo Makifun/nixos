@@ -1,4 +1,4 @@
-{ hosts, ... }:
+{ baseFacts, hosts, ... }:
 let
   rclonePort = 6969;
 in
@@ -6,14 +6,14 @@ in
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       rclone-storma-outpost = {
-        rule = "Host(`rclone-storma.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`rclone-storma.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
       rclone-storma = {
-        rule = "Host(`rclone-storma.makifun.se`)";
+        rule = "Host(`rclone-storma.${baseFacts.domainName}`)";
         priority = 1;
         entryPoints = [ "websecure" ];
         service = "rclone-storma-svc";
@@ -26,5 +26,5 @@ in
     ];
   };
 
-  ligma.dnsRecords."rclone-storma.makifun.se".value = hosts.ligma;
+  ligma.dnsRecords."rclone-storma.${baseFacts.domainName}".value = hosts.ligma;
 }

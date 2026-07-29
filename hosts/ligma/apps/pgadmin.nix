@@ -1,5 +1,12 @@
-{ pkgs, ... }:
+{
+  baseFacts,
+  config,
+  hosts,
+  pkgs,
+  ...
+}:
 let
+  hostname = config.networking.hostName;
   pgadminPort = 5050;
 
   serversJson = pkgs.writeText "pgadmin-servers.json" (
@@ -8,7 +15,7 @@ let
         "1" = {
           Name = "bofa (TimescaleDB)";
           Group = "Servers";
-          Host = "10.10.10.14";
+          Host = hosts.bofa;
           Port = 5432;
           MaintenanceDB = "postgres";
           Username = "tracearr";
@@ -29,7 +36,7 @@ let
 in
 {
   systemd.tmpfiles.rules = [
-    "d '/ligma/ligma/pgadmin' 0750 5050 5050 - -"
+    "d '/${hostname}/${hostname}/pgadmin' 0750 5050 5050 - -"
   ];
 
   virtualisation.oci-containers.containers.pgadmin = {
@@ -37,14 +44,14 @@ in
     image = "dpage/pgadmin4:9.16";
     environment = {
       PGADMIN_CONFIG_SERVER_MODE = "False";
-      PGADMIN_DEFAULT_EMAIL = "admin@makifun.se";
+      PGADMIN_DEFAULT_EMAIL = "admin@${baseFacts.domainName}";
       PGADMIN_DEFAULT_PASSWORD = "unused";
       # Cookie protection ties session to client IP — breaks behind Traefik.
       PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION = "False";
       PGADMIN_SERVER_JSON_FILE = "/pgadmin4/servers.json";
     };
     volumes = [
-      "/ligma/ligma/pgadmin:/var/lib/pgadmin"
+      "/${hostname}/${hostname}/pgadmin:/var/lib/pgadmin"
       "/run/postgresql:/run/postgresql"
       "${serversJson}:/pgadmin4/servers.json:ro"
     ];
@@ -54,14 +61,14 @@ in
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       pgadmin = {
-        rule = "Host(`pgadmin.makifun.se`)";
+        rule = "Host(`pgadmin.${baseFacts.domainName}`)";
         entryPoints = [ "websecure" ];
         service = "pgadmin-svc";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
       pgadmin-outpost = {
-        rule = "Host(`pgadmin.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`pgadmin.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
@@ -72,5 +79,5 @@ in
     ];
   };
 
-  ligma.dnsRecords."pgadmin.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."pgadmin.${baseFacts.domainName}".value = hosts.ligma;
 }

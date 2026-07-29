@@ -29,11 +29,11 @@
     ./apps/pgadmin.nix
     ./apps/pve-exporter.nix
     ./apps/renovate.nix
-    ./apps/technitium.nix
     ./apps/traefik-backrest-bofa.nix
     ./apps/traefik-backrest-playma.nix
     ./apps/traefik-rclone-playma.nix
     ./apps/traefik-rclone-storma.nix
+    ./apps/traefik-technitium.nix
     ./apps/traefik.nix
     ./apps/unifi.nix
     ./apps/vaultwarden.nix

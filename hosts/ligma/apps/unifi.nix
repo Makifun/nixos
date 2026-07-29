@@ -1,7 +1,15 @@
-{ pkgs, lib, ... }:
+{
+  baseFacts,
+  config,
+  hosts,
+  lib,
+  pkgs,
+  ...
+}:
 let
+  hostname = config.networking.hostName;
   unifiPort = 8443;
-  unifiBase = "/ligma/ligma/unifi";
+  unifiBase = "/${hostname}/${hostname}/unifi";
   # renovate: datasource=docker depName=mongo versioning=semver
   mongoTag = "8.2.6";
   # renovate: datasource=docker depName=linuxserver/unifi-network-application registryUrl=https://lscr.io
@@ -28,7 +36,6 @@ let
             data, _ = sock.recvfrom(65536)
             f.write(data.decode("utf-8", errors="replace").rstrip("\n") + "\n")
   '';
-
 in
 {
   systemd.tmpfiles.rules = [
@@ -79,7 +86,7 @@ in
       environment = {
         PUID = "1000";
         PGID = "1000";
-        TZ = "Europe/Stockholm";
+        TZ = baseFacts.timeZone;
         MONGO_USER = "unifi";
         MONGO_PASS = "unifi";
         MONGO_HOST = "unifi-db";
@@ -155,28 +162,22 @@ in
   #   podman*        — UniFi container (already trusted by common/alloy.nix rule)
   # ---------------------------------------------------------------------------
   networking.firewall.extraInputRules = ''
-    tcp dport 8080 ip saddr 10.10.10.0/24 accept comment "UniFi device inform"
-    udp dport { 3478, 10001 } ip saddr 10.10.10.0/24 accept comment "UniFi STUN + discovery"
-    udp dport 5141 ip saddr 10.10.10.0/24 accept comment "UniFi syslog (APs + controller)"
+    tcp dport 8080 ip saddr ${hosts.lan} accept comment "UniFi device inform"
+    udp dport { 3478, 10001 } ip saddr ${hosts.lan} accept comment "UniFi STUN + discovery"
+    udp dport 5141 ip saddr ${hosts.lan} accept comment "UniFi syslog (APs + controller)"
   '';
 
-  # ---------------------------------------------------------------------------
-  # Traefik
-  #
-  # The linuxserver image serves HTTPS with a self-signed cert on 8443.
-  # serversTransport skips verification for the local backend only.
-  # ---------------------------------------------------------------------------
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       unifi = {
-        rule = "Host(`unifi.makifun.se`)";
+        rule = "Host(`unifi.${baseFacts.domainName}`)";
         entryPoints = [ "websecure" ];
         service = "unifi-svc";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
       "unifi-outpost" = {
-        rule = "Host(`unifi.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`unifi.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
@@ -189,5 +190,5 @@ in
     serversTransports."unifi-transport".insecureSkipVerify = true;
   };
 
-  ligma.dnsRecords."unifi.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."unifi.${baseFacts.domainName}".value = hosts.ligma;
 }

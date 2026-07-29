@@ -1,24 +1,26 @@
-{ config, pkgs, ... }:
+{
+  baseFacts,
+  config,
+  hosts,
+  pkgs,
+  ...
+}:
 let
+  hostname = config.networking.hostName;
   # renovate: datasource=docker depName=aceberg/watchyourlan
   wylTag = "2.1.4";
-  wylBase = "/ligma/ligma/watchyourlan";
+  wylBase = "/${hostname}/${hostname}/watchyourlan";
 in
 {
-  systemd.tmpfiles.rules = [
-    "d '${wylBase}' 0755 root root - -"
-  ];
-
   sops.secrets.watchyourlan-gotify-token = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
   };
 
-  # ---------------------------------------------------------------------------
-  # WatchYourLAN initial config
-  # Written only on first boot (if config_v2.yaml absent). UI changes persist.
-  # To force re-write: rm /ligma/ligma/watchyourlan/config_v2.yaml + restart.
-  # ---------------------------------------------------------------------------
+  systemd.tmpfiles.rules = [
+    "d '${wylBase}' 0755 root root - -"
+  ];
+
   systemd.services.watchyourlan-config = {
     description = "Write WatchYourLAN initial config_v2.yaml";
     before = [ "podman-watchyourlan.service" ];
@@ -41,7 +43,7 @@ in
       ifaces: ens18
       log_level: info
       port: "8840"
-      shoutrrr_url: "gotify://gotify.makifun.se/__TOKEN__/?title=WatchYourLAN"
+      shoutrrr_url: "gotify://gotify.${baseFacts.domainName}/__TOKEN__/?title=WatchYourLAN"
       theme: sand
       timeout: 60
       trim_hist: 48
@@ -52,18 +54,13 @@ in
     '';
   };
 
-  # ---------------------------------------------------------------------------
-  # WatchYourLAN — lightweight network presence monitor
-  # ARP-scans LAN; notifies via Gotify (Shoutrrr) on new/returning devices.
-  # Host networking required for ARP scans. Web UI at :8840.
-  # ---------------------------------------------------------------------------
   virtualisation.oci-containers.containers.watchyourlan = {
     image = "ghcr.io/aceberg/watchyourlan:${wylTag}";
     volumes = [
       "${wylBase}:/data/WatchYourLAN"
     ];
     environment = {
-      TZ = "Europe/Stockholm";
+      TZ = baseFacts.timeZone;
       IFACES = "ens18";
     };
     extraOptions = [
@@ -73,18 +70,17 @@ in
     ];
   };
 
-  # ---- Traefik ----------------------------------------------------------------
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       watchyourlan = {
-        rule = "Host(`watchyourlan.makifun.se`)";
+        rule = "Host(`watchyourlan.${baseFacts.domainName}`)";
         entryPoints = [ "websecure" ];
         service = "watchyourlan-svc";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
       "watchyourlan-outpost" = {
-        rule = "Host(`watchyourlan.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`watchyourlan.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
@@ -93,5 +89,5 @@ in
     services."watchyourlan-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:8840"; } ];
   };
 
-  ligma.dnsRecords."watchyourlan.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."watchyourlan.${baseFacts.domainName}".value = hosts.ligma;
 }

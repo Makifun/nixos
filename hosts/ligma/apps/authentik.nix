@@ -1,11 +1,14 @@
 {
+  baseFacts,
   config,
+  hosts,
   lib,
   pkgs,
   ...
 }:
 let
-  authBase = "/ligma/ligma/authentik";
+  hostname = config.networking.hostName;
+  authBase = "/${hostname}/${hostname}/authentik";
   # renovate: datasource=docker depName=ghcr.io/goauthentik/server
   authTag = "2026.5.6";
   sharedEnv = {
@@ -24,6 +27,11 @@ let
   sharedExtraOptions = [ "--network=authentik_network" ];
 in
 {
+  sops.secrets.authentik_env = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+
   systemd.services.podman-create-authentik-network = {
     description = "Create authentik_network podman network";
     before = [
@@ -77,11 +85,6 @@ in
     "d '${authBase}/redis'            0755 999      999      - -"
   ];
 
-  sops.secrets.authentik_env = {
-    format = "yaml";
-    sopsFile = ../secrets.yaml;
-  };
-
   virtualisation.oci-containers.containers = {
     authentik-redis = {
       image = "docker.io/redis:7-alpine";
@@ -116,7 +119,7 @@ in
 
   services.traefik.dynamicConfigOptions.http = {
     routers.authentik = {
-      rule = "Host(`auth.makifun.se`)";
+      rule = "Host(`auth.${baseFacts.domainName}`)";
       entryPoints = [ "websecure" ];
       service = "authentik";
       tls.certResolver = "letsencrypt";
@@ -124,5 +127,5 @@ in
     services.authentik.loadBalancer.servers = [ { url = "http://127.0.0.1:9000"; } ];
   };
 
-  ligma.dnsRecords."auth.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."auth.${baseFacts.domainName}".value = hosts.ligma;
 }
