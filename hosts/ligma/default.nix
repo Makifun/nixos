@@ -39,27 +39,6 @@
     ./apps/vaultwarden.nix
     ./apps/watchyourlan.nix
   ];
-  environment.persistence."/persist" = {
-    hideMounts = true;
-    directories = [
-      "/var/log"
-      "/var/lib/nixos"
-      "/var/lib/systemd/coredump"
-    ];
-    files = [
-      "/etc/machine-id"
-    ];
-  };
-  sops.secrets.initrd_ssh_host_ed25519_key = {
-    format = "yaml";
-    sopsFile = ./secrets.yaml;
-  };
-  services.journald.extraConfig = ''
-    SystemMaxUse=512M
-    MaxRetentionSec=7day
-    MaxFileSec=1day
-  '';
-
   systemd.tmpfiles.rules = [
     "d '/ligma/ligma' 0755 root root - -"
   ];

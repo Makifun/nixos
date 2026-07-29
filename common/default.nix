@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 {
   imports = map (f: ./. + "/${f}") (
     builtins.filter (f: f != "default.nix" && lib.hasSuffix ".nix" f) (
@@ -41,6 +46,26 @@
       tree
       vim
     ];
+  };
+  environment.persistence."/persist" = {
+    hideMounts = true;
+    directories = [
+      "/var/log"
+      "/var/lib/nixos"
+      "/var/lib/systemd/coredump"
+    ];
+    files = [
+      "/etc/machine-id"
+    ];
+  };
+  services.journald.extraConfig = ''
+    SystemMaxUse=512M
+    MaxRetentionSec=7day
+    MaxFileSec=1day
+  '';
+  sops.secrets.initrd_ssh_host_ed25519_key = {
+    format = "yaml";
+    sopsFile = ../hosts/${config.networking.hostName}/secrets.yaml;
   };
   programs.nh = {
     enable = true;
