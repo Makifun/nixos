@@ -1,7 +1,13 @@
-{ config, pkgs, ... }:
+{
+  config,
+  hosts,
+  pkgs,
+  ...
+}:
 let
+  hostname = config.networking.hostName;
   pgPort = 5432;
-  pgData = "/bofa/bofa/postgresql";
+  pgData = "/${hostname}/${hostname}/postgresql";
   # renovate: datasource=docker depName=timescale/timescaledb-ha
   pgImage = "timescale/timescaledb-ha:pg18.1-ts2.25.0";
 in
@@ -37,8 +43,6 @@ in
       "--stop-timeout=60"
     ];
     # Tuned for 8 GB RAM (balloon: 5 GB min / 8 GB max), SSD. shared_buffers=25% of max.
-    # max_worker_processes=32: pgtune says 4 (CPU count) but TimescaleDB needs
-    # timescaledb.max_background_workers + max_parallel_workers + autovacuum(3) ≥ 23.
     cmd = [
       "-c"
       "timescaledb.license=timescale"
@@ -123,6 +127,6 @@ in
 
   # Allow sugma cluster nodes to reach PostgreSQL.
   networking.firewall.extraInputRules = ''
-    tcp dport ${toString pgPort} ip saddr { 10.10.10.26/32, 10.10.10.27/32, 10.10.10.28/32 } accept comment "TimescaleDB from sugma"
+    tcp dport ${toString pgPort} ip saddr { ${hosts.sugma01}, ${hosts.sugma02}, ${hosts.sugma03} } accept comment "TimescaleDB from sugma"
   '';
 }
