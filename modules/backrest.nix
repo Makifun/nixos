@@ -59,7 +59,7 @@ in
               "AWS_ACCESS_KEY_ID=${config.sops.placeholder.backrest-aws-access-key-id}"
               "AWS_SECRET_ACCESS_KEY=${config.sops.placeholder.backrest-aws-secret-access-key}"
             ];
-            prunePolicy.schedule.cron = "0 ${toString (scheduleHour + 1)} * * *";
+            prunePolicy.schedule.cron = "30 ${toString scheduleHour} * * *";
           }
         ];
         plans = [
