@@ -186,7 +186,7 @@
                   "movies"
                   "tv"
                 ];
-                url = "${hosts.playma}:32400";
+                url = "https://${hosts.playma}:32400";
                 key = "{{HOMEPAGE_VAR_PLEX_TOKEN}}";
               };
             };
