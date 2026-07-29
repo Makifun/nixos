@@ -1,19 +1,25 @@
-{ config, ... }:
+{
+  config,
+  baseFacts,
+  hosts,
+  ...
+}:
 let
+  hostname = config.networking.hostName;
   gotifyPort = 8096;
-  gotifyBase = "/ligma/ligma/gotify";
+  gotifyBase = "/${hostname}/${hostname}/gotify";
   # renovate: datasource=docker depName=gotify/server
   gotifyTag = "3.0.0";
 in
 {
-  systemd.tmpfiles.rules = [
-    "d '${gotifyBase}' 0755 root root - -"
-  ];
-
   sops.secrets.gotify-oidc-secret = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
   };
+
+  systemd.tmpfiles.rules = [
+    "d '${gotifyBase}' 0755 root root - -"
+  ];
 
   # Write OIDC client secret to a runtime env file so the container picks it up.
   systemd.services.gotify-env-setup = {
@@ -47,38 +53,29 @@ in
     image = "docker.io/gotify/server:${gotifyTag}";
     ports = [ "127.0.0.1:${toString gotifyPort}:80" ];
     environment = {
-      TZ = "Europe/Stockholm";
-      # Traefik is on 127.0.0.1 — trust it as reverse proxy for real client IPs.
+      TZ = "${baseFacts.timeZone}";
       GOTIFY_SERVER_TRUSTEDPROXIES = "127.0.0.1";
       GOTIFY_OIDC_ENABLED = "true";
-      GOTIFY_OIDC_ISSUER = "https://auth.makifun.se/application/o/gotify/";
+      GOTIFY_OIDC_ISSUER = "https://auth.${baseFacts.domainName}/application/o/gotify/";
       GOTIFY_OIDC_CLIENTID = "gotify";
-      GOTIFY_OIDC_REDIRECTURL = "https://gotify.makifun.se/auth/oidc/callback";
-      # Link OIDC logins to existing local users with matching usernames.
+      GOTIFY_OIDC_REDIRECTURL = "https://gotify.${baseFacts.domainName}/auth/oidc/callback";
       GOTIFY_OIDC_LINK_BY_USERNAME = "true";
     };
     environmentFiles = [ "/run/gotify-oidc.env" ];
     volumes = [ "${gotifyBase}:/app/data" ];
   };
 
-  # ---------------------------------------------------------------------------
-  # Traefik
-  #
-  # Two routers (Gotify v3 handles auth natively via OIDC — no Authentik proxy):
-  #   gotify-token (10) — X-Gotify-Key header bypasses OIDC for push senders
-  #   gotify        (1) — catch-all, no middleware (Gotify does OIDC itself)
-  # ---------------------------------------------------------------------------
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       gotify-token = {
-        rule = "Host(`gotify.makifun.se`) && HeaderRegexp(`X-Gotify-Key`, `.+`)";
+        rule = "Host(`gotify.${baseFacts.domainName}`) && HeaderRegexp(`X-Gotify-Key`, `.+`)";
         priority = 10;
         entryPoints = [ "websecure" ];
         service = "gotify-svc";
         tls.certResolver = "letsencrypt";
       };
       gotify = {
-        rule = "Host(`gotify.makifun.se`)";
+        rule = "Host(`gotify.${baseFacts.domainName}`)";
         priority = 1;
         entryPoints = [ "websecure" ];
         service = "gotify-svc";
@@ -90,5 +87,5 @@ in
     ];
   };
 
-  ligma.dnsRecords."gotify.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."gotify.${baseFacts.domainName}".value = hosts.ligma;
 }

@@ -1,15 +1,16 @@
 {
-  domain,
+  baseFacts,
+  config,
   hosts,
-  lan,
   lib,
   pkgs,
   ...
 }:
 let
+  hostname = config.networking.hostName;
   # renovate: datasource=docker depName=registry
   registryTag = "3.1";
-  base = "/ligma/distribution";
+  base = "/${hostname}/distribution";
 
   # One Distribution instance per upstream registry.
   # Each gets its own port, storage directory, and subdomain.
@@ -99,7 +100,7 @@ in
   ) registries;
 
   # ---------------------------------------------
-  # Garbage collection — runs daily at 06:00.
+  # Garbage collection — runs Sundays at 06:00
   # ---------------------------------------------
   systemd.services.distribution-gc = {
     description = "Distribution Registry garbage collection";
@@ -144,14 +145,14 @@ in
   };
 
   # ----------------------------------------------------
-  # Traefik — <name>.mirror.${domain} per instance.
+  # Traefik — <name>.mirror.${baseFacts.domainName} per instance.
   # ----------------------------------------------------
   services.traefik.dynamicConfigOptions.http = {
-    middlewares."mirror-lan-only".ipAllowList.sourceRange = [ lan ];
+    middlewares."mirror-lan-only".ipAllowList.sourceRange = [ baseFacts.lan ];
     routers = lib.mapAttrs' (
       name: cfg:
       lib.nameValuePair "dist-${name}" {
-        rule = "Host(`${name}.mirror.${domain}`)";
+        rule = "Host(`${name}.mirror.${baseFacts.domainName}`)";
         entryPoints = [ "websecure" ];
         service = "dist-${name}-svc";
         middlewares = [ "mirror-lan-only" ];
@@ -167,6 +168,6 @@ in
   };
 
   ligma.dnsRecords = lib.mapAttrs' (
-    name: _: lib.nameValuePair "${name}.mirror.${domain}" { value = hosts.ligma; }
+    name: _: lib.nameValuePair "${name}.mirror.${baseFacts.domainName}" { value = hosts.ligma; }
   ) registries;
 }

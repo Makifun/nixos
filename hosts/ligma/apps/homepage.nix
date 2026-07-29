@@ -1,47 +1,26 @@
-{ config, ... }:
 {
-  # Authentik API token for the homepage widget.
-  # Retrieve from Terraform: tofu output -raw homepage_token
-  # Add to secrets.yaml: homepage-env: "HOMEPAGE_VAR_AUTHENTIK_TOKEN=<token>"
+  baseFacts,
+  config,
+  hosts,
+  ...
+}:
+{
   sops.secrets.homepage-env = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
   };
 
-  # Kubeconfig for sugma k8s cluster (homepage SA token).
-  # After Flux applies k8s/infra/homepage-rbac, build the kubeconfig:
-  #   TOKEN=$(kubectl get secret homepage-token -n homepage -o jsonpath='{.data.token}' | base64 -d)
-  # Then add to secrets.yaml: sops hosts/ligma/secrets.yaml
-  #   homepage-kubeconfig: |
-  #     apiVersion: v1
-  #     kind: Config
-  #     clusters:
-  #     - cluster:
-  #         insecure-skip-tls-verify: true
-  #         server: https://10.10.10.29:6443
-  #       name: sugma
-  #     contexts:
-  #     - context:
-  #         cluster: sugma
-  #         user: homepage
-  #       name: homepage@sugma
-  #     current-context: homepage@sugma
-  #     users:
-  #     - name: homepage
-  #       user:
-  #         token: <TOKEN>
   sops.secrets.homepage-kubeconfig = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
     owner = "homepage-dashboard";
   };
 
-  # Images are served from $HOMEPAGE_CONFIG_DIR/images/ (/etc/homepage-dashboard/images/).
-  # Add files to hosts/ligma/homepage_images/ and they will appear at /images/<file> in homepage.
+  systemd.services.homepage-dashboard.environment.KUBECONFIG =
+    config.sops.secrets.homepage-kubeconfig.path;
+
   environment.etc."homepage-dashboard/images".source = ../homepage_images;
 
-  # The Podman socket (group: podman) is needed for the ligma docker connection.
-  # Repeat the required fields so the merge satisfies NixOS user validation.
   users.users.homepage-dashboard = {
     isSystemUser = true;
     group = "homepage-dashboard";
@@ -49,13 +28,10 @@
   };
   users.groups.homepage-dashboard = { };
 
-  systemd.services.homepage-dashboard.environment.KUBECONFIG =
-    config.sops.secrets.homepage-kubeconfig.path;
-
   services.homepage-dashboard = {
     enable = true;
     listenPort = 8082;
-    allowedHosts = "localhost:8082,127.0.0.1:8082,homepage.makifun.se";
+    allowedHosts = "localhost:8082,127.0.0.1:8082,homepage.${baseFacts.domainName}";
     environmentFiles = [ config.sops.secrets.homepage-env.path ];
 
     kubernetes = {
@@ -171,7 +147,7 @@
       }
       {
         unifi_console = {
-          url = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
+          url = "https://unifi.${baseFacts.domainName}";
           username = "{{HOMEPAGE_VAR_UNIFI_USERNAME}}";
           password = "{{HOMEPAGE_VAR_UNIFI_PASSWORD}}";
         };
@@ -210,7 +186,7 @@
                   "movies"
                   "tv"
                 ];
-                url = "https://{{HOMEPAGE_VAR_PLEX_URL}}";
+                url = "${hosts.playma}:32400";
                 key = "{{HOMEPAGE_VAR_PLEX_TOKEN}}";
               };
             };
@@ -218,12 +194,12 @@
           {
             "Tracearr" = {
               icon = "/images/tracearr.png";
-              href = "https://{{HOMEPAGE_VAR_TRACEARR_URL}}";
+              href = "https://tracearr.${baseFacts.domainName}";
               namespace = "tracearr";
               app = "tracearr";
               widget = {
                 type = "tracearr";
-                url = "https://{{HOMEPAGE_VAR_TRACEARR_URL}}";
+                url = "https://tracearr.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_TRACEARR_TOKEN}}";
                 view = "both";
                 enableUser = true;
@@ -235,7 +211,7 @@
           {
             "Seerr" = {
               icon = "/images/seerr.png";
-              href = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
+              href = "https://seerr.${baseFacts.domainName}";
               namespace = "seerr";
               app = "seerr";
               widget = {
@@ -246,7 +222,7 @@
                   "available"
                   "processing"
                 ];
-                url = "https://{{HOMEPAGE_VAR_SEERR_URL}}";
+                url = "https://seerr.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_SEERR_TOKEN}}";
               };
             };
@@ -254,7 +230,7 @@
           {
             "SeerrOld" = {
               icon = "/images/seerr.png";
-              href = "https://{{HOMEPAGE_VAR_SEERROLD_URL}}";
+              href = "https://seerrold.${baseFacts.domainName}";
               namespace = "seerr";
               app = "seerr";
               widget = {
@@ -265,7 +241,7 @@
                   "available"
                   "processing"
                 ];
-                url = "https://{{HOMEPAGE_VAR_SEERROLD_URL}}";
+                url = "https://seerrold.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_SEERROLD_TOKEN}}";
               };
             };
@@ -278,12 +254,12 @@
           {
             "NZBget" = {
               icon = "/images/nzbget.png";
-              href = "https://{{HOMEPAGE_VAR_NZBGET_URL}}";
+              href = "https://nzbget.${baseFacts.domainName}";
               namespace = "nzbget";
               app = "nzbget";
               widget = {
                 type = "nzbget";
-                url = "https://{{HOMEPAGE_VAR_NZBGET_URL}}";
+                url = "https://nzbget.${baseFacts.domainName}";
                 username = "{{HOMEPAGE_VAR_NZBGET_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_NZBGET_PASSWORD}}";
               };
@@ -292,7 +268,7 @@
           {
             "qBittorrent" = {
               icon = "/images/qbittorrent.png";
-              href = "https://{{HOMEPAGE_VAR_QUI_URL}}";
+              href = "https://qui.${baseFacts.domainName}";
               namespace = "media";
               app = "media";
               widget = {
@@ -303,7 +279,7 @@
                   "seed"
                   "upload"
                 ];
-                url = "https://{{HOMEPAGE_VAR_QBITTORRENT_URL}}";
+                url = "https://qbittorrent.${baseFacts.domainName}";
                 enableLeechProgress = true;
               };
             };
@@ -311,7 +287,7 @@
           {
             "autobrr" = {
               icon = "/images/autobrr.png";
-              href = "https://{{HOMEPAGE_VAR_AUTOBRR_URL}}";
+              href = "https://autobrr.${baseFacts.domainName}";
               namespace = "media";
               app = "media";
               widget = {
@@ -322,7 +298,7 @@
                   "filters"
                   "indexers"
                 ];
-                url = "https://{{HOMEPAGE_VAR_AUTOBRR_URL}}";
+                url = "https://autobrr.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_AUTOBRR_TOKEN}}";
               };
             };
@@ -330,12 +306,12 @@
           {
             "Prowlarrpg" = {
               icon = "/images/prowlarr.png";
-              href = "https://{{HOMEPAGE_VAR_PROWLARRPG_URL}}";
+              href = "https://prowlarrpg.${baseFacts.domainName}";
               namespace = "media";
               app = "media";
               widget = {
                 type = "prowlarr";
-                url = "https://{{HOMEPAGE_VAR_PROWLARRPG_URL}}";
+                url = "https://prowlarrpg.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_PROWLARRPG_TOKEN}}";
               };
             };
@@ -348,7 +324,7 @@
           {
             "Sonarrpg" = {
               icon = "/images/sonarr.png";
-              href = "https://{{HOMEPAGE_VAR_SONARRPG_URL}}";
+              href = "https://sonarrpg.${baseFacts.domainName}";
               namespace = "sonarrpg";
               app = "sonarrpg";
               widget = {
@@ -358,7 +334,7 @@
                   "queued"
                   "series"
                 ];
-                url = "https://{{HOMEPAGE_VAR_SONARRPG_URL}}";
+                url = "https://sonarrpg.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_SONARRPG_TOKEN}}";
                 enableQueue = true;
               };
@@ -367,7 +343,7 @@
           {
             "Radarrpg" = {
               icon = "/images/radarr.png";
-              href = "https://{{HOMEPAGE_VAR_RADARRPG_URL}}";
+              href = "https://radarrpg.${baseFacts.domainName}";
               namespace = "radarrpg";
               app = "radarrpg";
               widget = {
@@ -378,7 +354,7 @@
                   "queued"
                   "movies"
                 ];
-                url = "https://{{HOMEPAGE_VAR_RADARRPG_URL}}";
+                url = "https://radarrpg.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_RADARRPG_TOKEN}}";
                 enableQueue = true;
               };
@@ -387,12 +363,12 @@
           {
             "Bazarr" = {
               icon = "/images/bazarr.png";
-              href = "https://{{HOMEPAGE_VAR_BAZARR_URL}}";
+              href = "https://bazarr.${baseFacts.domainName}";
               namespace = "bazarr";
               app = "bazarr";
               widget = {
                 type = "bazarr";
-                url = "https://{{HOMEPAGE_VAR_BAZARR_URL}}";
+                url = "https://bazarr.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_BAZARR_TOKEN}}";
               };
             };
@@ -405,7 +381,7 @@
           {
             "Sonarr4Kpg" = {
               icon = "/images/sonarr4k.png";
-              href = "https://{{HOMEPAGE_VAR_SONARR4KPG_URL}}";
+              href = "https://sonarr4kpg.${baseFacts.domainName}";
               namespace = "sonarr4kpg";
               app = "sonarr4kpg";
               widget = {
@@ -415,7 +391,7 @@
                   "queued"
                   "series"
                 ];
-                url = "https://{{HOMEPAGE_VAR_SONARR4KPG_URL}}";
+                url = "https://sonarr4kpg.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_SONARR4KPG_TOKEN}}";
                 enableQueue = true;
               };
@@ -424,7 +400,7 @@
           {
             "Radarr4Kpg" = {
               icon = "/images/radarr4k.png";
-              href = "https://{{HOMEPAGE_VAR_RADARR4KPG_URL}}";
+              href = "https://radarr4kpg.${baseFacts.domainName}";
               namespace = "radarr4kpg";
               app = "radarr4kpg";
               widget = {
@@ -435,7 +411,7 @@
                   "queued"
                   "movies"
                 ];
-                url = "https://{{HOMEPAGE_VAR_RADARR4KPG_URL}}";
+                url = "https://radarr4kpg.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_RADARR4KPG_TOKEN}}";
                 enableQueue = true;
               };
@@ -444,12 +420,12 @@
           {
             "Bazarr4K" = {
               icon = "/images/bazarr4k.png";
-              href = "https://{{HOMEPAGE_VAR_BAZARR4K_URL}}";
+              href = "https://bazarr4k.${baseFacts.domainName}";
               namespace = "bazarr4k";
               app = "bazarr4k";
               widget = {
                 type = "bazarr";
-                url = "https://{{HOMEPAGE_VAR_BAZARR4K_URL}}";
+                url = "https://bazarr4k.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_BAZARR4K_TOKEN}}";
               };
             };
@@ -488,12 +464,12 @@
           {
             "Miniflux" = {
               icon = "/images/miniflux.svg";
-              href = "https://{{HOMEPAGE_VAR_MINIFLUX_URL}}";
+              href = "https://miniflux.${baseFacts.domainName}";
               namespace = "miniflux";
               app = "miniflux";
               widget = {
                 type = "miniflux";
-                url = "https://{{HOMEPAGE_VAR_MINIFLUX_URL}}";
+                url = "https://miniflux.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_MINIFLUX_TOKEN}}";
               };
             };
@@ -501,12 +477,12 @@
           {
             "Home Assistant" = {
               icon = "/images/home-assistant.png";
-              href = "https://{{HOMEPAGE_VAR_HOMEASSISTANT_URL}}";
+              href = "https://homeassistant.${baseFacts.domainName}";
               namespace = "homeassistant";
               app = "homeassistant";
               widget = {
                 type = "homeassistant";
-                url = "https://{{HOMEPAGE_VAR_HOMEASSISTANT_URL}}";
+                url = "https://homeassistant.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_HOMEASSISTANT_TOKEN}}";
               };
             };
@@ -514,7 +490,7 @@
           {
             "HAVC" = {
               icon = "/images/havc.png";
-              href = "https://{{HOMEPAGE_VAR_HAVC_URL}}";
+              href = "https://havc.${baseFacts.domainName}";
               namespace = "homeassistant";
               app = "homeassistant";
             };
@@ -522,7 +498,7 @@
           {
             "Forgejo" = {
               icon = "/images/forgejo.png";
-              href = "https://{{HOMEPAGE_VAR_FORGEJO_URL}}";
+              href = "https://git.${baseFacts.domainName}";
               widget = {
                 type = "gitea";
                 fields = [
@@ -530,7 +506,7 @@
                   "issues"
                   "pulls"
                 ];
-                url = "https://{{HOMEPAGE_VAR_FORGEJO_URL}}";
+                url = "https://git.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_FORGEJO_TOKEN}}";
               };
             };
@@ -538,7 +514,7 @@
           {
             "Vaultwarden" = {
               icon = "/images/vaultwarden.png";
-              href = "https://{{HOMEPAGE_VAR_VAULTWARDEN_URL}}";
+              href = "https://vault.${baseFacts.domainName}";
               server = "ligma";
               container = "vaultwarden";
             };
@@ -546,7 +522,7 @@
           {
             "Filebrowser" = {
               icon = "/images/filebrowser.png";
-              href = "https://{{HOMEPAGE_VAR_FILEBROWSER_URL}}";
+              href = "https://filebrowser.${baseFacts.domainName}";
               namespace = "filebrowser";
               app = "filebrowser";
             };
@@ -554,7 +530,7 @@
           {
             "s3manager" = {
               icon = "/images/s3man.png";
-              href = "https://{{HOMEPAGE_VAR_S3MANAGER_URL}}";
+              href = "https://s3manager.${baseFacts.domainName}";
               namespace = "s3manager";
               app = "s3manager";
             };
@@ -562,7 +538,7 @@
           {
             "pgAdmin" = {
               icon = "/images/pgadmin.png";
-              href = "https://{{HOMEPAGE_VAR_PGADMIN_URL}}";
+              href = "https://pgadmin.${baseFacts.domainName}";
               server = "ligma";
               container = "pgadmin";
             };
@@ -570,7 +546,7 @@
           {
             "Profilarr" = {
               icon = "/images/profilarr.png";
-              href = "https://{{HOMEPAGE_VAR_PROFILARR_URL}}";
+              href = "https://profilarr.${baseFacts.domainName}";
               namespace = "profilarr";
               app = "profilarr";
             };
@@ -578,7 +554,7 @@
           {
             "Gotify" = {
               icon = "/images/gotify.png";
-              href = "https://{{HOMEPAGE_VAR_GOTIFY_URL}}";
+              href = "https://gotify.${baseFacts.domainName}";
               server = "ligma";
               container = "gotify";
             };
@@ -586,7 +562,7 @@
           {
             "Apprise" = {
               icon = "/images/apprise.png";
-              href = "https://{{HOMEPAGE_VAR_APPRISE_URL}}";
+              href = "https://apprise.${baseFacts.domainName}";
               server = "ligma";
               container = "apprise";
             };
@@ -594,7 +570,7 @@
           {
             "MediaInfo" = {
               icon = "/images/mediainfo.png";
-              href = "https://{{HOMEPAGE_VAR_MEDIAINFO_URL}}";
+              href = "https://mediainfo.${baseFacts.domainName}";
               namespace = "mediainfo";
               app = "mediainfo";
             };
@@ -602,7 +578,7 @@
           {
             "PrivateBin" = {
               icon = "/images/privatebin.png";
-              href = "https://{{HOMEPAGE_VAR_PRIVATEBIN_URL}}";
+              href = "https://privatebin.${baseFacts.domainName}";
               namespace = "privatebin";
               app = "privatebin";
             };
@@ -610,7 +586,7 @@
           {
             "KasmCord" = {
               icon = "/images/discord.png";
-              href = "https://{{HOMEPAGE_VAR_KASMCORD_URL}}";
+              href = "https://kasmcord.${baseFacts.domainName}";
               namespace = "kasmcord";
               app = "kasmcord";
             };
@@ -618,13 +594,13 @@
           {
             "Rclone Storma" = {
               icon = "/images/rclone.png";
-              href = "https://{{HOMEPAGE_VAR_RCLONESTORMA_URL}}";
+              href = "https://rclone-storma.${baseFacts.domainName}";
             };
           }
           {
             "Rclone Playma" = {
               icon = "/images/rclone.png";
-              href = "https://{{HOMEPAGE_VAR_RCLONEPLAYMA_URL}}";
+              href = "https://rclone-playma.${baseFacts.domainName}";
             };
           }
         ];
@@ -635,10 +611,10 @@
           {
             "OPNsense" = {
               icon = "/images/opnsense.png";
-              href = "https://{{HOMEPAGE_VAR_OPNSENSE_URL}}";
+              href = "https://opnsense.${baseFacts.domainName}";
               widget = {
                 type = "opnsense";
-                url = "https://{{HOMEPAGE_VAR_OPNSENSE_URL}}";
+                url = "https://opnsense.${baseFacts.domainName}";
                 username = "{{HOMEPAGE_VAR_OPNSENSE_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_OPNSENSE_PASSWORD}}";
               };
@@ -647,7 +623,7 @@
           {
             "Technitium" = {
               icon = "/images/technitium.png";
-              href = "https://{{HOMEPAGE_VAR_TECHNITIUM_URL}}";
+              href = "https://technitium.${baseFacts.domainName}";
               widget = {
                 type = "technitium";
                 fields = [
@@ -656,7 +632,7 @@
                   "totalCached"
                   "totalBlocked"
                 ];
-                url = "https://{{HOMEPAGE_VAR_TECHNITIUM_URL}}";
+                url = "https://technitium.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_TECHNITIUM_TOKEN}}";
               };
             };
@@ -664,12 +640,12 @@
           {
             "Unifi Controller" = {
               icon = "/images/unifi.png";
-              href = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
+              href = "https://unifi.${baseFacts.domainName}";
               server = "ligma";
               container = "unifi";
               widget = {
                 type = "unifi";
-                url = "https://{{HOMEPAGE_VAR_UNIFI_URL}}";
+                url = "https://unifi.${baseFacts.domainName}";
                 username = "{{HOMEPAGE_VAR_UNIFI_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_UNIFI_PASSWORD}}";
               };
@@ -680,10 +656,10 @@
               icon = "/images/watchyourlan.png";
               server = "ligma";
               container = "watchyourlan";
-              href = "https://{{HOMEPAGE_VAR_WATCHYOURLAN_URL}}";
+              href = "https://watchyourlan.${baseFacts.domainName}";
               widget = {
                 type = "customapi";
-                url = "https://{{HOMEPAGE_VAR_WATCHYOURLAN_URL}}/api/status/";
+                url = "https://watchyourlan.${baseFacts.domainName}/api/status/";
                 refreshInterval = 300000;
                 method = "GET";
                 display = "block";
@@ -720,7 +696,7 @@
           {
             "Proxmox" = {
               icon = "/images/proxmox.png";
-              href = "https://{{HOMEPAGE_VAR_PROXMOX_URL}}";
+              href = "https://proxmox.${baseFacts.domainName}";
               widget = {
                 type = "proxmox";
                 fields = [
@@ -728,7 +704,7 @@
                   "resources.cpu"
                   "resources.mem"
                 ];
-                url = "https://{{HOMEPAGE_VAR_PROXMOX_URL}}";
+                url = "https://proxmox.${baseFacts.domainName}";
                 username = "{{HOMEPAGE_VAR_PROXMOX_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_PROXMOX_PASSWORD}}";
               };
@@ -737,7 +713,7 @@
           {
             "Omni" = {
               icon = "/images/sidero.png";
-              href = "https://{{HOMEPAGE_VAR_OMNI_URL}}";
+              href = "https://omni.${baseFacts.domainName}";
               server = "ligma";
               container = "omni";
             };
@@ -745,39 +721,39 @@
           {
             "Backrest Ligma" = {
               icon = "/images/backrest.png";
-              href = "https://{{HOMEPAGE_VAR_BACKREST_LIGMA_URL}}";
+              href = "https://backrest-ligma.${baseFacts.domainName}";
               server = "ligma";
               container = "backrest";
               widget = {
                 type = "backrest";
-                url = "http://127.0.0.1:9898";
+                url = "https://backrest-ligma.${baseFacts.domainName}";
               };
             };
           }
           {
             "Backrest Bofa" = {
               icon = "/images/backrest.png";
-              href = "https://{{HOMEPAGE_VAR_BACKREST_BOFA_URL}}";
+              href = "https://backrest-bofa.${baseFacts.domainName}";
               widget = {
                 type = "backrest";
-                url = "http://10.10.10.14:9898";
+                url = "https://backrest-bofa.${baseFacts.domainName}";
               };
             };
           }
           {
             "Backrest Playma" = {
               icon = "/images/backrest.png";
-              href = "https://{{HOMEPAGE_VAR_BACKREST_PLAYMA_URL}}";
+              href = "https://backrest-playma.${baseFacts.domainName}";
               widget = {
                 type = "backrest";
-                url = "http://10.10.10.15:9898";
+                url = "https://backrest-playma.${baseFacts.domainName}";
               };
             };
           }
           {
             "Beszel Ligma" = {
               icon = "/images/beszel.svg";
-              href = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+              href = "https://beszel.${baseFacts.domainName}";
               server = "ligma";
               container = "beszel";
               widget = {
@@ -788,7 +764,7 @@
                   "disk"
                   "network"
                 ];
-                url = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+                url = "https://beszel.${baseFacts.domainName}";
                 username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
                 systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_LIGMA}}";
@@ -799,7 +775,7 @@
           {
             "Beszel Bofa" = {
               icon = "/images/beszel.svg";
-              href = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+              href = "https://beszel.${baseFacts.domainName}";
               widget = {
                 type = "beszel";
                 fields = [
@@ -808,7 +784,7 @@
                   "disk"
                   "network"
                 ];
-                url = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+                url = "https://beszel.${baseFacts.domainName}";
                 username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
                 systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_BOFA}}";
@@ -819,7 +795,7 @@
           {
             "Beszel Playma" = {
               icon = "/images/beszel.svg";
-              href = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+              href = "https://beszel.${baseFacts.domainName}";
               widget = {
                 type = "beszel";
                 fields = [
@@ -828,7 +804,7 @@
                   "disk"
                   "network"
                 ];
-                url = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+                url = "https://beszel.${baseFacts.domainName}";
                 username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
                 systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_PLAYMA}}";
@@ -839,7 +815,7 @@
           {
             "Beszel Storma" = {
               icon = "/images/beszel.svg";
-              href = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+              href = "https://beszel.${baseFacts.domainName}";
               widget = {
                 type = "beszel";
                 fields = [
@@ -848,7 +824,7 @@
                   "disk"
                   "network"
                 ];
-                url = "https://{{HOMEPAGE_VAR_BESZEL_URL}}";
+                url = "https://beszel.${baseFacts.domainName}";
                 username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
                 systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_STORMA}}";
@@ -859,28 +835,28 @@
           {
             "Grafana" = {
               icon = "/images/grafana.png";
-              href = "https://{{HOMEPAGE_VAR_GRAFANA_URL}}";
+              href = "https://grafana.${baseFacts.domainName}";
             };
           }
           {
             "Traefik Ligma" = {
               icon = "/images/traefik.png";
-              href = "https://{{HOMEPAGE_VAR_TRAEFIK_LIGMA_URL}}/dashboard/";
+              href = "https://traefik-ligma.${baseFacts.domainName}/dashboard/";
               widget = {
                 type = "traefik";
-                url = "https://{{HOMEPAGE_VAR_TRAEFIK_LIGMA_URL}}";
+                url = "https://traefik-ligma.${baseFacts.domainName}";
               };
             };
           }
           {
             "Authentik" = {
               icon = "/images/authentik.png";
-              href = "https://{{HOMEPAGE_VAR_AUTHENTIK_URL}}";
+              href = "https://auth.${baseFacts.domainName}";
               server = "ligma";
               container = "authentik-server";
               widget = {
                 type = "authentik";
-                url = "https://{{HOMEPAGE_VAR_AUTHENTIK_URL}}";
+                url = "https://auth.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_AUTHENTIK_TOKEN}}";
                 version = 2;
               };
@@ -889,7 +865,7 @@
           {
             "Gluetun" = {
               icon = "/images/wireguard.png";
-              href = "https://{{HOMEPAGE_VAR_GLUETUN_URL}}";
+              href = "https://gluetun.${baseFacts.domainName}";
               namespace = "media";
               app = "media";
               widget = {
@@ -898,7 +874,7 @@
                   "public_ip"
                   "country"
                 ];
-                url = "https://{{HOMEPAGE_VAR_GLUETUN_URL}}";
+                url = "https://gluetun.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_GLUETUN_TOKEN}}";
               };
             };
@@ -926,20 +902,20 @@
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       homepage = {
-        rule = "Host(`homepage.makifun.se`)";
+        rule = "Host(`homepage.${baseFacts.domainName}`)";
         entryPoints = [ "websecure" ];
         service = "homepage-svc";
         middlewares = [ "authentik" ];
         tls.certResolver = "letsencrypt";
       };
       homepage-images = {
-        rule = "Host(`homepage.makifun.se`) && PathPrefix(`/images/`)";
+        rule = "Host(`homepage.${baseFacts.domainName}`) && PathPrefix(`/images/`)";
         entryPoints = [ "websecure" ];
         service = "homepage-images-svc";
         tls.certResolver = "letsencrypt";
       };
       homepage-outpost = {
-        rule = "Host(`homepage.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`homepage.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
@@ -953,5 +929,5 @@
     ];
   };
 
-  ligma.dnsRecords."homepage.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."homepage.${baseFacts.domainName}".value = hosts.ligma;
 }

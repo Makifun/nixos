@@ -1,7 +1,13 @@
-{ ... }:
+{
+  config,
+  baseFacts,
+  hosts,
+  ...
+}:
 let
+  hostname = config.networking.hostName;
   lokiPort = 3100;
-  lokiBase = "/ligma/ligma/loki";
+  lokiBase = "/${hostname}/${hostname}/loki";
   # renovate: datasource=docker depName=grafana/loki
   lokiTag = "3.7.4";
 in
@@ -69,30 +75,24 @@ in
     wants = [ "podman-loki.service" ];
   };
 
-  # ---------------------------------------------------------------------------
-  # Traefik — three-router split
-  #   priority 30: Authentik outpost callback
-  #   priority 10: /loki/api/v1/push — no SSO (Alloy agents push here)
-  #   priority  1: everything else   — Authentik SSO
-  # ---------------------------------------------------------------------------
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       loki-outpost = {
-        rule = "Host(`loki.makifun.se`) && PathPrefix(`/outpost.goauthentik.io`)";
+        rule = "Host(`loki.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls.certResolver = "letsencrypt";
       };
       loki-push = {
-        rule = "Host(`loki.makifun.se`) && PathPrefix(`/loki/api/v1/push`)";
+        rule = "Host(`loki.${baseFacts.domainName}`) && PathPrefix(`/loki/api/v1/push`)";
         priority = 10;
         entryPoints = [ "websecure" ];
         service = "loki-svc";
         tls.certResolver = "letsencrypt";
       };
       loki = {
-        rule = "Host(`loki.makifun.se`)";
+        rule = "Host(`loki.${baseFacts.domainName}`)";
         priority = 1;
         entryPoints = [ "websecure" ];
         service = "loki-svc";
@@ -105,5 +105,5 @@ in
     ];
   };
 
-  ligma.dnsRecords."loki.makifun.se".value = "10.10.10.13";
+  ligma.dnsRecords."loki.${baseFacts.domainName}".value = hosts.ligma;
 }

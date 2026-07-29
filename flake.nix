@@ -22,8 +22,13 @@
         impermanence.nixosModules.impermanence
         sops-nix.nixosModules.sops
       ];
-      domain = "makifun.se";
+      baseFacts = {
+        userName = "makifun";
+        domainName = "makifun.se";
+        timeZone = "Europe/Stockholm";
+      };
       hosts = {
+        lan = "10.10.10.0/24";
         opnsense = "10.10.10.1";
         technitium = "10.10.10.3";
         storma = "10.10.10.12";
@@ -41,7 +46,7 @@
         modules:
         nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit domain hosts; };
+          specialArgs = { inherit baseFacts hosts; };
           modules = defaultModules ++ modules;
         };
     in
