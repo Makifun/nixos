@@ -14,9 +14,9 @@
     ../../modules/backrest.nix
     ./apps/backrest-extra.nix
     ./apps/beszel.nix
-    ./apps/timescaledb.nix
     ./apps/pg-arrs.nix
     ./apps/pg-dump.nix
+    ./apps/timescaledb.nix
   ];
   environment.persistence."/persist" = {
     hideMounts = true;
