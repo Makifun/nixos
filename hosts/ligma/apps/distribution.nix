@@ -1,8 +1,15 @@
-{ pkgs, lib, ... }:
+{
+  domain,
+  hosts,
+  lan,
+  lib,
+  pkgs,
+  ...
+}:
 let
   # renovate: datasource=docker depName=registry
   registryTag = "3.1";
-  base = "/var/lib/distribution";
+  base = "/ligma/distribution";
 
   # One Distribution instance per upstream registry.
   # Each gets its own port, storage directory, and subdomain.
@@ -37,6 +44,10 @@ let
       storage = {
         filesystem.rootdirectory = "/var/lib/registry";
         delete.enabled = true;
+        cache = {
+          blobdescriptor = "inmemory";
+          blobdescriptorSize = 10000;
+        };
       };
       http = {
         addr = ":5000";
@@ -66,18 +77,9 @@ in
     name: _: "d '${base}/${name}' 0755 root root - -"
   ) registries;
 
-  environment.persistence."/persist".directories = lib.mapAttrsToList (name: _: {
-    directory = "${base}/${name}";
-    user = "root";
-    group = "root";
-    mode = "0755";
-  }) registries;
-
-  # ---------------------------------------------------------------------------
-  # Containers — one per upstream, listening on localhost only.
-  # Podman mirrors are configured to hit 127.0.0.1:<port> directly (no TLS).
-  # External access (e.g. from jonny) goes through Traefik subdomains below.
-  # ---------------------------------------------------------------------------
+  # ---------------------------------
+  # Containers — one per upstream
+  # ---------------------------------
   virtualisation.oci-containers.containers = lib.mapAttrs' (
     name: cfg:
     lib.nameValuePair "dist-${name}" {
@@ -96,11 +98,9 @@ in
     }
   ) registries;
 
-  # ---------------------------------------------------------------------------
+  # ---------------------------------------------
   # Garbage collection — runs daily at 06:00.
-  # Stops each container, runs `registry garbage-collect --delete-untagged`,
-  # then restarts. Takes ~5-10 seconds per instance.
-  # ---------------------------------------------------------------------------
+  # ---------------------------------------------
   systemd.services.distribution-gc = {
     description = "Distribution Registry garbage collection";
     serviceConfig = {
@@ -135,27 +135,23 @@ in
   };
 
   systemd.timers.distribution-gc = {
-    description = "Daily Distribution Registry garbage collection at 06:00";
+    description = "Weekly Distribution Registry garbage collection (Sunday 06:00)";
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnCalendar = "*-*-* 06:00:00";
+      OnCalendar = "Sun *-*-* 06:00:00";
       Persistent = true;
     };
   };
 
-  # ---------------------------------------------------------------------------
-  # Traefik — <name>.mirror.makifun.se per instance.
-  # Covered by the existing *.makifun.se wildcard cert.
-  # Restricted to RFC-1918 + loopback — mirrors should not be open to the world.
-  # ---------------------------------------------------------------------------
+  # ----------------------------------------------------
+  # Traefik — <name>.mirror.${domain} per instance.
+  # ----------------------------------------------------
   services.traefik.dynamicConfigOptions.http = {
-    middlewares."mirror-lan-only".ipAllowList.sourceRange = [
-      "10.10.10.0/24"
-    ];
+    middlewares."mirror-lan-only".ipAllowList.sourceRange = [ lan ];
     routers = lib.mapAttrs' (
       name: cfg:
       lib.nameValuePair "dist-${name}" {
-        rule = "Host(`${name}.mirror.makifun.se`)";
+        rule = "Host(`${name}.mirror.${domain}`)";
         entryPoints = [ "websecure" ];
         service = "dist-${name}-svc";
         middlewares = [ "mirror-lan-only" ];
@@ -171,6 +167,6 @@ in
   };
 
   ligma.dnsRecords = lib.mapAttrs' (
-    name: _: lib.nameValuePair "${name}.mirror.makifun.se" { value = "10.10.10.13"; }
+    name: _: lib.nameValuePair "${name}.mirror.${domain}" { value = hosts.ligma; }
   ) registries;
 }
