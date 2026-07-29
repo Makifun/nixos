@@ -47,6 +47,9 @@
       vim
     ];
   };
+  systemd.tmpfiles.rules = [
+    "d '/${config.networking.hostName}/${config.networking.hostName}' 0755 root root - -"
+  ];
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
