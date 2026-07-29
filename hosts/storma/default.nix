@@ -10,15 +10,12 @@
   imports = [
     ./disko-config.nix
     ../../common
+    ../../modules/backrest.nix
     ../../modules/podman.nix
     ../../modules/rclone.nix
-    ../../modules/backrest.nix
+    ../../modules/samba.nix
     ./apps/backrest-extra.nix
     ./apps/beszel.nix
-    ./apps/samba.nix
-  ];
-  systemd.tmpfiles.rules = [
-    "d '/storma/storma' 0755 root root - -"
   ];
   networking = {
     hostName = "storma";

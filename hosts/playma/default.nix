@@ -10,13 +10,13 @@
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disko-config.nix
     ../../common
-    ../../modules/podman.nix
-    ../../modules/rclone.nix
     ../../modules/backrest.nix
     ../../modules/beszel.nix
+    ../../modules/podman.nix
+    ../../modules/rclone.nix
+    ../../modules/samba.nix
     ./apps/backrest-extra.nix
     ./apps/beszel-extra.nix
-    ./apps/samba.nix
     ./apps/plex.nix
   ];
   systemd.tmpfiles.rules = [
