@@ -22,6 +22,7 @@
         impermanence.nixosModules.impermanence
         sops-nix.nixosModules.sops
       ];
+      domain = "makifun.se";
       hosts = {
         opnsense = "10.10.10.1";
         technitium = "10.10.10.3";
@@ -33,14 +34,14 @@
         sugma01 = "10.10.10.26";
         sugma02 = "10.10.10.27";
         sugma03 = "10.10.10.28";
-        sugmaVip = "10.10.10.29";
-        sugmaGateway = "10.10.10.30";
+        sugmaVIP = "10.10.10.29";
+        sugmaGW = "10.10.10.30";
       };
       mkSystem =
         modules:
         nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit hosts; };
+          specialArgs = { inherit domain hosts; };
           modules = defaultModules ++ modules;
         };
     in
