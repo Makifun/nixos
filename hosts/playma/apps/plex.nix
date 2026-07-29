@@ -22,11 +22,7 @@ in
     extraOptions = [
       "--network=host"
       "--device=/dev/dri:/dev/dri"
-      "--health-cmd=nc localhost 32400 -vzw1 || exit 1"
-      "--health-interval=5m"
-      "--health-timeout=3s"
-      "--health-retries=3"
-      "--health-start-period=2m"
+      "--no-healthcheck"
     ];
     environment = {
       PUID = "1000";
