@@ -8,9 +8,9 @@
       ];
     };
     disk = {
+      # 50 G SSD (scsi0, serial=nixos) — OS
       nixos = {
         type = "disk";
-        # 50 G OS disk (scsi0, serial=nixos)
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_nixos";
         content = {
           type = "gpt";
@@ -31,7 +31,6 @@
                 type = "luks";
                 name = "crypted_nixos";
                 settings.allowDiscards = true;
-                # Single LUKS → LVM so both /nix and /persist share one passphrase.
                 content = {
                   type = "lvm_pv";
                   vg = "vg_nixos";
@@ -41,9 +40,9 @@
           };
         };
       };
+      # 100 G data disk (scsi1, serial=bofa) — all app data + PostgreSQL
       bofa = {
         type = "disk";
-        # 100 G data disk (scsi1, serial=bofa) — all app data + PostgreSQL
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_bofa";
         content = {
           type = "gpt";
