@@ -13,10 +13,17 @@ let
   scheduleHour = config.backrest.scheduleHour;
 in
 {
-  options.backrest.scheduleHour = lib.mkOption {
-    type = lib.types.int;
-    default = 5;
-    description = "UTC hour for daily backup (prune runs one hour later)";
+  options.backrest = {
+    scheduleHour = lib.mkOption {
+      type = lib.types.int;
+      default = 5;
+      description = "UTC hour for daily backup (prune runs 30 min later)";
+    };
+    extraPaths = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "Additional paths to include in the backup plan";
+    };
   };
 
   config = {
@@ -66,7 +73,7 @@ in
           {
             id = "${hostname}-daily";
             repo = "${hostname}-s3";
-            paths = [ "/${hostname}/${hostname}" ];
+            paths = [ "/${hostname}/${hostname}" ] ++ config.backrest.extraPaths;
             schedule.cron = "0 ${toString scheduleHour} * * *";
             retention.policyTimeBucketed = {
               daily = 30;

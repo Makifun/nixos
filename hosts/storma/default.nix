@@ -17,7 +17,8 @@
     ../../common
     ../../modules/podman.nix
     ../../modules/rclone.nix
-    ./apps/backrest.nix
+    ../../modules/backrest.nix
+    ./apps/backrest-extra.nix
     ./apps/beszel.nix
     ./apps/samba.nix
   ];

@@ -11,7 +11,8 @@
     ./disko-config.nix
     ../../common
     ../../modules/podman.nix
-    ./apps/backrest.nix
+    ../../modules/backrest.nix
+    ./apps/backrest-extra.nix
     ./apps/beszel.nix
     ./apps/timescaledb.nix
     ./apps/pg-arrs.nix

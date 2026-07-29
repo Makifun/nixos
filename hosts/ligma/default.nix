@@ -12,9 +12,10 @@
     ./disko-config.nix
     ../../common
     ../../modules/podman.nix
+    ../../modules/backrest.nix
     ./apps/apprise.nix
     ./apps/authentik.nix
-    ./apps/backrest.nix
+    ./apps/backrest-extra.nix
     ./apps/beszel.nix
     ./apps/distribution.nix
     ./apps/forgejo.nix
