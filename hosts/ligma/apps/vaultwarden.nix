@@ -3,7 +3,7 @@ let
   vaultwardenPort = 8310;
   vaultwardenBase = "/ligma/ligma/vaultwarden";
   # renovate: datasource=docker depName=vaultwarden/server
-  vaultwardenTag = "1.37.0";
+  vaultwardenTag = "1.37.1";
 in
 {
   # Data dir owned by UID/GID 1000 — vaultwarden container runs as that user.
