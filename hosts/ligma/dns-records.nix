@@ -1,21 +1,6 @@
-# ---------------------------------------------------------------------------
-# DNS record maintenance via nsupdate + TSIG against Technitium at 10.10.10.3
-#
-# Each app .nix sets:
-#   ligma.dnsRecords."foo.makifun.se".value = "<ip>";
-#
-# Prerequisites (one-time, manual):
-#   1. Generate key:
-#      Technitium WebGUI → Settings → TSIG → Add → Name: ligma-key → Save Settings
-#      (Key is auto generated)
-#   2. Technitium WebGUI → Zones → makifun.se → TSIG Keys: add ligma-key
-#   3. Enable "Allow Dynamic Updates" on the zone, restrict to ligma-key TSIG
-#   4. Add SOPS secret:
-#        sops hosts/ligma/secrets.yaml
-#        technitium-tsig-key: <base64-secret>
-# ---------------------------------------------------------------------------
 {
   config,
+  hosts,
   lib,
   pkgs,
   ...
@@ -23,7 +8,7 @@
 let
   cfg = config.ligma.dnsRecords;
   tsigKeyFile = config.sops.secrets.technitium-tsig-key.path;
-  server = "10.10.10.3";
+  server = hosts.technitium;
   zone = "makifun.se";
   keyName = "ligma-key";
 
