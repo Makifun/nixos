@@ -45,7 +45,7 @@ in
     wants = [ "podman-authentik-server.service" ];
     serviceConfig = {
       RestartSec = "30s";
-      StartLimitBurst = 10;
+      StartLimitIntervalSec = "0"; # unlimited retries — OIDC discovery blocks until Authentik ready
     };
   };
 
