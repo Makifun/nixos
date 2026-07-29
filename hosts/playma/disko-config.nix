@@ -40,7 +40,7 @@
           };
         };
       };
-      # 100G SSD (scsi1, serial=playma) — all app data
+      # 100 G SSD (scsi1, serial=playma) — all app data
       playma = {
         type = "disk";
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_playma";
@@ -67,7 +67,7 @@
           };
         };
       };
-      # 50G SSD (scsi2, serial=transcode) — Plex transcoder scratch
+      # 50 G SSD (scsi2, serial=transcode) — Plex transcoder scratch
       transcode = {
         type = "disk";
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_transcode";
@@ -94,7 +94,7 @@
           };
         };
       };
-      # 200G SSD (scsi3, serial=cache) — rclone VFS cache, LUKS-encrypted.
+      # 200 G SSD (scsi3, serial=cache) — rclone VFS cache, LUKS-encrypted.
       cache = {
         type = "disk";
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache";
