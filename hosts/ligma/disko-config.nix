@@ -8,6 +8,7 @@
       ];
     };
     disk = {
+      # 50 G SSD (scsi0, serial=nixos) — OS
       main = {
         type = "disk";
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_nixos";
@@ -39,6 +40,7 @@
           };
         };
       };
+      # 100 G SSD (scsi1, serial=ligma) — ZFS storage
       storage = {
         type = "disk";
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_ligma";
@@ -60,14 +62,7 @@
           };
         };
       };
-      # 2T HDD (scsi3, serial=slowmeme) — torrent downloads, LUKS+XFS.
-      # New VM: disko formats on install. Existing VM: format manually first:
-      #   parted /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_slowmeme -- mklabel gpt
-      #   parted /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_slowmeme -- mkpart primary 1MiB 100%
-      #   cryptsetup luksFormat /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_slowmeme-part1
-      #   cryptsetup open /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_slowmeme-part1 crypted_slowmeme
-      #   mkfs.xfs /dev/mapper/crypted_slowmeme
-      #   cryptsetup close crypted_slowmeme
+      # 2 T HDD (scsi3, serial=slowmeme) — torrent downloads, LUKS+XFS.
       slowmeme = {
         type = "disk";
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_slowmeme";
@@ -94,14 +89,7 @@
           };
         };
       };
-      # 200G HDD (scsi4, serial=nicememe) — NZBget downloads, LUKS+XFS.
-      # New VM: disko formats on install. Existing VM: format manually first:
-      #   parted /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_nicememe -- mklabel gpt
-      #   parted /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_nicememe -- mkpart primary 1MiB 100%
-      #   cryptsetup luksFormat /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_nicememe-part1
-      #   cryptsetup open /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_nicememe-part1 crypted_nicememe
-      #   mkfs.xfs /dev/mapper/crypted_nicememe
-      #   cryptsetup close crypted_nicememe
+      # 200 G SSD (scsi4, serial=nicememe) — NZBget downloads, LUKS+XFS.
       nicememe = {
         type = "disk";
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_nicememe";
