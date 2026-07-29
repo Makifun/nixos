@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 let
-  dumpDir = "/bofa/dumps";
+  hostname = config.networking.hostName;
+  dumpDir = "/${hostname}/${hostname}/dumps";
   retentionDays = 30;
   tracearrPasswordFile = config.sops.secrets.timescaledb-tracearr-password.path;
   arrsPasswordFile = config.sops.secrets.pg-arrs-password.path;
@@ -92,7 +93,7 @@ in
     description = "Daily PostgreSQL dump timer";
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnCalendar = "03:00:00";
+      OnCalendar = "02:00:00";
       RandomizedDelaySec = "15min";
       Persistent = true;
     };
