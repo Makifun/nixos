@@ -7,12 +7,12 @@
 }:
 {
   imports = [
-    ./dns-records.nix
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disko-config.nix
+    ./dns-records.nix
     ../../common
-    ../../modules/podman.nix
     ../../modules/backrest.nix
+    ../../modules/podman.nix
     ./apps/apprise.nix
     ./apps/authentik.nix
     ./apps/backrest-extra.nix
@@ -39,9 +39,6 @@
     ./apps/vaultwarden.nix
     ./apps/watchyourlan.nix
   ];
-  systemd.tmpfiles.rules = [
-    "d '/ligma/ligma' 0755 root root - -"
-  ];
   networking = {
     hostName = "ligma";
     useDHCP = true;
@@ -50,12 +47,11 @@
   services.qemuGuest.enable = true;
   system.stateVersion = "25.11";
 
-  # ZFS — ligma-only (bofa uses XFS).
+  # ZFS
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.devNodes = "/dev/mapper";
   boot.zfs.forceImportRoot = false;
-  # ARC tuning — ligma now has 16 GB RAM; 6 GB ARC leaves 10 GB for services.
-  # Previous 512 MB limit caused constant arc_prune thrash under NFS load.
+  # ARC tuning — 6 GB ARC
   boot.kernelParams = [ "zfs.zfs_arc_max=6442450944" ];
   boot.extraModprobeConfig = ''
     options zfs zfs_arc_min=2147483648
