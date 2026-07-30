@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 {
   boot = {
     loader = {
@@ -9,9 +9,15 @@
       systemd = {
         enable = true;
         users.root.shell = "/bin/systemd-tty-ask-password-agent";
-        # sulogin outputs "cannot open access to console" when root is locked;
-        # replace with sleep so emergency mode is silent while unlock still works.
-        services.emergency.serviceConfig.ExecStart = "/bin/sleep infinity";
+        # sulogin outputs "cannot open access to console" when root is locked.
+        # sleep infinity alone holds /dev/console (StandardInput=tty is inherited)
+        # and blocks the password prompt. Redirect to null to release the TTY.
+        services.emergency.serviceConfig = {
+          ExecStart = lib.mkForce "-/bin/sleep infinity";
+          StandardInput = "null";
+          StandardOutput = "null";
+          StandardError = "null";
+        };
       };
       network = {
         enable = true;
