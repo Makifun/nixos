@@ -14,6 +14,12 @@ wait_port() {
     echo "$desc reachable."
 }
 
+if nc -z -w 2 "$HOST" 22 2>/dev/null; then
+    echo "WARNING: $HOST already reachable on port 22 (existing system running)."
+    read "REPLY?Continue? This will WIPE the disk. [y/N] "
+    [[ "$REPLY" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 1; }
+fi
+
 echo "Pre-install: Refreshing sops keys for $FLAKE_NAME"
 ./sops_refresh_key.sh "$HOST" "$FLAKE_NAME" --no-push
 
@@ -22,7 +28,7 @@ nix run github:nix-community/nixos-anywhere -- --flake .#$FLAKE_NAME --copy-host
 
 wait_port 2222 "initrd SSH (LUKS unlock)"
 echo "Unlocking LUKS partitions"
-unlock $FLAKE_NAME
+ssh -tt -p 2222 $HOST <<< "$(rbw get ligma-luks)"
 
 wait_port 22 "NixOS SSH"
 echo "Post-install: Refreshing sops keys for $FLAKE_NAME"
