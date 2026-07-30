@@ -9,9 +9,13 @@
       systemd = {
         enable = true;
         users.root.shell = "/bin/systemd-tty-ask-password-agent";
-        # sulogin writes "cannot open access to console, the root account is locked"
-        # to stderr. Null stderr to suppress it; sulogin still exits immediately so
-        # the TTY is released and the LUKS password prompt remains accessible.
+        # Device units (dev-mapper-crypted_*.device) have a default timeout (~90s).
+        # When they expire, ZFS import fails → /persist mount fails → emergency mode.
+        # Setting infinity prevents that cascade; cryptsetup waits for the password
+        # however long it takes and the device unit follows without timing out first.
+        settings.Manager.DefaultDeviceTimeoutSec = "infinity";
+        # Keep stderr suppressed as defence-in-depth in case emergency mode is ever
+        # triggered by something else.
         services.emergency.serviceConfig.StandardError = lib.mkForce "null";
       };
       network = {
