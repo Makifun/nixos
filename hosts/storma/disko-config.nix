@@ -30,6 +30,7 @@
               type = "luks";
               name = "crypted_storma";
               settings.allowDiscards = true;
+              settings.crypttabExtraOpts = [ "timeout=0" ];
               content = {
                 type = "lvm_pv";
                 vg = "vg_storma";

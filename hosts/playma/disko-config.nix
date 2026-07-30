@@ -31,6 +31,7 @@
                 type = "luks";
                 name = "crypted_nixos";
                 settings.allowDiscards = true;
+                settings.crypttabExtraOpts = [ "timeout=0" ];
                 content = {
                   type = "lvm_pv";
                   vg = "vg_nixos";
@@ -53,6 +54,7 @@
                 type = "luks";
                 name = "crypted_playma";
                 settings.allowDiscards = true;
+                settings.crypttabExtraOpts = [ "timeout=0" ];
                 content = {
                   type = "filesystem";
                   format = "xfs";
@@ -80,6 +82,7 @@
                 type = "luks";
                 name = "crypted_transcode";
                 settings.allowDiscards = true;
+                settings.crypttabExtraOpts = [ "timeout=0" ];
                 content = {
                   type = "filesystem";
                   format = "xfs";
@@ -107,6 +110,7 @@
                 type = "luks";
                 name = "crypted_cache";
                 settings.allowDiscards = true;
+                settings.crypttabExtraOpts = [ "timeout=0" ];
                 content = {
                   type = "filesystem";
                   format = "xfs";
