@@ -28,7 +28,7 @@ nix run github:nix-community/nixos-anywhere -- --flake .#$FLAKE_NAME --copy-host
 
 wait_port 2222 "initrd SSH (LUKS unlock)"
 echo "Unlocking LUKS partitions"
-ssh -tt -p 2222 $HOST <<< "$(rbw get ligma-luks)"
+ssh -tt -p 2222 root@$HOST <<< "$(rbw get ligma-luks)"
 
 wait_port 22 "NixOS SSH"
 echo "Post-install: Refreshing sops keys for $FLAKE_NAME"
