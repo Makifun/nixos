@@ -8,9 +8,9 @@
       ];
     };
     disk.storma = {
-      # 120 G SSD (ata, model=ADATA_SP550_1F3520274890) — OS + Apps + Cache
+      # 1 T SSD (ata, model=Netac SSD 1TB) — OS + Apps + Cache
       type = "disk";
-      device = "/dev/disk/by-id/ata-ADATA_SP550_1F3520274890";
+      device = "/dev/disk/by-id/ata-Netac_SSD_1TB_AA202606011T64532001";
       content = {
         type = "gpt";
         partitions = {
