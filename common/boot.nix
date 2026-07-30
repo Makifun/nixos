@@ -9,9 +9,6 @@
       systemd = {
         enable = true;
         users.root.shell = "/bin/systemd-tty-ask-password-agent";
-        # sulogin outputs "cannot open access to console" when root is locked;
-        # replace with sleep so emergency mode is silent while unlock still works.
-        services.emergency.serviceConfig.ExecStart = "/bin/sleep infinity";
       };
       network = {
         enable = true;
