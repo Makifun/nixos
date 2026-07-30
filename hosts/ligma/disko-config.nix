@@ -31,6 +31,7 @@
                 type = "luks";
                 name = "crypted_zroot";
                 settings.allowDiscards = true;
+                settings.crypttabExtraOpts = [ "timeout=0" ];
                 content = {
                   type = "zfs";
                   pool = "zroot";
@@ -53,6 +54,7 @@
                 type = "luks";
                 name = "crypted_ligma";
                 settings.allowDiscards = true;
+                settings.crypttabExtraOpts = [ "timeout=0" ];
                 content = {
                   type = "zfs";
                   pool = "zstorage";
@@ -75,6 +77,7 @@
                 type = "luks";
                 name = "crypted_slowmeme";
                 settings.allowDiscards = true;
+                settings.crypttabExtraOpts = [ "timeout=0" ];
                 content = {
                   type = "filesystem";
                   format = "xfs";
@@ -102,6 +105,7 @@
                 type = "luks";
                 name = "crypted_nicememe";
                 settings.allowDiscards = true;
+                settings.crypttabExtraOpts = [ "timeout=0" ];
                 content = {
                   type = "filesystem";
                   format = "xfs";
