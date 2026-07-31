@@ -108,8 +108,8 @@ in
       EnvironmentFile = config.sops.templates."plex-trash.env".path;
       ExecStartPre = pkgs.writeShellScript "plex-wait" ''
         for i in $(seq 1 30); do
-          status=$(${pkgs.curl}/bin/curl -sf -o /dev/null -w "%{http_code}" http://localhost:32400/ 2>/dev/null || echo 0)
-          [ "$status" = "200" ] && exit 0
+          status=$(${pkgs.curl}/bin/curl -s -o /dev/null -w "%{http_code}" http://localhost:32400/ 2>/dev/null)
+          [ -n "$status" ] && [ "$status" != "503" ] && exit 0
           echo "plex not ready (status=$status), retry $i/30"
           sleep 10
         done
