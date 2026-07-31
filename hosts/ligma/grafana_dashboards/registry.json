@@ -1284,7 +1284,7 @@
       },
       "targets": [
         {
-          "expr": "{job=\"ligma-syslog\", unit=\"traefik.service\"} | json | RouterName =~ \"dist-.+\" | RequestMethod =~ \"GET|HEAD\" | line_format `{{.ClientHost}}  {{.RouterName}}  {{.RequestPath | substr 0 80}}  status={{.DownstreamStatus}}`",
+          "expr": "{job=\"ligma-traefik\"} | json | RouterName =~ \"dist-.+\" | RequestMethod =~ \"GET|HEAD\" | line_format `{{.ClientHost}}  {{.RouterName}}  {{.RequestPath | substr 0 80}}  status={{.DownstreamStatus}}`",
           "refId": "A"
         }
       ]
