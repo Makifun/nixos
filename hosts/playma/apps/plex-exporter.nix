@@ -11,6 +11,11 @@
     TZ=Europe/Stockholm
   '';
 
+  systemd.services.podman-plex-exporter = {
+    after = [ "podman-plex.service" ];
+    wants = [ "podman-plex.service" ];
+  };
+
   # renovate: datasource=docker depName=ghcr.io/timothystewart6/prometheus-plex-exporter
   virtualisation.oci-containers.containers.plex-exporter = {
     image = "ghcr.io/timothystewart6/prometheus-plex-exporter:latest";
