@@ -300,6 +300,8 @@ in
         {
           name = "default";
           options.path = "/etc/grafana-dashboards";
+          updateIntervalSeconds = 30;
+          disableDeletion = false;
         }
       ];
 
