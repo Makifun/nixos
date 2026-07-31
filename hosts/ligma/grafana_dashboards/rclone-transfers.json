@@ -25,8 +25,8 @@
       {
         "current": {
           "selected": true,
-          "text": "playma",
-          "value": "http://10.10.10.15:6969"
+          "text": "storma",
+          "value": "http://10.10.10.12:6969"
         },
         "hide": 0,
         "includeAll": false,
@@ -35,22 +35,17 @@
         "name": "instance",
         "options": [
           {
-            "selected": false,
-            "text": "ligma",
-            "value": "http://127.0.0.1:6969"
-          },
-          {
             "selected": true,
             "text": "storma",
             "value": "http://10.10.10.12:6969"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "playma",
             "value": "http://10.10.10.15:6969"
           }
         ],
-        "query": "ligma : http://127.0.0.1:6969,storma : http://10.10.10.12:6969,playma : http://10.10.10.15:6969",
+        "query": "storma : http://10.10.10.12:6969,playma : http://10.10.10.15:6969",
         "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"
