@@ -38,7 +38,9 @@ let
         gotify_url   = os.environ["GOTIFY_URL"]
         libraries    = json.loads(os.environ["PLEX_LIBRARIES"])
 
-        plex = PlexServer(plex_url, plex_token)
+        session = requests.Session()
+        session.headers["X-Plex-Client-Identifier"] = "plex-trash-playma"
+        plex = PlexServer(plex_url, plex_token, session=session)
         cleared, notify, total = [], [], 0
 
         for name in libraries:
