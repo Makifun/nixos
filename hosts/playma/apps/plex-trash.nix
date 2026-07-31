@@ -9,7 +9,10 @@ let
     #!${python}/bin/python3
     import json, logging, os, sys
     import requests
+    import plexapi
     from plexapi.server import PlexServer
+
+    plexapi.X_PLEX_IDENTIFIER = "plex-trash-playma"
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)-8s %(message)s", stream=sys.stdout)
     log = logging.getLogger(__name__)
@@ -38,9 +41,7 @@ let
         gotify_url   = os.environ["GOTIFY_URL"]
         libraries    = json.loads(os.environ["PLEX_LIBRARIES"])
 
-        session = requests.Session()
-        session.headers["X-Plex-Client-Identifier"] = "plex-trash-playma"
-        plex = PlexServer(plex_url, plex_token, session=session)
+        plex = PlexServer(plex_url, plex_token)
         cleared, notify, total = [], [], 0
 
         for name in libraries:
