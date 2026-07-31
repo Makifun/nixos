@@ -13,10 +13,9 @@
     ../../modules/backrest.nix
     ../../modules/beszel.nix
     ../../modules/podman.nix
-    ../../modules/rclone.nix
-    ../../modules/samba.nix
     ./apps/backrest-extra.nix
     ./apps/beszel-extra.nix
+    ./apps/cloud-mount.nix
     ./apps/plex.nix
     ./apps/plex-trash.nix
   ];
