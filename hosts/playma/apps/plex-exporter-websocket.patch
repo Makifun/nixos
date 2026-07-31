@@ -1,6 +1,6 @@
 --- a/vendor/github.com/timothystewart6/go-plex-client/websocket_client.go
 +++ b/vendor/github.com/timothystewart6/go-plex-client/websocket_client.go
-@@ -3,6 +3,7 @@ package plex
+@@ -3,7 +3,8 @@ package plex
  import (
 +	"crypto/tls"
  	"encoding/json"
@@ -9,8 +9,7 @@
  	"net/url"
  	"os"
  	"time"
-@@ -337,12 +337,19 @@ func (p *Plex) SubscribeToNotificationsWithContext(ctx context.Context, events *
-
+@@ -337,12 +338,21 @@ func (p *Plex) SubscribeToNotificationsWithContext(ctx context.Context, events *
  	websocketURL := url.URL{Scheme: scheme, Host: plexURL.Host, Path: "/:/websockets/notifications"}
 
 +	// Plex requires the token as a URL query parameter on the WebSocket endpoint.
