@@ -27,7 +27,7 @@ in
     environment = {
       PUID = "1000";
       PGID = "1000";
-      TZ = "Europe/Stockholm";
+      TZ = config.time.timeZone;
       VERSION = "docker";
     };
     volumes = [
