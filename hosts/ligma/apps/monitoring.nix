@@ -202,6 +202,11 @@ in
     mode = "0444";
   };
 
+  environment.etc."grafana-dashboards/plex.json" = {
+    source = ../grafana_dashboards/plex.json;
+    mode = "0444";
+  };
+
   environment.etc."grafana-dashboards/flux-cluster.json" = {
     source = ../grafana_dashboards/flux-cluster.json;
     mode = "0444";
