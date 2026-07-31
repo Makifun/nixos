@@ -17,6 +17,7 @@
     ../../modules/samba.nix
     ./apps/backrest-extra.nix
     ./apps/beszel-extra.nix
+    ./apps/rclone-extra.nix
   ];
   networking = {
     hostName = "storma";
