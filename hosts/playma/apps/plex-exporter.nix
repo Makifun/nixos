@@ -1,4 +1,30 @@
-{ config, hosts, ... }:
+{
+  config,
+  pkgs,
+  hosts,
+  ...
+}:
+let
+  # Build from source with two patches to the vendored go-plex-client:
+  # 1. Add X-Plex-Token as a URL query parameter (Plex requires it for WS auth).
+  # 2. Honor SKIP_TLS_VERIFICATION for the WebSocket dialer (self-signed cert).
+  plex-exporter = pkgs.buildGoModule {
+    pname = "prometheus-plex-exporter";
+    version = "3e7a4da";
+
+    src = pkgs.fetchzip {
+      url = "https://github.com/timothystewart6/prometheus-plex-exporter/archive/3e7a4da6306cebcaff499dca055c91dd1afe55fd.tar.gz";
+      sha256 = "1n4064ban8xs6cax12fiqkffki7w2yznrpqg3mvrg11kqvqjzqwc";
+    };
+
+    # Use the vendor/ directory already present in the source.
+    vendorHash = null;
+
+    subPackages = [ "cmd/prometheus-plex-exporter" ];
+
+    patches = [ ./plex-exporter-websocket.patch ];
+  };
+in
 {
   sops.secrets = {
     plex-trash-plex-token.sopsFile = ../secrets.yaml;
@@ -7,24 +33,30 @@
 
   sops.templates."plex-exporter.env".content = ''
     PLEX_TOKEN=${config.sops.placeholder."plex-trash-plex-token"}
+    PLEX_SERVER=${config.sops.placeholder."plex-trash-plex-url"}
   '';
 
-  systemd.services.podman-plex-exporter = {
-    after = [ "podman-plex.service" ];
-    wants = [ "podman-plex.service" ];
-  };
-
-  # renovate: datasource=docker depName=ghcr.io/timothystewart6/prometheus-plex-exporter
-  virtualisation.oci-containers.containers.plex-exporter = {
-    image = "ghcr.io/timothystewart6/prometheus-plex-exporter:latest";
-    extraOptions = [ "--network=host" ];
-    environmentFiles = [ config.sops.templates."plex-exporter.env".path ];
-    # Override URL to HTTPS — Plex rejects WebSocket upgrades on plain HTTP.
-    # --env takes precedence over --env-file for the same key.
-    environment = {
-      PLEX_SERVER = "https://localhost:32400";
-      SKIP_TLS_VERIFICATION = "true";
-      TZ = "Europe/Stockholm";
+  systemd.services.plex-exporter = {
+    description = "Prometheus Plex Exporter";
+    # Start after Plex container is up.
+    after = [
+      "podman-plex.service"
+      "network-online.target"
+    ];
+    wants = [
+      "podman-plex.service"
+      "network-online.target"
+    ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      EnvironmentFile = config.sops.templates."plex-exporter.env".path;
+      Environment = [
+        "SKIP_TLS_VERIFICATION=true"
+        "TZ=Europe/Stockholm"
+      ];
+      ExecStart = "${plex-exporter}/bin/prometheus-plex-exporter";
+      Restart = "on-failure";
+      RestartSec = "10s";
     };
   };
 
