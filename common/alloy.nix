@@ -107,6 +107,15 @@ in
         target_label = "job"
         replacement  = "${hostname}-syslog"
       }
+      // Override job to <hostname>-<unit> for all systemd services.
+      // Gives each service its own Loki stream. Podman rule below further
+      // overrides podman-*.service to <hostname>-podman-<container>.
+      rule {
+        source_labels = ["__journal__systemd_unit"]
+        regex         = "(.+)\\.service"
+        target_label  = "job"
+        replacement   = "${hostname}-$1"
+      }
       // Extract container name from podman-<name>.service unit name.
       rule {
         source_labels = ["__journal__systemd_unit"]
