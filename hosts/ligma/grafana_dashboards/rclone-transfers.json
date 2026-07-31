@@ -998,7 +998,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "last_over_time(\n  {job=\"${instance:text}-syslog\", unit=\"rclone-cloud.service\"} |= \"vfs cache: cleaned\"\n  | regexp `objects (?P<val>\\d+) \\(was`\n  | unwrap val [$__range]\n)",
+          "expr": "last_over_time(\n  {job=\"${instance:text}-rclone-cloud\"} |= \"vfs cache: cleaned\"\n  | regexp `objects (?P<val>\\d+) \\(was`\n  | unwrap val [$__range]\n)",
           "queryType": "instant",
           "legendFormat": "",
           "refId": "A"
@@ -1058,7 +1058,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "last_over_time(\n  {job=\"${instance:text}-syslog\", unit=\"rclone-cloud.service\"} |= \"vfs cache: cleaned\"\n  | regexp `in use (?P<val>\\d+),`\n  | unwrap val [$__range]\n)",
+          "expr": "last_over_time(\n  {job=\"${instance:text}-rclone-cloud\"} |= \"vfs cache: cleaned\"\n  | regexp `in use (?P<val>\\d+),`\n  | unwrap val [$__range]\n)",
           "queryType": "instant",
           "legendFormat": "",
           "refId": "A"
@@ -1126,7 +1126,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "last_over_time(\n  {job=\"${instance:text}-syslog\", unit=\"rclone-cloud.service\"} |= \"vfs cache: cleaned\"\n  | regexp `to upload (?P<val>\\d+),`\n  | unwrap val [$__range]\n)",
+          "expr": "last_over_time(\n  {job=\"${instance:text}-rclone-cloud\"} |= \"vfs cache: cleaned\"\n  | regexp `to upload (?P<val>\\d+),`\n  | unwrap val [$__range]\n)",
           "queryType": "instant",
           "legendFormat": "",
           "refId": "A"
@@ -1186,7 +1186,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "last_over_time(\n  {job=\"${instance:text}-syslog\", unit=\"rclone-cloud.service\"} |= \"vfs cache: cleaned\"\n  | regexp `uploading (?P<val>\\d+),`\n  | unwrap val [$__range]\n)",
+          "expr": "last_over_time(\n  {job=\"${instance:text}-rclone-cloud\"} |= \"vfs cache: cleaned\"\n  | regexp `uploading (?P<val>\\d+),`\n  | unwrap val [$__range]\n)",
           "queryType": "instant",
           "legendFormat": "",
           "refId": "A"
@@ -1247,7 +1247,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "last_over_time(\n  {job=\"${instance:text}-syslog\", unit=\"rclone-cloud.service\"} |= \"vfs cache: cleaned\"\n  | regexp `total size (?P<val>[\\d.]+)Gi`\n  | unwrap val [$__range]\n)",
+          "expr": "last_over_time(\n  {job=\"${instance:text}-rclone-cloud\"} |= \"vfs cache: cleaned\"\n  | regexp `total size (?P<val>[\\d.]+)Gi`\n  | unwrap val [$__range]\n)",
           "queryType": "instant",
           "legendFormat": "",
           "refId": "A"
@@ -1311,7 +1311,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "last_over_time(\n  {job=\"${instance:text}-syslog\", unit=\"rclone-cloud.service\"} |= \"vfs cache: cleaned\"\n  | regexp `objects (?P<val>\\d+) \\(was`\n  | unwrap val [$__interval]\n)",
+          "expr": "last_over_time(\n  {job=\"${instance:text}-rclone-cloud\"} |= \"vfs cache: cleaned\"\n  | regexp `objects (?P<val>\\d+) \\(was`\n  | unwrap val [$__interval]\n)",
           "queryType": "range",
           "legendFormat": "objects",
           "refId": "A"
@@ -1321,7 +1321,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "last_over_time(\n  {job=\"${instance:text}-syslog\", unit=\"rclone-cloud.service\"} |= \"vfs cache: cleaned\"\n  | regexp `in use (?P<val>\\d+),`\n  | unwrap val [$__interval]\n)",
+          "expr": "last_over_time(\n  {job=\"${instance:text}-rclone-cloud\"} |= \"vfs cache: cleaned\"\n  | regexp `in use (?P<val>\\d+),`\n  | unwrap val [$__interval]\n)",
           "queryType": "range",
           "legendFormat": "in use",
           "refId": "B"
@@ -1331,7 +1331,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "last_over_time(\n  {job=\"${instance:text}-syslog\", unit=\"rclone-cloud.service\"} |= \"vfs cache: cleaned\"\n  | regexp `to upload (?P<val>\\d+),`\n  | unwrap val [$__interval]\n)",
+          "expr": "last_over_time(\n  {job=\"${instance:text}-rclone-cloud\"} |= \"vfs cache: cleaned\"\n  | regexp `to upload (?P<val>\\d+),`\n  | unwrap val [$__interval]\n)",
           "queryType": "range",
           "legendFormat": "to upload",
           "refId": "C"
@@ -1341,7 +1341,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "last_over_time(\n  {job=\"${instance:text}-syslog\", unit=\"rclone-cloud.service\"} |= \"vfs cache: cleaned\"\n  | regexp `uploading (?P<val>\\d+),`\n  | unwrap val [$__interval]\n)",
+          "expr": "last_over_time(\n  {job=\"${instance:text}-rclone-cloud\"} |= \"vfs cache: cleaned\"\n  | regexp `uploading (?P<val>\\d+),`\n  | unwrap val [$__interval]\n)",
           "queryType": "range",
           "legendFormat": "uploading",
           "refId": "D"
@@ -1406,7 +1406,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "last_over_time(\n  {job=\"${instance:text}-syslog\", unit=\"rclone-cloud.service\"} |= \"vfs cache: cleaned\"\n  | regexp `total size (?P<val>[\\d.]+)Gi`\n  | unwrap val [$__interval]\n)",
+          "expr": "last_over_time(\n  {job=\"${instance:text}-rclone-cloud\"} |= \"vfs cache: cleaned\"\n  | regexp `total size (?P<val>[\\d.]+)Gi`\n  | unwrap val [$__interval]\n)",
           "queryType": "range",
           "legendFormat": "size GiB",
           "refId": "A"
@@ -1447,7 +1447,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "{job=\"${instance:text}-syslog\", unit=\"rclone-cloud.service\"}",
+          "expr": "{job=\"${instance:text}-rclone-cloud\"}",
           "legendFormat": "",
           "refId": "A"
         }
