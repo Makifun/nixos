@@ -2,7 +2,7 @@
   "title": "Arr Stack",
   "uid": "arr-stack",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "timezone": "browser",
   "refresh": "5m",
   "time": {
@@ -200,11 +200,125 @@
     {
       "id": 5,
       "type": "stat",
-      "title": "System Status",
+      "title": "Failed Queries",
       "gridPos": {
         "h": 4,
         "w": 4,
         "x": 12,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(prowlarr_indexer_failed_queries_total{job=\"exportarr\",app=\"prowlarrpg\"}) or vector(0)",
+          "instant": true,
+          "legendFormat": ""
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Total Grabs",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(prowlarr_indexer_grabs_total{job=\"exportarr\",app=\"prowlarrpg\"}) or vector(0)",
+          "instant": true,
+          "legendFormat": ""
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "System Status",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
         "y": 1
       },
       "datasource": {
@@ -255,7 +369,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": 8,
       "type": "timeseries",
       "title": "Queries by Indexer",
       "gridPos": {
@@ -295,11 +409,20 @@
           "expr": "rate(prowlarr_indexer_queries_total{job=\"exportarr\",app=\"prowlarrpg\"}[5m])",
           "legendFormat": "{{indexer}}",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(rate(prowlarr_indexer_failed_queries_total{job=\"exportarr\",app=\"prowlarrpg\"}[5m])) or vector(0)",
+          "legendFormat": "failed",
+          "refId": "B"
         }
       ]
     },
     {
-      "id": 7,
+      "id": 9,
       "type": "timeseries",
       "title": "Grabs by Indexer",
       "gridPos": {
@@ -343,7 +466,7 @@
       ]
     },
     {
-      "id": 8,
+      "id": 10,
       "type": "row",
       "title": "Sonarr",
       "collapsed": false,
@@ -356,7 +479,7 @@
       "panels": []
     },
     {
-      "id": 9,
+      "id": 11,
       "type": "stat",
       "title": "Series",
       "gridPos": {
@@ -413,7 +536,7 @@
       ]
     },
     {
-      "id": 10,
+      "id": 12,
       "type": "stat",
       "title": "Series Monitored",
       "gridPos": {
@@ -470,7 +593,7 @@
       ]
     },
     {
-      "id": 11,
+      "id": 13,
       "type": "stat",
       "title": "Episodes",
       "gridPos": {
@@ -527,7 +650,7 @@
       ]
     },
     {
-      "id": 12,
+      "id": 14,
       "type": "stat",
       "title": "Downloaded",
       "gridPos": {
@@ -584,7 +707,7 @@
       ]
     },
     {
-      "id": 13,
+      "id": 15,
       "type": "stat",
       "title": "Missing",
       "gridPos": {
@@ -641,7 +764,7 @@
       ]
     },
     {
-      "id": 14,
+      "id": 16,
       "type": "stat",
       "title": "Queue",
       "gridPos": {
@@ -698,7 +821,7 @@
       ]
     },
     {
-      "id": 15,
+      "id": 17,
       "type": "stat",
       "title": "Library Size",
       "gridPos": {
@@ -755,7 +878,7 @@
       ]
     },
     {
-      "id": 16,
+      "id": 18,
       "type": "stat",
       "title": "Health Issues",
       "gridPos": {
@@ -812,7 +935,7 @@
       ]
     },
     {
-      "id": 17,
+      "id": 19,
       "type": "row",
       "title": "Sonarr 4K",
       "collapsed": false,
@@ -825,7 +948,7 @@
       "panels": []
     },
     {
-      "id": 18,
+      "id": 20,
       "type": "stat",
       "title": "Series",
       "gridPos": {
@@ -882,7 +1005,7 @@
       ]
     },
     {
-      "id": 19,
+      "id": 21,
       "type": "stat",
       "title": "Series Monitored",
       "gridPos": {
@@ -939,7 +1062,7 @@
       ]
     },
     {
-      "id": 20,
+      "id": 22,
       "type": "stat",
       "title": "Episodes",
       "gridPos": {
@@ -996,7 +1119,7 @@
       ]
     },
     {
-      "id": 21,
+      "id": 23,
       "type": "stat",
       "title": "Downloaded",
       "gridPos": {
@@ -1053,7 +1176,7 @@
       ]
     },
     {
-      "id": 22,
+      "id": 24,
       "type": "stat",
       "title": "Missing",
       "gridPos": {
@@ -1110,7 +1233,7 @@
       ]
     },
     {
-      "id": 23,
+      "id": 25,
       "type": "stat",
       "title": "Queue",
       "gridPos": {
@@ -1167,7 +1290,7 @@
       ]
     },
     {
-      "id": 24,
+      "id": 26,
       "type": "stat",
       "title": "Library Size",
       "gridPos": {
@@ -1224,7 +1347,7 @@
       ]
     },
     {
-      "id": 25,
+      "id": 27,
       "type": "stat",
       "title": "Health Issues",
       "gridPos": {
@@ -1281,7 +1404,7 @@
       ]
     },
     {
-      "id": 26,
+      "id": 28,
       "type": "row",
       "title": "Radarr",
       "collapsed": false,
@@ -1294,7 +1417,7 @@
       "panels": []
     },
     {
-      "id": 27,
+      "id": 29,
       "type": "stat",
       "title": "Movies",
       "gridPos": {
@@ -1351,7 +1474,7 @@
       ]
     },
     {
-      "id": 28,
+      "id": 30,
       "type": "stat",
       "title": "Downloaded",
       "gridPos": {
@@ -1408,9 +1531,9 @@
       ]
     },
     {
-      "id": 29,
+      "id": 31,
       "type": "stat",
-      "title": "Wanted / Missing",
+      "title": "Wanted/Missing",
       "gridPos": {
         "h": 4,
         "w": 4,
@@ -1465,7 +1588,7 @@
       ]
     },
     {
-      "id": 30,
+      "id": 32,
       "type": "stat",
       "title": "Queue",
       "gridPos": {
@@ -1522,7 +1645,7 @@
       ]
     },
     {
-      "id": 31,
+      "id": 33,
       "type": "stat",
       "title": "Library Size",
       "gridPos": {
@@ -1579,7 +1702,7 @@
       ]
     },
     {
-      "id": 32,
+      "id": 34,
       "type": "stat",
       "title": "Free Space",
       "gridPos": {
@@ -1636,7 +1759,7 @@
       ]
     },
     {
-      "id": 33,
+      "id": 35,
       "type": "stat",
       "title": "Health Issues",
       "gridPos": {
@@ -1693,7 +1816,7 @@
       ]
     },
     {
-      "id": 34,
+      "id": 36,
       "type": "row",
       "title": "Radarr 4K",
       "collapsed": false,
@@ -1706,7 +1829,7 @@
       "panels": []
     },
     {
-      "id": 35,
+      "id": 37,
       "type": "stat",
       "title": "Movies",
       "gridPos": {
@@ -1763,7 +1886,7 @@
       ]
     },
     {
-      "id": 36,
+      "id": 38,
       "type": "stat",
       "title": "Downloaded",
       "gridPos": {
@@ -1820,9 +1943,9 @@
       ]
     },
     {
-      "id": 37,
+      "id": 39,
       "type": "stat",
-      "title": "Wanted / Missing",
+      "title": "Wanted/Missing",
       "gridPos": {
         "h": 4,
         "w": 4,
@@ -1877,7 +2000,7 @@
       ]
     },
     {
-      "id": 38,
+      "id": 40,
       "type": "stat",
       "title": "Queue",
       "gridPos": {
@@ -1934,7 +2057,7 @@
       ]
     },
     {
-      "id": 39,
+      "id": 41,
       "type": "stat",
       "title": "Library Size",
       "gridPos": {
@@ -1991,7 +2114,7 @@
       ]
     },
     {
-      "id": 40,
+      "id": 42,
       "type": "stat",
       "title": "Free Space",
       "gridPos": {
@@ -2048,7 +2171,7 @@
       ]
     },
     {
-      "id": 41,
+      "id": 43,
       "type": "stat",
       "title": "Health Issues",
       "gridPos": {
@@ -2105,7 +2228,7 @@
       ]
     },
     {
-      "id": 42,
+      "id": 44,
       "type": "row",
       "title": "Bazarr",
       "collapsed": false,
@@ -2118,12 +2241,12 @@
       "panels": []
     },
     {
-      "id": 43,
+      "id": 45,
       "type": "stat",
       "title": "Episode Subs",
       "gridPos": {
         "h": 4,
-        "w": 4,
+        "w": 5,
         "x": 0,
         "y": 34
       },
@@ -2175,13 +2298,13 @@
       ]
     },
     {
-      "id": 44,
+      "id": 46,
       "type": "stat",
       "title": "Episode Subs Missing",
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 4,
+        "w": 5,
+        "x": 5,
         "y": 34
       },
       "datasource": {
@@ -2232,13 +2355,13 @@
       ]
     },
     {
-      "id": 45,
+      "id": 47,
       "type": "stat",
       "title": "Movie Subs",
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 8,
+        "w": 5,
+        "x": 10,
         "y": 34
       },
       "datasource": {
@@ -2289,13 +2412,13 @@
       ]
     },
     {
-      "id": 46,
+      "id": 48,
       "type": "stat",
       "title": "Movie Subs Missing",
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 12,
+        "w": 5,
+        "x": 15,
         "y": 34
       },
       "datasource": {
@@ -2346,13 +2469,13 @@
       ]
     },
     {
-      "id": 47,
+      "id": 49,
       "type": "stat",
       "title": "Providers",
       "gridPos": {
         "h": 4,
         "w": 4,
-        "x": 16,
+        "x": 20,
         "y": 34
       },
       "datasource": {
@@ -2403,7 +2526,7 @@
       ]
     },
     {
-      "id": 48,
+      "id": 50,
       "type": "row",
       "title": "Bazarr 4K",
       "collapsed": false,
@@ -2416,12 +2539,12 @@
       "panels": []
     },
     {
-      "id": 49,
+      "id": 51,
       "type": "stat",
       "title": "Episode Subs",
       "gridPos": {
         "h": 4,
-        "w": 4,
+        "w": 5,
         "x": 0,
         "y": 39
       },
@@ -2473,13 +2596,13 @@
       ]
     },
     {
-      "id": 50,
+      "id": 52,
       "type": "stat",
       "title": "Episode Subs Missing",
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 4,
+        "w": 5,
+        "x": 5,
         "y": 39
       },
       "datasource": {
@@ -2530,13 +2653,13 @@
       ]
     },
     {
-      "id": 51,
+      "id": 53,
       "type": "stat",
       "title": "Movie Subs",
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 8,
+        "w": 5,
+        "x": 10,
         "y": 39
       },
       "datasource": {
@@ -2587,13 +2710,13 @@
       ]
     },
     {
-      "id": 52,
+      "id": 54,
       "type": "stat",
       "title": "Movie Subs Missing",
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 12,
+        "w": 5,
+        "x": 15,
         "y": 39
       },
       "datasource": {
@@ -2644,13 +2767,13 @@
       ]
     },
     {
-      "id": 53,
+      "id": 55,
       "type": "stat",
       "title": "Providers",
       "gridPos": {
         "h": 4,
         "w": 4,
-        "x": 16,
+        "x": 20,
         "y": 39
       },
       "datasource": {
