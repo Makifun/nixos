@@ -138,7 +138,7 @@ in
         params = {
           module = [ "default" ];
         };
-        static_configs = [ { targets = [ "proxmox.${baseFacts.domainName}" ]; } ];
+        static_configs = [ { targets = [ "proxmoxifun.${baseFacts.domainName}" ]; } ];
         relabel_configs = [
           {
             source_labels = [ "__address__" ];
