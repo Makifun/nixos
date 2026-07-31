@@ -719,6 +719,12 @@
             };
           }
           {
+            "Grafana" = {
+              icon = "/images/grafana.png";
+              href = "https://grafana.${baseFacts.domainName}";
+            };
+          }
+          {
             "Backrest Ligma" = {
               icon = "/images/backrest.png";
               href = "https://backrest-ligma.${baseFacts.domainName}";
@@ -830,12 +836,6 @@
                 systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_STORMA}}";
                 version = 2;
               };
-            };
-          }
-          {
-            "Grafana" = {
-              icon = "/images/grafana.png";
-              href = "https://grafana.${baseFacts.domainName}";
             };
           }
           {
