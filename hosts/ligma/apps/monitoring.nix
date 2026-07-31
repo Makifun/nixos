@@ -212,6 +212,11 @@ in
     mode = "0444";
   };
 
+  environment.etc."grafana-dashboards/exportarr_og.json" = {
+    source = ../grafana_dashboards/exportarr_og.json;
+    mode = "0444";
+  };
+
   environment.etc."grafana-dashboards/flux-cluster.json" = {
     source = ../grafana_dashboards/flux-cluster.json;
     mode = "0444";
