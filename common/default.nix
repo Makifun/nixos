@@ -43,6 +43,7 @@
       python3
       ripgrep
       screen
+      sqlite
       tree
       vim
     ];
