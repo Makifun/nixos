@@ -159,6 +159,15 @@ in
         scheme = "https";
         static_configs = [ { targets = [ "unpackerr-metrics.${baseFacts.domainName}:443" ]; } ];
       }
+      {
+        job_name = "plex";
+        static_configs = [
+          {
+            targets = [ "${hosts.playma}:9000" ];
+            labels.instance = "playma";
+          }
+        ];
+      }
     ];
   };
 
@@ -199,6 +208,11 @@ in
 
   environment.etc."grafana-dashboards/unpackerr.json" = {
     source = ../grafana_dashboards/unpackerr.json;
+    mode = "0444";
+  };
+
+  environment.etc."grafana-dashboards/plex.json" = {
+    source = ../grafana_dashboards/plex.json;
     mode = "0444";
   };
 

@@ -18,6 +18,7 @@
     ./apps/backrest-extra.nix
     ./apps/beszel-extra.nix
     ./apps/plex.nix
+    ./apps/plex-exporter.nix
     ./apps/plex-trash.nix
   ];
   systemd.tmpfiles.rules = [
