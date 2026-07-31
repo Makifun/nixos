@@ -38,7 +38,6 @@ in
 
   systemd.services.plex-exporter = {
     description = "Prometheus Plex Exporter";
-    # Start after Plex container is up.
     after = [
       "podman-plex.service"
       "network-online.target"
@@ -54,6 +53,16 @@ in
         "SKIP_TLS_VERIFICATION=true"
         "TZ=Europe/Stockholm"
       ];
+      ExecStartPre = pkgs.writeShellScript "plex-exporter-wait" ''
+        for i in $(seq 1 30); do
+          status=$(${pkgs.curl}/bin/curl -s -o /dev/null -w "%{http_code}" http://localhost:32400/ 2>/dev/null)
+          [ -n "$status" ] && [ "$status" != "503" ] && exit 0
+          echo "plex not ready (status=$status), retry $i/30"
+          sleep 10
+        done
+        echo "plex did not become ready in 5 minutes"
+        exit 1
+      '';
       ExecStart = "${plex-exporter}/bin/prometheus-plex-exporter";
       Restart = "on-failure";
       RestartSec = "10s";
