@@ -202,8 +202,8 @@ in
     mode = "0444";
   };
 
-  environment.etc."grafana-dashboards/flux-control-plane.json" = {
-    source = ../grafana_dashboards/flux-control-plane.json;
+  environment.etc."grafana-dashboards/flux-cluster.json" = {
+    source = ../grafana_dashboards/flux-cluster.json;
     mode = "0444";
   };
 
