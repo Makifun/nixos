@@ -202,6 +202,36 @@ in
     mode = "0444";
   };
 
+  environment.etc."grafana-dashboards/flux-cluster.json" = {
+    source = ../grafana_dashboards/flux-cluster.json;
+    mode = "0444";
+  };
+
+  environment.etc."grafana-dashboards/flux-control-plane.json" = {
+    source = ../grafana_dashboards/flux-control-plane.json;
+    mode = "0444";
+  };
+
+  environment.etc."grafana-dashboards/k8s-views-global.json" = {
+    source = ../grafana_dashboards/k8s-views-global.json;
+    mode = "0444";
+  };
+
+  environment.etc."grafana-dashboards/k8s-views-nodes.json" = {
+    source = ../grafana_dashboards/k8s-views-nodes.json;
+    mode = "0444";
+  };
+
+  environment.etc."grafana-dashboards/k8s-views-pods.json" = {
+    source = ../grafana_dashboards/k8s-views-pods.json;
+    mode = "0444";
+  };
+
+  environment.etc."grafana-dashboards/k8s-views-namespaces.json" = {
+    source = ../grafana_dashboards/k8s-views-namespaces.json;
+    mode = "0444";
+  };
+
   services.grafana = {
     enable = true;
     dataDir = "/${hostname}/${hostname}/grafana";
