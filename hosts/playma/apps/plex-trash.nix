@@ -9,10 +9,7 @@ let
     #!${python}/bin/python3
     import json, logging, os, sys
     import requests
-    import plexapi
     from plexapi.server import PlexServer
-
-    plexapi.X_PLEX_IDENTIFIER = "plex-trash-playma"
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)-8s %(message)s", stream=sys.stdout)
     log = logging.getLogger(__name__)
@@ -106,6 +103,7 @@ in
 
   systemd.services.plex-trash = {
     description = "Plex trash destroyer";
+    environment.PLEXAPI_HEADER_IDENTIFIER = "plex-trash-playma";
     serviceConfig = {
       Type = "oneshot";
       EnvironmentFile = config.sops.templates."plex-trash.env".path;
