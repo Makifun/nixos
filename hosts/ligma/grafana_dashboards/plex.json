@@ -20,7 +20,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "custom": {"fillOpacity": 10, "lineWidth": 2, "spanNulls": false}
+          "custom": {"drawStyle": "bars", "fillOpacity": 80, "lineWidth": 0, "spanNulls": false, "barAlignment": 0}
         }
       },
       "options": {
@@ -30,7 +30,7 @@
       "targets": [
         {
           "datasource": {"type": "loki", "uid": "loki"},
-          "expr": "sum by (library) (\n  sum_over_time(\n    {job=\"playma-plex-trash\"}\n    | regexp `(?:INFO|WARNING|ERROR)\\s+(?P<library>[^:]+): cleared (?P<count>\\d+)`\n    | unwrap count\n    [$__interval]\n  )\n)",
+          "expr": "sum by (library) (sum_over_time({job=\"playma-plex-trash\"} | regexp `(?:INFO|WARNING|ERROR)\\s+(?P<library>[^:]+): cleared (?P<count>\\d+)` | unwrap count [20m]))",
           "legendFormat": "{{library}}",
           "queryType": "range"
         }
@@ -47,7 +47,7 @@
         "defaults": {
           "unit": "short",
           "color": {"mode": "fixed", "fixedColor": "orange"},
-          "custom": {"fillOpacity": 15, "lineWidth": 2, "spanNulls": false}
+          "custom": {"drawStyle": "bars", "fillOpacity": 80, "lineWidth": 0, "spanNulls": false, "barAlignment": 0}
         }
       },
       "options": {
@@ -57,7 +57,7 @@
       "targets": [
         {
           "datasource": {"type": "loki", "uid": "loki"},
-          "expr": "{job=\"playma-plex-trash\"}\n| regexp `total trash: (?P<total>\\d+)`\n| unwrap total",
+          "expr": "max_over_time({job=\"playma-plex-trash\"} | regexp `total trash: (?P<total>\\d+)` | unwrap total [20m])",
           "legendFormat": "total trash",
           "queryType": "range"
         }
