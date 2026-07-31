@@ -232,25 +232,6 @@
               };
             };
           }
-          {
-            "SeerrOld" = {
-              icon = "/images/seerr.png";
-              href = "https://seerrold.${baseFacts.domainName}";
-              namespace = "seerr";
-              app = "seerr";
-              widget = {
-                type = "seerr";
-                fields = [
-                  "pending"
-                  "approved"
-                  "available"
-                  "processing"
-                ];
-                url = "https://seerrold.${baseFacts.domainName}";
-                key = "{{HOMEPAGE_VAR_SEERROLD_TOKEN}}";
-              };
-            };
-          }
         ];
       }
 
