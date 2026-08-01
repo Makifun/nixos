@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   baseFacts,
   hosts,
   ...
@@ -54,7 +55,7 @@ in
     wants = [ "podman-authentik-server.service" ];
     serviceConfig = {
       ExecStartPre = "${waitForAuthentik}";
-      TimeoutStartSec = 300;
+      TimeoutStartSec = lib.mkForce 300;
       RestartSec = "30s";
       StartLimitIntervalSec = "0";
     };
