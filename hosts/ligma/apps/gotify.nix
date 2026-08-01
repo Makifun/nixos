@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   baseFacts,
   hosts,
   ...
@@ -10,6 +11,13 @@ let
   gotifyBase = "/${hostname}/${hostname}/gotify";
   # renovate: datasource=docker depName=gotify/server
   gotifyTag = "3.0.0";
+  waitForAuthentik = pkgs.writeShellScript "gotify-wait-authentik" ''
+    until ${pkgs.curl}/bin/curl -sf --max-time 10 \
+      https://auth.${baseFacts.domainName}/application/o/gotify/.well-known/openid-configuration \
+      > /dev/null 2>&1; do
+      sleep 5
+    done
+  '';
 in
 {
   sops.secrets.gotify-oidc-secret = {
@@ -38,14 +46,17 @@ in
     '';
   };
 
-  # Wait for Authentik server before starting — Gotify does OIDC discovery at
-  # startup and fails with 503 if Authentik is still initialising.
+  # Block Gotify start until Authentik's OIDC discovery endpoint returns 200.
+  # `after` alone is not enough — it only waits for the container to start,
+  # not for Authentik to finish initialising internally.
   systemd.services.podman-gotify = {
     after = [ "podman-authentik-server.service" ];
     wants = [ "podman-authentik-server.service" ];
     serviceConfig = {
+      ExecStartPre = "${waitForAuthentik}";
+      TimeoutStartSec = 300;
       RestartSec = "30s";
-      StartLimitIntervalSec = "0"; # unlimited retries — OIDC discovery blocks until Authentik ready
+      StartLimitIntervalSec = "0";
     };
   };
 
