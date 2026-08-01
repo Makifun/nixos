@@ -25,6 +25,18 @@
     useDHCP = true;
     hostId = "c01d5701";
   };
+  systemd.services.console-blanking = {
+    description = "Blank console after 5 minutes";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.kbd}/bin/setterm --blank 5";
+      StandardOutput = "tty";
+      TTYPath = "/dev/tty1";
+    };
+  };
+
   # rclone FUSE drop during upgrade causes sonarr/radarr to mark media as missing
   system.autoUpgrade.enable = lib.mkForce false;
   system.stateVersion = "26.11";
