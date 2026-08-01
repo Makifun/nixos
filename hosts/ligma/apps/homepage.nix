@@ -498,6 +498,44 @@
             };
           }
           {
+            "nixos issues" = {
+              icon = "si-github";
+              href = "https://github.com/Makifun/nixos/issues";
+              widget = {
+                type = "customapi";
+                url = "https://api.github.com/search/issues?q=repo:Makifun/nixos+is:issue+state:open";
+                refreshInterval = 3600000;
+                method = "GET";
+                mappings = [
+                  {
+                    field = "total_count";
+                    label = "Open Issues";
+                    format = "number";
+                  }
+                ];
+              };
+            };
+          }
+          {
+            "nixos PRs" = {
+              icon = "si-github";
+              href = "https://github.com/Makifun/nixos/pulls";
+              widget = {
+                type = "customapi";
+                url = "https://api.github.com/search/issues?q=repo:Makifun/nixos+is:pr+state:open";
+                refreshInterval = 3600000;
+                method = "GET";
+                mappings = [
+                  {
+                    field = "total_count";
+                    label = "Open PRs";
+                    format = "number";
+                  }
+                ];
+              };
+            };
+          }
+          {
             "Vaultwarden" = {
               icon = "/images/vaultwarden.png";
               href = "https://vault.${baseFacts.domainName}";
