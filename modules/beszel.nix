@@ -1,6 +1,7 @@
 {
   config,
   hosts,
+  lib,
   ...
 }:
 let
@@ -12,7 +13,7 @@ in
 {
   sops.secrets.beszel_agent_key = {
     format = "yaml";
-    sopsFile = ../common/secrets.yaml;
+    sopsFile = lib.mkDefault ../common/secrets.yaml;
   };
 
   systemd.tmpfiles.rules = [
