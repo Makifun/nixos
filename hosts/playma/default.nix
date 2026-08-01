@@ -11,7 +11,7 @@
     ./disko-config.nix
     ../../common
     ../../modules/backrest.nix
-    ../../modules/beszel.nix
+    ../../modules/beszel-agent.nix
     ../../modules/podman.nix
     ./apps/backrest-extra.nix
     ./apps/beszel-extra.nix

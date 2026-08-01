@@ -12,12 +12,12 @@
     ./dns-records.nix
     ../../common
     ../../modules/backrest.nix
-    ../../modules/beszel.nix
+    ../../modules/beszel-agent.nix
     ../../modules/podman.nix
     ./apps/apprise.nix
     ./apps/authentik.nix
     ./apps/backrest-extra.nix
-    ./apps/beszel-agent.nix
+    ./apps/beszel-extra.nix
     ./apps/beszel-server.nix
     ./apps/distribution.nix
     ./apps/forgejo.nix

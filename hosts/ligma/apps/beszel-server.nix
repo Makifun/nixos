@@ -1,7 +1,13 @@
-{ baseFacts, ... }:
+{
+  config,
+  baseFacts,
+  hosts,
+  ...
+}:
 let
+  hostname = config.networking.hostName;
   beszelPort = 8095;
-  beszelBase = "/ligma/ligma/beszel";
+  beszelBase = "/${hostname}/${hostname}/beszel";
   # renovate: datasource=docker depName=henrygd/beszel
   beszelTag = "0.18.7";
 in
@@ -37,5 +43,5 @@ in
     ];
   };
 
-  ligma.dnsRecords."beszel.${baseFacts.domainName}".value = "10.10.10.13";
+  ligma.dnsRecords."beszel.${baseFacts.domainName}".value = hosts.ligma;
 }
