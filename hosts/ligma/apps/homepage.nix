@@ -498,37 +498,26 @@
             };
           }
           {
-            "nixos issues" = {
+            "makifun/nixos" = {
               icon = "si-github";
-              href = "https://github.com/Makifun/nixos/issues";
+              href = "https://github.com/Makifun/nixos";
               widget = {
                 type = "customapi";
-                url = "https://api.github.com/search/issues?q=repo:Makifun/nixos+is:issue+state:open";
+                url = "https://api.github.com/repos/Makifun/nixos";
                 refreshInterval = 3600000;
                 method = "GET";
+                headers = {
+                  "User-Agent" = "homepage-dashboard";
+                };
                 mappings = [
                   {
-                    field = "total_count";
-                    label = "Open Issues";
+                    field = "open_issues_count";
+                    label = "Issues & PRs";
                     format = "number";
                   }
-                ];
-              };
-            };
-          }
-          {
-            "nixos PRs" = {
-              icon = "si-github";
-              href = "https://github.com/Makifun/nixos/pulls";
-              widget = {
-                type = "customapi";
-                url = "https://api.github.com/search/issues?q=repo:Makifun/nixos+is:pr+state:open";
-                refreshInterval = 3600000;
-                method = "GET";
-                mappings = [
                   {
-                    field = "total_count";
-                    label = "Open PRs";
+                    field = "stargazers_count";
+                    label = "Stars";
                     format = "number";
                   }
                 ];
