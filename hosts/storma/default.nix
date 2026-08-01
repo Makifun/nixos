@@ -31,7 +31,7 @@
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.kbd}/bin/setterm --blank 5";
+      ExecStart = "${pkgs.util-linux}/bin/setterm --blank 5";
       StandardOutput = "tty";
       TTYPath = "/dev/tty1";
     };
