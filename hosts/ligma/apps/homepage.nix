@@ -711,6 +711,16 @@
             };
           }
           {
+            "Prometheus" = {
+              icon = "/images/prometheus.png";
+              href = "https://prometheus.${baseFacts.domainName}";
+              widget = {
+                type = "prometheus";
+                url = "http://prometheus.${baseFacts.domainName}";
+              };
+            };
+          }
+          {
             "Backrest Ligma" = {
               icon = "/images/backrest.png";
               href = "https://backrest-ligma.${baseFacts.domainName}";
