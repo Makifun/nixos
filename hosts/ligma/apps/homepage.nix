@@ -716,7 +716,7 @@
               href = "https://prometheus.${baseFacts.domainName}";
               widget = {
                 type = "prometheus";
-                url = "http://prometheus.${baseFacts.domainName}";
+                url = "localhost:9090";
               };
             };
           }
