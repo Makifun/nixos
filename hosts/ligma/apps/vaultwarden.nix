@@ -9,7 +9,7 @@ let
   vaultwardenPort = 8310;
   vaultwardenBase = "/${hostname}/${hostname}/vaultwarden";
   # renovate: datasource=docker depName=vaultwarden/server
-  vaultwardenTag = "1.37.0";
+  vaultwardenTag = "1.37.1";
 in
 {
   # vaultwarden_env: |
