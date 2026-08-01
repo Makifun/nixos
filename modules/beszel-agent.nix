@@ -13,6 +13,7 @@ in
 {
   sops.secrets.beszel_agent_key = {
     format = "yaml";
+    sopsFile = ../common/secrets.yaml;
   };
 
   systemd.tmpfiles.rules = [
