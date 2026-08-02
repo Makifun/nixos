@@ -1,35 +1,42 @@
 keys:
-  - &hosts_playma age18x48ucxzdqz43zs0yseyqgemreqw6ens35kzqnzy6svfsrql7urq6h9g02
-  - &hosts_storma age13rag24va4yap7qzfjcfsk0j6m3ktv52epr09gfqu4jg3mncxaurqmfh7vh
+  - &makifun age100c08p2hlc5vw258ug23wg4p5z7c99j4w30rayjyj5avtrfeegjqk9ylmk
+  - &hosts_arrma age12wzypy9a24g7k730w809a9t39z5k6p76l25d6a3mrrq8x3qey00sn272v8
   - &hosts_bofa age165yts9pqqffgurw853f7jfslt2p3sav3jxmftqs4uv8hak8qdqlsfalnmc
   - &hosts_ligma age1xfz2m2x6qffpyl7kgcgvgfhuxkefcl9zf3d9ds0mrdu0r32ny3aqgcx6mh
-  - &makifun age100c08p2hlc5vw258ug23wg4p5z7c99j4w30rayjyj5avtrfeegjqk9ylmk
+  - &hosts_playma age18x48ucxzdqz43zs0yseyqgemreqw6ens35kzqnzy6svfsrql7urq6h9g02
+  - &hosts_storma age13rag24va4yap7qzfjcfsk0j6m3ktv52epr09gfqu4jg3mncxaurqmfh7vh
 creation_rules:
   - path_regex: ^common/secrets\.yaml$
     key_groups:
       - age:
-          - *hosts_playma
-          - *hosts_storma
+          - *hosts_arrma
           - *hosts_bofa
           - *hosts_ligma
+          - *hosts_playma
+          - *hosts_storma
           - *makifun
-  - path_regex: ^hosts/ligma/secrets\.yaml$
+  - path_regex: ^hosts/arrma/secrets\.yaml$
     key_groups:
       - age:
-          - *hosts_ligma
+          - *hosts_arrma
           - *makifun
   - path_regex: ^hosts/bofa/secrets\.yaml$
     key_groups:
       - age:
           - *hosts_bofa
           - *makifun
-  - path_regex: ^hosts/storma/secrets\.yaml$
+  - path_regex: ^hosts/ligma/secrets\.yaml$
     key_groups:
       - age:
-          - *hosts_storma
+          - *hosts_ligma
           - *makifun
   - path_regex: ^hosts/playma/secrets\.yaml$
     key_groups:
       - age:
           - *hosts_playma
+          - *makifun
+  - path_regex: ^hosts/storma/secrets\.yaml$
+    key_groups:
+      - age:
+          - *hosts_storma
           - *makifun
