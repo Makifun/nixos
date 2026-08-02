@@ -62,7 +62,6 @@ in
               main = baseFacts.domainName;
               sans = [
                 "*.${baseFacts.domainName}"
-                "*.mirror.${baseFacts.domainName}"
               ];
             }
           ];
