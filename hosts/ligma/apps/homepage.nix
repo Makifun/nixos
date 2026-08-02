@@ -228,8 +228,8 @@
             "NZBget" = {
               icon = "/images/nzbget.png";
               href = "https://nzbget.${baseFacts.domainName}";
-              namespace = "nzbget";
-              app = "nzbget";
+              server = "arrma";
+              container = "nzbget";
               widget = {
                 type = "nzbget";
                 url = "https://nzbget.${baseFacts.domainName}";
@@ -242,8 +242,8 @@
             "qBittorrent" = {
               icon = "/images/qbittorrent.png";
               href = "https://qui.${baseFacts.domainName}";
-              namespace = "media";
-              app = "media";
+              server = "arrma";
+              container = "qbittorrent";
               widget = {
                 type = "qbittorrent";
                 fields = [
@@ -261,8 +261,8 @@
             "autobrr" = {
               icon = "/images/autobrr.png";
               href = "https://autobrr.${baseFacts.domainName}";
-              namespace = "media";
-              app = "media";
+              server = "arrma";
+              container = "autobrr";
               widget = {
                 type = "autobrr";
                 fields = [
@@ -280,8 +280,8 @@
             "Prowlarrpg" = {
               icon = "/images/prowlarr.png";
               href = "https://prowlarrpg.${baseFacts.domainName}";
-              namespace = "media";
-              app = "media";
+              server = "arrma";
+              container = "prowlarrpg";
               widget = {
                 type = "prowlarr";
                 url = "https://prowlarrpg.${baseFacts.domainName}";
@@ -730,14 +730,14 @@
             };
           }
           {
-            "Backrest Ligma" = {
+            "Backrest Arrma" = {
               icon = "/images/backrest.png";
-              href = "https://backrest-ligma.${baseFacts.domainName}";
-              server = "ligma";
+              href = "https://backrest-arrma.${baseFacts.domainName}";
+              server = "arrma";
               container = "backrest";
               widget = {
                 type = "backrest";
-                url = "http://127.0.0.1:9898";
+                url = "http://${hosts.arrma}:9898";
               };
             };
           }
@@ -752,12 +752,76 @@
             };
           }
           {
+            "Backrest Ligma" = {
+              icon = "/images/backrest.png";
+              href = "https://backrest-ligma.${baseFacts.domainName}";
+              server = "ligma";
+              container = "backrest";
+              widget = {
+                type = "backrest";
+                url = "http://127.0.0.1:9898";
+              };
+            };
+          }
+          {
             "Backrest Playma" = {
               icon = "/images/backrest.png";
               href = "https://backrest-playma.${baseFacts.domainName}";
               widget = {
                 type = "backrest";
                 url = "http://${hosts.playma}:9898";
+              };
+            };
+          }
+          {
+            "Backrest Storma" = {
+              icon = "/images/backrest.png";
+              href = "https://backrest-storma.${baseFacts.domainName}";
+              widget = {
+                type = "backrest";
+                url = "http://${hosts.storma}:9898";
+              };
+            };
+          }
+          {
+            "Beszel Arrma" = {
+              icon = "/images/beszel.svg";
+              href = "https://beszel.${baseFacts.domainName}";
+              server = "arrma";
+              container = "beszel";
+              widget = {
+                type = "beszel";
+                fields = [
+                  "cpu"
+                  "memory"
+                  "disk"
+                  "network"
+                ];
+                url = "https://beszel.${baseFacts.domainName}";
+                username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
+                password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
+                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_ARRMA}}";
+                version = 2;
+              };
+            };
+          }
+          {
+            "Beszel Bofa" = {
+              icon = "/images/beszel.svg";
+              href = "https://beszel.${baseFacts.domainName}";
+              widget = {
+                type = "beszel";
+                fields = [
+                  "cpu"
+                  "memory"
+                  "disk"
+                  "network"
+                ];
+                url = "https://beszel.${baseFacts.domainName}";
+                username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
+                password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
+                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_BOFA}}";
+                version = 2;
               };
             };
           }
@@ -779,26 +843,6 @@
                 username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
                 systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_LIGMA}}";
-                version = 2;
-              };
-            };
-          }
-          {
-            "Beszel Bofa" = {
-              icon = "/images/beszel.svg";
-              href = "https://beszel.${baseFacts.domainName}";
-              widget = {
-                type = "beszel";
-                fields = [
-                  "cpu"
-                  "memory"
-                  "disk"
-                  "network"
-                ];
-                url = "https://beszel.${baseFacts.domainName}";
-                username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
-                password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
-                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_BOFA}}";
                 version = 2;
               };
             };
@@ -854,6 +898,16 @@
             };
           }
           {
+            "Traefik Arrma" = {
+              icon = "/images/traefik.png";
+              href = "https://traefik-arrma.${baseFacts.domainName}/dashboard/";
+              widget = {
+                type = "traefik";
+                url = "https://traefik-arrma.${baseFacts.domainName}";
+              };
+            };
+          }
+          {
             "Authentik" = {
               icon = "/images/authentik.png";
               href = "https://auth.${baseFacts.domainName}";
@@ -871,8 +925,8 @@
             "Gluetun" = {
               icon = "/images/wireguard.png";
               href = "https://gluetun.${baseFacts.domainName}";
-              namespace = "media";
-              app = "media";
+              server = "arrma";
+              container = "gluetun";
               widget = {
                 type = "gluetun";
                 fields = [
