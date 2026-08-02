@@ -14,7 +14,6 @@
     ../../modules/beszel-agent.nix
     ../../modules/podman.nix
     ./apps/backrest-extra.nix
-    ./apps/beszel-extra.nix
     ./apps/pg-arrs.nix
     ./apps/pg-dump.nix
     ./apps/timescaledb.nix

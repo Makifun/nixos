@@ -17,10 +17,11 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d '${beszelBase}/data'         0755 root root - -"
-    "d '/.beszelroot'               0755 root root - -"
-    "d '/nix/.beszelnixos'          0755 root root - -"
-    "d '/persist/.beszelpersist'    0755 root root - -"
+    "d '${beszelBase}/data'               0755 root root - -"
+    "d '/${hostname}/.beszel${hostname}'  0755 root root - -"
+    "d '/.beszelroot'                     0755 root root - -"
+    "d '/nix/.beszelnixos'                0755 root root - -"
+    "d '/persist/.beszelpersist'          0755 root root - -"
   ];
 
   virtualisation.oci-containers.containers.beszel-agent = {
@@ -36,6 +37,7 @@ in
       "/.beszelroot:/extra-filesystems/root__root:ro"
       "/nix/.beszelnixos:/extra-filesystems/nixos__nix:ro"
       "/persist/.beszelpersist:/extra-filesystems/persist__persist:ro"
+      "/${hostname}/.beszel${hostname}:/extra-filesystems/${hostname}__${hostname}:ro"
     ];
   };
 
