@@ -1,9 +1,9 @@
 #!/bin/zsh
 ID=999
 NAME="playma"
-RAM_MIN=2048
-RAM_MAX=4096
-CPU=4
+RAM_MIN=6144
+RAM_MAX=6144
+CPU=2
 MAC="3E:91:5C:2D:88:7E"
 ORDER=5
 
@@ -19,13 +19,12 @@ qm create $ID \
   --cores $CPU \
   --sockets 1 \
   --cpu host \
-  --numa 1 \
   --onboot 1 \
   --startup order=$ORDER \
   --tablet 0 \
   --agent enabled=1,fstrim_cloned_disks=1 \
   --hostpci0 0000:00:02.0,mdev=i915-GVTg_V5_4,pcie=1 \
-  --net0 virtio=$MAC,bridge=vmbr0,firewall=1,queues=4 \
+  --net0 virtio=$MAC,bridge=vmbr0,queues=2 \
   --scsihw virtio-scsi-single \
   --scsi0 wdblacksn850x:50,discard=on,iothread=1,ssd=1,serial=nixos,backup=0 \
   --scsi1 wdblacksn850x:100,discard=on,iothread=1,ssd=1,serial=playma \

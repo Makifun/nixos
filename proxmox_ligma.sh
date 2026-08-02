@@ -5,6 +5,7 @@ RAM_MIN=12288
 RAM_MAX=16384
 CPU=4
 MAC="BC:24:11:7B:34:F2"
+ORDER=3
 
 echo "Creating VM $NAME"
 ssh proxmox << EOF
@@ -18,13 +19,14 @@ qm create $ID \
   --cores $CPU \
   --sockets 1 \
   --cpu host \
-  --numa 1 \
-  --agent enabled=1 \
-  --net0 virtio=$MAC,bridge=vmbr0,firewall=1,queues=4 \
+  --onboot 1 \
+  --startup order=$ORDER \
+  --tablet 0 \
+  --agent enabled=1,fstrim_cloned_disks=1 \
+  --net0 virtio=$MAC,bridge=vmbr0,queues=4 \
   --scsihw virtio-scsi-single \
   --scsi0 wdblacksn850x:50,discard=on,iothread=1,ssd=1,serial=nixos,backup=0 \
   --scsi1 wdblacksn850x:200,discard=on,iothread=1,ssd=1,serial=ligma \
-  --scsi2 evo850:200,discard=on,iothread=1,ssd=1,serial=cache,backup=0 \
   --scsi3 wdc7HKDX5JF8tb:2048,iothread=1,serial=slowmeme,backup=0 \
   --scsi4 wdc7HKDX5JF8tb:200,iothread=1,serial=nicememe,backup=0 \
   --efidisk0 wdblacksn850x:4,efitype=4m \

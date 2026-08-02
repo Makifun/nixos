@@ -3,8 +3,9 @@ ID=888
 NAME="bofa"
 RAM_MIN=5120
 RAM_MAX=8192
-CPU=4
+CPU=2
 MAC="2E:7A:45:73:8C:64"
+ORDER=4
 
 echo "Creating VM $NAME"
 ssh proxmox << EOF
@@ -18,9 +19,11 @@ qm create $ID \
   --cores $CPU \
   --sockets 1 \
   --cpu host \
-  --numa 1 \
-  --agent enabled=1 \
-  --net0 virtio=$MAC,bridge=vmbr0,firewall=1,queues=4 \
+  --onboot 1 \
+  --startup order=$ORDER \
+  --tablet 0 \
+  --agent enabled=1,fstrim_cloned_disks=1 \
+  --net0 virtio=$MAC,bridge=vmbr0,queues=2 \
   --scsihw virtio-scsi-single \
   --scsi0 wdblacksn850x:50,discard=on,iothread=1,ssd=1,serial=nixos,backup=0 \
   --scsi1 wdblacksn850x:100,discard=on,iothread=1,ssd=1,serial=bofa \
