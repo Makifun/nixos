@@ -111,7 +111,7 @@ in
       };
     };
     middlewares.authentik.forwardAuth = {
-      address = "http://${hosts.ligma}:9000/outpost.goauthentik.io/auth/traefik";
+      address = "https://auth.${baseFacts.domainName}/outpost.goauthentik.io/auth/traefik";
       trustForwardHeader = true;
       maxResponseBodySize = 65536;
       authResponseHeaders = [
@@ -129,7 +129,7 @@ in
       ];
     };
     services.authentik-embedded-outpost.loadBalancer.servers = [
-      { url = "http://${hosts.ligma}:9000"; }
+      { url = "https://auth.${baseFacts.domainName}"; }
     ];
   };
 
