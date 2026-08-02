@@ -41,13 +41,19 @@ in
         entryPoints = [ "websecure" ];
         service = "qui-svc";
         middlewares = [ "authentik" ];
-        tls = { };
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       qui-outpost = {
         rule = "Host(`qui.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls = { };
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
     };
     services."qui-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:7476"; } ];
