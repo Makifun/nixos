@@ -382,7 +382,10 @@ in
         rule = "Host(`grafana.${baseFacts.domainName}`)";
         entryPoints = [ "websecure" ];
         service = "grafana-svc";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
 
       # Prometheus — three-router split
@@ -394,14 +397,20 @@ in
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       prometheus-write = {
         rule = "Host(`prometheus.${baseFacts.domainName}`) && PathPrefix(`/api/v1/write`)";
         priority = 10;
         entryPoints = [ "websecure" ];
         service = "prometheus-svc";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       prometheus = {
         rule = "Host(`prometheus.${baseFacts.domainName}`)";
@@ -409,7 +418,10 @@ in
         entryPoints = [ "websecure" ];
         service = "prometheus-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
     };
     services = {

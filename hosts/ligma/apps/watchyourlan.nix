@@ -77,13 +77,19 @@ in
         entryPoints = [ "websecure" ];
         service = "watchyourlan-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       "watchyourlan-outpost" = {
         rule = "Host(`watchyourlan.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
     };
     services."watchyourlan-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:8840"; } ];

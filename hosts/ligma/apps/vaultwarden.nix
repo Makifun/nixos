@@ -78,7 +78,10 @@ in
       rule = "Host(`vault.${baseFacts.domainName}`)";
       entryPoints = [ "websecure" ];
       service = "vaultwarden";
-      tls.certResolver = "letsencrypt";
+      tls = {
+        certResolver = "letsencrypt";
+        domains = [ { main = "*.${baseFacts.domainName}"; } ];
+      };
     };
     services.vaultwarden.loadBalancer.servers = [
       { url = "http://127.0.0.1:${toString vaultwardenPort}"; }

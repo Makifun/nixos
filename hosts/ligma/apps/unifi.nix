@@ -174,13 +174,19 @@ in
         entryPoints = [ "websecure" ];
         service = "unifi-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       "unifi-outpost" = {
         rule = "Host(`unifi.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
     };
     services."unifi-svc".loadBalancer = {

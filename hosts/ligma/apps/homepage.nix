@@ -924,19 +924,28 @@
         entryPoints = [ "websecure" ];
         service = "homepage-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       homepage-images = {
         rule = "Host(`homepage.${baseFacts.domainName}`) && PathPrefix(`/images/`)";
         entryPoints = [ "websecure" ];
         service = "homepage-images-svc";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       homepage-outpost = {
         rule = "Host(`homepage.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
     };
     services.homepage-images-svc.loadBalancer.servers = [

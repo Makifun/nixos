@@ -9,13 +9,19 @@ in
         rule = "Host(`technitium.${baseFacts.domainName}`)";
         entryPoints = [ "websecure" ];
         service = "technitium-svc";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       doh = {
         rule = "Host(`doh.${baseFacts.domainName}`)";
         entryPoints = [ "websecure" ];
         service = "doh-svc";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
     };
     services = {

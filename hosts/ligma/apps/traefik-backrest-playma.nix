@@ -10,7 +10,10 @@ in
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       backrest-playma = {
         rule = "Host(`backrest-playma.${baseFacts.domainName}`)";
@@ -18,7 +21,10 @@ in
         entryPoints = [ "websecure" ];
         service = "backrest-playma-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
     };
     services."backrest-playma-svc".loadBalancer.servers = [

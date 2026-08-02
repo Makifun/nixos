@@ -10,7 +10,10 @@ in
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       backrest-bofa = {
         rule = "Host(`backrest-bofa.${baseFacts.domainName}`)";
@@ -18,7 +21,10 @@ in
         entryPoints = [ "websecure" ];
         service = "backrest-bofa-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
     };
     services."backrest-bofa-svc".loadBalancer.servers = [

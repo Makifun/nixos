@@ -165,13 +165,19 @@ in
       rule = "Host(`omni.${baseFacts.domainName}`)";
       entryPoints = [ "websecure" ];
       service = "omni-svc";
-      tls.certResolver = "letsencrypt";
+      tls = {
+        certResolver = "letsencrypt";
+        domains = [ { main = "*.${baseFacts.domainName}"; } ];
+      };
     };
     routers."omni-k8s-proxy" = {
       rule = "Host(`omni.${baseFacts.domainName}`)";
       entryPoints = [ "k8s-proxy" ];
       service = "omni-k8s-proxy-svc";
-      tls.certResolver = "letsencrypt";
+      tls = {
+        certResolver = "letsencrypt";
+        domains = [ { main = "*.${baseFacts.domainName}"; } ];
+      };
     };
     services."omni-svc".loadBalancer = {
       serversTransport = "omni-self-signed";

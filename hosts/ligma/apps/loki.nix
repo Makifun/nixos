@@ -82,14 +82,20 @@ in
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       loki-push = {
         rule = "Host(`loki.${baseFacts.domainName}`) && PathPrefix(`/loki/api/v1/push`)";
         priority = 10;
         entryPoints = [ "websecure" ];
         service = "loki-svc";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       loki = {
         rule = "Host(`loki.${baseFacts.domainName}`)";
@@ -97,7 +103,10 @@ in
         entryPoints = [ "websecure" ];
         service = "loki-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
     };
     services."loki-svc".loadBalancer.servers = [

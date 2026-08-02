@@ -38,14 +38,20 @@ in
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       apprise-api = {
         rule = "Host(`apprise.${baseFacts.domainName}`) && PathPrefix(`/notify`)";
         priority = 10;
         entryPoints = [ "websecure" ];
         service = "apprise-svc";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       apprise = {
         rule = "Host(`apprise.${baseFacts.domainName}`)";
@@ -53,7 +59,10 @@ in
         entryPoints = [ "websecure" ];
         service = "apprise-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
     };
     services."apprise-svc".loadBalancer.servers = [

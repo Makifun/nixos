@@ -122,7 +122,10 @@ in
       rule = "Host(`auth.${baseFacts.domainName}`)";
       entryPoints = [ "websecure" ];
       service = "authentik";
-      tls.certResolver = "letsencrypt";
+      tls = {
+        certResolver = "letsencrypt";
+        domains = [ { main = "*.${baseFacts.domainName}"; } ];
+      };
     };
     services.authentik.loadBalancer.servers = [ { url = "http://127.0.0.1:9000"; } ];
   };

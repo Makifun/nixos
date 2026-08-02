@@ -84,14 +84,20 @@ in
         priority = 10;
         entryPoints = [ "websecure" ];
         service = "gotify-svc";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       gotify = {
         rule = "Host(`gotify.${baseFacts.domainName}`)";
         priority = 1;
         entryPoints = [ "websecure" ];
         service = "gotify-svc";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
     };
     services."gotify-svc".loadBalancer.servers = [

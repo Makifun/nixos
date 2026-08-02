@@ -156,7 +156,10 @@ in
         entryPoints = [ "websecure" ];
         service = "dist-${name}-svc";
         middlewares = [ "mirror-lan-only" ];
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.mirror.${baseFacts.domainName}"; } ];
+        };
       }
     ) registries;
     services = lib.mapAttrs' (

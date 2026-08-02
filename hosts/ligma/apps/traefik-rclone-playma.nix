@@ -10,7 +10,10 @@ in
         priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
       rclone-playma = {
         rule = "Host(`rclone-playma.${baseFacts.domainName}`)";
@@ -18,7 +21,10 @@ in
         entryPoints = [ "websecure" ];
         service = "rclone-playma-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
       };
     };
     services."rclone-playma-svc".loadBalancer.servers = [

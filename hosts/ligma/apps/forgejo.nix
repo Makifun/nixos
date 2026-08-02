@@ -334,7 +334,10 @@ in
       rule = "Host(`git.${baseFacts.domainName}`)";
       entryPoints = [ "websecure" ];
       service = "forgejo";
-      tls.certResolver = "letsencrypt";
+      tls = {
+        certResolver = "letsencrypt";
+        domains = [ { main = "*.${baseFacts.domainName}"; } ];
+      };
     };
     services.forgejo.loadBalancer.servers = [ { url = "http://127.0.0.1:3010"; } ];
   };
