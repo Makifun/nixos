@@ -47,6 +47,27 @@
     '';
   };
 
+  services.traefik.dynamicConfigOptions.http = {
+    routers = {
+      gluetun = {
+        rule = "Host(`gluetun.${baseFacts.domainName}`)";
+        entryPoints = [ "websecure" ];
+        service = "gluetun-svc";
+        middlewares = [ "authentik" ];
+        tls.certResolver = "letsencrypt";
+      };
+      gluetun-outpost = {
+        rule = "Host(`gluetun.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
+        entryPoints = [ "websecure" ];
+        service = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
+    };
+    services."gluetun-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:8000"; } ];
+  };
+
+  arrma.dnsRecords."gluetun.${baseFacts.domainName}".value = hosts.arrma;
+
   boot.kernelModules = [ "tun" ];
 
   networking.firewall.extraInputRules = ''

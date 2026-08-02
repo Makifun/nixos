@@ -99,7 +99,7 @@ in
       environmentFiles = [ config.sops.secrets.authentik_env.path ];
       environment = sharedEnv;
       ports = [
-        "127.0.0.1:9000:9000"
+        "9000:9000"
         "127.0.0.1:9443:9443"
       ];
       volumes = sharedVolumes;
@@ -126,6 +126,10 @@ in
     };
     services.authentik.loadBalancer.servers = [ { url = "http://127.0.0.1:9000"; } ];
   };
+
+  networking.firewall.extraInputRules = ''
+    tcp dport 9000 ip saddr ${hosts.lan} accept comment "Authentik embedded outpost from LAN"
+  '';
 
   ligma.dnsRecords."auth.${baseFacts.domainName}".value = hosts.ligma;
 }

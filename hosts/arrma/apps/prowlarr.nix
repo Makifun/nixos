@@ -1,9 +1,35 @@
-{ config, ... }:
+{
+  baseFacts,
+  config,
+  hosts,
+  ...
+}:
 let
   hostname = config.networking.hostName;
   prowlarrBase = "/${hostname}/${hostname}/prowlarr";
 in
 {
+  services.traefik.dynamicConfigOptions.http = {
+    routers = {
+      prowlarrpg = {
+        rule = "Host(`prowlarrpg.${baseFacts.domainName}`)";
+        entryPoints = [ "websecure" ];
+        service = "prowlarrpg-svc";
+        middlewares = [ "authentik" ];
+        tls.certResolver = "letsencrypt";
+      };
+      prowlarrpg-outpost = {
+        rule = "Host(`prowlarrpg.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
+        entryPoints = [ "websecure" ];
+        service = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
+    };
+    services."prowlarrpg-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:9697"; } ];
+  };
+
+  arrma.dnsRecords."prowlarrpg.${baseFacts.domainName}".value = hosts.arrma;
+
   systemd.tmpfiles.rules = [
     "d '${prowlarrBase}' 0750 1000 1000 - -"
   ];

@@ -1,4 +1,7 @@
 { hosts, ... }:
 {
-  services.samba-cloud.extraHosts = [ hosts.playma ];
+  services.samba-cloud.extraHosts = [
+    hosts.playma
+    hosts.arrma
+  ];
 }

@@ -1,9 +1,35 @@
-{ config, ... }:
+{
+  baseFacts,
+  config,
+  hosts,
+  ...
+}:
 let
   hostname = config.networking.hostName;
   nzbgetBase = "/${hostname}/${hostname}/nzbget";
 in
 {
+  services.traefik.dynamicConfigOptions.http = {
+    routers = {
+      nzbget = {
+        rule = "Host(`nzbget.${baseFacts.domainName}`)";
+        entryPoints = [ "websecure" ];
+        service = "nzbget-svc";
+        middlewares = [ "authentik" ];
+        tls.certResolver = "letsencrypt";
+      };
+      nzbget-outpost = {
+        rule = "Host(`nzbget.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
+        entryPoints = [ "websecure" ];
+        service = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
+    };
+    services."nzbget-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:6789"; } ];
+  };
+
+  arrma.dnsRecords."nzbget.${baseFacts.domainName}".value = hosts.arrma;
+
   systemd.tmpfiles.rules = [
     "d '${nzbgetBase}' 0750 1000 1000 - -"
   ];

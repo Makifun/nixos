@@ -1,5 +1,31 @@
-{ config, ... }:
 {
+  baseFacts,
+  config,
+  hosts,
+  ...
+}:
+{
+  services.traefik.dynamicConfigOptions.http = {
+    routers = {
+      byparr = {
+        rule = "Host(`byparr.${baseFacts.domainName}`)";
+        entryPoints = [ "websecure" ];
+        service = "byparr-svc";
+        middlewares = [ "authentik" ];
+        tls.certResolver = "letsencrypt";
+      };
+      byparr-outpost = {
+        rule = "Host(`byparr.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
+        entryPoints = [ "websecure" ];
+        service = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
+    };
+    services."byparr-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:8192"; } ];
+  };
+
+  arrma.dnsRecords."byparr.${baseFacts.domainName}".value = hosts.arrma;
+
   systemd.services.podman-byparr = {
     after = [ "podman-gluetun.service" ];
     requires = [ "podman-gluetun.service" ];

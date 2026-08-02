@@ -1,4 +1,9 @@
-{ config, ... }:
+{
+  baseFacts,
+  config,
+  hosts,
+  ...
+}:
 let
   hostname = config.networking.hostName;
   qbittorrentBase = "/${hostname}/${hostname}/qbittorrent";
@@ -23,6 +28,27 @@ in
     after = [ "podman-gluetun.service" ];
     requires = [ "podman-gluetun.service" ];
   };
+
+  services.traefik.dynamicConfigOptions.http = {
+    routers = {
+      qbittorrent = {
+        rule = "Host(`qbittorrent.${baseFacts.domainName}`)";
+        entryPoints = [ "websecure" ];
+        service = "qbittorrent-svc";
+        middlewares = [ "authentik" ];
+        tls.certResolver = "letsencrypt";
+      };
+      qbittorrent-outpost = {
+        rule = "Host(`qbittorrent.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
+        entryPoints = [ "websecure" ];
+        service = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
+    };
+    services."qbittorrent-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:9090"; } ];
+  };
+
+  arrma.dnsRecords."qbittorrent.${baseFacts.domainName}".value = hosts.arrma;
 
   virtualisation.oci-containers.containers.qbittorrent = {
     # renovate: datasource=docker depName=lscr.io/linuxserver/qbittorrent

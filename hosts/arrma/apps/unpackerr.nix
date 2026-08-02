@@ -1,9 +1,26 @@
-{ config, ... }:
+{
+  baseFacts,
+  config,
+  hosts,
+  ...
+}:
 let
   hostname = config.networking.hostName;
   unpackerrBase = "/${hostname}/${hostname}/unpackerr";
 in
 {
+  services.traefik.dynamicConfigOptions.http = {
+    routers.unpackerr-metrics = {
+      rule = "Host(`unpackerr-metrics.${baseFacts.domainName}`)";
+      entryPoints = [ "websecure" ];
+      service = "unpackerr-metrics-svc";
+      tls.certResolver = "letsencrypt";
+    };
+    services."unpackerr-metrics-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:5656"; } ];
+  };
+
+  arrma.dnsRecords."unpackerr-metrics.${baseFacts.domainName}".value = hosts.arrma;
+
   systemd.tmpfiles.rules = [
     "d '${unpackerrBase}' 0750 1000 1000 - -"
   ];
