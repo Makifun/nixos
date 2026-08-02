@@ -9,15 +9,9 @@ let
   qbittorrentBase = "/${hostname}/${hostname}/qbittorrent";
 in
 {
-  sops.secrets.TORRENTING_PORT = {
+  sops.secrets.qbittorrent_env = {
+    format = "yaml";
     sopsFile = ../secrets.yaml;
-  };
-
-  sops.templates."qbittorrent.env" = {
-    mode = "0400";
-    content = ''
-      TORRENTING_PORT=${config.sops.placeholder.TORRENTING_PORT}
-    '';
   };
 
   systemd.tmpfiles.rules = [
@@ -53,7 +47,7 @@ in
   virtualisation.oci-containers.containers.qbittorrent = {
     # renovate: datasource=docker depName=lscr.io/linuxserver/qbittorrent
     image = "lscr.io/linuxserver/qbittorrent:5.2.3";
-    environmentFiles = [ config.sops.templates."qbittorrent.env".path ];
+    environmentFiles = [ config.sops.secrets.qbittorrent_env.path ];
     environment = {
       PUID = "1000";
       PGID = "1000";
