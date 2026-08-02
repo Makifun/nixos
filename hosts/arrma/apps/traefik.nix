@@ -122,9 +122,13 @@ in
         "X-authentik-meta-version"
       ];
     };
-    services.authentik-embedded-outpost.loadBalancer.servers = [
-      { url = "https://auth.${baseFacts.domainName}"; }
-    ];
+    services.authentik-embedded-outpost.loadBalancer = {
+      # passHostHeader=false: send Host: auth.makifun.se to ligma's Traefik.
+      # The default (true) would forward Host: <app>.makifun.se, which has no
+      # router on ligma and returns 404 for the Authentik callback.
+      passHostHeader = false;
+      servers = [ { url = "https://auth.${baseFacts.domainName}"; } ];
+    };
   };
 
   networking.firewall.extraInputRules = ''
