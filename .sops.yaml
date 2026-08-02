@@ -9,34 +9,34 @@ creation_rules:
   - path_regex: ^common/secrets\.yaml$
     key_groups:
       - age:
+          - *makifun
           - *hosts_arrma
           - *hosts_bofa
           - *hosts_ligma
           - *hosts_playma
           - *hosts_storma
-          - *makifun
   - path_regex: ^hosts/arrma/secrets\.yaml$
     key_groups:
       - age:
-          - *hosts_arrma
           - *makifun
+          - *hosts_arrma
   - path_regex: ^hosts/bofa/secrets\.yaml$
     key_groups:
       - age:
-          - *hosts_bofa
           - *makifun
+          - *hosts_bofa
   - path_regex: ^hosts/ligma/secrets\.yaml$
     key_groups:
       - age:
-          - *hosts_ligma
           - *makifun
+          - *hosts_ligma
   - path_regex: ^hosts/playma/secrets\.yaml$
     key_groups:
       - age:
-          - *hosts_playma
           - *makifun
+          - *hosts_playma
   - path_regex: ^hosts/storma/secrets\.yaml$
     key_groups:
       - age:
-          - *hosts_storma
           - *makifun
+          - *hosts_storma

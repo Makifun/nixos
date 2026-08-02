@@ -1,11 +1,11 @@
 { config, ... }:
 let
   hostname = config.networking.hostName;
-  configBase = "/${hostname}/${hostname}/prowlarr";
+  prowlarrBase = "/${hostname}/${hostname}/prowlarr";
 in
 {
   systemd.tmpfiles.rules = [
-    "d '${configBase}' 0750 1000 1000 - -"
+    "d '${prowlarrBase}' 0750 1000 1000 - -"
   ];
 
   systemd.services.podman-prowlarr = {
@@ -30,7 +30,7 @@ in
     };
     extraOptions = [ "--network=container:gluetun" ];
     volumes = [
-      "${configBase}:/config"
+      "${prowlarrBase}:/config"
     ];
   };
 
@@ -45,7 +45,7 @@ in
     };
     extraOptions = [ "--network=container:gluetun" ];
     volumes = [
-      "${configBase}:/config:ro"
+      "${prowlarrBase}:/config:ro"
     ];
   };
 }

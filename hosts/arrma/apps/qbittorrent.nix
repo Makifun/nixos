@@ -1,7 +1,7 @@
 { config, ... }:
 let
   hostname = config.networking.hostName;
-  configBase = "/${hostname}/${hostname}/qbittorrent";
+  qbittorrentBase = "/${hostname}/${hostname}/qbittorrent";
 in
 {
   sops.secrets.TORRENTING_PORT = {
@@ -16,7 +16,7 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d '${configBase}' 0750 1000 1000 - -"
+    "d '${qbittorrentBase}' 0750 1000 1000 - -"
   ];
 
   systemd.services.podman-qbittorrent = {
@@ -37,7 +37,7 @@ in
     };
     extraOptions = [ "--network=container:gluetun" ];
     volumes = [
-      "${configBase}:/config"
+      "${qbittorrentBase}:/config"
       "/slowmeme:/qbitdownloads"
     ];
   };

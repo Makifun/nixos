@@ -1,4 +1,9 @@
-{ config, hosts, ... }:
+{
+  baseFacts,
+  config,
+  hosts,
+  ...
+}:
 {
   sops.secrets.WIREGUARD_ENDPOINT_IP = {
     sopsFile = ../secrets.yaml;
@@ -27,25 +32,25 @@
     content = ''
       VPN_SERVICE_PROVIDER=custom
       VPN_TYPE=wireguard
+      WIREGUARD_ADDRESSES=${config.sops.placeholder.WIREGUARD_ADDRESSES}
       WIREGUARD_ENDPOINT_IP=${config.sops.placeholder.WIREGUARD_ENDPOINT_IP}
       WIREGUARD_ENDPOINT_PORT=${config.sops.placeholder.WIREGUARD_ENDPOINT_PORT}
-      WIREGUARD_PUBLIC_KEY=${config.sops.placeholder.WIREGUARD_PUBLIC_KEY}
-      WIREGUARD_PRIVATE_KEY=${config.sops.placeholder.WIREGUARD_PRIVATE_KEY}
       WIREGUARD_PRESHARED_KEY=${config.sops.placeholder.WIREGUARD_PRESHARED_KEY}
-      WIREGUARD_ADDRESSES=${config.sops.placeholder.WIREGUARD_ADDRESSES}
-      BLOCK_MALICIOUS=off
+      WIREGUARD_PRIVATE_KEY=${config.sops.placeholder.WIREGUARD_PRIVATE_KEY}
+      WIREGUARD_PUBLIC_KEY=${config.sops.placeholder.WIREGUARD_PUBLIC_KEY}
       FIREWALL_INPUT_PORTS=9090,8192,7474,7476,9696,9697,8000,5656,9707
-      FIREWALL_VPN_INPUT_PORTS=${config.sops.placeholder.FIREWALL_VPN_INPUT_PORTS}
       FIREWALL_OUTBOUND_SUBNETS=${hosts.lan}
+      FIREWALL_VPN_INPUT_PORTS=${config.sops.placeholder.FIREWALL_VPN_INPUT_PORTS}
       DNS_UPSTREAM_RESOLVERS=cloudflare,quad9,google
-      TZ=Europe/Stockholm
+      BLOCK_MALICIOUS=off
+      TZ=${config.time.timeZone}
     '';
   };
 
   boot.kernelModules = [ "tun" ];
 
   networking.firewall.extraInputRules = ''
-    tcp dport { 9090, 8192, 7474, 7476, 9697, 8000, 5656, 9707 } ip saddr ${hosts.lan} accept comment "media via gluetun from LAN"
+    tcp dport { 9090, 8192, 7474, 7476, 9697, 8000, 5656, 9707 } ip saddr ${hosts.lan} accept comment "Gluetun input ports"
   '';
 
   virtualisation.oci-containers.containers.gluetun = {
@@ -56,7 +61,11 @@
       "--cap-add=NET_ADMIN"
       "--device=/dev/net/tun:/dev/net/tun"
       "--sysctl=net.ipv6.conf.all.disable_ipv6=1"
-      "--add-host=gotify.makifun.se:${hosts.ligma}"
+      "--add-host=gotify.${baseFacts.domainName}:${hosts.ligma}"
+      "--add-host=sonarrpg.${baseFacts.domainName}:${hosts.sugmaGW}"
+      "--add-host=sonarr4kpg.${baseFacts.domainName}:${hosts.sugmaGW}"
+      "--add-host=radarrpg.${baseFacts.domainName}:${hosts.sugmaGW}"
+      "--add-host=radarr4kpg.${baseFacts.domainName}:${hosts.sugmaGW}"
     ];
     ports = [
       "9090:9090"

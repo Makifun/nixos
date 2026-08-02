@@ -1,11 +1,11 @@
 { config, ... }:
 let
   hostname = config.networking.hostName;
-  configBase = "/${hostname}/${hostname}/qui";
+  quiBase = "/${hostname}/${hostname}/qui";
 in
 {
   systemd.tmpfiles.rules = [
-    "d '${configBase}' 0750 1000 1000 - -"
+    "d '${quiBase}' 0750 1000 1000 - -"
   ];
 
   systemd.services.podman-qui = {
@@ -24,7 +24,7 @@ in
       "--user=1000:1000"
     ];
     volumes = [
-      "${configBase}:/config"
+      "${quiBase}:/config"
       "/slowmeme:/qbitdownloads"
     ];
   };

@@ -1,11 +1,11 @@
 { config, ... }:
 let
   hostname = config.networking.hostName;
-  configBase = "/${hostname}/${hostname}/autobrr";
+  autobrrBase = "/${hostname}/${hostname}/autobrr";
 in
 {
   systemd.tmpfiles.rules = [
-    "d '${configBase}' 0750 1000 1000 - -"
+    "d '${autobrrBase}' 0750 1000 1000 - -"
   ];
 
   systemd.services.podman-autobrr = {
@@ -24,7 +24,7 @@ in
       "--user=1000:1000"
     ];
     volumes = [
-      "${configBase}:/config"
+      "${autobrrBase}:/config"
     ];
   };
 }

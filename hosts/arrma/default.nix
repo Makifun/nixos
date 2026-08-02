@@ -13,14 +13,15 @@
     ../../modules/backrest.nix
     ../../modules/beszel-agent.nix
     ../../modules/podman.nix
+    ./apps/autobrr.nix
     ./apps/backrest-extra.nix
     ./apps/beszel-extra.nix
-    ./apps/gluetun.nix
-    ./apps/qbittorrent.nix
     ./apps/byparr.nix
-    ./apps/autobrr.nix
-    ./apps/qui.nix
+    ./apps/gluetun.nix
+    ./apps/nzbget.nix
     ./apps/prowlarr.nix
+    ./apps/qbittorrent.nix
+    ./apps/qui.nix
     ./apps/unpackerr.nix
   ];
   networking = {

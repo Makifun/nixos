@@ -1,11 +1,11 @@
 { config, ... }:
 let
   hostname = config.networking.hostName;
-  configBase = "/${hostname}/${hostname}/unpackerr";
+  unpackerrBase = "/${hostname}/${hostname}/unpackerr";
 in
 {
   systemd.tmpfiles.rules = [
-    "d '${configBase}' 0750 1000 1000 - -"
+    "d '${unpackerrBase}' 0750 1000 1000 - -"
   ];
 
   systemd.services.podman-unpackerr = {
@@ -24,7 +24,7 @@ in
     };
     extraOptions = [ "--network=container:gluetun" ];
     volumes = [
-      "${configBase}:/config"
+      "${unpackerrBase}:/config"
       "/slowmeme:/qbitdownloads"
     ];
   };

@@ -53,11 +53,11 @@
     in
     {
       nixosConfigurations = {
-        ligma = mkSystem [ ./hosts/ligma ];
-        bofa = mkSystem [ ./hosts/bofa ];
-        storma = mkSystem [ ./hosts/storma ];
-        playma = mkSystem [ ./hosts/playma ];
         arrma = mkSystem [ ./hosts/arrma ];
+        bofa = mkSystem [ ./hosts/bofa ];
+        ligma = mkSystem [ ./hosts/ligma ];
+        playma = mkSystem [ ./hosts/playma ];
+        storma = mkSystem [ ./hosts/storma ];
         minimaliso = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [
