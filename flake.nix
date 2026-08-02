@@ -36,7 +36,7 @@
         ligma = "10.10.10.13";
         bofa = "10.10.10.14";
         playma = "10.10.10.15";
-        jonny = "10.10.10.16";
+        arrma = "10.10.10.16";
         sugma01 = "10.10.10.26";
         sugma02 = "10.10.10.27";
         sugma03 = "10.10.10.28";
@@ -57,6 +57,7 @@
         bofa = mkSystem [ ./hosts/bofa ];
         storma = mkSystem [ ./hosts/storma ];
         playma = mkSystem [ ./hosts/playma ];
+        arrma = mkSystem [ ./hosts/arrma ];
         minimaliso = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [
