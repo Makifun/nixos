@@ -62,13 +62,13 @@
         entryPoints = [ "websecure" ];
         service = "gluetun-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
       gluetun-outpost = {
         rule = "Host(`gluetun.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
     };
     services."gluetun-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:8000"; } ];

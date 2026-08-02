@@ -64,13 +64,13 @@ in
         entryPoints = [ "websecure" ];
         service = "prowlarrpg-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
       prowlarrpg-outpost = {
         rule = "Host(`prowlarrpg.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
     };
     services."prowlarrpg-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:9697"; } ];

@@ -37,13 +37,13 @@ in
         entryPoints = [ "websecure" ];
         service = "nzbget-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
       nzbget-outpost = {
         rule = "Host(`nzbget.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
     };
     services."nzbget-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:6789"; } ];

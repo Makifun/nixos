@@ -48,13 +48,13 @@ in
         entryPoints = [ "websecure" ];
         service = "qbittorrent-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
       qbittorrent-outpost = {
         rule = "Host(`qbittorrent.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
     };
     services."qbittorrent-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:9090"; } ];

@@ -39,7 +39,7 @@ in
       rule = "Host(`unpackerr-metrics.${baseFacts.domainName}`)";
       entryPoints = [ "websecure" ];
       service = "unpackerr-metrics-svc";
-      tls.certResolver = "letsencrypt";
+      tls = { };
     };
     services."unpackerr-metrics-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:5656"; } ];
   };
