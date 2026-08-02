@@ -48,7 +48,10 @@ in
       URL = "http://localhost:9697";
       CONFIG = "/config/config.xml";
     };
-    extraOptions = [ "--network=container:gluetun" ];
+    extraOptions = [
+      "--network=container:gluetun"
+      "--user=1000:1000"
+    ];
     volumes = [
       "${prowlarrBase}:/config:ro"
     ];
