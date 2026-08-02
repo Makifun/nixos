@@ -1,5 +1,4 @@
 {
-  baseFacts,
   hosts,
   ...
 }:
@@ -16,23 +15,11 @@
     volumes = [
       "/run/podman/podman.sock:/var/run/docker.sock:ro"
     ];
-    ports = [ "127.0.0.1:2375:2375" ];
+    # Bind to the LAN IP only; firewall below restricts to ligma.
+    ports = [ "${hosts.arrma}:2375:2375" ];
   };
 
-  services.traefik.dynamicConfigOptions.http = {
-    routers."docker-arrma" = {
-      rule = "Host(`docker-arrma.${baseFacts.domainName}`)";
-      entryPoints = [ "websecure" ];
-      service = "docker-arrma-svc";
-      middlewares = [ "ligma-only" ];
-      tls = {
-        certResolver = "letsencrypt";
-        domains = [ { main = "*.${baseFacts.domainName}"; } ];
-      };
-    };
-    middlewares."ligma-only".ipAllowList.sourceRange = [ "${hosts.ligma}/32" ];
-    services."docker-arrma-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:2375"; } ];
-  };
-
-  arrma.dnsRecords."docker-arrma.${baseFacts.domainName}".value = hosts.arrma;
+  networking.firewall.extraInputRules = ''
+    tcp dport 2375 ip saddr ${hosts.ligma} accept comment "docker-socket-proxy for homepage on ligma"
+  '';
 }

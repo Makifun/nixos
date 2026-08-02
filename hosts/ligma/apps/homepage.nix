@@ -47,7 +47,7 @@
         socket = "/run/podman/podman.sock";
       };
       arrma = {
-        host = "https://docker-arrma.${baseFacts.domainName}";
+        host = "http://${hosts.arrma}:2375";
       };
     };
 
