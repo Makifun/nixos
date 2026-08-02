@@ -5,7 +5,7 @@
 {
   virtualisation.oci-containers.containers.docker-socket-proxy = {
     # renovate: datasource=docker depName=ghcr.io/tecnativa/docker-socket-proxy
-    image = "ghcr.io/tecnativa/docker-socket-proxy:0.3.0";
+    image = "ghcr.io/tecnativa/docker-socket-proxy:0.5.0";
     environment = {
       CONTAINERS = "1";
       INFO = "1";
