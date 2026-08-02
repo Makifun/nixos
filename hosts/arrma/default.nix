@@ -15,6 +15,7 @@
     ../../modules/podman.nix
     ./dns-records.nix
     ./apps/autobrr.nix
+    ./apps/docker-socket-proxy.nix
     ./apps/backrest-extra.nix
     ./apps/beszel-extra.nix
     ./apps/byparr.nix
