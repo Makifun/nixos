@@ -5,46 +5,17 @@
   ...
 }:
 {
-  sops.secrets.WIREGUARD_ENDPOINT_IP = {
+  # gluetun_env: |
+  #   WIREGUARD_ADDRESSES=<cidr>
+  #   WIREGUARD_ENDPOINT_IP=<ip>
+  #   WIREGUARD_ENDPOINT_PORT=<port>
+  #   WIREGUARD_PRESHARED_KEY=<key>
+  #   WIREGUARD_PRIVATE_KEY=<key>
+  #   WIREGUARD_PUBLIC_KEY=<key>
+  #   FIREWALL_VPN_INPUT_PORTS=<port>
+  sops.secrets.gluetun_env = {
+    format = "yaml";
     sopsFile = ../secrets.yaml;
-  };
-  sops.secrets.WIREGUARD_ENDPOINT_PORT = {
-    sopsFile = ../secrets.yaml;
-  };
-  sops.secrets.WIREGUARD_PUBLIC_KEY = {
-    sopsFile = ../secrets.yaml;
-  };
-  sops.secrets.WIREGUARD_PRIVATE_KEY = {
-    sopsFile = ../secrets.yaml;
-  };
-  sops.secrets.WIREGUARD_PRESHARED_KEY = {
-    sopsFile = ../secrets.yaml;
-  };
-  sops.secrets.WIREGUARD_ADDRESSES = {
-    sopsFile = ../secrets.yaml;
-  };
-  sops.secrets.FIREWALL_VPN_INPUT_PORTS = {
-    sopsFile = ../secrets.yaml;
-  };
-
-  sops.templates."gluetun.env" = {
-    mode = "0400";
-    content = ''
-      VPN_SERVICE_PROVIDER=custom
-      VPN_TYPE=wireguard
-      WIREGUARD_ADDRESSES=${config.sops.placeholder.WIREGUARD_ADDRESSES}
-      WIREGUARD_ENDPOINT_IP=${config.sops.placeholder.WIREGUARD_ENDPOINT_IP}
-      WIREGUARD_ENDPOINT_PORT=${config.sops.placeholder.WIREGUARD_ENDPOINT_PORT}
-      WIREGUARD_PRESHARED_KEY=${config.sops.placeholder.WIREGUARD_PRESHARED_KEY}
-      WIREGUARD_PRIVATE_KEY=${config.sops.placeholder.WIREGUARD_PRIVATE_KEY}
-      WIREGUARD_PUBLIC_KEY=${config.sops.placeholder.WIREGUARD_PUBLIC_KEY}
-      FIREWALL_INPUT_PORTS=9090,8192,7474,7476,9696,9697,8000,5656,9707
-      FIREWALL_OUTBOUND_SUBNETS=${hosts.lan}
-      FIREWALL_VPN_INPUT_PORTS=${config.sops.placeholder.FIREWALL_VPN_INPUT_PORTS}
-      DNS_UPSTREAM_RESOLVERS=cloudflare,quad9,google
-      BLOCK_MALICIOUS=off
-      TZ=${config.time.timeZone}
-    '';
   };
 
   services.traefik.dynamicConfigOptions.http = {
@@ -77,7 +48,16 @@
   virtualisation.oci-containers.containers.gluetun = {
     # renovate: datasource=docker depName=qmcgaw/gluetun
     image = "qmcgaw/gluetun:v3.41.3";
-    environmentFiles = [ config.sops.templates."gluetun.env".path ];
+    environmentFiles = [ config.sops.secrets.gluetun_env.path ];
+    environment = {
+      VPN_SERVICE_PROVIDER = "custom";
+      VPN_TYPE = "wireguard";
+      FIREWALL_INPUT_PORTS = "9090,8192,7474,7476,9697,8000,5656,9707";
+      FIREWALL_OUTBOUND_SUBNETS = hosts.lan;
+      DNS_UPSTREAM_RESOLVERS = "cloudflare,quad9,google";
+      BLOCK_MALICIOUS = "off";
+      TZ = config.time.timeZone;
+    };
     extraOptions = [
       "--cap-add=NET_ADMIN"
       "--device=/dev/net/tun:/dev/net/tun"
