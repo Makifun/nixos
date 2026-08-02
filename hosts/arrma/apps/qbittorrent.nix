@@ -23,6 +23,24 @@ in
     requires = [ "podman-gluetun.service" ];
   };
 
+  virtualisation.oci-containers.containers.qbittorrent = {
+    # renovate: datasource=docker depName=lscr.io/linuxserver/qbittorrent
+    image = "lscr.io/linuxserver/qbittorrent:5.2.3";
+    environmentFiles = [ config.sops.secrets.qbittorrent_env.path ];
+    environment = {
+      PUID = "1000";
+      PGID = "1000";
+      TZ = config.time.timeZone;
+      WEBUI_PORT = "9090";
+      UMASK = "002";
+    };
+    extraOptions = [ "--network=container:gluetun" ];
+    volumes = [
+      "${qbittorrentBase}:/config"
+      "/slowmeme:/qbitdownloads"
+    ];
+  };
+
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       qbittorrent = {
@@ -43,22 +61,4 @@ in
   };
 
   arrma.dnsRecords."qbittorrent.${baseFacts.domainName}".value = hosts.arrma;
-
-  virtualisation.oci-containers.containers.qbittorrent = {
-    # renovate: datasource=docker depName=lscr.io/linuxserver/qbittorrent
-    image = "lscr.io/linuxserver/qbittorrent:5.2.3";
-    environmentFiles = [ config.sops.secrets.qbittorrent_env.path ];
-    environment = {
-      PUID = "1000";
-      PGID = "1000";
-      TZ = config.time.timeZone;
-      WEBUI_PORT = "9090";
-      UMASK = "002";
-    };
-    extraOptions = [ "--network=container:gluetun" ];
-    volumes = [
-      "${qbittorrentBase}:/config"
-      "/slowmeme:/qbitdownloads"
-    ];
-  };
 }

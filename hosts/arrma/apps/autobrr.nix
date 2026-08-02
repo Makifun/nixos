@@ -9,27 +9,6 @@ let
   autobrrBase = "/${hostname}/${hostname}/autobrr";
 in
 {
-  services.traefik.dynamicConfigOptions.http = {
-    routers = {
-      autobrr = {
-        rule = "Host(`autobrr.${baseFacts.domainName}`)";
-        entryPoints = [ "websecure" ];
-        service = "autobrr-svc";
-        middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
-      };
-      autobrr-outpost = {
-        rule = "Host(`autobrr.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
-        entryPoints = [ "websecure" ];
-        service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
-      };
-    };
-    services."autobrr-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:7474"; } ];
-  };
-
-  arrma.dnsRecords."autobrr.${baseFacts.domainName}".value = hosts.arrma;
-
   systemd.tmpfiles.rules = [
     "d '${autobrrBase}' 0750 1000 1000 - -"
   ];
@@ -53,4 +32,25 @@ in
       "${autobrrBase}:/config"
     ];
   };
+
+  services.traefik.dynamicConfigOptions.http = {
+    routers = {
+      autobrr = {
+        rule = "Host(`autobrr.${baseFacts.domainName}`)";
+        entryPoints = [ "websecure" ];
+        service = "autobrr-svc";
+        middlewares = [ "authentik" ];
+        tls.certResolver = "letsencrypt";
+      };
+      autobrr-outpost = {
+        rule = "Host(`autobrr.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
+        entryPoints = [ "websecure" ];
+        service = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
+    };
+    services."autobrr-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:7474"; } ];
+  };
+
+  arrma.dnsRecords."autobrr.${baseFacts.domainName}".value = hosts.arrma;
 }

@@ -18,36 +18,11 @@
     sopsFile = ../secrets.yaml;
   };
 
-  services.traefik.dynamicConfigOptions.http = {
-    routers = {
-      gluetun = {
-        rule = "Host(`gluetun.${baseFacts.domainName}`)";
-        entryPoints = [ "websecure" ];
-        service = "gluetun-svc";
-        middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
-      };
-      gluetun-outpost = {
-        rule = "Host(`gluetun.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
-        entryPoints = [ "websecure" ];
-        service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
-      };
-    };
-    services."gluetun-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:8000"; } ];
-  };
-
-  arrma.dnsRecords."gluetun.${baseFacts.domainName}".value = hosts.arrma;
-
   boot.kernelModules = [ "tun" ];
-
-  networking.firewall.extraInputRules = ''
-    tcp dport { 9090, 8192, 7474, 7476, 9697, 8000, 5656, 9707 } ip saddr ${hosts.lan} accept comment "Gluetun input ports"
-  '';
 
   virtualisation.oci-containers.containers.gluetun = {
     # renovate: datasource=docker depName=qmcgaw/gluetun
-    image = "qmcgaw/gluetun:v3.41.3";
+    image = "docker.io/qmcgaw/gluetun:v3.41.3";
     environmentFiles = [ config.sops.secrets.gluetun_env.path ];
     environment = {
       VPN_SERVICE_PROVIDER = "custom";
@@ -79,4 +54,29 @@
       "9707:9707"
     ];
   };
+
+  services.traefik.dynamicConfigOptions.http = {
+    routers = {
+      gluetun = {
+        rule = "Host(`gluetun.${baseFacts.domainName}`)";
+        entryPoints = [ "websecure" ];
+        service = "gluetun-svc";
+        middlewares = [ "authentik" ];
+        tls.certResolver = "letsencrypt";
+      };
+      gluetun-outpost = {
+        rule = "Host(`gluetun.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
+        entryPoints = [ "websecure" ];
+        service = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
+    };
+    services."gluetun-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:8000"; } ];
+  };
+
+  networking.firewall.extraInputRules = ''
+    tcp dport { 9090, 8192, 7474, 7476, 9697, 8000, 5656, 9707 } ip saddr ${hosts.lan} accept comment "Gluetun input ports"
+  '';
+
+  arrma.dnsRecords."gluetun.${baseFacts.domainName}".value = hosts.arrma;
 }

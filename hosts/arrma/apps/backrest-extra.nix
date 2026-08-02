@@ -30,9 +30,4 @@ in
   };
 
   arrma.dnsRecords."backrest-${hostname}.${baseFacts.domainName}".value = hosts.arrma;
-
-  virtualisation.oci-containers.containers.backrest.volumes = [
-    "/${hostname}/${hostname}:/${hostname}/${hostname}:ro"
-    "/${hostname}/restore:/${hostname}/restore"
-  ];
 }

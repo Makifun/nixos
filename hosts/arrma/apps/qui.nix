@@ -9,27 +9,6 @@ let
   quiBase = "/${hostname}/${hostname}/qui";
 in
 {
-  services.traefik.dynamicConfigOptions.http = {
-    routers = {
-      qui = {
-        rule = "Host(`qui.${baseFacts.domainName}`)";
-        entryPoints = [ "websecure" ];
-        service = "qui-svc";
-        middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
-      };
-      qui-outpost = {
-        rule = "Host(`qui.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
-        entryPoints = [ "websecure" ];
-        service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
-      };
-    };
-    services."qui-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:7476"; } ];
-  };
-
-  arrma.dnsRecords."qui.${baseFacts.domainName}".value = hosts.arrma;
-
   systemd.tmpfiles.rules = [
     "d '${quiBase}' 0750 1000 1000 - -"
   ];
@@ -54,4 +33,25 @@ in
       "/slowmeme:/qbitdownloads"
     ];
   };
+
+  services.traefik.dynamicConfigOptions.http = {
+    routers = {
+      qui = {
+        rule = "Host(`qui.${baseFacts.domainName}`)";
+        entryPoints = [ "websecure" ];
+        service = "qui-svc";
+        middlewares = [ "authentik" ];
+        tls.certResolver = "letsencrypt";
+      };
+      qui-outpost = {
+        rule = "Host(`qui.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
+        entryPoints = [ "websecure" ];
+        service = "authentik-embedded-outpost";
+        tls.certResolver = "letsencrypt";
+      };
+    };
+    services."qui-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:7476"; } ];
+  };
+
+  arrma.dnsRecords."qui.${baseFacts.domainName}".value = hosts.arrma;
 }

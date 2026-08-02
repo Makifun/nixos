@@ -30,17 +30,6 @@ in
     environmentFiles = [ config.sops.secrets.traefik_env.path ];
   };
 
-  networking.firewall.extraInputRules = ''
-    # OPNsense
-    ip saddr ${hosts.lan} tcp dport 80 accept
-    ip saddr ${hosts.lan} tcp dport 443 accept
-    ip saddr ${hosts.lan} udp dport 443 accept
-    # WireGuard
-    ip saddr ${hosts.wireguard} tcp dport 80 accept
-    ip saddr ${hosts.wireguard} tcp dport 443 accept
-    ip saddr ${hosts.wireguard} udp dport 443 accept
-  '';
-
   services.traefik.staticConfigOptions = {
     global.sendAnonymousUsage = false;
     log.level = "INFO";
@@ -132,6 +121,17 @@ in
       { url = "https://auth.${baseFacts.domainName}"; }
     ];
   };
+
+  networking.firewall.extraInputRules = ''
+    # OPNsense
+    ip saddr ${hosts.lan} tcp dport 80 accept
+    ip saddr ${hosts.lan} tcp dport 443 accept
+    ip saddr ${hosts.lan} udp dport 443 accept
+    # WireGuard
+    ip saddr ${hosts.wireguard} tcp dport 80 accept
+    ip saddr ${hosts.wireguard} tcp dport 443 accept
+    ip saddr ${hosts.wireguard} udp dport 443 accept
+  '';
 
   arrma.dnsRecords."traefik-${hostname}.${baseFacts.domainName}".value = hosts.arrma;
 }
