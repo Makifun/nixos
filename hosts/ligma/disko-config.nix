@@ -64,34 +64,7 @@
           };
         };
       };
-      # 200 G SSD (scsi3, serial=nicememe) — NZBget downloads, LUKS+XFS.
-      nicememe = {
-        type = "disk";
-        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_nicememe";
-        content = {
-          type = "gpt";
-          partitions = {
-            luks = {
-              size = "100%";
-              content = {
-                type = "luks";
-                name = "crypted_nicememe";
-                settings.allowDiscards = true;
-                settings.crypttabExtraOpts = [ "timeout=0" ];
-                content = {
-                  type = "filesystem";
-                  format = "xfs";
-                  mountpoint = "/nicememe";
-                  mountOptions = [
-                    "noatime"
-                    "nofail"
-                  ];
-                };
-              };
-            };
-          };
-        };
-      };
+
     };
     zpool = {
       zroot = {
