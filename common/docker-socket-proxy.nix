@@ -8,8 +8,8 @@ let
 in
 {
   virtualisation.oci-containers.containers.docker-socket-proxy = {
-    # renovate: datasource=docker depName=ghcr.io/tecnativa/docker-socket-proxy
-    image = "ghcr.io/tecnativa/docker-socket-proxy:v0.5.0";
+    # renovate: datasource=docker depName=ghcr.io/linuxserver/socket-proxy
+    image = "ghcr.io/linuxserver/socket-proxy:3.4.3";
     environment = {
       CONTAINERS = "1";
       INFO = "1";
