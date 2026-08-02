@@ -20,6 +20,7 @@
     ./apps/byparr.nix
     ./apps/cloud-mount.nix
     ./apps/gluetun.nix
+    ./apps/nfs.nix
     ./apps/nzbget.nix
     ./apps/prowlarr.nix
     ./apps/qbittorrent.nix

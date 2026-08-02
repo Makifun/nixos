@@ -5,7 +5,6 @@ in
 {
   systemd.tmpfiles.rules = [
     "d '/${hostname}/sugma' 0755 root root - -"
-    "z '/slowmeme'          0775 1000 1000 - -"
     "z '/nicememe'          0775 1000 1000 - -"
   ];
 
@@ -20,7 +19,6 @@ in
     # sync on /${hostname}/sugma: k8s PVC data (app databases, configs).
     exports = ''
       /${hostname}/sugma ${hosts.sugma01}(rw,sync,no_subtree_check,no_root_squash) ${hosts.sugma02}(rw,sync,no_subtree_check,no_root_squash) ${hosts.sugma03}(rw,sync,no_subtree_check,no_root_squash)
-      /slowmeme          ${hosts.sugma01}(rw,async,no_subtree_check,no_root_squash) ${hosts.sugma02}(rw,async,no_subtree_check,no_root_squash) ${hosts.sugma03}(rw,async,no_subtree_check,no_root_squash)
       /nicememe          ${hosts.sugma01}(rw,async,no_subtree_check,no_root_squash) ${hosts.sugma02}(rw,async,no_subtree_check,no_root_squash) ${hosts.sugma03}(rw,async,no_subtree_check,no_root_squash)
     '';
   };

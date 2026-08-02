@@ -19,7 +19,7 @@
   systemd.services.homepage-dashboard.environment = {
     KUBECONFIG = config.sops.secrets.homepage-kubeconfig.path;
     # Raise libuv thread pool from default 4 → 32.
-    # statfs() calls on busy XFS volumes (/slowmeme, /nicememe) block threads;
+    # statfs() calls on busy XFS volumes (/nicememe) block threads;
     # without this, all 4 default slots fill up and stall every other async I/O.
     UV_THREADPOOL_SIZE = "32";
   };
@@ -140,13 +140,6 @@
         resources = {
           label = "/nicememe";
           disk = "/nicememe";
-          expanded = true;
-        };
-      }
-      {
-        resources = {
-          label = "/slowmeme";
-          disk = "/slowmeme";
           expanded = true;
         };
       }

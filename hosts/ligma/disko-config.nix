@@ -64,35 +64,7 @@
           };
         };
       };
-      # 2 T HDD (scsi3, serial=slowmeme) — torrent downloads, LUKS+XFS.
-      slowmeme = {
-        type = "disk";
-        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_slowmeme";
-        content = {
-          type = "gpt";
-          partitions = {
-            luks = {
-              size = "100%";
-              content = {
-                type = "luks";
-                name = "crypted_slowmeme";
-                settings.allowDiscards = true;
-                settings.crypttabExtraOpts = [ "timeout=0" ];
-                content = {
-                  type = "filesystem";
-                  format = "xfs";
-                  mountpoint = "/slowmeme";
-                  mountOptions = [
-                    "noatime"
-                    "nofail"
-                  ];
-                };
-              };
-            };
-          };
-        };
-      };
-      # 200 G SSD (scsi4, serial=nicememe) — NZBget downloads, LUKS+XFS.
+      # 200 G SSD (scsi3, serial=nicememe) — NZBget downloads, LUKS+XFS.
       nicememe = {
         type = "disk";
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_nicememe";
