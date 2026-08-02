@@ -132,6 +132,8 @@ in
         "${backrestBase}/data:/data"
         "${backrestBase}/config:/config"
         "${backrestBase}/cache:/cache"
+        "/${hostname}/${hostname}:/${hostname}/${hostname}:ro"
+        "/${hostname}/restore:/${hostname}/restore"
       ];
     };
 
