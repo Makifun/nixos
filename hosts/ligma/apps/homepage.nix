@@ -500,10 +500,10 @@
           {
             "makifun/nixos" = {
               icon = "si-github";
-              href = "https://github.com/Makifun/nixos";
+              href = "https://github.com/Makifun/nixos/pulls";
               widget = {
                 type = "customapi";
-                url = "https://api.github.com/repos/Makifun/nixos";
+                url = "https://api.github.com/search/issues?q=repo:Makifun/nixos+is:pr+state:open";
                 refreshInterval = 3600000;
                 method = "GET";
                 headers = {
@@ -511,13 +511,8 @@
                 };
                 mappings = [
                   {
-                    field = "open_issues_count";
-                    label = "Issues & PRs";
-                    format = "number";
-                  }
-                  {
-                    field = "stargazers_count";
-                    label = "Stars";
+                    field = "total_count";
+                    label = "Pull Requests";
                     format = "number";
                   }
                 ];
