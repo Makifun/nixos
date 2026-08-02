@@ -97,36 +97,6 @@
           };
         };
       };
-      # 200 G SSD (scsi3, serial=cache) — rclone VFS cache, LUKS-encrypted.
-      cache = {
-        type = "disk";
-        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache";
-        content = {
-          type = "gpt";
-          partitions = {
-            luks = {
-              size = "100%";
-              content = {
-                type = "luks";
-                name = "crypted_cache";
-                settings.allowDiscards = true;
-                settings.crypttabExtraOpts = [ "timeout=0" ];
-                content = {
-                  type = "filesystem";
-                  format = "xfs";
-                  mountpoint = "/rclone-cache";
-                  mountOptions = [
-                    "noatime"
-                    "discard"
-                    "nofail"
-                    "allocsize=64M"
-                  ];
-                };
-              };
-            };
-          };
-        };
-      };
     };
     lvm_vg = {
       vg_nixos = {

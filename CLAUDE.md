@@ -9,7 +9,7 @@ NixOS flake-based system configuration for three hosts:
 - **ligma** — production services host on Proxmox; ephemeral root (tmpfs), LUKS+ZFS, SOPS, impermanence.
 - **bofa** (VM 888, 10.10.10.14) — dedicated database host on Proxmox; ephemeral root (tmpfs), LUKS+XFS+LVM. Runs TimescaleDB for tracearr + all arr apps.
 - **storma** (10.10.10.12) — physical ASUS K56CB; ephemeral root (tmpfs), LUKS+LVM, systemd-boot (UEFI, `canTouchEfiVariables=false`). Previously hosted rclone `/cloud` mount; role transferred to playma. `r8169` in initrd for LUKS unlock SSH.
-- **playma** (10.10.10.15) — NixOS VM on Proxmox; Plex + rclone S3 FUSE mount at `/cloud`, re-exports via Samba to sugma (port 445, guest auth). Intel GVT-g iGPU for hardware transcoding. VFS cache at `/rclone-cache` (200G LUKS+XFS SSD).
+- **playma** (10.10.10.15) — NixOS VM on Proxmox; Plex + `/cloud` mounted via CIFS from storma, re-exported via Samba to sugma (port 445, guest auth). Intel GVT-g iGPU for hardware transcoding.
 
 ## Common Commands
 
