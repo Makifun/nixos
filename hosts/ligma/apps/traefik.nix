@@ -66,9 +66,14 @@ in
       websecure = {
         address = ":443";
         http3.advertisedPort = 443;
-        # Trust X-Forwarded-For from HAProxy on OPNsense.
-        # HAProxy sets it from CF-Connecting-IP so Authentik/apps see the real client IP.
-        forwardedHeaders.trustedIPs = [ hosts.opnsense ];
+        # Trust X-Forwarded-* from HAProxy on OPNsense (real client IPs from CF-Connecting-IP)
+        # and from LAN/WireGuard hosts so that remote Traefik instances (e.g. arrma) can set
+        # X-Forwarded-Host correctly for Authentik embedded outpost forwardAuth lookups.
+        forwardedHeaders.trustedIPs = [
+          hosts.opnsense
+          hosts.lan
+          hosts.wireguard
+        ];
         http.tls = {
           certResolver = "letsencrypt";
           domains = [
