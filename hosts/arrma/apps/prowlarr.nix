@@ -74,6 +74,7 @@ in
     routers = {
       prowlarrpg = {
         rule = "Host(`prowlarrpg.${baseFacts.domainName}`)";
+        priority = 1;
         entryPoints = [ "websecure" ];
         service = "prowlarrpg-svc";
         middlewares = [ "authentik" ];
@@ -82,8 +83,19 @@ in
           domains = [ { main = "*.${baseFacts.domainName}"; } ];
         };
       };
+      prowlarrpg-api = {
+        rule = "Host(`prowlarrpg.${baseFacts.domainName}`) && PathPrefix(`/api`)";
+        priority = 10;
+        entryPoints = [ "websecure" ];
+        service = "prowlarrpg-svc";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
+      };
       prowlarrpg-outpost = {
         rule = "Host(`prowlarrpg.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
+        priority = 30;
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
         tls = {
