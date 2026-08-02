@@ -9,6 +9,13 @@ let
   prowlarrBase = "/${hostname}/${hostname}/prowlarr";
 in
 {
+  # prowlarr_env: |
+  #   PROWLARR__POSTGRES__PASSWORD=<password>
+  sops.secrets.prowlarr_env = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+
   systemd.tmpfiles.rules = [
     "d '${prowlarrBase}' 0750 1000 1000 - -"
   ];
@@ -32,7 +39,13 @@ in
       PGID = "1000";
       TZ = config.time.timeZone;
       PROWLARR__SERVER__PORT = "9697";
+      PROWLARR__POSTGRES__HOST = hosts.bofa;
+      PROWLARR__POSTGRES__PORT = "5432";
+      PROWLARR__POSTGRES__USER = "prowlarrpg";
+      PROWLARR__POSTGRES__MAINDB = "prowlarrpg-main";
+      PROWLARR__POSTGRES__LOGDB = "prowlarrpg-log";
     };
+    environmentFiles = [ config.sops.secrets.prowlarr_env.path ];
     extraOptions = [ "--network=container:gluetun" ];
     volumes = [
       "${prowlarrBase}:/config"
