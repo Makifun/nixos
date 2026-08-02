@@ -10,9 +10,6 @@
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disko-config.nix
     ../../common
-    ../../modules/backrest.nix
-    ../../modules/beszel-agent.nix
-    ../../modules/podman.nix
     ./apps/backrest-extra.nix
     ./apps/pg-arrs.nix
     ./apps/pg-dump.nix

@@ -8,8 +8,6 @@ let
   hostname = config.networking.hostName;
 in
 {
-  backrest.scheduleHour = 3;
-
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       "backrest-${hostname}" = {

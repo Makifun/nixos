@@ -1,7 +1,11 @@
 {
+  config,
   hosts,
   ...
 }:
+let
+  hostname = config.networking.hostName;
+in
 {
   virtualisation.oci-containers.containers.docker-socket-proxy = {
     # renovate: datasource=docker depName=ghcr.io/tecnativa/docker-socket-proxy
@@ -15,8 +19,7 @@
     volumes = [
       "/run/podman/podman.sock:/var/run/docker.sock:ro"
     ];
-    # Bind to the LAN IP only; firewall below restricts to ligma.
-    ports = [ "${hosts.arrma}:2375:2375" ];
+    ports = [ "${hosts.${hostname}}:2375:2375" ];
   };
 
   networking.firewall.extraInputRules = ''

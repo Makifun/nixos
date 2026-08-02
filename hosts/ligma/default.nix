@@ -11,9 +11,6 @@
     ./disko-config.nix
     ./dns-records.nix
     ../../common
-    ../../modules/backrest.nix
-    ../../modules/beszel-agent.nix
-    ../../modules/podman.nix
     ./apps/apprise.nix
     ./apps/authentik.nix
     ./apps/backrest-extra.nix

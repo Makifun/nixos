@@ -10,14 +10,24 @@ let
   backrestBase = "/${hostname}/${hostname}/backrest";
   # renovate: datasource=docker depName=ghcr.io/garethgeorge/backrest
   backrestTag = "v1.14.1";
+
+  # Central backup schedule — each host gets a distinct UTC hour so backups
+  # never overlap and S3 request rates stay low. Add new hosts here.
+  scheduleMap = {
+    ligma = 1;
+    bofa = 2;
+    arrma = 3;
+    playma = 4;
+    storma = 5;
+  };
   scheduleHour = config.backrest.scheduleHour;
 in
 {
   options.backrest = {
     scheduleHour = lib.mkOption {
       type = lib.types.int;
-      default = 5;
-      description = "UTC hour for daily backup (prune runs 30 min later)";
+      default = scheduleMap.${hostname} or 5;
+      description = "UTC hour for daily backup (prune runs 30 min later). Defaults from the central scheduleMap; override only if needed.";
     };
     extraPaths = lib.mkOption {
       type = lib.types.listOf lib.types.str;

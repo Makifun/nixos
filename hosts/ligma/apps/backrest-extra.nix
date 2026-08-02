@@ -4,7 +4,6 @@ let
   backrestPort = 9898;
 in
 {
-  backrest.scheduleHour = 1;
   backrest.extraPaths = [ "/${hostname}/sugma" ];
 
   virtualisation.oci-containers.containers.backrest = {
