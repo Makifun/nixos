@@ -84,10 +84,7 @@ Three encrypted drives:
 - **Main drive** (`scsi-0QEMU_QEMU_HARDDISK_nixos`): LUKS → ZFS pool `zroot` with datasets `/nix` and `/persist` (refreservation: 10G), plus 1G EFI partition.
 - **Storage drive** (`scsi-0QEMU_QEMU_HARDDISK_ligma`): LUKS → ZFS pool `zstorage` with `/ligma` dataset (refreservation: 5G). All app persistent data lives here.
 - **Cache SSD** (`scsi-0QEMU_QEMU_HARDDISK_cache`, 200 GB): LUKS → ext4 mounted at `/rclone-cache`. Used as rclone VFS cache (up to 185 GB).
-- **slowmeme** (`scsi-0QEMU_QEMU_HARDDISK_slowmeme`, 4 TB): LUKS(`crypted_slowmeme`) → XFS `/slowmeme`. Torrent downloads for sugma media pod. NFS-exported to sugma nodes. Ownership: `1000:1000 0775` (set via `systemd.tmpfiles.rules`).
-- **nicememe** (`scsi-0QEMU_QEMU_HARDDISK_nicememe`, 200 GB): LUKS(`crypted_nicememe`) → XFS `/nicememe`. Usenet downloads for nzbget. NFS-exported to sugma nodes. Ownership: `1000:1000 0775`.
-
-Both new disks use XFS with `noatime,nofail`. LUKS passphrases entered via initrd SSH at boot (same as other disks). **New VM install:** disko formats on `nixos_install.sh`. **Existing VM adding these disks:** must manually partition + luksFormat + mkfs.xfs before `nh os switch` — see comments in `disko-config.nix`.
+Both drives use XFS with `noatime,nofail`. LUKS passphrases entered via initrd SSH at boot. **New VM install:** disko formats on `nixos_install.sh`. **Existing VM adding a disk:** must manually partition + luksFormat + mkfs.xfs before `nh os switch` — see comments in `disko-config.nix`.
 
 All ZFS pools: ashift=12, autotrim=on, compression=lz4, atime=off, xattr=sa. ARC max=6 GB, min=2 GB (ligma has 16 GB RAM). Prefetch disabled (`zfs_prefetch_disable=1`).
 
@@ -114,6 +111,8 @@ SSH restricted to `10.10.10.0/24`. NFTables firewall. IPv6 disabled globally. Tr
 
 NFS export (NFSv4 only — port 2049):
 - `/ligma/sugma` → sugma nodes `10.10.10.26`, `10.10.10.27`, `10.10.10.28` (rw, nfs-provisioner PVC storage)
+
+arrma (10.10.10.16) also exports via NFS:
 - `/slowmeme` → sugma nodes (rw, media pod torrent downloads + filebrowser)
 - `/nicememe` → sugma nodes (rw, nzbget downloads + media pod *arr access + filebrowser)
 
