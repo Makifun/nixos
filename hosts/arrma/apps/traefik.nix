@@ -89,13 +89,13 @@ in
         entryPoints = [ "websecure" ];
         service = "api@internal";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
       traefik-dashboard-outpost = {
         rule = "Host(`traefik-${hostname}.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
     };
     middlewares.authentik.forwardAuth = {

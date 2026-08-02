@@ -17,13 +17,13 @@ in
         entryPoints = [ "websecure" ];
         service = "backrest-${hostname}-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
       "backrest-${hostname}-outpost" = {
         rule = "Host(`backrest-${hostname}.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
     };
     services."backrest-${hostname}-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:9898"; } ];

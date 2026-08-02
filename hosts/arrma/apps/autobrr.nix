@@ -40,13 +40,13 @@ in
         entryPoints = [ "websecure" ];
         service = "autobrr-svc";
         middlewares = [ "authentik" ];
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
       autobrr-outpost = {
         rule = "Host(`autobrr.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls.certResolver = "letsencrypt";
+        tls = { };
       };
     };
     services."autobrr-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:7474"; } ];
