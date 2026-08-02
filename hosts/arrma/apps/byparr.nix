@@ -30,13 +30,13 @@
         entryPoints = [ "websecure" ];
         service = "byparr-svc";
         middlewares = [ "authentik" ];
-        tls = { };
+        tls.certResolver = "letsencrypt";
       };
       byparr-outpost = {
         rule = "Host(`byparr.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
         entryPoints = [ "websecure" ];
         service = "authentik-embedded-outpost";
-        tls = { };
+        tls.certResolver = "letsencrypt";
       };
     };
     services."byparr-svc".loadBalancer.servers = [ { url = "http://127.0.0.1:8192"; } ];
