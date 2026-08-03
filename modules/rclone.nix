@@ -38,6 +38,10 @@ in
       type = lib.types.str;
       default = "1m";
     };
+    vfsWriteBack = lib.mkOption {
+      type = lib.types.str;
+      default = "5s";
+    };
   };
 
   config = {
@@ -112,7 +116,8 @@ in
           + " --vfs-cache-mode full"
           + " --vfs-cache-poll-interval ${cfg.vfsCachePollInterval}"
           + " --vfs-read-chunk-size 128M"
-          + " --vfs-read-chunk-size-limit 1G";
+          + " --vfs-read-chunk-size-limit 1G"
+          + " --vfs-write-back ${cfg.vfsWriteBack}";
         ExecStartPost = "+${pkgs.systemd}/bin/systemctl restart samba-smbd.service";
         ExecStop = "${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
         KillMode = "process";
