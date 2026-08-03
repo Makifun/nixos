@@ -12,11 +12,12 @@ let
     "prowlarrpg"
   ];
 
-  # single database, no extensions needed (bazarr, seerr)
+  # single database, no extensions needed (bazarr, seerr, suggestarr)
   bazarrApps = [
     "bazarr"
     "bazarr4k"
     "seerr"
+    "suggestarr"
   ];
 
   setupScript = pkgs.writeShellScript "pg-setup-arrs" ''
