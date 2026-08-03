@@ -242,7 +242,7 @@
           {
             "qBittorrent" = {
               icon = "/images/qbittorrent.png";
-              href = "https://qui.${baseFacts.domainName}";
+              href = "https://qui.${baseFacts.domainName}/instances/1";
               server = "arrma";
               container = "qbittorrent";
               widget = {
