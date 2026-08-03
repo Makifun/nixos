@@ -7,7 +7,7 @@
 let
   hostname = config.networking.hostName;
   # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
-  renovateTag = "43.251.3";
+  renovateTag = "44.10.0";
   dataDir = "/${hostname}/${hostname}/renovate";
   tokenFile = "${dataDir}/token";
   githubTokenFile = config.sops.secrets."renovate-github-token".path;
