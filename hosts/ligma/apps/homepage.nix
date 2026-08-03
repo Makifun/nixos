@@ -43,13 +43,26 @@
     };
 
     docker = {
-      ligma = {
-        socket = "/run/podman/podman.sock";
-      };
       arrma = {
         host = hosts.arrma;
         port = 2375;
       };
+      bofa = {
+        host = hosts.bofa;
+        port = 2375;
+      };
+      ligma = {
+        socket = "/run/podman/podman.sock";
+      };
+      playma = {
+        host = hosts.playma;
+        port = 2375;
+      };
+      storma = {
+        host = hosts.storma;
+        port = 2375;
+      };
+
     };
 
     settings = {
@@ -282,7 +295,7 @@
               icon = "/images/prowlarr.png";
               href = "https://prowlarrpg.${baseFacts.domainName}";
               server = "arrma";
-              container = "prowlarrpg";
+              container = "prowlarr";
               widget = {
                 type = "prowlarr";
                 url = "https://prowlarrpg.${baseFacts.domainName}";
@@ -746,6 +759,8 @@
             "Backrest Bofa" = {
               icon = "/images/backrest.png";
               href = "https://backrest-bofa.${baseFacts.domainName}";
+              server = "bofa";
+              container = "backrest";
               widget = {
                 type = "backrest";
                 url = "http://${hosts.bofa}:9898";
@@ -768,6 +783,8 @@
             "Backrest Playma" = {
               icon = "/images/backrest.png";
               href = "https://backrest-playma.${baseFacts.domainName}";
+              server = "playma";
+              container = "backrest";
               widget = {
                 type = "backrest";
                 url = "http://${hosts.playma}:9898";
@@ -778,6 +795,8 @@
             "Backrest Storma" = {
               icon = "/images/backrest.png";
               href = "https://backrest-storma.${baseFacts.domainName}";
+              server = "storma";
+              container = "backrest";
               widget = {
                 type = "backrest";
                 url = "http://${hosts.storma}:9898";
@@ -789,7 +808,7 @@
               icon = "/images/beszel.svg";
               href = "https://beszel.${baseFacts.domainName}";
               server = "arrma";
-              container = "beszel";
+              container = "beszel-agent";
               widget = {
                 type = "beszel";
                 fields = [
@@ -810,6 +829,8 @@
             "Beszel Bofa" = {
               icon = "/images/beszel.svg";
               href = "https://beszel.${baseFacts.domainName}";
+              server = "bofa";
+              container = "beszel-agent";
               widget = {
                 type = "beszel";
                 fields = [
@@ -852,6 +873,8 @@
             "Beszel Playma" = {
               icon = "/images/beszel.svg";
               href = "https://beszel.${baseFacts.domainName}";
+              server = "playma";
+              container = "beszel-agent";
               widget = {
                 type = "beszel";
                 fields = [
@@ -872,6 +895,8 @@
             "Beszel Storma" = {
               icon = "/images/beszel.svg";
               href = "https://beszel.${baseFacts.domainName}";
+              server = "storma";
+              container = "beszel-agent";
               widget = {
                 type = "beszel";
                 fields = [
