@@ -5,4 +5,5 @@
   services.rclone-cloud.bwlimit = "25M";
   services.rclone-cloud.transfers = 20;
   services.rclone-cloud.bufferSize = "32M";
+  services.rclone-cloud.vfsCachePollInterval = "30s";
 }

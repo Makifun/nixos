@@ -34,6 +34,10 @@ in
       type = lib.types.str;
       default = "256M";
     };
+    vfsCachePollInterval = lib.mkOption {
+      type = lib.types.str;
+      default = "1m";
+    };
   };
 
   config = {
@@ -106,6 +110,7 @@ in
           + " --vfs-cache-max-size ${cfg.vfsCacheMaxSize}"
           + " --vfs-cache-min-free-space ${cfg.vfsCacheMinFreeSize}"
           + " --vfs-cache-mode full"
+          + " --vfs-cache-poll-interval ${cfg.vfsCachePollInterval}"
           + " --vfs-read-chunk-size 128M"
           + " --vfs-read-chunk-size-limit 1G";
         ExecStartPost = "+${pkgs.systemd}/bin/systemctl restart samba-smbd.service";
