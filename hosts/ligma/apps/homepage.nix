@@ -47,7 +47,8 @@
         socket = "/run/podman/podman.sock";
       };
       arrma = {
-        host = "http://${hosts.arrma}:2375";
+        host = hosts.arrma;
+        port = 2375;
       };
     };
 
