@@ -7,7 +7,7 @@ let
 in
 {
   systemd.tmpfiles.rules = [
-    "d '${plexBase}/config'   0750 root root - -"
+    "d '${plexBase}/config'   0750 1000 1000 - -"
     "d '/transcode/plex'      0775 1000 1000 - -"
   ];
 
