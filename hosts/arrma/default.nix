@@ -14,8 +14,6 @@
     ./apps/autobrr.nix
     ./apps/backrest-extra.nix
     ./apps/beszel-extra.nix
-    ./apps/byparr.nix
-    ./apps/trawl.nix
     ./apps/cloud-mount.nix
     ./apps/gluetun.nix
     ./apps/nfs.nix
@@ -24,6 +22,7 @@
     ./apps/qbittorrent.nix
     ./apps/qui.nix
     ./apps/traefik.nix
+    ./apps/trawl.nix
     ./apps/unpackerr.nix
   ];
   networking = {
