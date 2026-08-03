@@ -15,6 +15,7 @@
     ./apps/backrest-extra.nix
     ./apps/beszel-extra.nix
     ./apps/byparr.nix
+    ./apps/trawl.nix
     ./apps/cloud-mount.nix
     ./apps/gluetun.nix
     ./apps/nfs.nix

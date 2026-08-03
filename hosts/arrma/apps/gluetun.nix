@@ -27,7 +27,7 @@
     environment = {
       VPN_SERVICE_PROVIDER = "custom";
       VPN_TYPE = "wireguard";
-      FIREWALL_INPUT_PORTS = "9090,8192,7474,7476,9697,8000,5656,9707";
+      FIREWALL_INPUT_PORTS = "9090,8191,8192,7474,7476,9697,8000,5656,9707";
       FIREWALL_OUTBOUND_SUBNETS = hosts.lan;
       DNS_UPSTREAM_RESOLVERS = "cloudflare,quad9,google";
       BLOCK_MALICIOUS = "off";
@@ -45,6 +45,7 @@
     ];
     ports = [
       "9090:9090"
+      "8191:8191"
       "8192:8192"
       "7474:7474"
       "7476:7476"
@@ -81,7 +82,7 @@
   };
 
   networking.firewall.extraInputRules = ''
-    tcp dport { 9090, 8192, 7474, 7476, 9697, 8000, 5656, 9707 } ip saddr ${hosts.lan} accept comment "Gluetun input ports"
+    tcp dport { 9090, 8191, 8192, 7474, 7476, 9697, 8000, 5656, 9707 } ip saddr ${hosts.lan} accept comment "Gluetun input ports"
   '';
 
   arrma.dnsRecords."gluetun.${baseFacts.domainName}".value = hosts.arrma;
