@@ -22,11 +22,6 @@ in
       type = lib.types.str;
       default = "10G";
     };
-    vfsCacheMaxUploadRate = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-      description = "Cap rclone VFS cache upload rate to S3 (e.g. \"8M\"). Null disables the flag.";
-    };
     bwlimit = lib.mkOption {
       type = lib.types.str;
       default = "25M";
@@ -111,9 +106,6 @@ in
           + " --vfs-cache-max-size ${cfg.vfsCacheMaxSize}"
           + " --vfs-cache-min-free-space ${cfg.vfsCacheMinFreeSize}"
           + " --vfs-cache-mode full"
-          + (lib.optionalString (
-            cfg.vfsCacheMaxUploadRate != null
-          ) " --vfs-cache-max-upload-rate ${cfg.vfsCacheMaxUploadRate}")
           + " --vfs-read-chunk-size 128M"
           + " --vfs-read-chunk-size-limit 1G";
         ExecStartPost = "+${pkgs.systemd}/bin/systemctl restart samba-smbd.service";
