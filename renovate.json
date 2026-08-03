@@ -18,7 +18,8 @@
       "matchStrings": [
         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: registryUrl=(?<registryUrl>\\S+))?\\n\\s*\\w+\\s*=\\s*\"(?<currentValue>[^\"]+)\""
       ],
-      "versioningTemplate": "docker"
+      "versioningTemplate": "docker",
+      "extractVersionTemplate": "(?:.*:)?(?<version>.+)"
     }
   ]
 }
