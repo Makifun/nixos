@@ -12,7 +12,7 @@
 
   virtualisation.oci-containers.containers.trawl = {
     # renovate: datasource=docker depName=ghcr.io/germondai/trawl
-    image = "ghcr.io/germondai/trawl:latest";
+    image = "ghcr.io/germondai/trawl:1.3.1";
     environment = {
       TZ = config.time.timeZone;
       PORT = "8191";
