@@ -29,15 +29,14 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Update container image tags in NixOS let-bindings annotated with renovate comments",
+      "description": "Update container image tags in NixOS files annotated with renovate comments",
       "managerFilePatterns": [
         "/\\.nix$/"
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: registryUrl=(?<registryUrl>\\S+))?\\n\\s*\\w+\\s*=\\s*\"(?<currentValue>[^\"]+)\""
       ],
-      "versioningTemplate": "docker",
-      "extractVersionTemplate": "(?:.*:)?(?<version>.+)"
+      "versioningTemplate": "docker"
     }
   ]
 }

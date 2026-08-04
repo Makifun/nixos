@@ -4,6 +4,10 @@
   hosts,
   ...
 }:
+let
+  # renovate: datasource=docker depName=qmcgaw/gluetun
+  gluetunTag = "v3.41.3";
+in
 {
   # gluetun_env: |
   #   WIREGUARD_ADDRESSES=<cidr>
@@ -21,8 +25,7 @@
   boot.kernelModules = [ "tun" ];
 
   virtualisation.oci-containers.containers.gluetun = {
-    # renovate: datasource=docker depName=qmcgaw/gluetun
-    image = "docker.io/qmcgaw/gluetun:v3.41.3";
+    image = "docker.io/qmcgaw/gluetun:${gluetunTag}";
     environmentFiles = [ config.sops.secrets.gluetun_env.path ];
     environment = {
       VPN_SERVICE_PROVIDER = "custom";

@@ -7,6 +7,8 @@
 let
   hostname = config.networking.hostName;
   unpackerrBase = "/${hostname}/${hostname}/unpackerr";
+  # renovate: datasource=docker depName=ghcr.io/hotio/unpackerr
+  unpackerrTag = "release-v0.15.2";
 in
 {
   systemd.tmpfiles.rules = [
@@ -19,8 +21,7 @@ in
   };
 
   virtualisation.oci-containers.containers.unpackerr = {
-    # renovate: datasource=docker depName=ghcr.io/hotio/unpackerr
-    image = "ghcr.io/hotio/unpackerr:release-v0.15.2";
+    image = "ghcr.io/hotio/unpackerr:${unpackerrTag}";
     environment = {
       PUID = "1000";
       PGID = "1000";

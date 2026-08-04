@@ -7,6 +7,8 @@
 let
   hostname = config.networking.hostName;
   nzbgetBase = "/${hostname}/${hostname}/nzbget";
+  # renovate: datasource=docker depName=lscr.io/linuxserver/nzbget
+  nzbgetTag = "version-v26.2";
 in
 {
   systemd.tmpfiles.rules = [
@@ -14,8 +16,7 @@ in
   ];
 
   virtualisation.oci-containers.containers.nzbget = {
-    # renovate: datasource=docker depName=lscr.io/linuxserver/nzbget
-    image = "lscr.io/linuxserver/nzbget:version-v26.2";
+    image = "lscr.io/linuxserver/nzbget:${nzbgetTag}";
     environment = {
       PUID = "1000";
       PGID = "1000";

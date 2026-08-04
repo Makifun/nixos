@@ -4,6 +4,10 @@
   hosts,
   ...
 }:
+let
+  # renovate: datasource=docker depName=ghcr.io/germondai/trawl
+  trawlTag = "1.3.1";
+in
 {
   systemd.services.podman-trawl = {
     after = [ "podman-gluetun.service" ];
@@ -11,8 +15,7 @@
   };
 
   virtualisation.oci-containers.containers.trawl = {
-    # renovate: datasource=docker depName=ghcr.io/germondai/trawl
-    image = "ghcr.io/germondai/trawl:1.3.1";
+    image = "ghcr.io/germondai/trawl:${trawlTag}";
     environment = {
       TZ = config.time.timeZone;
       PORT = "8191";

@@ -7,6 +7,10 @@
 let
   hostname = config.networking.hostName;
   prowlarrBase = "/${hostname}/${hostname}/prowlarr";
+  # renovate: datasource=docker depName=lscr.io/linuxserver/prowlarr
+  prowlarrTag = "2.5.2";
+  # renovate: datasource=docker depName=ghcr.io/onedr0p/exportarr
+  exportarrTag = "v2.3.0";
 in
 {
   # prowlarr_env: |
@@ -32,8 +36,7 @@ in
   };
 
   virtualisation.oci-containers.containers.prowlarr = {
-    # renovate: datasource=docker depName=lscr.io/linuxserver/prowlarr
-    image = "lscr.io/linuxserver/prowlarr:2.5.2";
+    image = "lscr.io/linuxserver/prowlarr:${prowlarrTag}";
     environment = {
       PUID = "1000";
       PGID = "1000";
@@ -53,8 +56,7 @@ in
   };
 
   virtualisation.oci-containers.containers.exportarr-prowlarr = {
-    # renovate: datasource=docker depName=ghcr.io/onedr0p/exportarr
-    image = "ghcr.io/onedr0p/exportarr:v2.3.0";
+    image = "ghcr.io/onedr0p/exportarr:${exportarrTag}";
     cmd = [ "prowlarr" ];
     environment = {
       PORT = "9707";

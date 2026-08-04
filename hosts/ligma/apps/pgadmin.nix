@@ -8,6 +8,8 @@
 let
   hostname = config.networking.hostName;
   pgadminPort = 5050;
+  # renovate: datasource=docker depName=dpage/pgadmin4
+  pgadminTag = "9.16";
 
   serversJson = pkgs.writeText "pgadmin-servers.json" (
     builtins.toJSON {
@@ -40,8 +42,7 @@ in
   ];
 
   virtualisation.oci-containers.containers.pgadmin = {
-    # renovate: datasource=docker depName=dpage/pgadmin4
-    image = "dpage/pgadmin4:9.16";
+    image = "dpage/pgadmin4:${pgadminTag}";
     environment = {
       PGADMIN_CONFIG_SERVER_MODE = "False";
       PGADMIN_DEFAULT_EMAIL = "admin@${baseFacts.domainName}";

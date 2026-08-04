@@ -7,6 +7,8 @@
 let
   hostname = config.networking.hostName;
   quiBase = "/${hostname}/${hostname}/qui";
+  # renovate: datasource=docker depName=ghcr.io/autobrr/qui
+  quiTag = "v1.24.0";
 in
 {
   systemd.tmpfiles.rules = [
@@ -19,8 +21,7 @@ in
   };
 
   virtualisation.oci-containers.containers.qui = {
-    # renovate: datasource=docker depName=ghcr.io/autobrr/qui
-    image = "ghcr.io/autobrr/qui:v1.24.0";
+    image = "ghcr.io/autobrr/qui:${quiTag}";
     environment = {
       TZ = config.time.timeZone;
     };

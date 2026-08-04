@@ -7,6 +7,8 @@
 let
   hostname = config.networking.hostName;
   qbittorrentBase = "/${hostname}/${hostname}/qbittorrent";
+  # renovate: datasource=docker depName=lscr.io/linuxserver/qbittorrent
+  qbittorrentTag = "5.2.3";
 in
 {
   sops.secrets.qbittorrent_env = {
@@ -24,8 +26,7 @@ in
   };
 
   virtualisation.oci-containers.containers.qbittorrent = {
-    # renovate: datasource=docker depName=lscr.io/linuxserver/qbittorrent
-    image = "lscr.io/linuxserver/qbittorrent:5.2.3";
+    image = "lscr.io/linuxserver/qbittorrent:${qbittorrentTag}";
     environmentFiles = [ config.sops.secrets.qbittorrent_env.path ];
     environment = {
       PUID = "1000";

@@ -7,6 +7,8 @@
 let
   hostname = config.networking.hostName;
   autobrrBase = "/${hostname}/${hostname}/autobrr";
+  # renovate: datasource=docker depName=ghcr.io/autobrr/autobrr
+  autobrrTag = "v1.83.0";
 in
 {
   systemd.tmpfiles.rules = [
@@ -19,8 +21,7 @@ in
   };
 
   virtualisation.oci-containers.containers.autobrr = {
-    # renovate: datasource=docker depName=ghcr.io/autobrr/autobrr
-    image = "ghcr.io/autobrr/autobrr:v1.83.0";
+    image = "ghcr.io/autobrr/autobrr:${autobrrTag}";
     environment = {
       TZ = config.time.timeZone;
     };
