@@ -30,7 +30,7 @@ in
   };
 
   virtualisation.oci-containers.containers.pve-exporter = {
-    image = "prompve/prometheus-pve-exporter:${exporterTag}";
+    image = "docker.io/prompve/prometheus-pve-exporter:${exporterTag}";
     volumes = [ "/run/pve-exporter.yml:/etc/pve-exporter/pve.yml:ro" ];
     cmd = [ "--config.file=/etc/pve-exporter/pve.yml" ];
     ports = [ "127.0.0.1:9221:9221" ];

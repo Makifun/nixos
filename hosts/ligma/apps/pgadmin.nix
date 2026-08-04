@@ -42,7 +42,7 @@ in
   ];
 
   virtualisation.oci-containers.containers.pgadmin = {
-    image = "dpage/pgadmin4:${pgadminTag}";
+    image = "docker.io/dpage/pgadmin4:${pgadminTag}";
     environment = {
       PGADMIN_CONFIG_SERVER_MODE = "False";
       PGADMIN_DEFAULT_EMAIL = "admin@${baseFacts.domainName}";
