@@ -12,5 +12,5 @@
   # Cap rclone's write rate to the cache LV so concurrent smbd threads don't
   # pile up in D state waiting for disk IO. Creates natural backpressure on
   # the Samba clients (arrma/playma) without requiring tc rules.
-  services.rclone-cloud.ioWriteBandwidthMax = [ "/dev/vg_storma/rclone-cache 50M" ];
+  services.rclone-cloud.ioWriteBandwidthMax = [ "/dev/disk/by-partlabel/rclone-cache 50M" ];
 }

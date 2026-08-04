@@ -25,7 +25,9 @@
             };
           };
           luks = {
-            size = "100%";
+            # Fixed size: nix(15G) + persist(5G) + storma(5G) + LVM/LUKS overhead.
+            # rclone-cache is a separate plain partition — no LUKS.
+            size = "27G";
             content = {
               type = "luks";
               name = "crypted_storma";
@@ -35,6 +37,21 @@
                 type = "lvm_pv";
                 vg = "vg_storma";
               };
+            };
+          };
+          rclone-cache = {
+            size = "100%";
+            content = {
+              type = "filesystem";
+              format = "xfs";
+              mountpoint = "/rclone-cache";
+              mountOptions = [
+                "noatime"
+                "discard"
+                "logbufs=8"
+                "logbsize=256k"
+                "allocsize=64M"
+              ];
             };
           };
         };
@@ -76,21 +93,6 @@
             mountOptions = [
               "noatime"
               "discard"
-            ];
-          };
-        };
-        rclone-cache = {
-          size = "100%FREE";
-          content = {
-            type = "filesystem";
-            format = "xfs";
-            mountpoint = "/rclone-cache";
-            mountOptions = [
-              "noatime"
-              "discard"
-              "logbufs=8"
-              "logbsize=256k"
-              "allocsize=64M"
             ];
           };
         };
