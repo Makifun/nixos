@@ -95,7 +95,7 @@ in
         Type = "notify";
         ExecStartPre = "-${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
         ExecStart =
-          "${pkgs.rclone}/bin/rclone mount crypt:/ /cloud"
+          "${pkgs.rclone}/bin/rclone mount chunker:/ /cloud"
           + " --config ${rcloneBase}/rclone.conf"
           + " --allow-non-empty"
           + " --allow-other"
