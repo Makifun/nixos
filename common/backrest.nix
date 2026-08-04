@@ -69,7 +69,7 @@ in
         repos = [
           {
             id = "${hostname}-s3";
-            uri = config.sops.placeholder.backrest-repo-uri;
+            uri = "${config.sops.placeholder.backrest-repo-uri}${hostname}";
             autoInitialize = true;
             password = config.sops.placeholder.backrest-restic-password;
             env = [
