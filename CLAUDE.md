@@ -359,17 +359,19 @@ sudo systemctl start nixos-upgrade-notify@success.service
 
 `renovate.json` in the repo root configures the GitHub Renovate web app to update container image tags in `.nix` files.
 
-**Custom regex manager** — matches lines annotated with `# renovate: datasource=docker depName=<image>` followed by a Nix assignment. Two supported patterns:
+**Custom regex manager** — matches lines annotated with `# renovate: datasource=docker depName=<image>` followed by a Nix assignment. The annotation must be in a `let` block, and the assigned value must be **only the tag** (not a full image reference):
 
 ```nix
-# renovate: datasource=docker depName=ghcr.io/garethgeorge/backrest
-backrestTag = "v1.14.1";          # let-binding, tag only
-
-# renovate: datasource=docker depName=lscr.io/linuxserver/nzbget
-image = "lscr.io/linuxserver/nzbget:version-v26.2";  # full image ref
+let
+  # renovate: datasource=docker depName=ghcr.io/garethgeorge/backrest
+  backrestTag = "v1.14.1";
+in
+{
+  virtualisation.oci-containers.containers.backrest = {
+    image = "ghcr.io/garethgeorge/backrest:${backrestTag}";
 ```
 
-`extractVersionTemplate: "(?:.*:)?(?<version>.+)"` strips the image name prefix from the second pattern so Renovate receives only the tag.
+**Never put the annotation above `image = "registry/name:tag"` directly.** Renovate captures the entire assignment value as `currentValue` and validates it as a docker version. A full image reference like `"ghcr.io/foo/bar:v1.2.3"` fails validation (`skipReason: invalid-value`) and the package is silently skipped.
 
 **linuxserver.io versioning quirk** — `lscr.io/linuxserver/*` images publish historic Ubuntu release tags (`20.04.1`, `22.04.1`) that sort above application version tags under semver. `renovate.json` applies:
 
