@@ -42,11 +42,6 @@ in
       type = lib.types.str;
       default = "5s";
     };
-    ioWriteBandwidthMax = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
-      description = "systemd IOWriteBandwidthMax entries (e.g. [\"/dev/vg_storma/rclone-cache 100M\"]). Throttles rclone cache writes, backpressuring Samba clients.";
-    };
   };
 
   config = {
@@ -130,9 +125,6 @@ in
         KillMode = "process";
         Restart = "on-failure";
         RestartSec = "10s";
-      }
-      // lib.optionalAttrs (cfg.ioWriteBandwidthMax != [ ]) {
-        IOWriteBandwidthMax = cfg.ioWriteBandwidthMax;
       };
     };
 
