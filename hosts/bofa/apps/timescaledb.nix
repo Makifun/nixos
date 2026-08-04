@@ -10,7 +10,7 @@ let
   pgData = "/${hostname}/${hostname}/postgresql";
   # renovate: datasource=docker depName=timescale/timescaledb-ha
   timescaledbTag = "pg18.1-ts2.25.1";
-  pgImage = "timescale/timescaledb-ha:${timescaledbTag}";
+  pgImage = "docker.io/timescale/timescaledb-ha:${timescaledbTag}";
 in
 {
   sops.secrets.timescaledb-tracearr-password = {
