@@ -29,6 +29,7 @@
     ./apps/pve-exporter.nix
     ./apps/renovate.nix
     ./apps/traefik-backrest-bofa.nix
+    ./apps/traefik-backrest-ligma.nix
     ./apps/traefik-backrest-playma.nix
     ./apps/traefik-backrest-storma.nix
     ./apps/traefik-rclone-playma.nix
