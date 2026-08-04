@@ -14,9 +14,9 @@ let
   # Central backup schedule — each host gets a distinct UTC hour so backups
   # never overlap and S3 request rates stay low. Add new hosts here.
   scheduleMap = {
-    ligma = 1;
+    arrma = 1;
     bofa = 2;
-    arrma = 3;
+    ligma = 3;
     playma = 4;
     storma = 5;
   };
