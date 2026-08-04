@@ -53,9 +53,10 @@ in
     programs.fuse.userAllowOther = true;
 
     systemd.tmpfiles.rules = [
-      "d ${rcloneBase}    0700 root root - -"
-      "d /cloud           0755 root root - -"
-      "d /rclone-cache    0700 root root - -"
+      "d ${rcloneBase}         0700 root root - -"
+      "d /cloud                0755 root root - -"
+      "d /rclone-cache         0700 root root - -"
+      "d /rclone-cache/tmp     0700 root root - -"
     ];
 
     sops.secrets.rclone-config-stage = {
@@ -123,6 +124,7 @@ in
           + " --vfs-read-chunk-size 128M"
           + " --vfs-read-chunk-size-limit 1G"
           + " --vfs-write-back ${cfg.vfsWriteBack}";
+        Environment = [ "TMPDIR=/rclone-cache/tmp" ];
         ExecStartPost = "+${pkgs.systemd}/bin/systemctl restart samba-smbd.service";
         ExecStop = "${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
         KillMode = "process";
