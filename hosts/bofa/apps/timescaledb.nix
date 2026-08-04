@@ -9,7 +9,7 @@ let
   pgPort = 5432;
   pgData = "/${hostname}/${hostname}/postgresql";
   # renovate: datasource=docker depName=timescale/timescaledb-ha
-  timescaledbTag = "pg18.1-ts2.25.0";
+  timescaledbTag = "pg18.1-ts2.25.1";
   pgImage = "timescale/timescaledb-ha:${timescaledbTag}";
 in
 {
