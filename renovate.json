@@ -6,6 +6,24 @@
       "matchPackageNames": ["ghcr.io/renovatebot/renovate"],
       "automerge": true,
       "automergeType": "branch"
+    },
+    {
+      "versioning": "regex:^(?:amd64-|version-v)?(?<major>\\d+)\\.(?<minor>\\d+)\\.?(?<patch>\\d+)?$",
+      "matchPackageNames": [
+        "/^lscr\\.io/linuxserver//"
+      ]
+    },
+    {
+      "matchPackageNames": ["lscr.io/linuxserver/qbittorrent"],
+      "allowedVersions": ">=5.0.0 <6.0.0"
+    },
+    {
+      "matchPackageNames": ["lscr.io/linuxserver/prowlarr"],
+      "allowedVersions": ">=2.0.0 <3.0.0"
+    },
+    {
+      "matchPackageNames": ["lscr.io/linuxserver/nzbget"],
+      "allowedVersions": "/^version-v/"
     }
   ],
   "customManagers": [

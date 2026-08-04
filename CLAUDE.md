@@ -354,3 +354,26 @@ annotations:
 ```bash
 sudo systemctl start nixos-upgrade-notify@success.service
 ```
+
+### Renovate (GitHub web app)
+
+`renovate.json` in the repo root configures the GitHub Renovate web app to update container image tags in `.nix` files.
+
+**Custom regex manager** — matches lines annotated with `# renovate: datasource=docker depName=<image>` followed by a Nix assignment. Two supported patterns:
+
+```nix
+# renovate: datasource=docker depName=ghcr.io/garethgeorge/backrest
+backrestTag = "v1.14.1";          # let-binding, tag only
+
+# renovate: datasource=docker depName=lscr.io/linuxserver/nzbget
+image = "lscr.io/linuxserver/nzbget:version-v26.2";  # full image ref
+```
+
+`extractVersionTemplate: "(?:.*:)?(?<version>.+)"` strips the image name prefix from the second pattern so Renovate receives only the tag.
+
+**linuxserver.io versioning quirk** — `lscr.io/linuxserver/*` images publish historic Ubuntu release tags (`20.04.1`, `22.04.1`) that sort above application version tags under semver. `renovate.json` applies:
+
+1. A global regex versioning rule for all `lscr.io/linuxserver/*` images (handles `version-v` prefix for nzbget and `amd64-` prefix for multi-arch tags).
+2. Per-image `allowedVersions` constraints for qbittorrent (`>=5.0.0 <6.0.0`), prowlarr (`>=2.0.0 <3.0.0`), and nzbget (`/^version-v/`).
+
+When adding a new linuxserver image, check if its version tags conflict with ubuntu date tags and add an `allowedVersions` entry if needed.
