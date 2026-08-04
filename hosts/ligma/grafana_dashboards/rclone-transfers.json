@@ -592,6 +592,10 @@
               {
                 "id": "displayName",
                 "value": "Size"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           },
@@ -608,6 +612,10 @@
               {
                 "id": "displayName",
                 "value": "Transferred"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               }
             ]
           },
@@ -624,6 +632,10 @@
               {
                 "id": "displayName",
                 "value": "Speed"
+              },
+              {
+                "id": "custom.width",
+                "value": 100
               }
             ]
           },
@@ -652,6 +664,10 @@
               {
                 "id": "max",
                 "value": 100
+              },
+              {
+                "id": "custom.width",
+                "value": 150
               }
             ]
           },
@@ -668,6 +684,10 @@
               {
                 "id": "displayName",
                 "value": "ETA"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
               }
             ]
           }
