@@ -30,6 +30,7 @@
     ./apps/renovate.nix
     ./apps/traefik-backrest-bofa.nix
     ./apps/traefik-backrest-playma.nix
+    ./apps/traefik-backrest-storma.nix
     ./apps/traefik-rclone-playma.nix
     ./apps/traefik-rclone-storma.nix
     ./apps/traefik-technitium.nix
