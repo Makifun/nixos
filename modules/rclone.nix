@@ -105,8 +105,10 @@ in
           + " --poll-interval 10000h"
           + " --rc-addr 0.0.0.0:${toString rclonePort}"
           + " --rc-no-auth"
-          + " --rc-web-gui-no-open-browser"
+          + " --rc-serve"
           + " --rc-web-gui"
+          + " --rc-web-gui-no-open-browser"
+          + " --rc-web-gui-update"
           + " --rc"
           + " --transfers ${toString cfg.transfers}"
           + " --umask 0000"
@@ -119,7 +121,10 @@ in
           + " --vfs-read-chunk-size 128M"
           + " --vfs-read-chunk-size-limit 1G"
           + " --vfs-write-back ${cfg.vfsWriteBack}";
-        Environment = [ "TMPDIR=/rclone-cache/tmp" ];
+        Environment = [
+          "TMPDIR=/rclone-cache/tmp"
+          "HOME=/rclone-cache"
+        ];
         ExecStartPost = "+${pkgs.systemd}/bin/systemctl restart samba-smbd.service";
         ExecStop = "${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
         KillMode = "process";
