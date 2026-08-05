@@ -12,7 +12,7 @@ let
   # renovate: datasource=docker depName=infisical/infisical
   infisicalTag = "v0.162.16";
   # renovate: datasource=docker depName=postgres
-  pgTag = "16-alpine";
+  pgTag = "18-alpine";
   # renovate: datasource=docker depName=redis
   redisTag = "8-alpine";
 in
