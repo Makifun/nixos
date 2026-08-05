@@ -11,6 +11,13 @@ let
   rclonePort = 6969;
   metricsPort = 6970;
   cfg = config.services.rclone-cloud;
+  # renovate: datasource=github-releases depName=rclone/rclone-web
+  rcloneWebVersion = "1.1.11";
+  rcloneWebGui = pkgs.fetchzip {
+    url = "https://github.com/rclone/rclone-web/releases/download/${rcloneWebVersion}/dist.zip";
+    hash = "sha256-hraWo4LIQuUz1Z7Rs4Nos5zv3Sg+xkJU2mSQA+YYkYU=";
+    stripRoot = false;
+  };
 in
 {
   options.services.rclone-cloud = {
@@ -104,11 +111,9 @@ in
           + " --metrics-addr 0.0.0.0:${toString metricsPort}"
           + " --poll-interval 10000h"
           + " --rc-addr 0.0.0.0:${toString rclonePort}"
+          + " --rc-files ${rcloneWebGui}"
           + " --rc-no-auth"
           + " --rc-serve"
-          + " --rc-web-gui"
-          + " --rc-web-gui-no-open-browser"
-          + " --rc-web-gui-update"
           + " --rc"
           + " --transfers ${toString cfg.transfers}"
           + " --umask 0000"
@@ -121,10 +126,7 @@ in
           + " --vfs-read-chunk-size 128M"
           + " --vfs-read-chunk-size-limit 1G"
           + " --vfs-write-back ${cfg.vfsWriteBack}";
-        Environment = [
-          "TMPDIR=/rclone-cache/tmp"
-          "HOME=/rclone-cache"
-        ];
+        Environment = [ "TMPDIR=/rclone-cache/tmp" ];
         ExecStartPost = "+${pkgs.systemd}/bin/systemctl restart samba-smbd.service";
         ExecStop = "${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
         KillMode = "process";
