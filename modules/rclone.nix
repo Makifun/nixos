@@ -13,11 +13,26 @@ let
   cfg = config.services.rclone-cloud;
   # renovate: datasource=github-releases depName=rclone/rclone-web
   rcloneWebVersion = "1.1.11";
-  rcloneWebGui = pkgs.fetchzip {
+  rcloneWebSrc = pkgs.fetchzip {
     url = "https://github.com/rclone/rclone-web/releases/download/${rcloneWebVersion}/dist.zip";
     hash = "sha256-hraWo4LIQuUz1Z7Rs4Nos5zv3Sg+xkJU2mSQA+YYkYU=";
     stripRoot = false;
   };
+  # Inject a script that auto-sets ?url=<origin> so rclone-web auto-connects
+  # to the RC API without requiring manual URL entry on first visit.
+  rcloneWebGui =
+    pkgs.runCommand "rclone-web-gui-${rcloneWebVersion}"
+      {
+        nativeBuildInputs = [
+          pkgs.coreutils
+          pkgs.gnused
+        ];
+      }
+      ''
+        cp -r ${rcloneWebSrc} $out
+        chmod -R +w $out
+        sed -i 's|</head>|<script>(function(){var p=new URLSearchParams(window.location.search);if(!p.has("url")){p.set("url",window.location.origin);window.location.replace(window.location.pathname+"?"+p.toString()+window.location.hash);}})()</script></head>|' $out/index.html
+      '';
 in
 {
   options.services.rclone-cloud = {
