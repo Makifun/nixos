@@ -13,6 +13,8 @@ let
   infisicalTag = "v0.162.16";
   # renovate: datasource=docker depName=postgres
   pgTag = "16-alpine";
+  # renovate: datasource=docker depName=redis
+  redisTag = "8-alpine";
 in
 {
   # infisical-env: |
@@ -65,7 +67,7 @@ in
     };
 
     infisical-redis = {
-      image = "docker.io/redis:7-alpine";
+      image = "docker.io/redis:${redisTag}";
       extraOptions = [
         "--network=infisical_network"
         "--hostname=infisical-redis"
