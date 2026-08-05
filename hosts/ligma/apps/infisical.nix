@@ -58,7 +58,7 @@ in
         "--network=infisical_network"
         "--hostname=infisical-db"
       ];
-      volumes = [ "${infisicalBase}/db:/var/lib/postgresql/data" ];
+      volumes = [ "${infisicalBase}/db:/var/lib/postgresql" ];
       environment = {
         POSTGRES_USER = "infisical";
         POSTGRES_DB = "infisical";
