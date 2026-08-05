@@ -31,7 +31,7 @@ let
       ''
         cp -r ${rcloneWebSrc} $out
         chmod -R +w $out
-        sed -i 's|</head>|<script>(function(){try{var k="lite-auth-store";if(!localStorage.getItem(k)){localStorage.setItem(k,JSON.stringify({state:{url:window.location.origin,user:"",pass:""},version:0}));}}catch(e){}})()</script></head>|' $out/index.html
+        sed -i 's|</head>|<script>(function(){try{var k="lite-auth-store",r=localStorage.getItem(k),p=r?JSON.parse(r):null;if(!(p\&\&p.state\&\&p.state.url)){var o=p?p:{};o.state=o.state?o.state:{};o.state.url=window.location.origin;if(!o.state.user)o.state.user="";if(!o.state.pass)o.state.pass="";if(o.version===undefined)o.version=0;localStorage.setItem(k,JSON.stringify(o));}}catch(e){}})()</script></head>|' $out/index.html
       '';
 in
 {
