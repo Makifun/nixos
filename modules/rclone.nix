@@ -11,26 +11,6 @@ let
   rclonePort = 6969;
   metricsPort = 6970;
   cfg = config.services.rclone-cloud;
-  # renovate: datasource=github-releases depName=rclone/rclone-web
-  rcloneWebVersion = "1.1.11";
-  rcloneWebSrc = pkgs.fetchzip {
-    url = "https://github.com/rclone/rclone-web/releases/download/${rcloneWebVersion}/dist.zip";
-    hash = "sha256-hraWo4LIQuUz1Z7Rs4Nos5zv3Sg+xkJU2mSQA+YYkYU=";
-    stripRoot = false;
-  };
-  rcloneWebGui =
-    pkgs.runCommand "rclone-web-gui-${rcloneWebVersion}"
-      {
-        nativeBuildInputs = [
-          pkgs.coreutils
-          pkgs.gnused
-        ];
-      }
-      ''
-        cp -r ${rcloneWebSrc} $out
-        chmod -R +w $out
-        sed -i 's|</head>|<script>(function(){try{var k="lite-auth-store",r=localStorage.getItem(k),p=r?JSON.parse(r):null;if(!(p\&\&p.state\&\&p.state.url)){var o=p?p:{};o.state=o.state?o.state:{};o.state.url=window.location.origin;if(!o.state.user)o.state.user="";if(!o.state.pass)o.state.pass="";if(o.version===undefined)o.version=0;localStorage.setItem(k,JSON.stringify(o));}}catch(e){}})()</script></head>|' $out/index.html
-      '';
 in
 {
   options.services.rclone-cloud = {
@@ -124,7 +104,8 @@ in
           + " --metrics-addr 0.0.0.0:${toString metricsPort}"
           + " --poll-interval 10000h"
           + " --rc-addr 0.0.0.0:${toString rclonePort}"
-          + " --rc-files ${rcloneWebGui}"
+          + " --rc-web-gui"
+          + " --rc-web-gui-no-open-browser"
           + " --rc-no-auth"
           + " --rc-serve"
           + " --rc"
@@ -139,7 +120,10 @@ in
           + " --vfs-read-chunk-size 128M"
           + " --vfs-read-chunk-size-limit 1G"
           + " --vfs-write-back ${cfg.vfsWriteBack}";
-        Environment = [ "TMPDIR=/rclone-cache/tmp" ];
+        Environment = [
+          "HOME=/rclone-cache"
+          "TMPDIR=/rclone-cache/tmp"
+        ];
         ExecStartPost = "+${pkgs.systemd}/bin/systemctl restart samba-smbd.service";
         ExecStop = "${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
         KillMode = "process";
