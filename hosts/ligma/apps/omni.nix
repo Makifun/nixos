@@ -82,7 +82,7 @@ in
     path = [ pkgs.coreutils ];
     script = ''
       if [ ! -f ${kmsBase}/kms.key ]; then
-        dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 -w 0 > ${kmsBase}/kms.key
+        dd if=/dev/urandom bs=32 count=1 2>/dev/null > ${kmsBase}/kms.key
         chmod 400 ${kmsBase}/kms.key
       fi
     '';
