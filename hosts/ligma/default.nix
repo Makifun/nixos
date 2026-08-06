@@ -21,6 +21,7 @@
     ./apps/gotify.nix
     ./apps/homepage.nix
     ./apps/infisical.nix
+    ./apps/kms.nix
     ./apps/loki.nix
     ./apps/monitoring.nix
     ./apps/nfs.nix
