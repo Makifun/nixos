@@ -41,6 +41,7 @@ in
       "--device=/dev/net/tun:/dev/net/tun"
       "--sysctl=net.ipv6.conf.all.disable_ipv6=1"
       "--add-host=gotify.${baseFacts.domainName}:${hosts.ligma}"
+      "--add-host=nzbget.${baseFacts.domainName}:${hosts.arrma}"
       "--add-host=sonarrpg.${baseFacts.domainName}:${hosts.sugmaGW}"
       "--add-host=sonarr4kpg.${baseFacts.domainName}:${hosts.sugmaGW}"
       "--add-host=radarrpg.${baseFacts.domainName}:${hosts.sugmaGW}"
