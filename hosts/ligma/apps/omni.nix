@@ -200,7 +200,7 @@ in
     ":${toString k8sProxyPortExternal}";
 
   services.traefik.dynamicConfigOptions.http = {
-    middlewares."kms-allowlist".ipAllowList.sourceRange = [ ${hosts.sugma01} ];
+    middlewares."kms-allowlist".ipAllowList.sourceRange = [ "${hosts.sugma01}/32" ];
 
     routers.kms = {
       rule = "Host(`kms.${baseFacts.domainName}`)";
