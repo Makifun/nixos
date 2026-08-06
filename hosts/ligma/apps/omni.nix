@@ -16,6 +16,10 @@ let
   wgPort = 50180;
   # renovate: datasource=docker depName=ghcr.io/siderolabs/omni
   omniTag = "v1.9.3";
+  kmsBase = "/${hostname}/${hostname}/kms";
+  kmsPort = 4050;
+  # renovate: datasource=docker depName=ghcr.io/siderolabs/kms-server
+  kmsTag = "v0.2.0";
 
   # Authentik emits attributes under the Microsoft SOAP claim URIs.
   # Map SAML attribute name → Omni identity field.
@@ -57,7 +61,42 @@ in
     "d '${omniBase}/etcd' 0750 root root - -"
     "d '${omniBase}/keys' 0750 root root - -"
     "d '${omniBase}/tls'  0750 root root - -"
+    "d '${kmsBase}'       0700 root root - -"
   ];
+
+  # Generate a random 32-byte key on first boot.
+  # The key persists in zstorage (covered by Backrest S3).
+  # Back it up manually before wiping zstorage.
+  systemd.services.kms-key-setup = {
+    description = "Generate KMS key on first run";
+    before = [ "podman-kms.service" ];
+    requiredBy = [ "podman-kms.service" ];
+    after = [
+      "local-fs.target"
+      "zfs-mount.service"
+    ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    path = [ pkgs.coreutils ];
+    script = ''
+      if [ ! -f ${kmsBase}/kms.key ]; then
+        dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 -w 0 > ${kmsBase}/kms.key
+        chmod 400 ${kmsBase}/kms.key
+      fi
+    '';
+  };
+
+  virtualisation.oci-containers.containers.kms = {
+    image = "ghcr.io/siderolabs/kms-server:${kmsTag}";
+    ports = [ "127.0.0.1:${toString kmsPort}:${toString kmsPort}" ];
+    volumes = [ "${kmsBase}:/data:ro" ];
+    cmd = [
+      "--kms-api-endpoint=0.0.0.0:${toString kmsPort}"
+      "--key-path=/data/kms.key"
+    ];
+  };
 
   # Stage JWT signing key from sops, generate self-signed TLS for the API
   # listener (Traefik handles the public LE cert; this only protects loopback).
@@ -161,6 +200,23 @@ in
     ":${toString k8sProxyPortExternal}";
 
   services.traefik.dynamicConfigOptions.http = {
+    middlewares."kms-allowlist".ipAllowList.sourceRange = [ "10.10.10.26/32" ];
+
+    routers.kms = {
+      rule = "Host(`kms.${baseFacts.domainName}`)";
+      entryPoints = [ "websecure" ];
+      service = "kms-svc";
+      middlewares = [ "kms-allowlist" ];
+      tls = {
+        certResolver = "letsencrypt";
+        domains = [ { main = "*.${baseFacts.domainName}"; } ];
+      };
+    };
+
+    services."kms-svc".loadBalancer.servers = [
+      { url = "h2c://127.0.0.1:${toString kmsPort}"; }
+    ];
+
     routers.omni = {
       rule = "Host(`omni.${baseFacts.domainName}`)";
       entryPoints = [ "websecure" ];
@@ -191,4 +247,5 @@ in
   };
 
   ligma.dnsRecords."omni.${baseFacts.domainName}".value = hosts.ligma;
+  ligma.dnsRecords."kms.${baseFacts.domainName}".value = hosts.ligma;
 }
