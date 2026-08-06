@@ -8,7 +8,7 @@ let
   hostname = config.networking.hostName;
   quiBase = "/${hostname}/${hostname}/qui";
   # renovate: datasource=docker depName=ghcr.io/autobrr/qui
-  quiTag = "v1.24.0";
+  quiTag = "v1.25.0";
 in
 {
   systemd.tmpfiles.rules = [
