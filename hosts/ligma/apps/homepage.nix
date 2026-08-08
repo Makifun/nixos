@@ -291,15 +291,15 @@
             };
           }
           {
-            "Prowlarrpg" = {
+            "prowlarr" = {
               icon = "/images/prowlarr.png";
-              href = "https://prowlarrpg.${baseFacts.domainName}";
+              href = "https://prowlarr.${baseFacts.domainName}";
               server = "arrma";
               container = "prowlarr";
               widget = {
                 type = "prowlarr";
-                url = "https://prowlarrpg.${baseFacts.domainName}";
-                key = "{{HOMEPAGE_VAR_PROWLARRPG_TOKEN}}";
+                url = "https://prowlarr.${baseFacts.domainName}";
+                key = "{{HOMEPAGE_VAR_prowlarr_TOKEN}}";
               };
             };
           }
