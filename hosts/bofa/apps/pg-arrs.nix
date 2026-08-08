@@ -16,6 +16,7 @@ let
   bazarrApps = [
     "bazarr"
     "bazarr4k"
+    "cleanuparr"
     "seerr"
     "suggestarr"
   ];
