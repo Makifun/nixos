@@ -11,19 +11,19 @@
     ./disko-config.nix
     ../../common
     ./dns-records.nix
-    ./apps/autobrr.nix
+    #./apps/autobrr.nix
     ./apps/backrest-extra.nix
     ./apps/beszel-extra.nix
     ./apps/cloud-mount.nix
-    ./apps/gluetun.nix
+    #./apps/gluetun.nix
     ./apps/nfs.nix
-    ./apps/nzbget.nix
-    ./apps/prowlarr.nix
-    ./apps/qbittorrent.nix
-    ./apps/qui.nix
+    #./apps/nzbget.nix
+    #./apps/prowlarr.nix
+    #./apps/qbittorrent.nix
+    #./apps/qui.nix
     ./apps/traefik.nix
-    ./apps/trawl.nix
-    ./apps/unpackerr.nix
+    #./apps/trawl.nix
+    #./apps/unpackerr.nix
   ];
   networking = {
     hostName = "arrma";
