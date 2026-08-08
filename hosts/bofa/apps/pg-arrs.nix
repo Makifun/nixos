@@ -18,7 +18,6 @@ let
     "bazarr4k"
     "cleanuparr"
     "seerr"
-    "suggestarr"
   ];
 
   setupScript = pkgs.writeShellScript "pg-setup-arrs" ''
