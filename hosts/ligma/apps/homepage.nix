@@ -43,10 +43,6 @@
     };
 
     docker = {
-      arrma = {
-        host = hosts.arrma;
-        port = 2375;
-      };
       bofa = {
         host = hosts.bofa;
         port = 2375;
@@ -242,8 +238,8 @@
             "NZBget" = {
               icon = "/images/nzbget.png";
               href = "https://nzbget.${baseFacts.domainName}";
-              server = "arrma";
-              container = "nzbget";
+              namespace = "nzbget";
+              app = "nzbget";
               widget = {
                 type = "nzbget";
                 url = "https://nzbget.${baseFacts.domainName}";
@@ -256,8 +252,8 @@
             "qBittorrent" = {
               icon = "/images/qbittorrent.png";
               href = "https://qui.${baseFacts.domainName}/instances/1";
-              server = "arrma";
-              container = "qbittorrent";
+              namespace = "media";
+              app = "media";
               widget = {
                 type = "qbittorrent";
                 fields = [
@@ -275,8 +271,8 @@
             "Autobrr" = {
               icon = "/images/autobrr.png";
               href = "https://autobrr.${baseFacts.domainName}";
-              server = "arrma";
-              container = "autobrr";
+              namespace = "media";
+              app = "media";
               widget = {
                 type = "autobrr";
                 fields = [
@@ -294,8 +290,8 @@
             "Prowlarr" = {
               icon = "/images/prowlarr.png";
               href = "https://prowlarr.${baseFacts.domainName}";
-              server = "arrma";
-              container = "prowlarr";
+              namespace = "media";
+              app = "media";
               widget = {
                 type = "prowlarr";
                 url = "https://prowlarr.${baseFacts.domainName}";
@@ -744,18 +740,6 @@
             };
           }
           {
-            "Backrest Arrma" = {
-              icon = "/images/backrest.png";
-              href = "https://backrest-arrma.${baseFacts.domainName}";
-              server = "arrma";
-              container = "backrest";
-              widget = {
-                type = "backrest";
-                url = "http://${hosts.arrma}:9898";
-              };
-            };
-          }
-          {
             "Backrest Bofa" = {
               icon = "/images/backrest.png";
               href = "https://backrest-bofa.${baseFacts.domainName}";
@@ -800,28 +784,6 @@
               widget = {
                 type = "backrest";
                 url = "http://${hosts.storma}:9898";
-              };
-            };
-          }
-          {
-            "Beszel Arrma" = {
-              icon = "/images/beszel.svg";
-              href = "https://beszel.${baseFacts.domainName}";
-              server = "arrma";
-              container = "beszel-agent";
-              widget = {
-                type = "beszel";
-                fields = [
-                  "cpu"
-                  "memory"
-                  "disk"
-                  "network"
-                ];
-                url = "https://beszel.${baseFacts.domainName}";
-                username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
-                password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
-                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_ARRMA}}";
-                version = 2;
               };
             };
           }
@@ -924,16 +886,6 @@
             };
           }
           {
-            "Traefik Arrma" = {
-              icon = "/images/traefik.png";
-              href = "https://traefik-arrma.${baseFacts.domainName}/dashboard/";
-              widget = {
-                type = "traefik";
-                url = "https://traefik-arrma.${baseFacts.domainName}";
-              };
-            };
-          }
-          {
             "Authentik" = {
               icon = "/images/authentik.png";
               href = "https://auth.${baseFacts.domainName}";
@@ -951,8 +903,8 @@
             "Gluetun" = {
               icon = "/images/wireguard.png";
               href = "https://gluetun.${baseFacts.domainName}";
-              server = "arrma";
-              container = "gluetun";
+              namespace = "media";
+              app = "media";
               widget = {
                 type = "gluetun";
                 fields = [
