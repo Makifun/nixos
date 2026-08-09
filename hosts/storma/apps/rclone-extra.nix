@@ -1,6 +1,6 @@
 { ... }:
 {
-  services.rclone-cloud.vfsCacheMaxSize = "870G";
+  services.rclone-cloud.vfsCacheMaxSize = "700G";
   services.rclone-cloud.vfsCacheMinFreeSize = "30G";
   services.rclone-cloud.bwlimit = "25M";
   services.rclone-cloud.transfers = 20;
