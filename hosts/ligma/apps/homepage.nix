@@ -432,12 +432,12 @@
                   {
                     type = "sonarr";
                     service_group = "DVR";
-                    service_name = "Sonarrpg";
+                    service_name = "Sonarr";
                   }
                   {
                     type = "radarr";
                     service_group = "DVR";
-                    service_name = "radarr";
+                    service_name = "Radarr";
                   }
                 ];
               };
