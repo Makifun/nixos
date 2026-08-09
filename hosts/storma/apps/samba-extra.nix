@@ -2,7 +2,6 @@
 {
   services.samba-cloud.extraHosts = [
     hosts.playma
-    hosts.arrma
   ];
 
   services.samba.settings = {

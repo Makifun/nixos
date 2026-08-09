@@ -128,6 +128,6 @@ in
 
   # Allow sugma cluster nodes and arrma to reach PostgreSQL.
   networking.firewall.extraInputRules = ''
-    tcp dport ${toString pgPort} ip saddr { ${hosts.sugma01}, ${hosts.sugma02}, ${hosts.sugma03}, ${hosts.arrma} } accept comment "TimescaleDB from sugma + arrma"
+    tcp dport ${toString pgPort} ip saddr { ${hosts.sugma01}, ${hosts.sugma02}, ${hosts.sugma03} } accept comment "TimescaleDB from sugma"
   '';
 }
