@@ -36,7 +36,6 @@
         ligma = "10.10.10.13";
         bofa = "10.10.10.14";
         playma = "10.10.10.15";
-        arrma = "10.10.10.16";
         sugma01 = "10.10.10.26";
         sugma02 = "10.10.10.27";
         sugma03 = "10.10.10.28";
@@ -53,7 +52,6 @@
     in
     {
       nixosConfigurations = {
-        arrma = mkSystem [ ./hosts/arrma ];
         bofa = mkSystem [ ./hosts/bofa ];
         ligma = mkSystem [ ./hosts/ligma ];
         playma = mkSystem [ ./hosts/playma ];
