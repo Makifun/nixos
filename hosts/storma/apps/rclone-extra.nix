@@ -4,7 +4,7 @@
   services.rclone-cloud.vfsCacheMinFreeSize = "30G";
   services.rclone-cloud.bwlimit = "25M";
   services.rclone-cloud.transfers = 20;
-  services.rclone-cloud.bufferSize = "256M";
+  services.rclone-cloud.bufferSize = "0M";
   services.rclone-cloud.vfsCachePollInterval = "30s";
   # Delay upload start so the smbd write phase completes first, avoiding
   # simultaneous disk reads (upload) and disk writes (SMB ingest).
