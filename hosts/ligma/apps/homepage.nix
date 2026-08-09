@@ -557,6 +557,14 @@
             };
           }
           {
+            "Cleanuparr" = {
+              icon = "/images/cleanuparr.png";
+              href = "https://cleanuparr.${baseFacts.domainName}";
+              namespace = "cleanuparr";
+              app = "cleanuparr";
+            };
+          }
+          {
             "Gotify" = {
               icon = "/images/gotify.png";
               href = "https://gotify.${baseFacts.domainName}";
