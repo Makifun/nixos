@@ -272,7 +272,7 @@
             };
           }
           {
-            "autobrr" = {
+            "Autobrr" = {
               icon = "/images/autobrr.png";
               href = "https://autobrr.${baseFacts.domainName}";
               server = "arrma";
@@ -291,7 +291,7 @@
             };
           }
           {
-            "prowlarr" = {
+            "Prowlarr" = {
               icon = "/images/prowlarr.png";
               href = "https://prowlarr.${baseFacts.domainName}";
               server = "arrma";
@@ -309,11 +309,11 @@
       {
         "DVR" = [
           {
-            "Sonarrpg" = {
+            "Sonarr" = {
               icon = "/images/sonarr.png";
-              href = "https://sonarrpg.${baseFacts.domainName}";
-              namespace = "sonarrpg";
-              app = "sonarrpg";
+              href = "https://sonarr.${baseFacts.domainName}";
+              namespace = "sonarr";
+              app = "sonarr";
               widget = {
                 type = "sonarr";
                 fields = [
@@ -321,18 +321,18 @@
                   "queued"
                   "series"
                 ];
-                url = "https://sonarrpg.${baseFacts.domainName}";
-                key = "{{HOMEPAGE_VAR_SONARRPG_TOKEN}}";
+                url = "https://sonarr.${baseFacts.domainName}";
+                key = "{{HOMEPAGE_VAR_SONARR_TOKEN}}";
                 enableQueue = true;
               };
             };
           }
           {
-            "Radarrpg" = {
+            "Radarr" = {
               icon = "/images/radarr.png";
-              href = "https://radarrpg.${baseFacts.domainName}";
-              namespace = "radarrpg";
-              app = "radarrpg";
+              href = "https://radarr.${baseFacts.domainName}";
+              namespace = "radarr";
+              app = "radarr";
               widget = {
                 type = "radarr";
                 fields = [
@@ -341,8 +341,8 @@
                   "queued"
                   "movies"
                 ];
-                url = "https://radarrpg.${baseFacts.domainName}";
-                key = "{{HOMEPAGE_VAR_RADARRPG_TOKEN}}";
+                url = "https://radarr.${baseFacts.domainName}";
+                key = "{{HOMEPAGE_VAR_RADARR_TOKEN}}";
                 enableQueue = true;
               };
             };
@@ -366,11 +366,11 @@
       {
         "DVR4K" = [
           {
-            "Sonarr4Kpg" = {
+            "Sonarr4K" = {
               icon = "/images/sonarr4k.png";
-              href = "https://sonarr4kpg.${baseFacts.domainName}";
-              namespace = "sonarr4kpg";
-              app = "sonarr4kpg";
+              href = "https://sonarr4k.${baseFacts.domainName}";
+              namespace = "sonarr4k";
+              app = "sonarr4k";
               widget = {
                 type = "sonarr";
                 fields = [
@@ -378,18 +378,18 @@
                   "queued"
                   "series"
                 ];
-                url = "https://sonarr4kpg.${baseFacts.domainName}";
-                key = "{{HOMEPAGE_VAR_SONARR4KPG_TOKEN}}";
+                url = "https://sonarr4k.${baseFacts.domainName}";
+                key = "{{HOMEPAGE_VAR_SONARR4K_TOKEN}}";
                 enableQueue = true;
               };
             };
           }
           {
-            "Radarr4Kpg" = {
+            "Radarr4K" = {
               icon = "/images/radarr4k.png";
-              href = "https://radarr4kpg.${baseFacts.domainName}";
-              namespace = "radarr4kpg";
-              app = "radarr4kpg";
+              href = "https://radarr4k.${baseFacts.domainName}";
+              namespace = "radarr4k";
+              app = "radarr4k";
               widget = {
                 type = "radarr";
                 fields = [
@@ -398,8 +398,8 @@
                   "queued"
                   "movies"
                 ];
-                url = "https://radarr4kpg.${baseFacts.domainName}";
-                key = "{{HOMEPAGE_VAR_RADARR4KPG_TOKEN}}";
+                url = "https://radarr4k.${baseFacts.domainName}";
+                key = "{{HOMEPAGE_VAR_RADARR4K_TOKEN}}";
                 enableQueue = true;
               };
             };
@@ -437,7 +437,7 @@
                   {
                     type = "radarr";
                     service_group = "DVR";
-                    service_name = "Radarrpg";
+                    service_name = "radarr";
                   }
                 ];
               };
