@@ -299,7 +299,7 @@
               widget = {
                 type = "prowlarr";
                 url = "https://prowlarr.${baseFacts.domainName}";
-                key = "{{HOMEPAGE_VAR_prowlarr_TOKEN}}";
+                key = "{{HOMEPAGE_VAR_PROWLARR_TOKEN}}";
               };
             };
           }
