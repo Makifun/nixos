@@ -8,5 +8,5 @@
   services.rclone-cloud.vfsCachePollInterval = "30s";
   # Delay upload start so the smbd write phase completes first, avoiding
   # simultaneous disk reads (upload) and disk writes (SMB ingest).
-  services.rclone-cloud.vfsWriteBack = "10m";
+  services.rclone-cloud.vfsWriteBack = "30m";
 }
