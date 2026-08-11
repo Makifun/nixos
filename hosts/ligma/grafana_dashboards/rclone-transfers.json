@@ -41,11 +41,16 @@
           },
           {
             "selected": false,
+            "text": "makizen",
+            "value": "http://10.10.10.9:6969"
+          },
+          {
+            "selected": false,
             "text": "playma",
             "value": "http://10.10.10.15:6969"
           }
         ],
-        "query": "storma : http://10.10.10.12:6969,playma : http://10.10.10.15:6969",
+        "query": "storma : http://10.10.10.12:6969,makizen : http://10.10.10.9:6969,playma : http://10.10.10.15:6969",
         "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"

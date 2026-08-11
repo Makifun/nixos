@@ -59,6 +59,10 @@ in
             labels.instance = "storma";
           }
           {
+            targets = [ "${hosts.makizen}:6970" ];
+            labels.instance = "makizen";
+          }
+          {
             targets = [ "${hosts.playma}:6970" ];
             labels.instance = "playma";
           }
