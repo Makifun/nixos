@@ -10,7 +10,7 @@ let
   infisicalPort = 8850;
   infisicalBase = "/${hostname}/${hostname}/infisical";
   # renovate: datasource=docker depName=infisical/infisical
-  infisicalTag = "v0.162.18";
+  infisicalTag = "v0.162.19";
   # renovate: datasource=docker depName=postgres
   pgTag = "18-alpine";
   # renovate: datasource=docker depName=redis
