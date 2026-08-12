@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ baseFacts, config, pkgs, ... }:
 {
   sops.secrets.garage-backrest-access-key = {
     format = "yaml";
@@ -22,7 +22,7 @@
       provider = Other
       access_key_id = ${config.sops.placeholder.garage-backrest-access-key}
       secret_access_key = ${config.sops.placeholder.garage-backrest-secret-key}
-      endpoint = https://s3.makifun.se
+      endpoint = https://s3.${baseFacts.domainName}
       region = garage
       no_check_bucket = true
 
@@ -31,7 +31,7 @@
   };
 
   systemd.services.garage-offsite-sync = {
-    description = "Sync Garage nixos bucket to offsite via chunker";
+    description = "Sync Garage backrest bucket to offsite via chunker";
     after = [
       "network-online.target"
       "sops-nix.service"
@@ -40,7 +40,7 @@
     serviceConfig = {
       Type = "oneshot";
       ExecStart =
-        "${pkgs.rclone}/bin/rclone sync garage:nixos chunker:"
+        "${pkgs.rclone}/bin/rclone sync garage:backrest chunker:"
         + " --config ${config.sops.templates."rclone-garage-offsite.conf".path}"
         + " --transfers 4"
         + " --log-level INFO";
