@@ -12,7 +12,7 @@
     ../../common
     ./apps/backrest-extra.nix
     ./apps/pg-arrs.nix
-    ./apps/pg-dump.nix
+    ./apps/pgbackrest.nix
     ./apps/timescaledb.nix
   ];
   networking = {
