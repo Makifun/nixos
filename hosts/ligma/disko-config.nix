@@ -41,7 +41,7 @@
           };
         };
       };
-      # 100 G SSD (scsi1, serial=ligma) — ZFS storage
+      # 300 G SSD (scsi1, serial=ligma) — ZFS storage
       storage = {
         type = "disk";
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_ligma";
