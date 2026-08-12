@@ -42,6 +42,7 @@ in
 
   sops.templates."pgbackrest.env" = {
     content = ''
+      PGBACKREST_CONFIG=/etc/pgbackrest/pgbackrest.conf
       PGBACKREST_REPO1_S3_KEY=${config.sops.placeholder.pgbackrest-s3-key}
       PGBACKREST_REPO1_S3_KEY_SECRET=${config.sops.placeholder.pgbackrest-s3-secret}
     '';
