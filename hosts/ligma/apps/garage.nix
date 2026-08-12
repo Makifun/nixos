@@ -54,7 +54,7 @@ in
   };
 
   virtualisation.oci-containers.containers.garage = {
-    image = "dxflrs/garage:${garageTag}";
+    image = "docker.io/dxflrs/garage:${garageTag}";
     ports = [
       "127.0.0.1:${toString garageS3Port}:${toString garageS3Port}"
       "127.0.0.1:3901:3901"
