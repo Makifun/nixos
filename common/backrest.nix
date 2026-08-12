@@ -83,10 +83,10 @@ in
         ];
         plans = [
           {
-            id = "${hostname}-daily";
+            id = "${hostname}-hourly";
             repo = "${hostname}-s3";
             paths = [ "/${hostname}/${hostname}" ] ++ config.backrest.extraPaths;
-            schedule.cron = "0 ${toString scheduleHour} * * *";
+            schedule.cron = "0 * * * *";
             retention.policyTimeBucketed = {
               daily = 30;
               weekly = 8;

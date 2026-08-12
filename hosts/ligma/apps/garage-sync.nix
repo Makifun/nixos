@@ -70,12 +70,11 @@
     };
   };
 
-  # Runs after the latest Backrest host (storma at 05:00 UTC) finishes.
   systemd.timers.garage-offsite-sync = {
     description = "Nightly Garage → offsite sync";
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnCalendar = "07:00 UTC";
+      OnCalendar = "02:00 UTC";
       Persistent = true;
       RandomizedDelaySec = "15min";
     };
