@@ -75,6 +75,7 @@ in
             env = [
               "AWS_ACCESS_KEY_ID=${config.sops.placeholder.backrest-aws-access-key-id}"
               "AWS_SECRET_ACCESS_KEY=${config.sops.placeholder.backrest-aws-secret-access-key}"
+              "AWS_REGION=garage"
             ];
             prunePolicy.schedule.cron = "30 ${toString scheduleHour} * * *";
           }
