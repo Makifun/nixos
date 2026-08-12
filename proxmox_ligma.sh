@@ -26,9 +26,7 @@ qm create $ID \
   --net0 virtio=$MAC,bridge=vmbr0,queues=4 \
   --scsihw virtio-scsi-single \
   --scsi0 wdblacksn850x:50,discard=on,iothread=1,ssd=1,serial=nixos,backup=0 \
-  --scsi1 wdblacksn850x:200,discard=on,iothread=1,ssd=1,serial=ligma \
-  --scsi3 wdc7HKDX5JF8tb:2048,iothread=1,serial=slowmeme,backup=0 \
-  --scsi4 wdc7HKDX5JF8tb:200,iothread=1,serial=nicememe,backup=0 \
+  --scsi1 wdblacksn850x:300,discard=on,iothread=1,ssd=1,serial=ligma \
   --efidisk0 wdblacksn850x:4,efitype=4m \
   --ide2 local:iso/nixos-minimal-x86_64-linux.iso,media=cdrom \
   --boot "order=scsi0;ide2"
