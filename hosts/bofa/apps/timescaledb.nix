@@ -98,7 +98,7 @@ in
       "-c"
       "archive_mode=on"
       "-c"
-      "archive_command=pgbackrest --stanza=bofa archive-push %p"
+      "archive_command=pgbackrest --config=/etc/pgbackrest/pgbackrest.conf --stanza=bofa archive-push %p"
       "-c"
       "archive_timeout=60"
     ];
