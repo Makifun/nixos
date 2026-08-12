@@ -6,7 +6,7 @@
 }:
 let
   hostname = config.networking.hostName;
-  # No secrets in this file — credentials come in via env vars at runtime.
+  # Credentials and cipher pass come in via env vars — no secrets in this file.
   pgbackrestConf = pkgs.writeText "pgbackrest.conf" ''
     [global]
     repo1-type=s3
@@ -14,9 +14,20 @@ let
     repo1-s3-bucket=pgbackrest
     repo1-s3-region=garage
     repo1-s3-uri-style=path
+    repo1-cipher-type=aes-256-cbc
     repo1-retention-full=2
     repo1-retention-diff=6
     compress-type=lz4
+    # Bundle small files together to reduce S3 API request count.
+    bundle=y
+    # Block-level incremental: copy only changed blocks within files.
+    block=y
+    # Parallel compression / transfer workers.
+    process-max=2
+    # Async WAL archiving: PostgreSQL hands off the WAL file immediately;
+    # the background archiver uploads it to S3 without blocking commits.
+    archive-async=y
+    spool-path=/var/spool/pgbackrest
     log-level-console=info
     log-level-file=off
     log-timestamp=n
@@ -39,14 +50,24 @@ in
     format = "yaml";
     sopsFile = ../secrets.yaml;
   };
+  sops.secrets.pgbackrest-cipher-pass = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
 
   sops.templates."pgbackrest.env" = {
     content = ''
       PGBACKREST_CONFIG=/etc/pgbackrest/pgbackrest.conf
       PGBACKREST_REPO1_S3_KEY=${config.sops.placeholder.pgbackrest-s3-key}
       PGBACKREST_REPO1_S3_KEY_SECRET=${config.sops.placeholder.pgbackrest-s3-secret}
+      PGBACKREST_REPO1_CIPHER_PASS=${config.sops.placeholder.pgbackrest-cipher-pass}
     '';
   };
+
+  # Spool directory for async WAL archiving — must be owned by the postgres UID.
+  systemd.tmpfiles.rules = [
+    "d '/bofa/bofa/pgbackrest-spool' 0750 1000 1000 - -"
+  ];
 
   # Ensure sops renders the env file before the container starts.
   systemd.services.podman-timescaledb = {
@@ -56,7 +77,10 @@ in
 
   # Merge into the timescaledb container — lists are concatenated across modules.
   virtualisation.oci-containers.containers.timescaledb = {
-    volumes = [ "${pgbackrestConf}:/etc/pgbackrest/pgbackrest.conf:ro" ];
+    volumes = [
+      "${pgbackrestConf}:/etc/pgbackrest/pgbackrest.conf:ro"
+      "/bofa/bofa/pgbackrest-spool:/var/spool/pgbackrest"
+    ];
     environmentFiles = [ envFile ];
   };
 
