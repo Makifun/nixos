@@ -109,10 +109,7 @@ Age-based encryption with two recipients: the host's SSH key (`&hosts_ligma`) an
 
 SSH restricted to `10.10.10.0/24`. NFTables firewall. IPv6 disabled globally. Traefik (80/443) reachable from `10.10.10.0/24` and `10.10.11.0/24` (WireGuard).
 
-NFS export (NFSv4 only — port 2049):
-- `/ligma/sugma` → sugma nodes `10.10.10.26`, `10.10.10.27`, `10.10.10.28` (rw, nfs-provisioner PVC storage)
-
-arrma (10.10.10.16) also exports via NFS:
+arrma (10.10.10.16) exports via NFS:
 - `/slowmeme` → sugma nodes (rw, media pod torrent downloads + filebrowser)
 - `/nicememe` → sugma nodes (rw, nzbget downloads + media pod *arr access + filebrowser)
 
@@ -133,10 +130,9 @@ Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Su
 | `homepage.nix` | Homepage dashboard | 8082, 8083 (images) | nginx on 8083 serves `/images/` (Next.js can't serve custom public/). Connects to sugma k8s via SOPS kubeconfig. SOPS: `homepage-env`, `homepage-kubeconfig`. |
 | `monitoring.nix` | Prometheus + Grafana | 9090, 9100, 3000 | 30d retention. Grafana OIDC via Authentik, role from `groups` claim. Alerting: Authentik login success/failure → Gotify webhook. Dashboards (from `grafana_dashboards/`): rclone, registry, rclone-transfers, podman-containers, node-exporter-full, opnsense, proxmox. Scrape jobs: rclone, prometheus, distribution (debug ports 5011-5014), loki, alloy, opnsense-node, opnsense, pve (relay: `?target=proxmoxifun.makifun.se` → `127.0.0.1:9221/pve`). SOPS: `grafana-secret-key`, `grafana-oauth-secret`, `grafana-gotify-token`. |
 | `pve-exporter.nix` | prometheus-pve-exporter | 9221 | Proxmox API metrics for Grafana proxmox dashboard. Config written to `/run/pve-exporter.yml` by `pve-exporter-config.service` (oneshot, `chmod 444` — container runs non-root). `verify_ssl: true` (Proxmox has LE cert). SOPS: `proxmox-pve-token-value`. One-time Proxmox setup: create user `prometheus@pve` + API token `prometheus` with PVEAuditor role; **apply the role to both user and token** (privilege separation = intersection — token role alone is not enough). `pveum aclmod / --users 'prometheus@pve' --roles PVEAuditor --propagate 1`. |
-| `backrest.nix` | Backrest backup manager | 9898 | Restic-backed S3. Backs up `/ligma/ligma` + `/ligma/sugma` (both `:ro`). `/ligma/restore` mounted rw for restore staging. Schedule: 04:00 UTC. Prune: 05:00 UTC. SOPS: `backrest-restic-password`, `backrest-repo-uri`, `backrest-aws-access-key-id`, `backrest-aws-secret-access-key`, `backrest-gotify-token`. |
+| `backrest.nix` | Backrest backup manager | 9898 | Restic-backed S3. Backs up `/ligma/ligma` (`:ro`). `/ligma/restore` mounted rw for restore staging. Schedule: 04:00 UTC. Prune: 05:00 UTC. SOPS: `backrest-restic-password`, `backrest-repo-uri`, `backrest-aws-access-key-id`, `backrest-aws-secret-access-key`, `backrest-gotify-token`. |
 | `rclone.nix` | rclone S3 FUSE mount | 6969 (RC), 6970 (metrics) | Shared module used by ligma, storma, and playma. Mounts S3 crypt remote at `/cloud`. VFS cache at `/rclone-cache`. **Primary cloud host is now playma (10.10.10.15).** |
 | `samba.nix` | Samba/CIFS share | 445 | Exposes `/cloud` as `\\<host>\cloud`. Guest access, force user=root. `hosts allow`: jonny (10.10.10.16) + sugma nodes (10.10.10.26-28). Sugma cloud PVs point to playma (10.10.10.15). |
-| `nfs.nix` | NFS server (v4 only) | 2049 | Exports `/ligma/sugma` to sugma nodes only. NFSv3 ports removed — k8s nfs-provisioner negotiates NFSv4. Includes bind mount for PVC UUID migration (see below). |
 | `omni.nix` | Sidero Omni (Talos cluster manager) | 9999 (UI), 50180/udp (WG), 8091 (machine API), 8098/6443 (k8s proxy) | Distroless container. SAML auth via Authentik. JWT key is OpenPGP ASCII-armor (not PEM). SOPS: `omni-account-uuid`, `omni-jwt-signing-key`. |
 | `gotify.nix` | Gotify push notifications | 8096 | v3 native OIDC via Authentik (`auth.makifun.se/application/o/gotify/`). Two-router split: `X-Gotify-Key` header bypass (push senders), catch-all no-middleware (Gotify handles OIDC itself). Client secret from SOPS `gotify-oidc-secret` → `/run/gotify-oidc.env` via `gotify-env-setup` oneshot. `GOTIFY_OIDC_LINK_BY_USERNAME=true` links existing local users. |
 | `apprise.nix` | Apprise notification aggregator | 8097 | Three-router split: `/outpost` callback, `/notify` path (API bypass for senders), catch-all SSO. |
@@ -282,10 +278,6 @@ Served at `{name}.mirror.makifun.se` behind `mirror-lan-only` ipAllowList middle
 `log.level = "info"` — pull events (HTTP GETs) appear in Loki under `job=ligma-podman-dist-*`. Distribution containers only see `10.88.0.1` (Podman bridge = Traefik) — real client IPs only available from Traefik JSON access logs. Use Loki query: `{job="ligma-syslog", unit="traefik.service"} | json | RouterName =~ "dist-.+" | RequestMethod =~ "GET|HEAD"`.
 
 **Grafana registry dashboard** (`registry.json`) — uses `registry_proxy_*` metrics (not `registry_storage_cache_*` which track internal blob descriptor cache). Distribution v3 renamed metrics: `registry_storage_cache_total{type="Hit"}` → `registry_storage_cache_hits_total`, `{type="Request"}` → `registry_storage_cache_requests_total`. Dashboard datasource UIDs must be hardcoded (`prometheus`, `loki`) — file provisioning does not substitute `${DS_PROMETHEUS}` / `__inputs`.
-
-### NFS bind mount (PVC UUID migration)
-
-`nfs.nix` contains a bind mount for a PVC UUID change that happened after a miniflux restore. The old directory (`f72d460c`) is bind-mounted at the new PVC path (`c555d26d`) so NFS serves the correct data. When miniflux is fully migrated to the new PVC name (via the `pathPattern` provisioner fix in sugma), remove both the bind mount and its tmpfiles entry from `nfs.nix`.
 
 ### Homepage → Kubernetes integration
 

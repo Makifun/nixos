@@ -23,7 +23,6 @@
     ./apps/infisical.nix
     ./apps/loki.nix
     ./apps/monitoring.nix
-    ./apps/nfs.nix
     ./apps/omni.nix
     ./apps/opnsense-exporter.nix
     ./apps/pgadmin.nix
