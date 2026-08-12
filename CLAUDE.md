@@ -10,7 +10,6 @@ NixOS flake-based system configuration for three hosts:
 - **bofa** (VM 888, 10.10.10.14) — dedicated database host on Proxmox; ephemeral root (tmpfs), LUKS+XFS+LVM. Runs TimescaleDB for tracearr + all arr apps.
 - **storma** (10.10.10.12) — physical ASUS K56CB; ephemeral root (tmpfs), LUKS+LVM, systemd-boot (UEFI, `canTouchEfiVariables=false`). Previously hosted rclone `/cloud` mount; role transferred to playma. `r8169` in initrd for LUKS unlock SSH.
 - **playma** (10.10.10.15) — NixOS VM on Proxmox; Plex + `/cloud` mounted via CIFS from storma, re-exported via Samba to sugma (port 445, guest auth). Intel GVT-g iGPU for hardware transcoding.
-- **arrma** (10.10.10.16) — NixOS VM on Proxmox; runs all media pod apps (gluetun/WireGuard VPN, qbittorrent, byparr, autobrr, qui, prowlarr, nzbget, unpackerr) that previously ran in the sugma k8s media pod. Mounts `/cloud` via CIFS from storma. Traefik with Authentik SSO (forwardAuth to ligma:9000 embedded outpost). `/slowmeme` and `/nicememe` LUKS+XFS data disks.
 
 ## Common Commands
 
@@ -109,10 +108,6 @@ Age-based encryption with two recipients: the host's SSH key (`&hosts_ligma`) an
 
 SSH restricted to `10.10.10.0/24`. NFTables firewall. IPv6 disabled globally. Traefik (80/443) reachable from `10.10.10.0/24` and `10.10.11.0/24` (WireGuard).
 
-arrma (10.10.10.16) exports via NFS:
-- `/slowmeme` → sugma nodes (rw, media pod torrent downloads + filebrowser)
-- `/nicememe` → sugma nodes (rw, nzbget downloads + media pod *arr access + filebrowser)
-
 Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Sugma apps access `/cloud` via SMB CSI (`//10.10.10.13/cloud`, guest auth).
 
 ### Auto-upgrade
@@ -124,7 +119,7 @@ Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Su
 | File | Service | Port | Notes |
 |---|---|---|---|
 | `traefik.nix` | Traefik reverse proxy | 80, 443, 8090 (dashboard) | TLS termination, Cloudflare DNS challenge, wildcards `*.makifun.se` + `*.mirror.makifun.se` (separate SANs — single-level wildcard does not cover two-level subdomains). JSON access log (`accessLog.format = "json"`) — client IPs for mirror pulls visible in Loki. ACME `resolvers` hardcoded to `1.1.1.1:53`, `8.8.8.8:53` to bypass OPNsense DNS intercept for propagation checks. Dashboard loopback only. Trusted IP: 10.10.10.1 (OPNsense HAProxy). **ACME DNS gotcha:** Technitium is both the local authoritative NS and the web UI hostname. `technitium.makifun.se` resolves to `10.10.10.13` (Traefik) in LAN — lego finds `technitium.makifun.se` as NS, resolves it, tries port 53 → "connection refused". True fix: change Technitium NS record to a hostname that resolves to `10.10.10.3` (e.g. `ns.makifun.se`) rather than the web UI proxy IP. |
-| `authentik.nix` | Authentik SSO | 9000 (embedded outpost) | Three Podman containers (`authentik_network`): Redis + server + worker. Native PostgreSQL at `/ligma/ligma/authentik/postgresql`. `/run/postgresql` bind-mounted with `trust` auth. SOPS: `authentik_env`. Port 9000 is exposed to the full LAN (not loopback-only) so arrma can use the embedded outpost for forwardAuth. |
+| `authentik.nix` | Authentik SSO | 9000 (embedded outpost) | Three Podman containers (`authentik_network`): Redis + server + worker. Native PostgreSQL at `/ligma/ligma/authentik/postgresql`. `/run/postgresql` bind-mounted with `trust` auth. SOPS: `authentik_env`. Port 9000 is exposed to the full LAN (not loopback-only) for forwardAuth from other hosts. |
 | `forgejo.nix` | Forgejo + Actions runner | 3010, SSH 22222 | `forgejo-provision` service auto-creates makifun/opnsense/renovate-bot users on every boot. Renovate token persists to `/ligma/ligma/renovate/token`. SOPS: `forgejo-admin-password`, `forgejo-admin-email`, `forgejo-oauth-secret`, `forgejo-runner-token`. |
 | `vaultwarden.nix` | Vaultwarden | 8310 | OIDC via Authentik. Signup disabled. fail2ban protection. SOPS: `vaultwarden_env`. |
 | `homepage.nix` | Homepage dashboard | 8082, 8083 (images) | nginx on 8083 serves `/images/` (Next.js can't serve custom public/). Connects to sugma k8s via SOPS kubeconfig. SOPS: `homepage-env`, `homepage-kubeconfig`. |
