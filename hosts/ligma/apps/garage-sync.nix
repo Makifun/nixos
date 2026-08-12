@@ -1,4 +1,9 @@
-{ baseFacts, config, pkgs, ... }:
+{
+  baseFacts,
+  config,
+  pkgs,
+  ...
+}:
 {
   sops.secrets.garage-backrest-access-key = {
     format = "yaml";
@@ -37,6 +42,7 @@
       "sops-nix.service"
     ];
     wants = [ "network-online.target" ];
+    unitConfig.OnFailure = "garage-offsite-sync-notify.service";
     serviceConfig = {
       Type = "oneshot";
       ExecStart =
@@ -44,6 +50,23 @@
         + " --config ${config.sops.templates."rclone-garage-offsite.conf".path}"
         + " --transfers 4"
         + " --log-level INFO";
+    };
+  };
+
+  systemd.services.garage-offsite-sync-notify = {
+    description = "Gotify notification for garage-offsite-sync failure";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = pkgs.writeShellScript "garage-offsite-sync-notify" ''
+        TOKEN=$(< ${config.sops.secrets.backrest-gotify-token.path})
+        ${pkgs.curl}/bin/curl -sf \
+          "https://gotify.${baseFacts.domainName}/message?token=$TOKEN" \
+          -F "title=Garage offsite sync failed" \
+          -F "message=garage-offsite-sync.service failed on $(hostname). Check: journalctl -u garage-offsite-sync" \
+          -F "priority=7"
+      '';
     };
   };
 
