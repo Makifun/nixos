@@ -565,6 +565,14 @@
             };
           }
           {
+            "CrossWatch" = {
+              icon = "/images/crosswatch.png";
+              href = "https://crosswatch.${baseFacts.domainName}";
+              namespace = "crosswatch";
+              app = "crosswatch";
+            };
+          }
+          {
             "Gotify" = {
               icon = "/images/gotify.png";
               href = "https://gotify.${baseFacts.domainName}";
