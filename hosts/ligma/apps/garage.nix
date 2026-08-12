@@ -1,6 +1,7 @@
 {
   config,
   hosts,
+  baseFacts,
   ...
 }:
 let
@@ -55,7 +56,7 @@ in
   virtualisation.oci-containers.containers.garage = {
     image = "dxflrs/garage:${garageTag}";
     ports = [
-      "${toString garageS3Port}:${toString garageS3Port}"
+      "127.0.0.1:${toString garageS3Port}:${toString garageS3Port}"
       "127.0.0.1:3901:3901"
       "127.0.0.1:3902:3902"
     ];
@@ -66,8 +67,21 @@ in
     ];
   };
 
-  # S3 API accessible from LAN and WireGuard; admin API stays loopback-only.
-  networking.firewall.extraInputRules = ''
-    tcp dport ${toString garageS3Port} ip saddr { ${hosts.lan}, ${hosts.wireguard} } accept comment "Garage S3 from LAN+WG"
-  '';
+  services.traefik.dynamicConfigOptions.http = {
+    routers.garage-s3 = {
+      rule = "Host(`s3.${baseFacts.domainName}`)";
+      entryPoints = [ "websecure" ];
+      service = "garage-s3-svc";
+      # No Authentik — S3 clients authenticate with access keys.
+      tls = {
+        certResolver = "letsencrypt";
+        domains = [ { main = "*.${baseFacts.domainName}"; } ];
+      };
+    };
+    services."garage-s3-svc".loadBalancer.servers = [
+      { url = "http://127.0.0.1:${toString garageS3Port}"; }
+    ];
+  };
+
+  ligma.dnsRecords."s3.${baseFacts.domainName}".value = hosts.ligma;
 }
