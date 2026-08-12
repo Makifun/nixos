@@ -1,4 +1,5 @@
 {
+  baseFacts,
   config,
   hosts,
   lib,
@@ -95,7 +96,7 @@ in
               {
                 conditions = [ "CONDITION_ANY_ERROR" ];
                 actionGotify = {
-                  baseUrl = "https://gotify.makifun.se";
+                  baseUrl = "https://gotify.${baseFacts.domainName}";
                   token = config.sops.placeholder.backrest-gotify-token;
                   titleTemplate = "Backrest: {{ .Plan.Id }} failed";
                   bodyTemplate = "{{ .Error }}";
@@ -109,9 +110,9 @@ in
     };
 
     systemd.tmpfiles.rules = [
-      "d '${backrestBase}/data'   0750 root root - -"
-      "d '${backrestBase}/config' 0750 root root - -"
       "d '${backrestBase}/cache'  0750 root root - -"
+      "d '${backrestBase}/config' 0750 root root - -"
+      "d '${backrestBase}/data'   0750 root root - -"
       "d '/${hostname}/restore'   0755 root root - -"
     ];
 
