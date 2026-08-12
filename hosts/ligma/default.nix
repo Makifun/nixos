@@ -21,7 +21,7 @@
     ./apps/garage.nix
     ./apps/gotify.nix
     ./apps/homepage.nix
-    ./apps/infisical.nix
+    #./apps/infisical.nix
     ./apps/loki.nix
     ./apps/monitoring.nix
     ./apps/omni.nix
