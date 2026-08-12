@@ -537,7 +537,7 @@
               icon = "/images/s3man.png";
               href = "https://s3manager-garage.${baseFacts.domainName}";
               namespace = "s3manager";
-              app = "s3manager";
+              app = "s3manager-garage";
             };
           }
           {
@@ -545,7 +545,7 @@
               icon = "/images/s3man.png";
               href = "https://s3manager-offsite.${baseFacts.domainName}";
               namespace = "s3manager";
-              app = "s3manager";
+              app = "s3manager-offsite";
             };
           }
           {
