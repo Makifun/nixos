@@ -5,7 +5,7 @@
 }:
 let
   # renovate: datasource=docker depName=dxflrs/garage
-  garageTag = "v1.0.1";
+  garageTag = "v2.3.0";
   garageS3Port = 3900;
   garageMetaDir = "/ligma/garage/meta";
   garageDataDir = "/ligma/garage/data";
