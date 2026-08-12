@@ -67,7 +67,7 @@ in
         address = ":443";
         http3.advertisedPort = 443;
         # Trust X-Forwarded-* from HAProxy on OPNsense (real client IPs from CF-Connecting-IP)
-        # and from LAN/WireGuard hosts so that remote Traefik instances (e.g. arrma) can set
+        # and from LAN/WireGuard hosts so that remote Traefik instances can set
         # X-Forwarded-Host correctly for Authentik embedded outpost forwardAuth lookups.
         forwardedHeaders.trustedIPs = [
           hosts.opnsense
