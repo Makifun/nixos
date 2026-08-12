@@ -19,6 +19,7 @@
     ./apps/distribution.nix
     ./apps/forgejo.nix
     ./apps/garage.nix
+    ./apps/garage-sync.nix
     ./apps/gotify.nix
     ./apps/homepage.nix
     #./apps/infisical.nix
