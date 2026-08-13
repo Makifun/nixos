@@ -28,7 +28,7 @@ in
     image = "docker.io/henrygd/beszel-agent:${beszelTag}";
     environment = {
       PORT = "45876";
-      FILESYSTEM = "/extra-filesystems/root__root";
+      FILESYSTEM = "/extra-filesystems/${hostname}__${hostname}";
     };
     environmentFiles = [ config.sops.secrets.beszel_agent_key.path ];
     extraOptions = [ "--network=host" ];
