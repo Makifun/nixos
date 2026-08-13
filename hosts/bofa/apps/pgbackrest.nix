@@ -66,7 +66,7 @@ in
 
   # Spool directory for async WAL archiving — must be owned by the postgres UID.
   systemd.tmpfiles.rules = [
-    "d '/bofa/bofa/pgbackrest-spool' 0750 1000 1000 - -"
+    "d '/${hostname}/${hostname}/pgbackrest-spool' 0750 1000 1000 - -"
   ];
 
   # Ensure sops renders the env file before the container starts.
@@ -79,7 +79,7 @@ in
   virtualisation.oci-containers.containers.timescaledb = {
     volumes = [
       "${pgbackrestConf}:/etc/pgbackrest/pgbackrest.conf:ro"
-      "/bofa/bofa/pgbackrest-spool:/var/spool/pgbackrest"
+      "/${hostname}/${hostname}/pgbackrest-spool:/var/spool/pgbackrest"
     ];
     environmentFiles = [ envFile ];
   };
