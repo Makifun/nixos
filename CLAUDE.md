@@ -152,93 +152,11 @@ Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Su
 | `timescaledb.nix` | TimescaleDB (Podman) | 5432 | `timescale/timescaledb-ha:pg18.1-ts2.25.0`. Data at `/bofa/bofa/postgresql`. `POSTGRES_USER=tracearr`, `POSTGRES_DB=tracearr`. Password from SOPS `timescaledb-tracearr-password` via `sops.templates."timescaledb.env"`. `max_connections=200` (raised from 100 — 8 arr apps exhaust 100 on cold-start burst). bofa has **balloon RAM** (5 GB min / 8 GB max, Proxmox). Port open to sugma nodes 10.10.10.26-28 only. SOPS: `timescaledb-tracearr-password`. |
 | `backrest.nix` | Backrest backup manager | 9898 | Restic-backed S3. Backs up `/bofa/bofa`. Port 9898 open to ligma (10.10.10.13) only for Traefik proxy. Schedule: 05:00 UTC. Prune: 06:00 UTC. SOPS: same keys as ligma backrest. |
 | `beszel.nix` | Beszel agent | 45876 | Monitors bofa; reports disk usage of `/bofa` and `/persist`. Port 45876 open to ligma only. |
-| `pgbackrest.nix` | pgBackRest PostgreSQL backups | — | WAL archiving + physical backups to Garage `pgbackrest` bucket. Stanza `bofa`. PostgreSQL WAL archiving: `archive_mode=on`, async push, `archive_timeout=60`. Weekly full (Sun 01:00 UTC), daily incremental (Mon–Sat 01:00 UTC). Features: AES-256-CBC repo encryption, file bundling (`bundle=y`), block incremental (`block=y`), 2 parallel workers, async WAL spool at `/bofa/bofa/pgbackrest-spool`. SOPS: `pgbackrest-s3-key`, `pgbackrest-s3-secret`, `pgbackrest-cipher-pass`. See **pgBackRest** section below for restore procedures. **Bootstrap (run once after first deploy):** Create bucket + key on ligma (see garage.nix bootstrap), add key + cipher pass to `sops hosts/bofa/secrets.yaml`, deploy, then `stanza-create` + `backup --type=full` (see restore section). **Encryption requires repo re-init:** if changing cipher on existing repo, empty the bucket and re-run stanza-create + full backup. |
+| `pgbackweb.nix` | pgBackWeb logical backup UI | 8085 | `eduardolat/pgbackweb:0.5.1`. Web UI for scheduled pg_dump backups to Garage `pgbackweb` S3 bucket. State DB: `pgbackweb` database in the local timescaledb instance, owned by the `pgbackweb` user (`pg_read_all_data` grant). Port open to ligma only; exposed via Traefik + Authentik at `pgbackweb.makifun.se`. SOPS: `pgbackweb-encryption-key`, `pgbackweb-db-password`. Configure databases and S3 destination via the web UI (use key-value DSN format for connection strings: `host=10.88.0.1 port=5432 user=pgbackweb ...`). |
 
 **To add a new bofa secret:** `sops hosts/bofa/secrets.yaml`, add the key, reference in the app `.nix` file.
 
 **bofa IP:** `10.10.10.14` (MAC `2E:7A:45:73:8C:64`, static DHCP reservation recommended).
-
-### pgBackRest (bofa)
-
-All commands use the helper pattern (run on **bofa**):
-
-```bash
-PBW="podman exec --env-file /run/secrets/rendered/pgbackrest.env timescaledb pgbackrest --stanza=bofa"
-```
-
-**List backups and WAL archive range:**
-```bash
-$PBW info
-```
-
-**Force an incremental backup now:**
-```bash
-$PBW backup --type=incr
-```
-
-**Test WAL archiving is working:**
-```bash
-$PBW check
-```
-
----
-
-**Full restore (overwrites current data — DESTRUCTIVE):**
-
-```bash
-# 1. Get the Nix-store path of the mounted pgbackrest.conf
-CONF=$(podman inspect timescaledb \
-  --format '{{range .Mounts}}{{if eq .Destination "/etc/pgbackrest/pgbackrest.conf"}}{{.Source}}{{end}}{{end}}')
-
-# 2. Stop PostgreSQL
-systemctl stop podman-timescaledb
-
-# 3. Clear PGDATA — keep the directory itself
-rm -rf /bofa/bofa/postgresql/data
-
-# 4. Restore latest backup (runs as UID 1000 to match postgres user)
-podman run --rm \
-  --env-file /run/secrets/rendered/pgbackrest.env \
-  --user 1000:1000 \
-  -v /bofa/bofa/postgresql:/home/postgres/pgdata \
-  -v "$CONF:/etc/pgbackrest/pgbackrest.conf:ro" \
-  docker.io/timescale/timescaledb-ha:pg18.1-ts2.25.1 \
-  pgbackrest --stanza=bofa restore
-
-# 5. Restart
-systemctl start podman-timescaledb
-```
-
-**Restore to a specific backup set:**
-```bash
-# Get the label from: $PBW info
-podman run ... pgbackrest --stanza=bofa restore --set=20260812-224934F
-```
-
-**PITR — restore to a point in time:**
-```bash
-podman run ... pgbackrest --stanza=bofa restore \
-  --type=time \
-  --target="2026-08-12 23:00:00+00" \
-  --target-action=promote
-```
-
-After a PITR restore, PostgreSQL starts in recovery. `--target-action=promote` promotes it to primary once the target time is reached. Check `podman logs timescaledb` to confirm recovery completes.
-
----
-
-**Re-initialising the repo (required when adding encryption to an existing repo):**
-
-```bash
-# On ligma — empty the bucket
-podman exec garage /garage bucket delete pgbackrest
-podman exec garage /garage bucket create pgbackrest
-podman exec garage /garage bucket allow pgbackrest --read --write --owner --key <key-id>
-
-# On bofa — re-create the stanza and run a fresh full backup
-$PBW stanza-create
-$PBW backup --type=full
-```
 
 ### Traefik + Authentik integration
 

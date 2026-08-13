@@ -12,7 +12,6 @@
     ../../common
     ./apps/backrest-extra.nix
     ./apps/pg-arrs.nix
-    ./apps/pgbackrest.nix
     ./apps/pgbackweb.nix
     ./apps/timescaledb.nix
   ];

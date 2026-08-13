@@ -93,14 +93,6 @@ in
       "max_parallel_workers_per_gather=2"
       "-c"
       "max_parallel_maintenance_workers=2"
-      "-c"
-      "wal_level=replica"
-      "-c"
-      "archive_mode=on"
-      "-c"
-      "archive_command=pgbackrest --config=/etc/pgbackrest/pgbackrest.conf --stanza=${hostname} archive-push %p"
-      "-c"
-      "archive_timeout=60"
     ];
   };
 
