@@ -53,7 +53,7 @@ in
 
   virtualisation.oci-containers.containers.pgbackweb = {
     # renovate: datasource=docker depName=eduardolat/pgbackweb
-    image = "docker.io/eduardolat/pgbackweb:v0.5.1";
+    image = "docker.io/eduardolat/pgbackweb:0.5.1";
     ports = [ "${toString pgbackwebPort}:${toString pgbackwebPort}" ];
     environmentFiles = [ config.sops.templates."pgbackweb.env".path ];
   };
