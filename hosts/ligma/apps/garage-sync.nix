@@ -13,14 +13,17 @@
     format = "yaml";
     sopsFile = ../secrets.yaml;
   };
-  sops.secrets.rclone-config-offsite = {
+  sops.secrets.rclone-config-offsite-backrest = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+  sops.secrets.rclone-config-offsite-pgbackweb = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
   };
 
-  # Assembles a complete rclone.conf: [garage] section built from individual
-  # key secrets, followed by the offsite blob (must contain [offsite] + [chunker]).
-  sops.templates."rclone-garage-offsite.conf" = {
+  # Each rclone config: shared [garage] section + per-destination [offsite]+[chunker] blob.
+  sops.templates."rclone-garage-offsite-backrest.conf" = {
     content = ''
       [garage]
       type = s3
@@ -31,7 +34,22 @@
       region = garage
       no_check_bucket = true
 
-      ${config.sops.placeholder.rclone-config-offsite}
+      ${config.sops.placeholder.rclone-config-offsite-backrest}
+    '';
+  };
+
+  sops.templates."rclone-garage-offsite-pgbackweb.conf" = {
+    content = ''
+      [garage]
+      type = s3
+      provider = Other
+      access_key_id = ${config.sops.placeholder.garage-backrest-access-key}
+      secret_access_key = ${config.sops.placeholder.garage-backrest-secret-key}
+      endpoint = https://s3.${baseFacts.domainName}
+      region = garage
+      no_check_bucket = true
+
+      ${config.sops.placeholder.rclone-config-offsite-pgbackweb}
     '';
   };
 
@@ -45,16 +63,14 @@
     unitConfig.OnFailure = "garage-offsite-sync-notify.service";
     serviceConfig = {
       Type = "oneshot";
-      # The backrest key must have read access to both buckets:
-      #   podman exec garage /garage bucket allow pgbackweb --read --key <backrest-key-id>
-      # backrest syncs to chunker root; pgbackweb to chunker:pgbackweb/ to keep them separate.
       ExecStart = pkgs.writeShellScript "garage-offsite-sync" ''
         set -e
-        CONF=${config.sops.templates."rclone-garage-offsite.conf".path}
+        CONF_BACKREST=${config.sops.templates."rclone-garage-offsite-backrest.conf".path}
+        CONF_PGBACKWEB=${config.sops.templates."rclone-garage-offsite-pgbackweb.conf".path}
         ${pkgs.rclone}/bin/rclone sync garage:backrest chunker: \
-          --config "$CONF" --transfers 4 --log-level INFO
-        ${pkgs.rclone}/bin/rclone sync garage:pgbackweb chunker:pgbackweb \
-          --config "$CONF" --transfers 4 --log-level INFO
+          --config "$CONF_BACKREST" --transfers 4 --log-level INFO
+        ${pkgs.rclone}/bin/rclone sync garage:pgbackweb chunker: \
+          --config "$CONF_PGBACKWEB" --transfers 4 --log-level INFO
       '';
     };
   };
