@@ -549,11 +549,26 @@
             };
           }
           {
+            "Garage S3" = {
+              icon = "/images/garages3.svg";
+              server = "ligma";
+              container = "garage";
+            };
+          }
+          {
             "pgAdmin" = {
               icon = "/images/pgadmin.png";
               href = "https://pgadmin.${baseFacts.domainName}";
               server = "ligma";
               container = "pgadmin";
+            };
+          }
+          {
+            "pgBackWeb" = {
+              icon = "/images/pgbackweb.png";
+              href = "https://pgbackweb.${baseFacts.domainName}";
+              server = "ligma";
+              container = "pgbackweb";
             };
           }
           {
