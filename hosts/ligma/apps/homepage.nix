@@ -556,6 +556,13 @@
             };
           }
           {
+            "TimescaleDB" = {
+              icon = "/images/timescaledb.png";
+              server = "bofa";
+              container = "timescaledb";
+            };
+          }
+          {
             "pgAdmin" = {
               icon = "/images/pgadmin.png";
               href = "https://pgadmin.${baseFacts.domainName}";
@@ -567,7 +574,7 @@
             "pgBackWeb" = {
               icon = "/images/pgbackweb.png";
               href = "https://pgbackweb.${baseFacts.domainName}";
-              server = "ligma";
+              server = "bofa";
               container = "pgbackweb";
             };
           }
