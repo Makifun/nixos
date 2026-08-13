@@ -181,6 +181,8 @@
             "Plex" = {
               icon = "/images/plex.png";
               href = "https://app.plex.tv";
+              server = "playma";
+              container = "plex";
               widget = {
                 type = "plex";
                 fields = [
