@@ -96,9 +96,8 @@
     description = "Nightly Garage → offsite sync";
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnCalendar = "02:00 UTC";
+      OnCalendar = "*-*-* *:15:00 UTC";
       Persistent = true;
-      RandomizedDelaySec = "15min";
     };
   };
 }
