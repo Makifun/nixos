@@ -36,7 +36,7 @@
   };
 
   systemd.services.garage-offsite-sync = {
-    description = "Sync Garage backrest bucket to offsite via chunker";
+    description = "Sync Garage buckets to offsite via chunker";
     after = [
       "network-online.target"
       "sops-nix.service"
@@ -45,11 +45,17 @@
     unitConfig.OnFailure = "garage-offsite-sync-notify.service";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart =
-        "${pkgs.rclone}/bin/rclone sync garage:backrest chunker:"
-        + " --config ${config.sops.templates."rclone-garage-offsite.conf".path}"
-        + " --transfers 4"
-        + " --log-level INFO";
+      # The backrest key must have read access to both buckets:
+      #   podman exec garage /garage bucket allow pgbackweb --read --key <backrest-key-id>
+      # backrest syncs to chunker root; pgbackweb to chunker:pgbackweb/ to keep them separate.
+      ExecStart = pkgs.writeShellScript "garage-offsite-sync" ''
+        set -e
+        CONF=${config.sops.templates."rclone-garage-offsite.conf".path}
+        ${pkgs.rclone}/bin/rclone sync garage:backrest chunker: \
+          --config "$CONF" --transfers 4 --log-level INFO
+        ${pkgs.rclone}/bin/rclone sync garage:pgbackweb chunker:pgbackweb \
+          --config "$CONF" --transfers 4 --log-level INFO
+      '';
     };
   };
 
