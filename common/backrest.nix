@@ -87,6 +87,7 @@ in
             paths = [ "/${hostname}/${hostname}" ] ++ config.backrest.extraPaths;
             schedule.cron = "0 * * * *";
             retention.policyTimeBucketed = {
+              hourly = 24;
               daily = 30;
               weekly = 8;
               monthly = 12;
