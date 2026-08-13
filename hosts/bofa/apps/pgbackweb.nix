@@ -16,7 +16,7 @@ in
   sops.templates."pgbackweb.env" = {
     content = ''
       PBW_ENCRYPTION_KEY=${config.sops.placeholder.pgbackweb-encryption-key}
-      PBW_POSTGRES_CONN_STRING=postgresql://tracearr:${config.sops.placeholder.timescaledb-tracearr-password}@10.88.0.1:5432/pgbackweb?sslmode=disable
+      PBW_POSTGRES_CONN_STRING=host=10.88.0.1 port=5432 user=tracearr password=${config.sops.placeholder.timescaledb-tracearr-password} dbname=pgbackweb sslmode=disable
       PBW_LISTEN_PORT=${toString pgbackwebPort}
       TZ=UTC
     '';
@@ -35,10 +35,10 @@ in
       RemainAfterExit = true;
     };
     script = ''
-      until podman exec timescaledb psql -U tracearr -c "SELECT 1" >/dev/null 2>&1; do
+      until podman exec timescaledb psql -U tracearr -d tracearr -c "SELECT 1" >/dev/null 2>&1; do
         sleep 2
       done
-      podman exec timescaledb psql -U tracearr \
+      podman exec timescaledb psql -U tracearr -d tracearr \
         -c "CREATE DATABASE pgbackweb;" 2>/dev/null || true
     '';
   };
