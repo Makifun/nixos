@@ -77,11 +77,10 @@ Root `/` is a tmpfs (wiped on reboot). Persistent state lives in `/persist` (ZFS
 
 ### Disk Layout — ligma (`hosts/ligma/disko-config.nix`)
 
-Three encrypted drives:
+Two encrypted drives:
 
 - **Main drive** (`scsi-0QEMU_QEMU_HARDDISK_nixos`): LUKS → ZFS pool `zroot` with datasets `/nix` and `/persist` (refreservation: 10G), plus 1G EFI partition.
 - **Storage drive** (`scsi-0QEMU_QEMU_HARDDISK_ligma`): LUKS → ZFS pool `zstorage` with `/ligma` dataset (refreservation: 5G). All app persistent data lives here.
-- **Cache SSD** (`scsi-0QEMU_QEMU_HARDDISK_cache`, 200 GB): LUKS → ext4 mounted at `/rclone-cache`. Used as rclone VFS cache (up to 185 GB).
 Both drives use XFS with `noatime,nofail`. LUKS passphrases entered via initrd SSH at boot. **New VM install:** disko formats on `nixos_install.sh`. **Existing VM adding a disk:** must manually partition + luksFormat + mkfs.xfs before `nh os switch` — see comments in `disko-config.nix`.
 
 All ZFS pools: ashift=12, autotrim=on, compression=lz4, atime=off, xattr=sa. ARC max=4 GB, min=2 GB (ligma balloon: 12 GB floor, 16 GB ceiling). Prefetch disabled (`zfs_prefetch_disable=1`).
@@ -94,6 +93,23 @@ Two encrypted drives (no ZFS — lower overhead for DB workloads):
 - **Data disk** (100 G, `scsi-0QEMU_QEMU_HARDDISK_bofa`): LUKS(`crypted_bofa`) → XFS `/bofa`. All app data lives here (postgresql, backrest, beszel).
 
 XFS mount options: `noatime,discard`.
+
+### Disk Layout — playma (`hosts/playma/disko-config.nix`)
+
+Four drives, XFS throughout, root is tmpfs (impermanence module, same pattern as ligma):
+
+- **OS disk** (50 G, `scsi-0QEMU_QEMU_HARDDISK_nixos`): 1 G EFI + LUKS(`crypted_nixos`) → LVM `vg_nixos` → XFS `/nix` (25 G) + XFS `/persist` (rest). Single passphrase for both via LVM.
+- **App data disk** (100 G, `scsi-0QEMU_QEMU_HARDDISK_playma`): LUKS(`crypted_playma`) → XFS `/playma`. All app persistent data lives here.
+- **Cache disk** (400 G, `scsi-0QEMU_QEMU_HARDDISK_cache`): no LUKS (regenerable) → XFS `/rclone-cache`. rclone VFS cache; `vfsCacheMaxSize` set in `apps/rclone-extra.nix` (currently 380 G, 20 G headroom).
+- **Transcode disk** (50 G, `scsi-0QEMU_QEMU_HARDDISK_transcode`): no LUKS (ephemeral) → XFS `/transcode`. Plex transcoder scratch space.
+
+**Growing a disko-managed disk after enlarging the virtual disk in Proxmox:** disko's `size = "100%"` only applies at first format — it does not live-resize an already-formatted disk. On the running host:
+
+1. `sudo nix shell nixpkgs#gptfdisk -c sgdisk -e /dev/sdX` — relocates the GPT backup header to the new disk end (fixes the "GPT not using all space" warning).
+2. Grow partition 1 to fill the disk. `parted /dev/sdX resizepart 1 100%` prompts "partition is in use, are you sure?" and does not accept a piped answer over a non-tty SSH session; use `sgdisk` delete+recreate instead, keeping the original start sector, type GUID, unique GUID, and name (`sgdisk -i 1 /dev/sdX` to read them first): `sudo nix shell nixpkgs#gptfdisk -c sgdisk -d 1 -n 1:<start>:0 -t 1:<type-guid> -u 1:<unique-guid> -c 1:'<name>' /dev/sdX`.
+3. `sudo xfs_growfs <mountpoint>` — grows the live filesystem to fill the partition.
+
+Update the disko comment and any size-derived options (e.g. `vfsCacheMaxSize` in `apps/rclone-extra.nix`) afterward to match.
 
 ### Secrets (`hosts/ligma/sops.nix`, `.sops.yaml`)
 

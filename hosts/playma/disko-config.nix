@@ -69,7 +69,7 @@
           };
         };
       };
-      # 200 G SSD (scsi3, serial=cache) — rclone VFS cache (no LUKS — cache is regenerable)
+      # 400 G SSD (scsi3, serial=cache) — rclone VFS cache (no LUKS — cache is regenerable)
       cache = {
         type = "disk";
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache";
