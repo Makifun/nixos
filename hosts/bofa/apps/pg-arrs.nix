@@ -66,6 +66,15 @@ let
 
     ${builtins.concatStringsSep "\n" (map (a: "setup_arr_app ${a}") arrsApps)}
     ${builtins.concatStringsSep "\n" (map (a: "setup_bazarr_app ${a}") bazarrApps)}
+
+    # miniflux — simple DB, fixed password (auth handled by Authentik outpost)
+    psql_exec -tc "SELECT 1 FROM pg_roles WHERE rolname='miniflux'" \
+      | grep -q 1 \
+      || psql_exec -c "CREATE USER miniflux WITH PASSWORD 'secret'"
+    psql_exec -c "ALTER USER miniflux WITH PASSWORD 'secret'"
+    psql_exec -tc "SELECT 1 FROM pg_database WHERE datname='miniflux'" \
+      | grep -q 1 \
+      || psql_exec -c "CREATE DATABASE miniflux OWNER miniflux"
   '';
 in
 {
