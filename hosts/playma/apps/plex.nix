@@ -11,10 +11,10 @@ in
     "d '/transcode/plex'      0775 1000 1000 - -"
   ];
 
-  # Start after CIFS mount so media is available on startup.
+  # Start after rclone mounts /cloud so media is available on startup.
   systemd.services.podman-plex = {
-    after = [ "cloud.mount" ];
-    bindsTo = [ "cloud.mount" ];
+    after = [ "rclone-cloud.service" ];
+    bindsTo = [ "rclone-cloud.service" ];
   };
 
   virtualisation.oci-containers.containers.plex = {
