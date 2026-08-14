@@ -42,6 +42,9 @@ in
           "guest ok" = "yes";
           # Run as root so smbd has full access to the rclone FUSE mount.
           "force user" = "root";
+          # Coalesce writes into 16 MB chunks before flushing to the rclone FUSE
+          # mount, reducing write() call frequency for large media file copies.
+          "write cache size" = "16777216";
         };
       };
     };
