@@ -1,6 +1,5 @@
 keys:
   - &makifun age100c08p2hlc5vw258ug23wg4p5z7c99j4w30rayjyj5avtrfeegjqk9ylmk
-  - &hosts_arrma age1d2sh3sgpwk0mszqz5aqvyscrcc02fe4xf4s890g4c68adfgg3ezs9n8yaz
   - &hosts_bofa age165yts9pqqffgurw853f7jfslt2p3sav3jxmftqs4uv8hak8qdqlsfalnmc
   - &hosts_ligma age1xfz2m2x6qffpyl7kgcgvgfhuxkefcl9zf3d9ds0mrdu0r32ny3aqgcx6mh
   - &hosts_playma age18x48ucxzdqz43zs0yseyqgemreqw6ens35kzqnzy6svfsrql7urq6h9g02
@@ -10,16 +9,10 @@ creation_rules:
     key_groups:
       - age:
           - *makifun
-          - *hosts_arrma
           - *hosts_bofa
           - *hosts_ligma
           - *hosts_playma
           - *hosts_storma
-  - path_regex: ^hosts/arrma/secrets\.yaml$
-    key_groups:
-      - age:
-          - *makifun
-          - *hosts_arrma
   - path_regex: ^hosts/bofa/secrets\.yaml$
     key_groups:
       - age:

@@ -54,11 +54,6 @@
         host = hosts.playma;
         port = 2375;
       };
-      storma = {
-        host = hosts.storma;
-        port = 2375;
-      };
-
     };
 
     settings = {
@@ -645,12 +640,6 @@
             };
           }
           {
-            "Rclone Storma" = {
-              icon = "/images/rclone.png";
-              href = "https://rclone-storma.${baseFacts.domainName}";
-            };
-          }
-          {
             "Rclone Playma" = {
               icon = "/images/rclone.png";
               href = "https://rclone-playma.${baseFacts.domainName}";
@@ -824,18 +813,6 @@
             };
           }
           {
-            "Backrest Storma" = {
-              icon = "/images/backrest.png";
-              href = "https://backrest-storma.${baseFacts.domainName}";
-              server = "storma";
-              container = "backrest";
-              widget = {
-                type = "backrest";
-                url = "http://${hosts.storma}:9898";
-              };
-            };
-          }
-          {
             "Beszel Bofa" = {
               icon = "/images/beszel.svg";
               href = "https://beszel.${baseFacts.domainName}";
@@ -897,28 +874,6 @@
                 username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
                 password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
                 systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_PLAYMA}}";
-                version = 2;
-              };
-            };
-          }
-          {
-            "Beszel Storma" = {
-              icon = "/images/beszel.svg";
-              href = "https://beszel.${baseFacts.domainName}";
-              server = "storma";
-              container = "beszel-agent";
-              widget = {
-                type = "beszel";
-                fields = [
-                  "cpu"
-                  "memory"
-                  "disk"
-                  "network"
-                ];
-                url = "https://beszel.${baseFacts.domainName}";
-                username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
-                password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
-                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_STORMA}}";
                 version = 2;
               };
             };
