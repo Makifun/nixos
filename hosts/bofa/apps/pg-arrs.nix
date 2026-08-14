@@ -2,6 +2,7 @@
 let
   tracearrPasswordFile = config.sops.secrets.timescaledb-tracearr-password.path;
   arrsPasswordFile = config.sops.secrets.pg-arrs-password.path;
+  minifluxPasswordFile = config.sops.secrets.pg-miniflux-password.path;
 
   # sonarr/radarr: two databases each (main + log) with full-text search extensions
   arrsApps = [
@@ -33,6 +34,7 @@ let
     done
 
     ARRS_PASS=$(cat ${arrsPasswordFile})
+    MINIFLUX_PASS=$(cat ${minifluxPasswordFile})
 
     setup_arr_app() {
       local app=$1
@@ -67,11 +69,11 @@ let
     ${builtins.concatStringsSep "\n" (map (a: "setup_arr_app ${a}") arrsApps)}
     ${builtins.concatStringsSep "\n" (map (a: "setup_bazarr_app ${a}") bazarrApps)}
 
-    # miniflux — simple DB, fixed password (auth handled by Authentik outpost)
+    # miniflux
     psql_exec -tc "SELECT 1 FROM pg_roles WHERE rolname='miniflux'" \
       | grep -q 1 \
-      || psql_exec -c "CREATE USER miniflux WITH PASSWORD 'secret'"
-    psql_exec -c "ALTER USER miniflux WITH PASSWORD 'secret'"
+      || psql_exec -c "CREATE USER miniflux WITH PASSWORD '$MINIFLUX_PASS'"
+    psql_exec -c "ALTER USER miniflux WITH PASSWORD '$MINIFLUX_PASS'"
     psql_exec -tc "SELECT 1 FROM pg_database WHERE datname='miniflux'" \
       | grep -q 1 \
       || psql_exec -c "CREATE DATABASE miniflux OWNER miniflux"
@@ -79,6 +81,11 @@ let
 in
 {
   sops.secrets.pg-arrs-password = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+
+  sops.secrets.pg-miniflux-password = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
   };
