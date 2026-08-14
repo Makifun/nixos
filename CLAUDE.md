@@ -84,7 +84,7 @@ Three encrypted drives:
 - **Cache SSD** (`scsi-0QEMU_QEMU_HARDDISK_cache`, 200 GB): LUKS → ext4 mounted at `/rclone-cache`. Used as rclone VFS cache (up to 185 GB).
 Both drives use XFS with `noatime,nofail`. LUKS passphrases entered via initrd SSH at boot. **New VM install:** disko formats on `nixos_install.sh`. **Existing VM adding a disk:** must manually partition + luksFormat + mkfs.xfs before `nh os switch` — see comments in `disko-config.nix`.
 
-All ZFS pools: ashift=12, autotrim=on, compression=lz4, atime=off, xattr=sa. ARC max=6 GB, min=2 GB (ligma has 16 GB RAM). Prefetch disabled (`zfs_prefetch_disable=1`).
+All ZFS pools: ashift=12, autotrim=on, compression=lz4, atime=off, xattr=sa. ARC max=4 GB, min=2 GB (ligma balloon: 12 GB floor, 16 GB ceiling). Prefetch disabled (`zfs_prefetch_disable=1`).
 
 ### Disk Layout — bofa (`hosts/bofa/disko-config.nix`)
 

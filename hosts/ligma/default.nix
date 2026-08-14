@@ -53,8 +53,8 @@
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.devNodes = "/dev/mapper";
   boot.zfs.forceImportRoot = false;
-  # ARC tuning — 6 GB ARC
-  boot.kernelParams = [ "zfs.zfs_arc_max=6442450944" ];
+  # ARC tuning — 4 GB max (balloon floor is 12 GB; 6 GB was sized for 16 GB)
+  boot.kernelParams = [ "zfs.zfs_arc_max=4294967296" ];
   boot.extraModprobeConfig = ''
     options zfs zfs_arc_min=2147483648
     options zfs zfs_prefetch_disable=1
