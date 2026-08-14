@@ -88,6 +88,7 @@
                   "logbufs=8"
                   "logbsize=256k"
                   "allocsize=64M"
+                  "nofail"
                 ];
               };
             };
