@@ -784,7 +784,7 @@
               container = "backrest";
               widget = {
                 type = "backrest";
-                url = "http://${hosts.bofa}:9898";
+                url = "https://backrest-bofa.${baseFacts.domainName}";
               };
             };
           }
@@ -808,7 +808,7 @@
               container = "backrest";
               widget = {
                 type = "backrest";
-                url = "http://${hosts.playma}:9898";
+                url = "https://backrest-playma.${baseFacts.domainName}";
               };
             };
           }
