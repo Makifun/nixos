@@ -820,7 +820,7 @@
               app = "backrest";
               widget = {
                 type = "backrest";
-                url = "http://${hosts.sugma}:9898";
+                url = "https://backrest-sugma.${baseFacts.domainName}";
               };
             };
           }
