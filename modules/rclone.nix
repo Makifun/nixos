@@ -124,7 +124,7 @@ in
           "HOME=/rclone-cache"
           "TMPDIR=/rclone-cache/tmp"
         ];
-        ExecStartPost = "+${pkgs.systemd}/bin/systemctl restart samba-smbd.service";
+        ExecStartPost = lib.mkIf config.services.samba.enable "+${pkgs.systemd}/bin/systemctl restart samba-smbd.service";
         ExecStop = "${pkgs.fuse3}/bin/fusermount3 -uz /cloud";
         KillMode = "process";
         Restart = "on-failure";

@@ -69,6 +69,31 @@
           };
         };
       };
+      # 200 G SSD (scsi3, serial=cache) — rclone VFS cache (no LUKS — cache is regenerable)
+      cache = {
+        type = "disk";
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache";
+        content = {
+          type = "gpt";
+          partitions = {
+            rclone-cache = {
+              size = "100%";
+              content = {
+                type = "filesystem";
+                format = "xfs";
+                mountpoint = "/rclone-cache";
+                mountOptions = [
+                  "noatime"
+                  "discard"
+                  "logbufs=8"
+                  "logbsize=256k"
+                  "allocsize=64M"
+                ];
+              };
+            };
+          };
+        };
+      };
       # 50 G SSD (scsi2, serial=transcode) — Plex transcoder scratch
       transcode = {
         type = "disk";

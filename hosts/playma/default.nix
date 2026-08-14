@@ -10,8 +10,9 @@
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disko-config.nix
     ../../common
+    ../../modules/rclone.nix
     ./apps/beszel-extra.nix
-    ./apps/cloud-mount.nix
+    ./apps/rclone-extra.nix
     ./apps/plex.nix
     ./apps/plex-trash.nix
   ];
