@@ -95,29 +95,24 @@
           };
         };
       };
-      # 50 G SSD (scsi2, serial=transcode) — Plex transcoder scratch
+      # 50 G SSD (scsi2, serial=transcode) — Plex transcoder scratch (no LUKS — ephemeral data)
       transcode = {
         type = "disk";
         device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_transcode";
         content = {
           type = "gpt";
           partitions = {
-            luks = {
+            data = {
               size = "100%";
               content = {
-                type = "luks";
-                name = "crypted_transcode";
-                settings.allowDiscards = true;
-                settings.crypttabExtraOpts = [ "timeout=0" ];
-                content = {
-                  type = "filesystem";
-                  format = "xfs";
-                  mountpoint = "/transcode";
-                  mountOptions = [
-                    "noatime"
-                    "discard"
-                  ];
-                };
+                type = "filesystem";
+                format = "xfs";
+                mountpoint = "/transcode";
+                mountOptions = [
+                  "noatime"
+                  "discard"
+                  "nofail"
+                ];
               };
             };
           };
