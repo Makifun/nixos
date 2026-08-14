@@ -34,9 +34,7 @@
     ./apps/traefik-pgbackweb-bofa.nix
     ./apps/traefik-backrest-ligma.nix
     ./apps/traefik-backrest-playma.nix
-    ./apps/traefik-backrest-storma.nix
     ./apps/traefik-rclone-playma.nix
-    ./apps/traefik-rclone-storma.nix
     ./apps/traefik-technitium.nix
     ./apps/traefik.nix
     ./apps/unifi.nix

@@ -18,7 +18,6 @@ let
     bofa = 2;
     ligma = 3;
     playma = 4;
-    storma = 5;
   };
   scheduleHour = config.backrest.scheduleHour;
 in

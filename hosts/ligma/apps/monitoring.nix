@@ -55,10 +55,6 @@ in
         job_name = "rclone";
         static_configs = [
           {
-            targets = [ "${hosts.storma}:6970" ];
-            labels.instance = "storma";
-          }
-          {
             targets = [ "${hosts.makizen}:6970" ];
             labels.instance = "makizen";
           }

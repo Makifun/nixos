@@ -33,7 +33,6 @@
         opnsense = "10.10.10.1";
         technitium = "10.10.10.3";
         makizen = "10.10.10.9";
-        storma = "10.10.10.12";
         ligma = "10.10.10.13";
         bofa = "10.10.10.14";
         playma = "10.10.10.15";
@@ -56,7 +55,6 @@
         bofa = mkSystem [ ./hosts/bofa ];
         ligma = mkSystem [ ./hosts/ligma ];
         playma = mkSystem [ ./hosts/playma ];
-        storma = mkSystem [ ./hosts/storma ];
         minimaliso = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [
