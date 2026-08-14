@@ -11,6 +11,7 @@
     ./disko-config.nix
     ../../common
     ../../modules/rclone.nix
+    ../../modules/samba.nix
     ./apps/beszel-extra.nix
     ./apps/rclone-extra.nix
     ./apps/plex.nix
