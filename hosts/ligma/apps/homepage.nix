@@ -813,6 +813,18 @@
             };
           }
           {
+            "Backrest Sugma" = {
+              icon = "/images/backrest.png";
+              href = "https://backrest-sugma.${baseFacts.domainName}";
+              namespace = "backrest";
+              app = "backrest";
+              widget = {
+                type = "backrest";
+                url = "http://${hosts.sugma}:9898";
+              };
+            };
+          }
+          {
             "Beszel Bofa" = {
               icon = "/images/beszel.svg";
               href = "https://beszel.${baseFacts.domainName}";
