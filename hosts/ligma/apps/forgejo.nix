@@ -288,6 +288,7 @@ in
       tokenFile = config.sops.secrets.forgejo-runner-token.path;
       labels = [
         "go-builder:docker://golang:alpine"
+        "nix:docker://nixos/nix"
       ];
     };
   };
