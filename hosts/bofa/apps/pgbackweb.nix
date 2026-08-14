@@ -52,12 +52,23 @@ in
       # Create user (ignore error if already exists).
       podman exec timescaledb psql -U tracearr -d tracearr \
         -c "CREATE USER pgbackweb WITH PASSWORD '$PASS';" 2>/dev/null || true
-      # Grant SELECT on all present and future tables in all databases.
+      # Grant SELECT on all tables across all databases (for pg_dump reads).
       podman exec timescaledb psql -U tracearr -d tracearr \
         -c "GRANT pg_read_all_data TO pgbackweb;" 2>/dev/null || true
       # Create the pgbackweb state database (ignore error if already exists).
       podman exec timescaledb psql -U tracearr -d tracearr \
         -c "CREATE DATABASE pgbackweb OWNER pgbackweb;" 2>/dev/null || true
+      # Grant full write access on the pgbackweb database so the pgbackweb
+      # service can INSERT/UPDATE/DELETE its own state tables (sessions etc.).
+      # pg_read_all_data alone is not enough — it is read-only.
+      podman exec timescaledb psql -U tracearr -d pgbackweb \
+        -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pgbackweb;" 2>/dev/null || true
+      podman exec timescaledb psql -U tracearr -d pgbackweb \
+        -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO pgbackweb;" 2>/dev/null || true
+      podman exec timescaledb psql -U tracearr -d pgbackweb \
+        -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO pgbackweb;" 2>/dev/null || true
+      podman exec timescaledb psql -U tracearr -d pgbackweb \
+        -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO pgbackweb;" 2>/dev/null || true
     '';
   };
 
