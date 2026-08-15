@@ -382,3 +382,14 @@ in
 2. Per-image `allowedVersions` constraints for qbittorrent (`>=5.0.0 <6.0.0`), prowlarr (`>=2.0.0 <3.0.0`), and nzbget (`/^version-v/`).
 
 When adding a new linuxserver image, check if its version tags conflict with ubuntu date tags and add an `allowedVersions` entry if needed.
+
+### Flake input updates (GitHub Actions)
+
+`.github/workflows/update-flake-inputs.yml` runs `nix flake update` daily (00:00 Europe/Stockholm) and on manual dispatch. It does not commit to `main` directly:
+
+1. Diffs `flake.lock` before/after; skips the rest if nothing changed.
+2. Runs `nix flake check` against the updated lock and records pass/fail.
+3. Builds a PR body table of the flake's direct inputs (`nixpkgs`, `disko`, `impermanence`, `sops-nix`) that changed rev, with before/after dates and a GitHub compare link per input. Transitive inputs (e.g. `home-manager`, pulled in by `impermanence`) are excluded from the table.
+4. Opens (or updates, if one is already open) a PR on branch `update/flake-lock` via `peter-evans/create-pull-request`, titled with the check result. **`nix flake check` failures do not block the PR** — it's still opened, flagged with ⚠️, so the update is visible either way.
+
+Requires repo setting **Settings → Actions → General → Workflow permissions → "Allow GitHub Actions to create and approve pull requests"** enabled, or `peter-evans/create-pull-request` fails to open the PR with the default `GITHUB_TOKEN`.

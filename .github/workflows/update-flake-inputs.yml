@@ -6,22 +6,110 @@ on:
       timezone: "Europe/Stockholm"
   workflow_dispatch:
 
+concurrency:
+  group: update-flake-inputs
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v7
 
       - uses: DeterminateSystems/nix-installer-action@main
 
+      - name: Snapshot flake.lock before update
+        run: cp flake.lock /tmp/flake.lock.before
+
       - name: Update flake inputs
         run: nix flake update
 
-      - name: Commit and push if changed
+      - name: Check for changes
+        id: changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add flake.lock
-          git diff --cached --quiet || git commit -m "flake: update inputs" && git push
+          if git diff --quiet flake.lock; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate updated flake
+        if: steps.changes.outputs.changed == 'true'
+        id: check
+        run: |
+          if nix flake check; then
+            echo "status=passed" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=failed" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate PR body
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          cat > /tmp/gen_summary.py << 'PYEOF'
+          import json, datetime, os
+
+          with open('/tmp/flake.lock.before') as f:
+              before_lock = json.load(f)
+          with open('flake.lock') as f:
+              after_lock = json.load(f)
+
+          # Only the flake's own direct inputs (root node) — skip transitive
+          # deps like home-manager pulled in by impermanence.
+          root_inputs = after_lock['nodes'][after_lock['root']]['inputs']
+
+          rows = []
+          for input_name, node_name in sorted(root_inputs.items()):
+              node_name = node_name if isinstance(node_name, str) else node_name[-1]
+              locked = after_lock['nodes'].get(node_name, {}).get('locked', {})
+              if locked.get('type') != 'github':
+                  continue
+              b_locked = before_lock['nodes'].get(node_name, {}).get('locked', {})
+              a_rev, b_rev = locked.get('rev', ''), b_locked.get('rev', '')
+              if a_rev == b_rev:
+                  continue
+              owner, repo = locked.get('owner'), locked.get('repo')
+              a_date = datetime.datetime.fromtimestamp(locked.get('lastModified', 0), tz=datetime.timezone.utc).strftime('%Y-%m-%d')
+              b_date = datetime.datetime.fromtimestamp(b_locked.get('lastModified', 0), tz=datetime.timezone.utc).strftime('%Y-%m-%d')
+              compare = f'https://github.com/{owner}/{repo}/compare/{b_rev}...{a_rev}'
+              rows.append(
+                  f'| `{input_name}` | `{b_rev[:8]}` ({b_date}) | `{a_rev[:8]}` ({a_date}) | [diff]({compare}) |'
+              )
+
+          if rows:
+              body = (
+                  '## Flake inputs\n\n'
+                  '| Input | Before | After | |\n'
+                  '|-------|--------|-------|---|\n' +
+                  '\n'.join(rows)
+              )
+          else:
+              body = '_Only transitive/non-GitHub inputs changed — see `flake.lock` diff._'
+
+          check_status = os.environ['CHECK_STATUS']
+          if check_status == 'passed':
+              body += '\n\n## Validation\n\n✅ `nix flake check` passed for all hosts.'
+          else:
+              body += '\n\n## Validation\n\n⚠️ `nix flake check` failed — inspect the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) before merging.'
+
+          body += '\n\n---\n_Automated update. Review and merge to apply._'
+
+          print(body)
+          PYEOF
+          CHECK_STATUS="${{ steps.check.outputs.status }}" python3 /tmp/gen_summary.py > /tmp/pr-body.md
+          cat /tmp/pr-body.md
+
+      - name: Create pull request
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "flake: update inputs"
+          title: "flake: update inputs (${{ steps.check.outputs.status == 'failed' && '⚠️ check failed' || 'flake check passed' }})"
+          body-path: /tmp/pr-body.md
+          branch: update/flake-lock
+          delete-branch: true
+          labels: dependencies
+          add-paths: flake.lock
