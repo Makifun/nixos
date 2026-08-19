@@ -9,7 +9,7 @@ let
   beszelPort = 8095;
   beszelBase = "/${hostname}/${hostname}/beszel";
   # renovate: datasource=docker depName=henrygd/beszel
-  beszelTag = "0.18.8";
+  beszelTag = "0.18.7";
 in
 {
   systemd.tmpfiles.rules = [
