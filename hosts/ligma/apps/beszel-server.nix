@@ -17,7 +17,7 @@ in
   ];
 
   virtualisation.oci-containers.containers.beszel = {
-    image = "henrygd/beszel:${beszelTag}";
+    image = "docker.io/henrygd/beszel:${beszelTag}";
     ports = [ "127.0.0.1:${toString beszelPort}:8090" ];
     volumes = [ "${beszelBase}/data:/beszel_data" ];
   };
