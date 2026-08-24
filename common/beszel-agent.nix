@@ -8,7 +8,7 @@ let
   hostname = config.networking.hostName;
   beszelBase = "/${hostname}/${hostname}/beszel";
   # renovate: datasource=docker depName=henrygd/beszel
-  beszelTag = "0.18.7";
+  beszelTag = "0.18.8";
 in
 {
   sops.secrets.beszel_agent_key = {
