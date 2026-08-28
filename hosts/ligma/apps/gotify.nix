@@ -11,7 +11,7 @@ let
   gotifyPort = 8096;
   gotifyBase = "/${hostname}/${hostname}/gotify";
   # renovate: datasource=docker depName=gotify/server
-  gotifyTag = "3.0.0";
+  gotifyTag = "3.1.0";
   waitForAuthentik = pkgs.writeShellScript "gotify-wait-authentik" ''
     until ${pkgs.curl}/bin/curl -sf --max-time 10 \
       https://auth.${baseFacts.domainName}/application/o/gotify/.well-known/openid-configuration \
