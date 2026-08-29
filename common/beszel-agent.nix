@@ -33,7 +33,7 @@ in
     environmentFiles = [ config.sops.secrets.beszel_agent_key.path ];
     extraOptions = [ "--network=host" ];
     volumes = [
-      "/run/dbus/system_bus_socket:/run/dbus/system_bus_socket:ro"
+      "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro"
       "/run/podman/podman.sock:/var/run/docker.sock:ro"
       "/.beszelroot:/extra-filesystems/root__root:ro"
       "/nix/.beszelnixos:/extra-filesystems/nixos__nix:ro"
