@@ -1,5 +1,6 @@
 {
   config,
+  baseFacts,
   hosts,
   lib,
   ...
@@ -12,6 +13,11 @@ let
 in
 {
   sops.secrets.beszel_agent_key = {
+    format = "yaml";
+    sopsFile = ../common/secrets.yaml;
+  };
+
+  sops.secrets.beszel_universal_token = {
     format = "yaml";
     sopsFile = ../common/secrets.yaml;
   };
@@ -29,8 +35,17 @@ in
     environment = {
       PORT = "45876";
       FILESYSTEM = "/extra-filesystems/${hostname}__${hostname}";
+      # Agent dials the hub itself and self-registers via the universal token
+      # (KEY/TOKEN below) — no manual "add system in the UI" step needed for
+      # new hosts. PORT/LISTEN above is kept for the hub's legacy pull path.
+      # Goes through Traefik (not a raw LAN port) — see the beszel-agent-connect
+      # router bypass in hosts/ligma/apps/beszel-server.nix.
+      HUB_URL = "https://beszel.${baseFacts.domainName}";
     };
-    environmentFiles = [ config.sops.secrets.beszel_agent_key.path ];
+    environmentFiles = [
+      config.sops.secrets.beszel_agent_key.path
+      config.sops.secrets.beszel_universal_token.path
+    ];
     extraOptions = [ "--network=host" ];
     volumes = [
       "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro"

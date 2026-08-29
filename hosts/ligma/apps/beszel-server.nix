@@ -43,6 +43,18 @@ in
           domains = [ { main = "*.${baseFacts.domainName}"; } ];
         };
       };
+      # Agents (universal-token self-registration) dial this fixed path directly —
+      # bypass Authentik so the WebSocket upgrade isn't redirected to a login page.
+      # Beszel authenticates the connection itself via the agent's KEY/TOKEN.
+      beszel-agent-connect = {
+        rule = "Host(`beszel.${baseFacts.domainName}`) && PathPrefix(`/api/beszel/agent-connect`)";
+        entryPoints = [ "websecure" ];
+        service = "beszel-svc";
+        tls = {
+          certResolver = "letsencrypt";
+          domains = [ { main = "*.${baseFacts.domainName}"; } ];
+        };
+      };
     };
     services."beszel-svc".loadBalancer.servers = [
       { url = "http://127.0.0.1:${toString beszelPort}"; }

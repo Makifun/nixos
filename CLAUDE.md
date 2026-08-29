@@ -146,7 +146,7 @@ Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Su
 | `omni.nix` | Sidero Omni (Talos cluster manager) | 9999 (UI), 50180/udp (WG), 8091 (machine API), 8098/6443 (k8s proxy) | Distroless container. SAML auth via Authentik. JWT key is OpenPGP ASCII-armor (not PEM). SOPS: `omni-account-uuid`, `omni-jwt-signing-key`. |
 | `gotify.nix` | Gotify push notifications | 8096 | v3 native OIDC via Authentik (`auth.makifun.se/application/o/gotify/`). Two-router split: `X-Gotify-Key` header bypass (push senders), catch-all no-middleware (Gotify handles OIDC itself). Client secret from SOPS `gotify-oidc-secret` → `/run/gotify-oidc.env` via `gotify-env-setup` oneshot. `GOTIFY_OIDC_LINK_BY_USERNAME=true` links existing local users. **Local password auth is disabled** (`GOTIFY_LOCALAUTH_ENABLED=false`, v3.1.0+) — OIDC via Authentik is the only login path; login button reads "Authentik" (`GOTIFY_OIDC_IDP_NAME`). Unaffected: all `/message?token=...` app-token pushes (autoupgrade-notify, garage-sync, watchyourlan Shoutrrr, Grafana, Backrest) — those use per-application tokens, not username/password. |
 | `apprise.nix` | Apprise notification aggregator | 8097 | Three-router split: `/outpost` callback, `/notify` path (API bypass for senders), catch-all SSO. |
-| `beszel.nix` | Beszel monitoring hub + agent | 8095 (hub), 45876 (agent) | Hub loopback. Agent runs host networking (must see host interfaces). Agent KEY from SOPS `beszel_agent_key`. Hub connects OUT to agents. |
+| `beszel-server.nix` + `common/beszel-agent.nix` | Beszel monitoring hub + agent | 8095 (hub, loopback), 45876 (agent) | Agents self-register via universal token, routed through Traefik (`beszel-agent-connect` router bypasses Authentik for the fixed `/api/beszel/agent-connect` path). See "Beszel monitoring" below. |
 | `distribution.nix` | OCI registry mirrors | 5001-5004 | Four instances: dockerhub (5001), ghcr (5002), lscr (5003), quay (5004). Daily GC at 06:00 UTC. LAN-only via `mirror-lan-only` ipAllowList middleware. `log.level = "info"` — HTTP request logs visible in Loki (`job=ligma-podman-dist-*`). Client IPs are NOT visible here (containers see Podman bridge `10.88.0.1`); use Traefik JSON access logs for real client IPs (`RouterName =~ "dist-.+"`). |
 | `unifi.nix` | UniFi Network Application | 8443 (UI), 8080 (inform), 3478/udp (STUN), 10001/udp (discovery), 5141/udp (syslog in) | Two Podman containers (`unifi_network`): MongoDB 8 + linuxserver/unifi. Syslog on 5141 ingested by Alloy → Loki (job=ligma-unifi). UI self-signed cert — Traefik uses `insecureSkipVerify`. PUID/PGID=1000, MEM_LIMIT=1024M. |
 | `watchyourlan.nix` | WatchYourLAN network presence monitor | 8840 (UI) | Lightweight ARP scanner; notifies via Shoutrrr → Gotify on new/returning devices. Host networking + NET_ADMIN/NET_RAW caps required. Config written on first boot from SOPS `watchyourlan-gotify-token`; UI changes persist (delete `config_v2.yaml` to reset). Scans `ens18` every 60s. SOPS: `watchyourlan-gotify-token`. |
@@ -165,7 +165,7 @@ Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Su
 |---|---|---|---|
 | `timescaledb.nix` | TimescaleDB (Podman) | 5432 | `timescale/timescaledb-ha:pg18.1-ts2.25.0`. Data at `/bofa/bofa/postgresql`. `POSTGRES_USER=tracearr`, `POSTGRES_DB=tracearr`. Password from SOPS `timescaledb-tracearr-password` via `sops.templates."timescaledb.env"`. `max_connections=200` (raised from 100 — 8 arr apps exhaust 100 on cold-start burst). bofa has **balloon RAM** (5 GB min / 8 GB max, Proxmox). Port open to sugma nodes 10.10.10.26-28 only. SOPS: `timescaledb-tracearr-password`. |
 | `backrest.nix` | Backrest backup manager | 9898 | Restic-backed S3. Backs up `/bofa/bofa`. Port 9898 open to ligma (10.10.10.13) only for Traefik proxy. Schedule: 05:00 UTC. Prune: 06:00 UTC. SOPS: same keys as ligma backrest. |
-| `beszel.nix` | Beszel agent | 45876 | Monitors bofa; reports disk usage of `/bofa` and `/persist`. Port 45876 open to ligma only. |
+| `common/beszel-agent.nix` | Beszel agent | 45876 | Monitors bofa; reports disk usage of `/bofa` and `/persist`. Self-registers with the hub via universal token — see "Beszel monitoring" in the ligma section. |
 | `pgbackweb.nix` | pgBackWeb logical backup UI | 8085 | `eduardolat/pgbackweb:0.5.1`. Web UI for scheduled pg_dump backups to Garage `pgbackweb` S3 bucket. State DB: `pgbackweb` database in the local timescaledb instance, owned by the `pgbackweb` user (`pg_read_all_data` grant). Port open to ligma only; exposed via Traefik + Authentik at `pgbackweb.makifun.se`. SOPS: `pgbackweb-encryption-key`, `pgbackweb-db-password`. Configure databases and S3 destination via the web UI (use key-value DSN format for connection strings: `host=10.88.0.1 port=5432 user=pgbackweb ...`). |
 
 **To add a new bofa secret:** `sops hosts/bofa/secrets.yaml`, add the key, reference in the app `.nix` file.
@@ -263,14 +263,17 @@ Paste the full `-----BEGIN PGP PRIVATE KEY BLOCK-----...END...` into sops as a Y
 
 ### Beszel monitoring
 
-Beszel hub (loopback port 8095) + agent (host networking, port 45876). Agent must run on host networking to see host interfaces. Hub connects OUT to agents — open firewall port 45876 to LAN.
+Beszel hub (loopback port 8095, also reachable via Traefik at `beszel.makifun.se`) + agent (`common/beszel-agent.nix`, host networking, port 45876) on every flake-managed host. Agent must run on host networking to see host interfaces.
 
-**Bootstrap sequence** (one-time, agent KEY not known until hub first runs):
-1. Deploy config (hub starts, agent fails without KEY — expected)
-2. Open https://beszel.makifun.se → create admin account
-3. Add system "ligma", host `10.88.0.1` (Podman gateway), port 45876
-4. Copy KEY value → `sops hosts/ligma/secrets.yaml` as `beszel_agent_key`
-5. `nh os switch` → agent picks up key and connects
+**Agents self-register via universal token** — the agent dials *out* to the hub (`HUB_URL = https://beszel.makifun.se`) and authenticates with a shared `KEY` (hub's public SSH key, same for every agent) + `TOKEN` (a permanent Universal Token, same for every agent). A new host provisioned from the flake shows up in the hub automatically; no manual "add system" step. The legacy hub-initiated pull path (hub connects to the agent's own `PORT`/`LISTEN`, port 45876) is left configured alongside it and still works, but is unused as long as `HUB_URL`/`TOKEN` are set — kept for parity with upstream's docker-compose example, not required.
+
+**Traefik bypass for agent-connect** — the agent always POSTs its WebSocket upgrade to the fixed path `/api/beszel/agent-connect`. `hosts/ligma/apps/beszel-server.nix` adds a `beszel-agent-connect` router matching `Host + PathPrefix(/api/beszel/agent-connect)` with no Authentik middleware, so the machine-to-machine handshake isn't redirected to a login page; the browser UI (bare `Host` rule) stays behind `authentik` as before. Beszel authenticates the connection itself via KEY/TOKEN, so this is safe to leave open like the other API-bypass routers (see Gotify's `X-Gotify-Key` / Graylog's Basic Auth pattern under "Three-router priority split").
+
+SOPS secrets (both in `common/secrets.yaml`, shared by every host):
+- `beszel_agent_key` — hub's public SSH key. One-time bootstrap: create the hub admin account at `https://beszel.makifun.se`, add any one system in the UI to reveal the key, copy it into this secret as `KEY=<value>`.
+- `beszel_universal_token` — Settings → Tokens & Fingerprints → enable Universal Token → toggle "permanent" → copy. Store as `TOKEN=<value>`. Both secrets are consumed directly as container `environmentFiles`, so the stored value must be the full `KEY=...`/`TOKEN=...` line, not just the bare value.
+
+Port 45876 is still opened to the hub's LAN IP per-agent (`common/beszel-agent.nix`) for the legacy path. No new port was opened for self-registration — it rides Traefik's existing 443.
 
 ### Distribution registry mirrors
 
