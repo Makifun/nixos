@@ -28,22 +28,15 @@ in
     volumes = [ "${beszelBase}/data:/beszel_data" ];
   };
 
+  # No Authentik forwardAuth middleware — Beszel handles its own login via
+  # native OIDC (beszel.tf in the authentik repo), same migration Gotify
+  # went through. No outpost-callback router needed either.
   services.traefik.dynamicConfigOptions.http = {
     routers = {
       beszel = {
         rule = "Host(`beszel.${baseFacts.domainName}`)";
         entryPoints = [ "websecure" ];
         service = "beszel-svc";
-        middlewares = [ "authentik" ];
-        tls = {
-          certResolver = "letsencrypt";
-          domains = [ { main = "*.${baseFacts.domainName}"; } ];
-        };
-      };
-      beszel-outpost = {
-        rule = "Host(`beszel.${baseFacts.domainName}`) && PathPrefix(`/outpost.goauthentik.io`)";
-        entryPoints = [ "websecure" ];
-        service = "authentik-embedded-outpost";
         tls = {
           certResolver = "letsencrypt";
           domains = [ { main = "*.${baseFacts.domainName}"; } ];
