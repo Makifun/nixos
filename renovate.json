@@ -36,6 +36,11 @@
     {
       "matchPackageNames": ["timescale/timescaledb-ha"],
       "versioning": "regex:^pg18\\.1-ts(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+    },
+    {
+      "description": "2026.8.0's published manifest list is broken upstream (podman rejects it: 'Unexpectedly received a manifest list instead of a manifest for a single image'). Block until goauthentik republishes a working 2026.8.x tag — see hosts/ligma/apps/authentik.nix.",
+      "matchPackageNames": ["ghcr.io/goauthentik/server"],
+      "allowedVersions": "!/^2026\\.8\\.0$/"
     }
   ],
   "customManagers": [
