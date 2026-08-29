@@ -875,6 +875,28 @@
             };
           }
           {
+            "Beszel Sugma01" = {
+              icon = "/images/beszel.svg";
+              href = "https://beszel.${baseFacts.domainName}";
+              namespace = "monitoring";
+              app = "beszel-agent-sugma01";
+              widget = {
+                type = "beszel";
+                fields = [
+                  "cpu"
+                  "memory"
+                  "disk"
+                  "network"
+                ];
+                url = "https://beszel.${baseFacts.domainName}";
+                username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
+                password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
+                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_SUGMA01}}";
+                version = 2;
+              };
+            };
+          }
+          {
             "Traefik Ligma" = {
               icon = "/images/traefik.png";
               href = "https://traefik-ligma.${baseFacts.domainName}/dashboard/";
