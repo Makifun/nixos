@@ -14,7 +14,6 @@
     ./apps/apprise.nix
     ./apps/authentik.nix
     ./apps/backrest-extra.nix
-    ./apps/beszel-extra.nix
     ./apps/beszel-server.nix
     ./apps/distribution.nix
     ./apps/forgejo.nix

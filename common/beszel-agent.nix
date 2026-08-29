@@ -1,7 +1,6 @@
 {
   config,
   baseFacts,
-  hosts,
   lib,
   ...
 }:
@@ -33,13 +32,11 @@ in
   virtualisation.oci-containers.containers.beszel-agent = {
     image = "docker.io/henrygd/beszel-agent:${beszelTag}";
     environment = {
-      PORT = "45876";
       FILESYSTEM = "/extra-filesystems/${hostname}__${hostname}";
       # Agent dials the hub itself and self-registers via the universal token
       # (KEY/TOKEN below) — no manual "add system in the UI" step needed for
-      # new hosts. PORT/LISTEN above is kept for the hub's legacy pull path.
-      # Goes through Traefik (not a raw LAN port) — see the beszel-agent-connect
-      # router bypass in hosts/ligma/apps/beszel-server.nix.
+      # new hosts. Goes through the existing beszel.makifun.se Traefik route
+      # (no Authentik forwardAuth in front of it — see beszel-server.nix).
       HUB_URL = "https://beszel.${baseFacts.domainName}";
     };
     environmentFiles = [
@@ -59,8 +56,4 @@ in
 
   systemd.services.podman-beszel-agent.after = [ "podman.socket" ];
   systemd.services.podman-beszel-agent.requires = [ "podman.socket" ];
-
-  networking.firewall.extraInputRules = ''
-    tcp dport 45876 ip saddr ${hosts.ligma}/32 accept comment "Beszel agent"
-  '';
 }
