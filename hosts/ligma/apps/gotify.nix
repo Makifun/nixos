@@ -72,6 +72,8 @@ in
       GOTIFY_OIDC_CLIENTID = "gotify";
       GOTIFY_OIDC_REDIRECTURL = "https://gotify.${baseFacts.domainName}/auth/oidc/callback";
       GOTIFY_OIDC_LINK_BY_USERNAME = "true";
+      GOTIFY_OIDC_IDP_NAME = "Authentik";
+      GOTIFY_LOCALAUTH_ENABLED = "false";
     };
     environmentFiles = [ "/run/gotify-oidc.env" ];
     volumes = [ "${gotifyBase}:/app/data" ];
