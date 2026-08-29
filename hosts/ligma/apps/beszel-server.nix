@@ -12,6 +12,11 @@ let
   beszelTag = "0.18.8";
 in
 {
+  sops.secrets.beszel_heartbeat_url = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+
   systemd.tmpfiles.rules = [
     "d '${beszelBase}/data' 0755 root root - -"
   ];
@@ -19,6 +24,7 @@ in
   virtualisation.oci-containers.containers.beszel = {
     image = "docker.io/henrygd/beszel:${beszelTag}";
     ports = [ "127.0.0.1:${toString beszelPort}:8090" ];
+    environmentFiles = [ config.sops.secrets.beszel_heartbeat_url.path ];
     volumes = [ "${beszelBase}/data:/beszel_data" ];
   };
 

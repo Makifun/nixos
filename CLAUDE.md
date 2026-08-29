@@ -269,11 +269,15 @@ Beszel hub (loopback port 8095, also reachable via Traefik at `beszel.makifun.se
 
 **No Traefik/Authentik change needed for agent-connect** — the agent always dials the fixed path `/api/beszel/agent-connect`. `beszel-server.nix`'s single `beszel` router still routes everything through the `authentik` forwardAuth middleware, same as before, but the `authentik` repo's `apps.tf` already sets `skip_path_regex = "^/(api)(/.*)?$"` on `authentik_provider_proxy.ligma_apps["beszel"]` (originally there for the web UI's own `/api` calls) — the embedded outpost exempts anything under `/api/*` without checking a session, which already covers the agent's path. This is the same mechanism sonarr/radarr/prowlarr/etc. use for their own `/api` paths, not the separate router-bypass pattern Gotify/Graylog use.
 
-SOPS secrets (both in `common/secrets.yaml`, shared by every host):
+SOPS secrets in `common/secrets.yaml` (shared by every host):
 - `beszel_agent_key` — hub's public SSH key. One-time bootstrap: create the hub admin account at `https://beszel.makifun.se`, add any one system in the UI to reveal the key, copy it into this secret as `KEY=<value>`.
-- `beszel_universal_token` — Settings → Tokens & Fingerprints → enable Universal Token → toggle "permanent" → copy. Store as `TOKEN=<value>`. Both secrets are consumed directly as container `environmentFiles`, so the stored value must be the full `KEY=...`/`TOKEN=...` line, not just the bare value.
+- `beszel_universal_token` — Settings → Tokens & Fingerprints → enable Universal Token → toggle "permanent" → copy. Store as `TOKEN=<value>`.
+
+Both secrets above are consumed directly as container `environmentFiles`, so the stored value must be the full `KEY=...`/`TOKEN=...` line, not just the bare value. Same convention for the hub-only secret below.
 
 Port 45876 is still opened to the hub's LAN IP per-agent (`common/beszel-agent.nix`) for the legacy path. No new port was opened for self-registration — it rides Traefik's existing 443.
+
+**Outbound heartbeat** ([beszel.dev/guide/heartbeat](https://beszel.dev/guide/heartbeat), 0.18.4+) — the hub itself pings an external monitor (e.g. a healthchecks.io-style push URL) on an interval to prove it's alive, independent of any agent. `beszel-server.nix` sets it via `beszel_heartbeat_url` in `hosts/ligma/secrets.yaml` (hub-only, not the shared `common/secrets.yaml` — this is a hub concern, not an agent one), stored as `HEARTBEAT_URL=<value>`. `HEARTBEAT_INTERVAL`/`HEARTBEAT_METHOD` are left unset — Beszel's built-in defaults apply.
 
 ### Distribution registry mirrors
 
