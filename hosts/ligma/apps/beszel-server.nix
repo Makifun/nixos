@@ -24,6 +24,10 @@ in
   virtualisation.oci-containers.containers.beszel = {
     image = "docker.io/henrygd/beszel:${beszelTag}";
     ports = [ "127.0.0.1:${toString beszelPort}:8090" ];
+    environment = {
+      # OIDC login verified working — require it, no local password fallback.
+      DISABLE_PASSWORD_AUTH = "true";
+    };
     environmentFiles = [ config.sops.secrets.beszel_heartbeat_url.path ];
     volumes = [ "${beszelBase}/data:/beszel_data" ];
   };

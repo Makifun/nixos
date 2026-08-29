@@ -279,7 +279,7 @@ Beszel hub (loopback port 8095, also reachable via Traefik at `beszel.makifun.se
 3. Toggle "Hide collection create and edit controls" back on.
 4. Beszel does not auto-create users from OIDC login by default — either set `USER_CREATION=true` (not currently set), or make sure the existing Beszel account's email matches the Authentik account's email so login links to it instead of failing.
 5. Verify: click "authentik" on the Beszel login page, confirm it round-trips through Authentik back into Beszel.
-6. Only once verified: set `DISABLE_PASSWORD_AUTH=true` on the hub container to fully require OIDC (not yet set, to avoid a lockout if step 2 has a typo).
+6. Verified and now enforced: `DISABLE_PASSWORD_AUTH=true` is set on the hub container (`beszel-server.nix`) — OIDC via Authentik is the only login path, no local password fallback.
 
 SOPS secrets in `common/secrets.yaml` (shared by every host):
 - `beszel_agent_key` — hub's public SSH key. One-time bootstrap: create the hub admin account at `https://beszel.makifun.se`, add any one system in the UI to reveal the key, copy it into this secret as `KEY=<value>`.
