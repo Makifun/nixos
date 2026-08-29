@@ -29,7 +29,6 @@
     ./apps/opnsense-exporter.nix
     ./apps/pgadmin.nix
     ./apps/pve-exporter.nix
-    ./apps/renovate.nix
     ./apps/traefik-backrest-bofa.nix
     ./apps/traefik-pgbackweb-bofa.nix
     ./apps/traefik-backrest-ligma.nix
