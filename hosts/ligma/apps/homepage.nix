@@ -478,7 +478,7 @@
           {
             "Forgejo" = {
               icon = "/images/forgejo.png";
-              href = "https://git.${baseFacts.domainName}";
+              href = "https://git.${baseFacts.domainName}/pulls?type=your_repositories";
               widget = {
                 type = "gitea";
                 fields = [
