@@ -571,8 +571,8 @@
             "pgBackWeb" = {
               icon = "/images/pgbackweb.png";
               href = "https://pgbackweb.${baseFacts.domainName}";
-              server = "bofa";
-              container = "pgbackweb";
+              namespace = "postgres";
+              app = "pgbackweb";
             };
           }
           {
