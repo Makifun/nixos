@@ -24,8 +24,25 @@ jobs:
       - name: Snapshot flake.lock before update
         run: cp flake.lock /tmp/flake.lock.before
 
+      - name: Snapshot package versions before update
+        run: |
+          echo 'status=ok' > /tmp/pkgs-eval-status
+          nix eval --json \
+            '.#nixosConfigurations.ligma.config.environment.systemPackages' \
+            --apply 'pkgs: builtins.map (p: let d = builtins.parseDrvName p.name; in {inherit (d) name version;}) pkgs' \
+            > /tmp/pkgs-before.json \
+            || { echo 'status=failed' > /tmp/pkgs-eval-status; echo '[]' > /tmp/pkgs-before.json; }
+
       - name: Update flake inputs
         run: nix flake update
+
+      - name: Snapshot package versions after update
+        run: |
+          nix eval --json \
+            '.#nixosConfigurations.ligma.config.environment.systemPackages' \
+            --apply 'pkgs: builtins.map (p: let d = builtins.parseDrvName p.name; in {inherit (d) name version;}) pkgs' \
+            > /tmp/pkgs-after.json \
+            || { echo 'status=failed' > /tmp/pkgs-eval-status; echo '[]' > /tmp/pkgs-after.json; }
 
       - name: Check for changes
         id: changes
@@ -88,6 +105,34 @@ jobs:
               )
           else:
               body = '_Only transitive/non-GitHub inputs changed — see `flake.lock` diff._'
+
+          # Package version changes (ligma's environment.systemPackages —
+          # identical set across all hosts, common/default.nix)
+          with open('/tmp/pkgs-before.json') as f:
+              before_pkgs = {p['name']: p['version'] for p in json.load(f) if p.get('version')}
+          with open('/tmp/pkgs-after.json') as f:
+              after_pkgs = {p['name']: p['version'] for p in json.load(f) if p.get('version')}
+
+          pkg_eval_status = open('/tmp/pkgs-eval-status').read().strip()
+
+          pkg_rows = []
+          for name in sorted(set(before_pkgs) | set(after_pkgs)):
+              bv = before_pkgs.get(name, '_(new)_')
+              av = after_pkgs.get(name, '_(removed)_')
+              if bv != av:
+                  pkg_rows.append(f'| `{name}` | {bv} | {av} |')
+
+          if pkg_eval_status == 'failed':
+              body += '\n\n## Package versions\n\n_`nix eval` failed — check workflow logs._'
+          elif pkg_rows:
+              body += (
+                  '\n\n## Package versions\n\n'
+                  '| Package | Before | After |\n'
+                  '|---------|--------|-------|\n' +
+                  '\n'.join(pkg_rows)
+              )
+          else:
+              body += '\n\n## Package versions\n\n_No version changes._'
 
           check_status = os.environ['CHECK_STATUS']
           if check_status == 'passed':
