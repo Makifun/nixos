@@ -29,7 +29,7 @@
     ./apps/pgadmin.nix
     ./apps/pve-exporter.nix
     ./apps/traefik-backrest-bofa.nix
-    ./apps/traefik-pgbackweb-bofa.nix
+    #./apps/traefik-pgbackweb-bofa.nix
     ./apps/traefik-backrest-ligma.nix
     ./apps/traefik-backrest-playma.nix
     ./apps/traefik-rclone-playma.nix
