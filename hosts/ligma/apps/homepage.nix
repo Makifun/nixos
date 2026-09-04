@@ -43,10 +43,6 @@
     };
 
     docker = {
-      bofa = {
-        host = hosts.bofa;
-        port = 2375;
-      };
       ligma = {
         socket = "/run/podman/podman.sock";
       };
@@ -555,8 +551,8 @@
           {
             "TimescaleDB" = {
               icon = "/images/timescaledb.png";
-              server = "bofa";
-              container = "timescaledb";
+              namespace = "postgres";
+              app = "tracearr-db";
             };
           }
           {
@@ -761,18 +757,6 @@
             };
           }
           {
-            "Backrest Bofa" = {
-              icon = "/images/backrest.png";
-              href = "https://backrest-bofa.${baseFacts.domainName}";
-              server = "bofa";
-              container = "backrest";
-              widget = {
-                type = "backrest";
-                url = "https://backrest-bofa.${baseFacts.domainName}";
-              };
-            };
-          }
-          {
             "Backrest Ligma" = {
               icon = "/images/backrest.png";
               href = "https://backrest-ligma.${baseFacts.domainName}";
@@ -805,28 +789,6 @@
               widget = {
                 type = "backrest";
                 url = "https://backrest-sugma.${baseFacts.domainName}";
-              };
-            };
-          }
-          {
-            "Beszel Bofa" = {
-              icon = "/images/beszel.svg";
-              href = "https://beszel.${baseFacts.domainName}";
-              server = "bofa";
-              container = "beszel-agent";
-              widget = {
-                type = "beszel";
-                fields = [
-                  "cpu"
-                  "memory"
-                  "disk"
-                  "network"
-                ];
-                url = "https://beszel.${baseFacts.domainName}";
-                username = "{{HOMEPAGE_VAR_BESZEL_USERNAME}}";
-                password = "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}";
-                systemId = "{{HOMEPAGE_VAR_BESZEL_SYSTEMID_BOFA}}";
-                version = 2;
               };
             };
           }
