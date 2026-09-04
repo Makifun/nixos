@@ -237,6 +237,11 @@ in
     mode = "0444";
   };
 
+  environment.etc."grafana-dashboards/postgres.json" = {
+    source = ../grafana_dashboards/postgres.json;
+    mode = "0444";
+  };
+
   services.grafana = {
     enable = true;
     dataDir = "/${hostname}/${hostname}/grafana";
