@@ -2,24 +2,34 @@
   "title": "PostgreSQL (CNPG + TimescaleDB)",
   "uid": "postgres-sugma",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "timezone": "browser",
   "refresh": "30s",
   "time": {"from": "now-6h", "to": "now"},
   "tags": ["postgres", "cnpg", "timescaledb", "sugma"],
   "panels": [
     {
+      "id": 200,
+      "type": "text",
+      "title": "",
+      "gridPos": {"h": 3, "w": 24, "x": 0, "y": 0},
+      "options": {
+        "mode": "markdown",
+        "content": "**general-apps** (CNPG, `cnpg_*` metrics) hosts 15 real app databases (sonarr/-log, sonarr4k/-log, radarr/-log, radarr4k/-log, prowlarr/-log, bazarr, bazarr4k, seerr, miniflux, pgbackweb) plus two housekeeping databases every panel below excludes: **`app`** (CNPG's default bootstrap database, created automatically, unused — nothing connects to it) and **`postgres`** (the built-in Postgres maintenance database every instance has, including `tracearr`). Single-instance cluster (sugma is one node) — replication-lag panels read 0 by design, not a fault."
+      }
+    },
+    {
       "id": 100,
       "type": "row",
       "title": "Overview",
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 3},
       "collapsed": false
     },
     {
       "id": 1,
       "title": "general-apps (CNPG)",
       "type": "stat",
-      "gridPos": {"h": 3, "w": 4, "x": 0, "y": 1},
+      "gridPos": {"h": 3, "w": 4, "x": 0, "y": 4},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {
@@ -38,7 +48,7 @@
       "id": 2,
       "title": "tracearr (TimescaleDB)",
       "type": "stat",
-      "gridPos": {"h": 3, "w": 4, "x": 4, "y": 1},
+      "gridPos": {"h": 3, "w": 4, "x": 4, "y": 4},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {
@@ -56,45 +66,47 @@
     {
       "id": 3,
       "title": "general-apps connections",
-      "type": "stat",
-      "gridPos": {"h": 3, "w": 4, "x": 8, "y": 1},
+      "type": "gauge",
+      "gridPos": {"h": 3, "w": 4, "x": 8, "y": 4},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "thresholds": {"mode": "percentage", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 70}, {"color": "red", "value": 90}]},
-          "max": 100
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 70}, {"color": "red", "value": 90}]}
         }
       },
-      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "value", "colorMode": "value"},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "showThresholdLabels": false, "showThresholdMarkers": true},
       "targets": [
-        {"expr": "100 * sum(cnpg_backends_total{cluster=\"general-apps\"}) / cnpg_pg_settings_setting{name=\"max_connections\"}", "legendFormat": "% of max_connections", "refId": "A"}
+        {"expr": "100 * sum(cnpg_backends_total{job=\"cnpg\"}) / scalar(cnpg_pg_settings_setting{job=\"cnpg\", name=\"max_connections\"})", "legendFormat": "% of max_connections", "refId": "A"}
       ]
     },
     {
       "id": 4,
       "title": "tracearr connections",
-      "type": "stat",
-      "gridPos": {"h": 3, "w": 4, "x": 12, "y": 1},
+      "type": "gauge",
+      "gridPos": {"h": 3, "w": 4, "x": 12, "y": 4},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "thresholds": {"mode": "percentage", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 70}, {"color": "red", "value": 90}]},
-          "max": 100
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 70}, {"color": "red", "value": 90}]}
         }
       },
-      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "value", "colorMode": "value"},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "showThresholdLabels": false, "showThresholdMarkers": true},
       "targets": [
-        {"expr": "100 * sum(pg_stat_activity_count{job=\"tracearr-db\", state=~\"active|idle|idle in transaction\"}) / pg_settings_max_connections{job=\"tracearr-db\"}", "legendFormat": "% of max_connections", "refId": "A"}
+        {"expr": "100 * sum(pg_stat_activity_count{job=\"tracearr-db\"}) / scalar(pg_settings_max_connections{job=\"tracearr-db\"})", "legendFormat": "% of max_connections", "refId": "A"}
       ]
     },
     {
       "id": 5,
       "title": "Time since last successful backup",
       "type": "stat",
-      "description": "cnpg_collector_last_available_backup_timestamp — 0 means CNPG's collector has not recorded a completed backup yet, check `kubectl get backup -n postgres` directly if this looks wrong.",
-      "gridPos": {"h": 3, "w": 4, "x": 16, "y": 1},
+      "description": "general-apps only, via the barman-cloud plugin's own metric (the legacy cnpg_collector_last_available_backup_timestamp never updates for plugin-managed backups — known upstream gap, cloudnative-pg/plugin-barman-cloud#380).",
+      "gridPos": {"h": 3, "w": 4, "x": 16, "y": 4},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {
@@ -104,14 +116,15 @@
       },
       "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "value", "colorMode": "value"},
       "targets": [
-        {"expr": "time() - cnpg_collector_last_available_backup_timestamp", "legendFormat": "age", "refId": "A"}
+        {"expr": "time() - barman_cloud_cloudnative_pg_io_last_available_backup_timestamp{job=\"cnpg\"}", "legendFormat": "age", "refId": "A"}
       ]
     },
     {
       "id": 6,
       "title": "CNPG replication lag",
       "type": "stat",
-      "gridPos": {"h": 3, "w": 4, "x": 20, "y": 1},
+      "description": "Always 0 on this single-instance cluster — kept for when/if a replica is ever added.",
+      "gridPos": {"h": 3, "w": 4, "x": 20, "y": 4},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {
@@ -121,35 +134,35 @@
       },
       "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "value", "colorMode": "value"},
       "targets": [
-        {"expr": "cnpg_pg_replication_lag{cluster=\"general-apps\"}", "legendFormat": "lag", "refId": "A"}
+        {"expr": "cnpg_pg_replication_lag{job=\"cnpg\"}", "legendFormat": "lag", "refId": "A"}
       ]
     },
     {
       "id": 101,
       "type": "row",
       "title": "Database sizes",
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 4},
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 7},
       "collapsed": false
     },
     {
       "id": 10,
       "title": "general-apps — database size by app",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 5},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "bytes", "custom": {"drawStyle": "line", "fillOpacity": 10, "spanNulls": true}}
       },
       "options": {"legend": {"displayMode": "table", "placement": "right", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}},
       "targets": [
-        {"expr": "cnpg_pg_database_size_bytes{datname!~\"template0|template1\"}", "legendFormat": "{{datname}}", "refId": "A"}
+        {"expr": "cnpg_pg_database_size_bytes{job=\"cnpg\", datname!~\"app|postgres|template0|template1\"}", "legendFormat": "{{datname}}", "refId": "A"}
       ]
     },
     {
       "id": 11,
       "title": "tracearr — database size",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 5},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "bytes", "custom": {"drawStyle": "line", "fillOpacity": 10, "spanNulls": true}}
@@ -163,28 +176,28 @@
       "id": 102,
       "type": "row",
       "title": "Connections & activity",
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 13},
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 16},
       "collapsed": false
     },
     {
       "id": 20,
       "title": "general-apps — backends by database",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 17},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "short", "custom": {"drawStyle": "line", "fillOpacity": 15, "stacking": {"mode": "normal"}, "spanNulls": true}}
       },
       "options": {"legend": {"displayMode": "table", "placement": "right", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}},
       "targets": [
-        {"expr": "sum by (datname) (cnpg_backends_total{cluster=\"general-apps\"})", "legendFormat": "{{datname}}", "refId": "A"}
+        {"expr": "sum by (datname) (cnpg_backends_total{job=\"cnpg\", datname!~\"app|postgres\"})", "legendFormat": "{{datname}}", "refId": "A"}
       ]
     },
     {
       "id": 21,
       "title": "tracearr — connections by state",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 17},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "short", "custom": {"drawStyle": "line", "fillOpacity": 15, "stacking": {"mode": "normal"}, "spanNulls": true}}
@@ -198,29 +211,29 @@
       "id": 103,
       "type": "row",
       "title": "Transactions & cache",
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 22},
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 25},
       "collapsed": false
     },
     {
       "id": 30,
       "title": "general-apps — commits/rollbacks per second",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 23},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 26},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "ops", "custom": {"drawStyle": "line", "fillOpacity": 10, "spanNulls": true}}
       },
       "options": {"legend": {"displayMode": "table", "placement": "right", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}},
       "targets": [
-        {"expr": "sum by (datname) (rate(cnpg_pg_stat_database_xact_commit{cluster=\"general-apps\", datname!=\"\"}[5m]))", "legendFormat": "{{datname}} commit", "refId": "A"},
-        {"expr": "sum by (datname) (rate(cnpg_pg_stat_database_xact_rollback{cluster=\"general-apps\", datname!=\"\"}[5m]))", "legendFormat": "{{datname}} rollback", "refId": "B"}
+        {"expr": "sum by (datname) (rate(cnpg_pg_stat_database_xact_commit{job=\"cnpg\", datname!~\"app|postgres|\"}[5m]))", "legendFormat": "{{datname}} commit", "refId": "A"},
+        {"expr": "sum by (datname) (rate(cnpg_pg_stat_database_xact_rollback{job=\"cnpg\", datname!~\"app|postgres|\"}[5m]))", "legendFormat": "{{datname}} rollback", "refId": "B"}
       ]
     },
     {
       "id": 31,
       "title": "tracearr — commits/rollbacks per second",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 23},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 26},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "ops", "custom": {"drawStyle": "line", "fillOpacity": 10, "spanNulls": true}}
@@ -234,9 +247,9 @@
     {
       "id": 32,
       "title": "Buffer cache hit ratio",
-      "description": "blks_hit / (blks_hit + blks_read), per instance. Below ~99% on an OLTP workload usually means shared_buffers is undersized.",
+      "description": "blks_hit / (blks_hit + blks_read), per instance, all databases. Below ~99% on an OLTP workload usually means shared_buffers is undersized.",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 31},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 34},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "percentunit", "max": 1, "custom": {"drawStyle": "line", "fillOpacity": 10, "spanNulls": true}}
@@ -244,7 +257,7 @@
       "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi", "sort": "desc"}},
       "targets": [
         {
-          "expr": "sum(rate(cnpg_pg_stat_database_blks_hit{cluster=\"general-apps\", datname!=\"\"}[5m])) / (sum(rate(cnpg_pg_stat_database_blks_hit{cluster=\"general-apps\", datname!=\"\"}[5m])) + sum(rate(cnpg_pg_stat_database_blks_read{cluster=\"general-apps\", datname!=\"\"}[5m])))",
+          "expr": "sum(rate(cnpg_pg_stat_database_blks_hit{job=\"cnpg\", datname!=\"\"}[5m])) / (sum(rate(cnpg_pg_stat_database_blks_hit{job=\"cnpg\", datname!=\"\"}[5m])) + sum(rate(cnpg_pg_stat_database_blks_read{job=\"cnpg\", datname!=\"\"}[5m])))",
           "legendFormat": "general-apps",
           "refId": "A"
         },
@@ -260,7 +273,7 @@
       "title": "tracearr — temp file usage",
       "description": "Bytes written to temp files (query results spilling to disk because work_mem was too small).",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 31},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 34},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "Bps", "custom": {"drawStyle": "bars", "fillOpacity": 60, "lineWidth": 0}}
@@ -274,28 +287,28 @@
       "id": 104,
       "type": "row",
       "title": "Locks & conflicts",
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 39},
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 42},
       "collapsed": false
     },
     {
       "id": 40,
       "title": "general-apps — deadlocks",
       "type": "timeseries",
-      "gridPos": {"h": 7, "w": 12, "x": 0, "y": 40},
+      "gridPos": {"h": 7, "w": 12, "x": 0, "y": 43},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "short", "custom": {"drawStyle": "bars", "fillOpacity": 60, "lineWidth": 0}}
       },
       "options": {"legend": {"displayMode": "table", "placement": "right", "calcs": ["sum"]}, "tooltip": {"mode": "multi", "sort": "desc"}},
       "targets": [
-        {"expr": "sum by (datname) (increase(cnpg_pg_stat_database_deadlocks{cluster=\"general-apps\", datname!=\"\"}[5m]))", "legendFormat": "{{datname}}", "refId": "A"}
+        {"expr": "sum by (datname) (increase(cnpg_pg_stat_database_deadlocks{job=\"cnpg\", datname!~\"app|postgres|\"}[5m]))", "legendFormat": "{{datname}}", "refId": "A"}
       ]
     },
     {
       "id": 41,
       "title": "tracearr — locks by mode",
       "type": "timeseries",
-      "gridPos": {"h": 7, "w": 12, "x": 12, "y": 40},
+      "gridPos": {"h": 7, "w": 12, "x": 12, "y": 43},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "short", "custom": {"drawStyle": "line", "fillOpacity": 15, "stacking": {"mode": "normal"}, "spanNulls": true}}
@@ -309,35 +322,35 @@
       "id": 105,
       "type": "row",
       "title": "CNPG — WAL, checkpoints & archiving",
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 47},
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 50},
       "collapsed": false
     },
     {
       "id": 50,
       "title": "WAL generation rate",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 48},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 51},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "Bps", "custom": {"drawStyle": "line", "fillOpacity": 10, "spanNulls": true}}
       },
       "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
       "targets": [
-        {"expr": "rate(cnpg_collector_wal_bytes{cluster=\"general-apps\"}[5m])", "legendFormat": "WAL bytes/s", "refId": "A"}
+        {"expr": "rate(cnpg_collector_wal_bytes{job=\"cnpg\"}[5m])", "legendFormat": "WAL bytes/s", "refId": "A"}
       ]
     },
     {
       "id": 51,
       "title": "WAL files on disk",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 48},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 51},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "short", "custom": {"drawStyle": "line", "fillOpacity": 10, "spanNulls": true}}
       },
       "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi", "sort": "desc"}},
       "targets": [
-        {"expr": "cnpg_collector_pg_wal{cluster=\"general-apps\", value=~\"count|keep|max|min\"}", "legendFormat": "{{value}}", "refId": "A"}
+        {"expr": "cnpg_collector_pg_wal{job=\"cnpg\", value=~\"count|keep|max|min\"}", "legendFormat": "{{value}}", "refId": "A"}
       ]
     },
     {
@@ -345,22 +358,22 @@
       "title": "Checkpoints (timed vs requested)",
       "description": "A rising 'requested' rate relative to 'timed' means checkpoints are being forced early by WAL volume — consider raising max_wal_size.",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 48},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 51},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "short", "custom": {"drawStyle": "bars", "fillOpacity": 60, "lineWidth": 0, "stacking": {"mode": "normal"}}}
       },
       "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi", "sort": "desc"}},
       "targets": [
-        {"expr": "increase(cnpg_pg_stat_checkpointer_checkpoints_timed{cluster=\"general-apps\"}[5m])", "legendFormat": "timed", "refId": "A"},
-        {"expr": "increase(cnpg_pg_stat_checkpointer_checkpoints_req{cluster=\"general-apps\"}[5m])", "legendFormat": "requested", "refId": "B"}
+        {"expr": "increase(cnpg_pg_stat_checkpointer_checkpoints_timed{job=\"cnpg\"}[5m])", "legendFormat": "timed", "refId": "A"},
+        {"expr": "increase(cnpg_pg_stat_checkpointer_checkpoints_req{job=\"cnpg\"}[5m])", "legendFormat": "requested", "refId": "B"}
       ]
     },
     {
       "id": 53,
       "title": "Seconds since last WAL archival",
       "type": "timeseries",
-      "gridPos": {"h": 7, "w": 12, "x": 0, "y": 56},
+      "gridPos": {"h": 7, "w": 12, "x": 0, "y": 59},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {
@@ -371,29 +384,29 @@
       },
       "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
       "targets": [
-        {"expr": "cnpg_pg_stat_archiver_seconds_since_last_archival{cluster=\"general-apps\"}", "legendFormat": "seconds since last archival", "refId": "A"}
+        {"expr": "cnpg_pg_stat_archiver_seconds_since_last_archival{job=\"cnpg\"}", "legendFormat": "seconds since last archival", "refId": "A"}
       ]
     },
     {
       "id": 54,
       "title": "WAL archiving — archived vs failed",
       "type": "timeseries",
-      "gridPos": {"h": 7, "w": 12, "x": 12, "y": 56},
+      "gridPos": {"h": 7, "w": 12, "x": 12, "y": 59},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "short", "custom": {"drawStyle": "bars", "fillOpacity": 60, "lineWidth": 0}}
       },
       "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi", "sort": "desc"}},
       "targets": [
-        {"expr": "increase(cnpg_pg_stat_archiver_archived_count{cluster=\"general-apps\"}[5m])", "legendFormat": "archived", "refId": "A"},
-        {"expr": "increase(cnpg_pg_stat_archiver_failed_count{cluster=\"general-apps\"}[5m])", "legendFormat": "failed", "refId": "B"}
+        {"expr": "increase(cnpg_pg_stat_archiver_archived_count{job=\"cnpg\"}[5m])", "legendFormat": "archived", "refId": "A"},
+        {"expr": "increase(cnpg_pg_stat_archiver_failed_count{job=\"cnpg\"}[5m])", "legendFormat": "failed", "refId": "B"}
       ]
     },
     {
       "id": 106,
       "type": "row",
       "title": "tracearr — table sizes",
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 63},
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 66},
       "collapsed": false
     },
     {
@@ -401,7 +414,7 @@
       "title": "tracearr — largest user tables (top 10)",
       "description": "Includes TimescaleDB chunk tables — a hypertable's data lives in per-chunk child tables, not the parent.",
       "type": "timeseries",
-      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 64},
+      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 67},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {
         "defaults": {"unit": "bytes", "custom": {"drawStyle": "line", "fillOpacity": 10, "spanNulls": true}}
