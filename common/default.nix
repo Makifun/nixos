@@ -62,11 +62,11 @@
       "/etc/machine-id"
     ];
   };
-  services.journald.extraConfig = ''
-    SystemMaxUse=512M
-    MaxRetentionSec=7day
-    MaxFileSec=1day
-  '';
+  services.journald.settings.Journal = {
+    SystemMaxUse = "512M";
+    MaxRetentionSec = "7day";
+    MaxFileSec = "1day";
+  };
   sops.secrets.initrd_ssh_host_ed25519_key = {
     format = "yaml";
     sopsFile = ../hosts/${config.networking.hostName}/secrets.yaml;
