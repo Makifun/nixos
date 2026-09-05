@@ -349,6 +349,19 @@
               };
             };
           }
+          {
+            "Sportarr" = {
+              icon = "/images/sportarr.png";
+              href = "https://sportarr.${baseFacts.domainName}";
+              namespace = "sportarr";
+              app = "sportarr";
+              widget = {
+                type = "sportarr";
+                url = "https://sportarr.${baseFacts.domainName}";
+                key = "{{HOMEPAGE_VAR_SPORTARR_TOKEN}}";
+              };
+            };
+          }
         ];
       }
 
