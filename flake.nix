@@ -34,7 +34,6 @@
         technitium = "10.10.10.3";
         makizen = "10.10.10.9";
         ligma = "10.10.10.13";
-        bofa = "10.10.10.14";
         playma = "10.10.10.15";
         sugma01 = "10.10.10.26";
         sugma02 = "10.10.10.27";
@@ -52,7 +51,6 @@
     in
     {
       nixosConfigurations = {
-        bofa = mkSystem [ ./hosts/bofa ];
         ligma = mkSystem [ ./hosts/ligma ];
         playma = mkSystem [ ./hosts/playma ];
         minimaliso = nixpkgs.lib.nixosSystem {

@@ -15,15 +15,6 @@ let
     builtins.toJSON {
       Servers = {
         "1" = {
-          Name = "bofa (TimescaleDB)";
-          Group = "Servers";
-          Host = hosts.bofa;
-          Port = 5432;
-          MaintenanceDB = "postgres";
-          Username = "tracearr";
-          SSLMode = "prefer";
-        };
-        "2" = {
           Name = "ligma (PostgreSQL)";
           Group = "Servers";
           Host = "/run/postgresql";

@@ -4,11 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-NixOS flake-based system configuration for three hosts:
+NixOS flake-based system configuration for two hosts:
 
 - **ligma** — production services host on Proxmox; ephemeral root (tmpfs), LUKS+ZFS, SOPS, impermanence.
-- **bofa** (VM 888, 10.10.10.14) — dedicated database host on Proxmox; ephemeral root (tmpfs), LUKS+XFS+LVM. Runs TimescaleDB for tracearr + all arr apps.
 - **playma** (10.10.10.15) — NixOS VM on Proxmox; Plex + `/cloud` via rclone FUSE (S3 crypt remote, VFS cache on 200 G disk), re-exported via Samba to sugma (port 445, guest auth). Intel GVT-g iGPU for hardware transcoding.
+
+**bofa** (dedicated database host, TimescaleDB for tracearr) was decommissioned — TimescaleDB now runs on sugma via CNPG (see `sugma/CLAUDE.md`).
 
 ## Common Commands
 
@@ -38,7 +39,7 @@ nixfmt **/*.nix
 **Deploy/provision a new host from scratch:**
 ```bash
 ./nixos_install.sh <ip/hostname> ligma
-./nixos_install.sh <ip/hostname> bofa
+./nixos_install.sh <ip/hostname> playma
 ```
 
 **Refresh SOPS keys** (after adding/changing age keys):
@@ -65,10 +66,10 @@ sops hosts/ligma/secrets.yaml
 
 ### Flake Structure
 
-- **`flake.nix`** — Defines three outputs: `nixosConfigurations.ligma`, `nixosConfigurations.bofa`, and `nixosConfigurations.minimaliso`. Inputs: nixpkgs (unstable, stateVersion 25.11), disko, impermanence, sops-nix.
-- **`common/`** — Modules applied to all hosts via `common/default.nix` (auto-imports all `.nix` files in the directory): boot (initrd SSH), users, sops, openssh, hardening, fail2ban, zram, autoupgrade, autoupgrade-notify, alloy. **ZFS-specific config is NOT in common** — it lives in `hosts/ligma/default.nix` only (bofa uses XFS).
+- **`flake.nix`** — Defines three outputs: `nixosConfigurations.ligma`, `nixosConfigurations.playma`, and `nixosConfigurations.minimaliso`. Inputs: nixpkgs (unstable, stateVersion 25.11), disko, impermanence, sops-nix.
+- **`common/`** — Modules applied to all hosts via `common/default.nix` (auto-imports all `.nix` files in the directory): boot (initrd SSH), users, sops, openssh, hardening, fail2ban, zram, autoupgrade, autoupgrade-notify, alloy.
 - **`hosts/ligma/`** — ligma-specific config, disk layout (ZFS), and secrets.
-- **`hosts/bofa/`** — bofa-specific config, disk layout (XFS+LVM), and secrets.
+- **`hosts/playma/`** — playma-specific config, disk layout (XFS), and secrets.
 - **`modules/`** — Reusable custom modules (currently: podman).
 - **`CHANGELOG.md`** — flake-input and package version history; `.github/workflows/update-flake-inputs.yml` prepends a dated entry on each lock update (see "Flake input updates" below).
 
@@ -85,15 +86,6 @@ Two encrypted drives:
 Both drives use XFS with `noatime,nofail`. LUKS passphrases entered via initrd SSH at boot. **New VM install:** disko formats on `nixos_install.sh`. **Existing VM adding a disk:** must manually partition + luksFormat + mkfs.xfs before `nh os switch` — see comments in `disko-config.nix`.
 
 All ZFS pools: ashift=12, autotrim=on, compression=lz4, atime=off, xattr=sa. ARC max=4 GB, min=2 GB (ligma balloon: 12 GB floor, 16 GB ceiling). Prefetch disabled (`zfs_prefetch_disable=1`).
-
-### Disk Layout — bofa (`hosts/bofa/disko-config.nix`)
-
-Two encrypted drives (no ZFS — lower overhead for DB workloads):
-
-- **OS disk** (50 G, `scsi-0QEMU_QEMU_HARDDISK_nixos`): 1 G EFI + LUKS(`crypted_nixos`) → LVM `vg_nixos` → XFS `/nix` (25 G) + XFS `/persist` (~24 G). Single passphrase for both via LVM.
-- **Data disk** (100 G, `scsi-0QEMU_QEMU_HARDDISK_bofa`): LUKS(`crypted_bofa`) → XFS `/bofa`. All app data lives here (postgresql, backrest, beszel).
-
-XFS mount options: `noatime,discard`.
 
 ### Disk Layout — playma (`hosts/playma/disko-config.nix`)
 
@@ -157,21 +149,7 @@ Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Su
 | `netbird.nix` | NetBird VPN management | 8811 (dashboard), 33073 (mgmt), 10000/10080 (signal), 33080 (relay), 3478/udp (STUN/TURN) | 5 containers on `netbird_network` (10.89.3.0/24). Coturn uses host network. Secrets in `netbird-config.service` oneshot (SOPS: `netbird-datastore-key`, `netbird-relay-secret`, `netbird-turn-password`). Authentik public PKCE OIDC (`client_id=netbird`); no forwardAuth. gRPC paths use `h2c://` backend scheme in Traefik. Dashboard: `https://netbird.makifun.se`. CLI: `netbird up --management-url https://netbird.makifun.se`. **`netbird-datastore-key` must be exactly 32 bytes** — generate with `openssl rand -base64 32` (produces 44-char base64 string; Netbird hashes it internally to 32 bytes). `openssl rand -base64 24` (32 chars) is NOT accepted. |
 | `syncstorage.nix` | Firefox Sync (syncstorage-rs) | 8000 | Mozilla syncstorage-rs postgres variant. Tokenserver enabled; authenticates via Mozilla FxA OAuth (no Authentik). Two PostgreSQL DBs (`syncstorage`, `tokenserver`) owned by `syncstorage` user; provisioned by `syncstorage-db-setup.service`. Connects via Unix socket bind-mount. SOPS: `syncstorage_env` (must contain `SYNC_MASTER_SECRET=...`). Firefox client URL: `https://firefox.makifun.se/1.0/sync/1.5`. |
 | `technitium.nix` | Technitium DNS Server (external) | — | Traefik proxy to Technitium LXC at `10.10.10.3`. `technitium.makifun.se` → `https://10.10.10.3:53443` (self-signed, `insecureSkipVerify`). **No Authentik forwardAuth** — Technitium handles auth via its own OIDC login (like Jellyfin); adding forwardAuth causes 404 since there is no proxy provider. `doh.makifun.se` → `http://10.10.10.3` (no auth). OIDC configured in `ligma/authentik/technitium.tf`. Sets `ligma.dnsRecords."technitium.makifun.se"`. |
-| `backrest-bofa.nix` | Traefik proxy to bofa backrest | — | Routes `backrest-bofa.makifun.se` → `http://<BOFA_IP>:9898` via Authentik SSO. Replace `REPLACE_WITH_BOFA_IP` in the file with bofa's actual IP. |
-| `pgadmin.nix` | PGAdmin PostgreSQL manager | 5050 | `dpage/pgadmin4:9`. Desktop mode (`SERVER_MODE=False`, no login screen — Authentik handles auth). Pre-configured servers: bofa (TimescaleDB at 10.10.10.14:5432, user=tracearr) and ligma (native PG at /run/postgresql socket, user=authentik). Data at `/ligma/ligma/pgadmin` (UID/GID 5050). Socket bind-mount: `/run/postgresql`. `ENHANCED_COOKIE_PROTECTION=False` (breaks behind reverse proxy). |
-
-### Services (`hosts/bofa/apps/`)
-
-| File | Service | Port | Notes |
-|---|---|---|---|
-| `timescaledb.nix` | TimescaleDB (Podman) | 5432 | `timescale/timescaledb-ha:pg18.1-ts2.25.0`. Data at `/bofa/bofa/postgresql`. `POSTGRES_USER=tracearr`, `POSTGRES_DB=tracearr`. Password from SOPS `timescaledb-tracearr-password` via `sops.templates."timescaledb.env"`. `max_connections=200` (raised from 100 — 8 arr apps exhaust 100 on cold-start burst). bofa has **balloon RAM** (5 GB min / 8 GB max, Proxmox). Port open to sugma nodes 10.10.10.26-28 only. SOPS: `timescaledb-tracearr-password`. |
-| `backrest.nix` | Backrest backup manager | 9898 | Restic-backed S3. Backs up `/bofa/bofa`. Port 9898 open to ligma (10.10.10.13) only for Traefik proxy. Schedule: 05:00 UTC. Prune: 06:00 UTC. SOPS: same keys as ligma backrest. |
-| `common/beszel-agent.nix` | Beszel agent | 45876 | Monitors bofa; reports disk usage of `/bofa` and `/persist`. Self-registers with the hub via universal token — see "Beszel monitoring" in the ligma section. |
-| `pgbackweb.nix` | pgBackWeb logical backup UI | 8085 | `eduardolat/pgbackweb:0.5.1`. Web UI for scheduled pg_dump backups to Garage `pgbackweb` S3 bucket. State DB: `pgbackweb` database in the local timescaledb instance, owned by the `pgbackweb` user (`pg_read_all_data` grant). Port open to ligma only; exposed via Traefik + Authentik at `pgbackweb.makifun.se`. SOPS: `pgbackweb-encryption-key`, `pgbackweb-db-password`. Configure databases and S3 destination via the web UI (use key-value DSN format for connection strings: `host=10.88.0.1 port=5432 user=pgbackweb ...`). |
-
-**To add a new bofa secret:** `sops hosts/bofa/secrets.yaml`, add the key, reference in the app `.nix` file.
-
-**bofa IP:** `10.10.10.14` (MAC `2E:7A:45:73:8C:64`, static DHCP reservation recommended).
+| `pgadmin.nix` | PGAdmin PostgreSQL manager | 5050 | `dpage/pgadmin4:9`. Desktop mode (`SERVER_MODE=False`, no login screen — Authentik handles auth). Pre-configured server: ligma (native PG at /run/postgresql socket, user=authentik). Data at `/ligma/ligma/pgadmin` (UID/GID 5050). Socket bind-mount: `/run/postgresql`. `ENHANCED_COOKIE_PROTECTION=False` (breaks behind reverse proxy). |
 
 ### Traefik + Authentik integration
 
