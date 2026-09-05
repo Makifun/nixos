@@ -39,6 +39,7 @@ in
       "/cloud/Film4k:/movies4k:ro"
       "/cloud/Asian:/asian:ro"
       "/cloud/FilmSWE:/moviesswe:ro"
+      "/cloud/Sports:/sports:ro"
       "/transcode/plex:/transcode"
     ];
   };
