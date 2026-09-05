@@ -70,6 +70,7 @@ sops hosts/ligma/secrets.yaml
 - **`hosts/ligma/`** — ligma-specific config, disk layout (ZFS), and secrets.
 - **`hosts/bofa/`** — bofa-specific config, disk layout (XFS+LVM), and secrets.
 - **`modules/`** — Reusable custom modules (currently: podman).
+- **`CHANGELOG.md`** — flake-input and package version history; `.github/workflows/update-flake-inputs.yml` prepends a dated entry on each lock update (see "Flake input updates" below).
 
 ### Ephemeral Root + Impermanence
 
@@ -415,5 +416,6 @@ When adding a new linuxserver image, check if its version tags conflict with ubu
 3. Runs `nix flake check` against the updated lock and records pass/fail.
 4. Builds a PR body table of the flake's direct inputs (`nixpkgs`, `disko`, `impermanence`, `sops-nix`) that changed rev, with before/after dates and a GitHub compare link per input. Transitive inputs (e.g. `home-manager`, pulled in by `impermanence`) are excluded from the table. A second table lists packages whose version changed between the before/after snapshots.
 5. Opens (or updates, if one is already open) a PR on branch `update/flake-lock` via `peter-evans/create-pull-request`, titled with the check result. **`nix flake check` failures do not block the PR** — it's still opened, flagged with ⚠️, so the update is visible either way.
+6. Prepends the same flake-input/package diff to `CHANGELOG.md` at the repo root, under a `## <date>` heading, so the history survives after the PR merges (the PR body itself vanishes once the PR is closed). Same mechanism as `makizen/.forgejo/workflows/update-flake-lock.yml` — reuses the exact rows already computed for the PR body, just with `###` sub-headings instead of `##`. The PR includes `CHANGELOG.md` alongside `flake.lock` (`add-paths`).
 
 Requires repo setting **Settings → Actions → General → Workflow permissions → "Allow GitHub Actions to create and approve pull requests"** enabled, or `peter-evans/create-pull-request` fails to open the PR with the default `GITHUB_TOKEN`.

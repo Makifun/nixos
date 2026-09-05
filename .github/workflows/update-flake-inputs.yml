@@ -63,11 +63,11 @@ jobs:
             echo "status=failed" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Generate PR body
+      - name: Generate PR body and changelog entry
         if: steps.changes.outputs.changed == 'true'
         run: |
           cat > /tmp/gen_summary.py << 'PYEOF'
-          import json, datetime, os
+          import json, datetime, os, pathlib
 
           with open('/tmp/flake.lock.before') as f:
               before_lock = json.load(f)
@@ -143,9 +143,51 @@ jobs:
           body += '\n\n---\n_Automated update. Review and merge to apply._'
 
           print(body)
+
+          # Changelog entry, newest first — same input/package diff as the
+          # PR body above, so the history survives after the PR merges.
+          today = datetime.date.today().isoformat()
+          entry_sections = []
+          if rows:
+              entry_sections.append(
+                  '### Flake inputs\n\n'
+                  '| Input | Before | After | |\n'
+                  '|-------|--------|-------|---|\n' +
+                  '\n'.join(rows)
+              )
+          else:
+              entry_sections.append('_Only transitive/non-GitHub inputs changed — see `flake.lock` diff._')
+
+          if pkg_eval_status == 'failed':
+              entry_sections.append('### Package versions\n\n_`nix eval` failed — check workflow logs._')
+          elif pkg_rows:
+              entry_sections.append(
+                  '### Package versions\n\n'
+                  '| Package | Before | After |\n'
+                  '|---------|--------|-------|\n' +
+                  '\n'.join(pkg_rows)
+              )
+          else:
+              entry_sections.append('### Package versions\n\n_No version changes._')
+
+          entry = f'## {today}\n\n' + '\n\n'.join(entry_sections)
+
+          changelog = pathlib.Path('CHANGELOG.md')
+          if changelog.exists():
+              old = changelog.read_text()
+              header, _, rest = old.partition('\n\n')
+              header = header.rstrip('\n')
+              rest = rest.strip('\n')
+              if not header.startswith('# Changelog'):
+                  header, rest = '# Changelog', old.strip('\n')
+              new_content = f'{header}\n\n{entry}\n\n{rest}'.rstrip() + '\n'
+          else:
+              new_content = f'# Changelog\n\n{entry}\n'
+          changelog.write_text(new_content)
           PYEOF
           CHECK_STATUS="${{ steps.check.outputs.status }}" python3 /tmp/gen_summary.py > /tmp/pr-body.md
           cat /tmp/pr-body.md
+          cat CHANGELOG.md
 
       - name: Create pull request
         if: steps.changes.outputs.changed == 'true'
@@ -157,4 +199,6 @@ jobs:
           branch: update/flake-lock
           delete-branch: true
           labels: dependencies
-          add-paths: flake.lock
+          add-paths: |
+            flake.lock
+            CHANGELOG.md
