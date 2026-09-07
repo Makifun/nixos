@@ -116,7 +116,7 @@ Age-based encryption with two recipients: the host's SSH key (`&hosts_ligma`) an
 
 SSH restricted to `10.10.10.0/24`. NFTables firewall. IPv6 disabled globally. Traefik (80/443) reachable from `10.10.10.0/24` and `10.10.11.0/24` (WireGuard).
 
-Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Sugma apps access `/cloud` via SMB CSI (`//10.10.10.13/cloud`, guest auth).
+Note: `/cloud` is **not** exported via NFS. Sugma apps access it two ways: via Samba/CIFS from playma (`modules/samba.nix`, `hosts allow` = sugma01–03) and via SMB CSI (`//10.10.10.15/cloud`, guest auth) — playma is the cloud host, not ligma.
 
 ### Auto-upgrade
 
@@ -133,10 +133,14 @@ Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Su
 | `homepage.nix` | Homepage dashboard | 8082, 8083 (images) | nginx on 8083 serves `/images/` (Next.js can't serve custom public/). Connects to sugma k8s via SOPS kubeconfig. SOPS: `homepage-env`, `homepage-kubeconfig`. |
 | `monitoring.nix` | Prometheus + Grafana | 9090, 9100, 3000 | 30d retention. Grafana OIDC via Authentik, role from `groups` claim. Alerting: Authentik login success/failure → Gotify webhook. Dashboards (from `grafana_dashboards/`): rclone, registry, rclone-transfers, podman-containers, node-exporter-full, opnsense, proxmox, postgres (CNPG `general-apps` + `tracearr` TimescaleDB, sourced from sugma's `cnpg`/`tracearr-db` Alloy scrape jobs — see `sugma/CLAUDE.md`). Scrape jobs: rclone, prometheus, distribution (debug ports 5011-5014), loki, alloy, opnsense-node, opnsense, pve (relay: `?target=proxmoxifun.makifun.se` → `127.0.0.1:9221/pve`). SOPS: `grafana-secret-key`, `grafana-oauth-secret`, `grafana-gotify-token`. |
 | `pve-exporter.nix` | prometheus-pve-exporter | 9221 | Proxmox API metrics for Grafana proxmox dashboard. Config written to `/run/pve-exporter.yml` by `pve-exporter-config.service` (oneshot, `chmod 444` — container runs non-root). `verify_ssl: true` (Proxmox has LE cert). SOPS: `proxmox-pve-token-value`. One-time Proxmox setup: create user `prometheus@pve` + API token `prometheus` with PVEAuditor role; **apply the role to both user and token** (privilege separation = intersection — token role alone is not enough). `pveum aclmod / --users 'prometheus@pve' --roles PVEAuditor --propagate 1`. |
-| `backrest.nix` | Backrest backup manager | 9898 | Restic-backed S3. Backs up `/ligma/ligma` (`:ro`). `/ligma/restore` mounted rw for restore staging. Schedule: 04:00 UTC. Prune: 05:00 UTC. SOPS: `backrest-restic-password`, `backrest-repo-uri`, `backrest-aws-access-key-id`, `backrest-aws-secret-access-key`, `backrest-gotify-token`. |
-| `rclone.nix` | rclone S3 FUSE mount | 6969 (RC), 6970 (metrics) | Shared module currently used by playma. Mounts S3 crypt remote at `/cloud`. VFS cache at `/rclone-cache`. **Primary cloud host is now playma (10.10.10.15).** |
-| `samba.nix` | Samba/CIFS share | 445 | Exposes `/cloud` as `\\<host>\cloud`. Guest access, force user=root. `hosts allow`: jonny (10.10.10.16) + sugma nodes (10.10.10.26-28). Sugma cloud PVs point to playma (10.10.10.15). |
-| `omni.nix` | Sidero Omni (Talos cluster manager) | 9999 (UI), 50180/udp (WG), 8091 (machine API), 8098/6443 (k8s proxy) | Distroless container. SAML auth via Authentik. JWT key is OpenPGP ASCII-armor (not PEM). SOPS: `omni-account-uuid`, `omni-jwt-signing-key`. |
+| `common/backrest.nix` + `backrest-extra.nix` | Backrest backup manager | 9898 (loopback on ligma, forced by `backrest-extra.nix`) | Shared module: every host gets a Backrest instance on its own UTC backup hour (prune 30 min later) so S3 request rates never overlap; add new hosts to the central schedule map. Restic-backed to Garage S3. SOPS: `backrest-restic-password`, `backrest-repo-uri`, `backrest-aws-access-key-id`, `backrest-aws-secret-access-key`, `backrest-gotify-token`. |
+| `traefik-backrest-ligma.nix` / `traefik-backrest-playma.nix` | Backrest Traefik routes | — | Two separate reverse-proxy routes: `backrest-ligma.makifun.se` → this host's own instance, `backrest-playma.makifun.se` → playma's instance (`http://<playma>:9898`, playma gets the shared `common/backrest.nix` module too, no ligma-side file needed for it). |
+| `traefik-rclone-playma.nix` | rclone RC Traefik route | — | Reverse-proxy route only: `rclone-playma.makifun.se` → `http://<playma>:6969`. The actual rclone mount and RC server live on playma (`modules/rclone.nix` + `hosts/playma/apps/rclone-extra.nix`), not here. |
+| `omni.nix` | Sidero Omni (Talos cluster manager) | 9999 (UI), 50180/udp (WG), 8091 (machine API), 8098/6443 (k8s proxy), plus a `kms` route | Distroless container. SAML auth via Authentik. JWT key is OpenPGP ASCII-armor (not PEM). SOPS: `omni-account-uuid`, `omni-jwt-signing-key`. `kms.makifun.se` is a second, IP-allowlisted (`sugma01` only) route to Omni's embedded KMS endpoint, used for Talos disk-encryption unseal — not reachable from anywhere else. |
+| `infisical.nix` | Infisical secrets manager | loopback (behind Traefik at `infisical.makifun.se`) | Three Podman containers (`infisical_network`, 10.89.5.0/24): Postgres + Redis + Infisical. Authentik forwardAuth. SOPS: `infisical-env` (`ENCRYPTION_KEY`, `AUTH_SECRET`). |
+| `loki.nix` | Loki log aggregation | loopback (behind Traefik at `loki.makifun.se`) | **Replaces the old Graylog+Vector pipeline.** Grafana Alloy (`common/alloy.nix`) is the actual log shipper now — journald kernel/audit/syslog streams and container logs all forward here. Three-router split: outpost bypass, `/loki/api/v1/push` bypass (for Alloy push clients, including sugma's), browser SSO catch-all. Runs as uid 10001. |
+| `garage-sync.nix` | Garage offsite sync | — (no HTTP endpoint) | Nightly systemd timer; rclone syncs Garage buckets to an offsite destination via a chunker remote (shared `[garage]` section + per-destination blob in the rclone config). Gotify notification on failure. |
+| `opnsense-exporter.nix` | OPNsense Prometheus exporter | 9091 (loopback) | Scrapes the OPNsense API over HTTPS, exposes Prometheus metrics on loopback instead of letting Prometheus hit OPNsense's own node_exporter directly — keeps OPNsense credentials off the firewall box. `instance-label` must match the node_exporter instance label so the Grafana proxmox/opnsense dashboard can join `opnsense_*` and `node_*` metrics on `$opnsense_instance`. |
 | `gotify.nix` | Gotify push notifications | 8096 | v3 native OIDC via Authentik (`auth.makifun.se/application/o/gotify/`). Two-router split: `X-Gotify-Key` header bypass (push senders), catch-all no-middleware (Gotify handles OIDC itself). Client secret from SOPS `gotify-oidc-secret` → `/run/gotify-oidc.env` via `gotify-env-setup` oneshot. `GOTIFY_OIDC_LINK_BY_USERNAME=true` links existing local users. **Local password auth is disabled** (`GOTIFY_LOCALAUTH_ENABLED=false`, v3.1.0+) — OIDC via Authentik is the only login path; login button reads "Authentik" (`GOTIFY_OIDC_IDP_NAME`). Unaffected: all `/message?token=...` app-token pushes (autoupgrade-notify, garage-sync, watchyourlan Shoutrrr, Grafana, Backrest) — those use per-application tokens, not username/password. |
 | `apprise.nix` | Apprise notification aggregator | 8097 | Three-router split: `/outpost` callback, `/notify` path (API bypass for senders), catch-all SSO. |
 | `beszel-server.nix` + `common/beszel-agent.nix` | Beszel monitoring hub + agent | 8095 (hub, loopback), 45876 (agent) | Agents self-register via universal token. No Authentik forwardAuth — Beszel handles its own login via native OIDC (PocketBase admin UI, not NixOS). See "Beszel monitoring" below. |
@@ -146,10 +150,21 @@ Note: `/cloud` is **not** exported via NFS. jonny mounts it via CIFS (Samba). Su
 | `garage.nix` | Garage S3-compatible object store | 3900 (S3 API, loopback) | Single-node (`replication_factor=1`). Data at `/ligma/garage/{data,meta}`. S3 API via Traefik at `https://s3.makifun.se` (no Authentik — S3 clients use access key auth). Admin API loopback-only (3901). RPC loopback-only (3902). No built-in web UI — use `podman exec garage /garage` for management. SOPS: `garage-rpc-secret` (`openssl rand -hex 32`), `garage-admin-token`. **Bootstrap (run once after first deploy):** `podman exec garage /garage layout assign -z dc1 -c 280G <node-id> && podman exec garage /garage layout apply --version 1`. Create buckets/keys with `podman exec garage /garage bucket create <name>` and `podman exec garage /garage key create <name>`. |
 | `hosts/ligma/dns-records.nix` | DNS record module | — | Defines `ligma.dnsRecords` option. Each app sets `ligma.dnsRecords."<fqdn>".value = "<ip>"` and a `systemd.services.dns-record-<name>` oneshot runs `nsupdate` with TSIG to register the record in Technitium at `10.10.10.3`. SOPS: `technitium-tsig-key` (base64 HMAC-SHA256 secret, key name `ligma-key`). Services retry on failure until Technitium is reachable. |
 | `common/autoupgrade-notify.nix` | Gotify notifier on `nixos-upgrade` | — | `OnSuccess`/`OnFailure` hooks; title uses hostname; includes generation + NixOS version; failure attaches last 40 journal lines (capped 3500 bytes). SOPS: `nixos-upgrade-gotify-token`. |
-| `netbird.nix` | NetBird VPN management | 8811 (dashboard), 33073 (mgmt), 10000/10080 (signal), 33080 (relay), 3478/udp (STUN/TURN) | 5 containers on `netbird_network` (10.89.3.0/24). Coturn uses host network. Secrets in `netbird-config.service` oneshot (SOPS: `netbird-datastore-key`, `netbird-relay-secret`, `netbird-turn-password`). Authentik public PKCE OIDC (`client_id=netbird`); no forwardAuth. gRPC paths use `h2c://` backend scheme in Traefik. Dashboard: `https://netbird.makifun.se`. CLI: `netbird up --management-url https://netbird.makifun.se`. **`netbird-datastore-key` must be exactly 32 bytes** — generate with `openssl rand -base64 32` (produces 44-char base64 string; Netbird hashes it internally to 32 bytes). `openssl rand -base64 24` (32 chars) is NOT accepted. |
-| `syncstorage.nix` | Firefox Sync (syncstorage-rs) | 8000 | Mozilla syncstorage-rs postgres variant. Tokenserver enabled; authenticates via Mozilla FxA OAuth (no Authentik). Two PostgreSQL DBs (`syncstorage`, `tokenserver`) owned by `syncstorage` user; provisioned by `syncstorage-db-setup.service`. Connects via Unix socket bind-mount. SOPS: `syncstorage_env` (must contain `SYNC_MASTER_SECRET=...`). Firefox client URL: `https://firefox.makifun.se/1.0/sync/1.5`. |
-| `technitium.nix` | Technitium DNS Server (external) | — | Traefik proxy to Technitium LXC at `10.10.10.3`. `technitium.makifun.se` → `https://10.10.10.3:53443` (self-signed, `insecureSkipVerify`). **No Authentik forwardAuth** — Technitium handles auth via its own OIDC login (like Jellyfin); adding forwardAuth causes 404 since there is no proxy provider. `doh.makifun.se` → `http://10.10.10.3` (no auth). OIDC configured in `ligma/authentik/technitium.tf`. Sets `ligma.dnsRecords."technitium.makifun.se"`. |
+| `traefik-technitium.nix` | Technitium DNS Server (external) | — | Traefik proxy to Technitium LXC at `10.10.10.3`. `technitium.makifun.se` → `https://10.10.10.3:53443` (self-signed, `insecureSkipVerify`). **No Authentik forwardAuth** — Technitium handles auth via its own OIDC login (like Jellyfin); adding forwardAuth causes 404 since there is no proxy provider. `doh.makifun.se` → `http://10.10.10.3` (no auth). OIDC configured in `authentik/technitium.tf`. Sets `ligma.dnsRecords."technitium.makifun.se"` and `"doh.makifun.se"`. |
 | `pgadmin.nix` | PGAdmin PostgreSQL manager | 5050 | `dpage/pgadmin4:9`. Desktop mode (`SERVER_MODE=False`, no login screen — Authentik handles auth). Pre-configured server: ligma (native PG at /run/postgresql socket, user=authentik). Data at `/ligma/ligma/pgadmin` (UID/GID 5050). Socket bind-mount: `/run/postgresql`. `ENHANCED_COOKIE_PROTECTION=False` (breaks behind reverse proxy). |
+
+### Services (`hosts/playma/apps/` + shared modules)
+
+playma has no CLAUDE.md-documented services table before this pass — it's not just a disk-layout host, it runs Plex plus the cloud/backup stack for the whole homelab.
+
+| File | Service | Port | Notes |
+|---|---|---|---|
+| `plex.nix` | Plex media server | 32400 (web UI/API), 32410/32412–32414 (GDM discovery, plus DLNA on 1900/udp + 32469 if enabled) | `lscr.io/linuxserver/plex`. Starts after `/cloud` (rclone) mounts so media is available on boot. Intel GVT-g iGPU passthrough for hardware transcoding. |
+| `plex-trash.nix` | Plex trash destroyer | — | Timer-triggered Python script; empties Plex's own trash on a schedule. |
+| `modules/rclone.nix` + `rclone-extra.nix` | rclone S3 FUSE mount | 6969 (RC), 6970 (metrics) | **playma is the cloud host** (moved off ligma). Mounts the S3 crypt remote at `/cloud`. VFS cache on the 400G cache disk (`vfsCacheMaxSize=380G`, `vfsCacheMinFreeSize=20G`, `bwlimit=80M`, 10 transfers). Reverse-proxied from ligma at `rclone-playma.makifun.se` via `traefik-rclone-playma.nix`. |
+| `modules/samba.nix` | Samba/CIFS share | 445 | Exposes `/cloud` as `\\playma\cloud`. Guest access, force user=root. `hosts allow` = sugma01–03 (`hosts.sugma01/02/03`) + `127.0.0.1` + any `extraHosts`. **jonny is gone from this list** — it was removed months ago along with the host itself. |
+| `common/backrest.nix` (shared) | Backrest backup manager | 9898 | Same shared module as ligma, own UTC backup hour. Reverse-proxied from ligma at `backrest-playma.makifun.se` via `traefik-backrest-playma.nix`. |
+| `beszel-extra.nix` | Beszel extra-disk reporting | — | Bind-mounts `/transcode` and `/rclone-cache` read-only into the Beszel agent's `/extra-filesystems/` so those disks show up in the Beszel dashboard (same [additional-disks](https://beszel.dev/guide/additional-disks) convention sugma01 uses — see `sugma/CLAUDE.md`). |
 
 ### Traefik + Authentik integration
 
@@ -161,19 +176,19 @@ Every service protected by the `authentik` middleware also needs a second router
 `PathPrefix(/outpost.goauthentik.io)` pointing to `authentik-embedded-outpost` (no middleware)
 so the post-login callback reaches the outpost.
 
-**Three-router priority split** — used by Graylog, Gotify, and Apprise to support both browser SSO and API clients on the same domain:
+**Three-router priority split** — used by Loki, Gotify, and Apprise to support both browser SSO and API/push clients on the same domain:
 
 | Router | Priority | Rule | Middleware | Purpose |
 |--------|----------|------|------------|---------|
 | `*-outpost` | 30 | `Host + PathPrefix(/outpost.goauthentik.io)` | none | Authentik post-login callback |
-| `*-api` | 10 | Header match (e.g. `Authorization: Basic`, `X-Gotify-Key`) | none | API/token clients bypass SSO |
+| `*-api` | 10 | Header or path match (e.g. `X-Gotify-Key`, `PathPrefix(/loki/api/v1/push)`) | none | API/token/push clients bypass SSO |
 | `*` | 1 | `Host` (catch-all) | `authentik` | Browser SSO |
 
-Graylog uses `Authorization: ^Basic .+` (Terraform API access). Gotify uses `X-Gotify-Key`. Apprise uses `PathPrefix(/notify)`.
+Loki uses `PathPrefix(/loki/api/v1/push)` (Alloy push clients). Gotify uses `X-Gotify-Key`. Apprise uses `PathPrefix(/notify)`.
 
 ### Journald retention
 
-`hosts/ligma/default.nix` caps journal at **512 MB / 7 days**. Logs ship to Graylog via Vector. Vacuum manually: `journalctl --vacuum-size=512M --vacuum-time=7d`.
+`hosts/ligma/default.nix` caps journal at **512 MB / 7 days**. Logs ship to self-hosted Loki (`loki.nix`) via Grafana Alloy (`common/alloy.nix`) — this replaced an older Graylog+Vector pipeline. Vacuum manually: `journalctl --vacuum-size=512M --vacuum-time=7d`.
 
 ### Authentik (Podman containers)
 
@@ -191,7 +206,7 @@ PostgreSQL runs as a native NixOS service at `/ligma/ligma/authentik/postgresql`
 
 ### Podman
 
-`modules/podman.nix` configures Podman. Container images use the default location (`/var/lib/containers`), which is persisted via impermanence. All Podman bridge interfaces are trusted in the firewall (aardvark-dns). Custom networks (authentik_network, graylog_network, unifi_network) use subnets in `10.89.x.0/24`.
+`modules/podman.nix` configures Podman. Container images use the default location (`/var/lib/containers`), which is persisted via impermanence. All Podman bridge interfaces are trusted in the firewall (aardvark-dns). Custom networks (authentik_network, unifi_network, infisical_network) use subnets in `10.89.x.0/24`.
 
 **DNS quirk for multi-network containers**: aardvark-dns resolves Podman container names only within the same network. Containers in different networks that need to cross-resolve each other must use `10.88.0.1` (default Podman gateway) as DNS — aardvark-dns there resolves all networks. Used by unifi_network containers.
 
@@ -281,7 +296,7 @@ Four OCI registry mirror instances, each a `docker.io/library/registry:3` contai
 | `dist-lscr` | 5003 | https://lscr.io |
 | `dist-quay` | 5004 | https://quay.io |
 
-Served at `{name}.mirror.makifun.se` behind `mirror-lan-only` ipAllowList middleware (10.10.10.0/24 only). Daily garbage collection at 06:00 UTC (systemd timer, stops containers → runs GC → restarts). Talos nodes and Podman are configured to pull from these mirrors. Logs filtered from Vector (OTEL disabled, debug spam suppressed).
+Served at `{name}.mirror.makifun.se` behind `mirror-lan-only` ipAllowList middleware (10.10.10.0/24 only). Daily garbage collection at 06:00 UTC (systemd timer, stops containers → runs GC → restarts). Talos nodes and Podman are configured to pull from these mirrors. `OTEL_SDK_DISABLED=true` (registry's own telemetry off); log shipping/filtering now goes through Alloy (see Journald retention above), not Vector.
 
 `log.level = "info"` — pull events (HTTP GETs) appear in Loki under `job=ligma-podman-dist-*`. Distribution containers only see `10.88.0.1` (Podman bridge = Traefik) — real client IPs only available from Traefik JSON access logs. Use Loki query: `{job="ligma-syslog", unit="traefik.service"} | json | RouterName =~ "dist-.+" | RequestMethod =~ "GET|HEAD"`.
 
