@@ -779,9 +779,10 @@
               # and Homepage can't merge separate `widgets:` entries into one
               # row (each renders as its own independent block — checked
               # against the frontend source). homepage-flux-status.service
-              # polls the 4 flux.makifun.se queries and republishes one
-              # combined JSON on loopback:8083 so this can be a single
-              # customapi call with 4 mappings, same pattern as WatchYourLAN.
+              # polls flux.makifun.se and republishes one combined JSON on
+              # loopback:8083 so this can be a single customapi call with 2
+              # mappings, same pattern as WatchYourLAN. Kustomizations only
+              # — HelmReleases dropped, 4 boxes made the whole page too wide.
               widget = {
                 type = "customapi";
                 url = "http://localhost:8083/flux-status/flux.json";
@@ -789,22 +790,12 @@
                 mappings = [
                   {
                     field = "kustomizations_ready";
-                    label = "Kustomizations Ready";
+                    label = "Ready";
                     format = "number";
                   }
                   {
                     field = "kustomizations_total";
-                    label = "Kustomizations Total";
-                    format = "number";
-                  }
-                  {
-                    field = "helmreleases_ready";
-                    label = "HelmReleases Ready";
-                    format = "number";
-                  }
-                  {
-                    field = "helmreleases_total";
-                    label = "HelmReleases Total";
+                    label = "Total";
                     format = "number";
                   }
                 ];
@@ -980,16 +971,18 @@
     };
   };
 
-  # Polls flux.makifun.se's /api/v1/resources 4 times (kind=Kustomization and
-  # kind=HelmRelease, each with and without status=Ready) and republishes one
-  # combined JSON so the Homepage widget above can be a single customapi call
-  # with 4 mappings — Homepage renders one `widget:` as one row of stat
-  # boxes, but stacks separate `widgets:` entries as independent rows, and
-  # each of these 4 numbers needs its own differently-filtered API call.
-  # Relies on the authentik repo's app_skip_path_regex.flux entry to let
-  # these calls through the sugma outpost unauthenticated.
+  # Polls flux.makifun.se's /api/v1/resources twice (kind=Kustomization, with
+  # and without status=Ready) and republishes one combined JSON so the
+  # Homepage widget above can be a single customapi call with 2 mappings —
+  # Homepage renders one `widget:` as one row of stat boxes, but stacks
+  # separate `widgets:` entries as independent rows, and each of these
+  # numbers needs its own differently-filtered API call. Relies on the
+  # authentik repo's app_skip_path_regex.flux entry to let these calls
+  # through the sugma outpost unauthenticated. HelmRelease counts dropped —
+  # 4 boxes made the Homepage page too wide; add them back the same way if
+  # ever wanted.
   systemd.services.homepage-flux-status = {
-    description = "Aggregate Flux Operator Kustomization/HelmRelease counts for Homepage";
+    description = "Aggregate Flux Operator Kustomization counts for Homepage";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     serviceConfig = {
@@ -1003,13 +996,10 @@
 
         k_ready=$(${pkgs.curl}/bin/curl -sf "$BASE?kind=Kustomization&status=Ready" | ${pkgs.jq}/bin/jq '.resources | length')
         k_total=$(${pkgs.curl}/bin/curl -sf "$BASE?kind=Kustomization" | ${pkgs.jq}/bin/jq '.resources | length')
-        h_ready=$(${pkgs.curl}/bin/curl -sf "$BASE?kind=HelmRelease&status=Ready" | ${pkgs.jq}/bin/jq '.resources | length')
-        h_total=$(${pkgs.curl}/bin/curl -sf "$BASE?kind=HelmRelease" | ${pkgs.jq}/bin/jq '.resources | length')
 
         ${pkgs.jq}/bin/jq -n \
           --argjson kr "$k_ready" --argjson kt "$k_total" \
-          --argjson hr "$h_ready" --argjson ht "$h_total" \
-          '{kustomizations_ready: $kr, kustomizations_total: $kt, helmreleases_ready: $hr, helmreleases_total: $ht}' \
+          '{kustomizations_ready: $kr, kustomizations_total: $kt}' \
           > "$OUT.tmp"
         chmod 644 "$OUT.tmp"
         mv "$OUT.tmp" "$OUT"
