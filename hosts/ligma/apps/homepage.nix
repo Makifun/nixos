@@ -771,18 +771,9 @@
             };
           }
           {
-            "Flux" = {
+            "Flux Kustomizations" = {
               icon = "/images/fluxcd.png";
               href = "https://flux.${baseFacts.domainName}";
-              # One widget = one row of side-by-side stat boxes, but each box
-              # needs its own differently-filtered API call (kind=/status=),
-              # and Homepage can't merge separate `widgets:` entries into one
-              # row (each renders as its own independent block — checked
-              # against the frontend source). homepage-flux-status.service
-              # polls flux.makifun.se and republishes one combined JSON on
-              # loopback:8083 so this can be a single customapi call with 2
-              # mappings, same pattern as WatchYourLAN. Kustomizations only
-              # — HelmReleases dropped, 4 boxes made the whole page too wide.
               widget = {
                 type = "customapi";
                 url = "http://localhost:8083/flux-status/flux.json";
@@ -971,16 +962,6 @@
     };
   };
 
-  # Polls flux.makifun.se's /api/v1/resources twice (kind=Kustomization, with
-  # and without status=Ready) and republishes one combined JSON so the
-  # Homepage widget above can be a single customapi call with 2 mappings —
-  # Homepage renders one `widget:` as one row of stat boxes, but stacks
-  # separate `widgets:` entries as independent rows, and each of these
-  # numbers needs its own differently-filtered API call. Relies on the
-  # authentik repo's app_skip_path_regex.flux entry to let these calls
-  # through the sugma outpost unauthenticated. HelmRelease counts dropped —
-  # 4 boxes made the Homepage page too wide; add them back the same way if
-  # ever wanted.
   systemd.services.homepage-flux-status = {
     description = "Aggregate Flux Operator Kustomization counts for Homepage";
     after = [ "network-online.target" ];
