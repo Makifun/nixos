@@ -2,6 +2,7 @@
   baseFacts,
   config,
   hosts,
+  pkgs,
   ...
 }:
 {
@@ -773,64 +774,41 @@
             "Flux" = {
               icon = "/images/fluxcd.png";
               href = "https://flux.${baseFacts.domainName}";
-              # The Flux Operator web UI's own /api/v1/resources endpoint
-              # (unauthenticated at the app layer — no OIDC configured on the
-              # chart) is exempted from the sugma outpost's SSO gate via
-              # apps.tf's app_skip_path_regex.flux, same as every other
-              # app's API-bypass entry. Four separate widgets because each
-              # hits a differently-filtered URL — customapi mappings can
-              # only read multiple fields from one response, and Flux's API
-              # has no single endpoint that pre-aggregates ready/total counts.
-              widgets = [
-                {
-                  type = "customapi";
-                  url = "https://flux.${baseFacts.domainName}/api/v1/resources?kind=Kustomization&status=Ready";
-                  refreshInterval = 60000;
-                  mappings = [
-                    {
-                      field = "resources";
-                      label = "Kustomizations Ready";
-                      format = "size";
-                    }
-                  ];
-                }
-                {
-                  type = "customapi";
-                  url = "https://flux.${baseFacts.domainName}/api/v1/resources?kind=Kustomization";
-                  refreshInterval = 60000;
-                  mappings = [
-                    {
-                      field = "resources";
-                      label = "Kustomizations Total";
-                      format = "size";
-                    }
-                  ];
-                }
-                {
-                  type = "customapi";
-                  url = "https://flux.${baseFacts.domainName}/api/v1/resources?kind=HelmRelease&status=Ready";
-                  refreshInterval = 60000;
-                  mappings = [
-                    {
-                      field = "resources";
-                      label = "HelmReleases Ready";
-                      format = "size";
-                    }
-                  ];
-                }
-                {
-                  type = "customapi";
-                  url = "https://flux.${baseFacts.domainName}/api/v1/resources?kind=HelmRelease";
-                  refreshInterval = 60000;
-                  mappings = [
-                    {
-                      field = "resources";
-                      label = "HelmReleases Total";
-                      format = "size";
-                    }
-                  ];
-                }
-              ];
+              # One widget = one row of side-by-side stat boxes, but each box
+              # needs its own differently-filtered API call (kind=/status=),
+              # and Homepage can't merge separate `widgets:` entries into one
+              # row (each renders as its own independent block — checked
+              # against the frontend source). homepage-flux-status.service
+              # polls the 4 flux.makifun.se queries and republishes one
+              # combined JSON on loopback:8083 so this can be a single
+              # customapi call with 4 mappings, same pattern as WatchYourLAN.
+              widget = {
+                type = "customapi";
+                url = "http://localhost:8083/flux-status/flux.json";
+                refreshInterval = 60000;
+                mappings = [
+                  {
+                    field = "kustomizations_ready";
+                    label = "Kustomizations Ready";
+                    format = "number";
+                  }
+                  {
+                    field = "kustomizations_total";
+                    label = "Kustomizations Total";
+                    format = "number";
+                  }
+                  {
+                    field = "helmreleases_ready";
+                    label = "HelmReleases Ready";
+                    format = "number";
+                  }
+                  {
+                    field = "helmreleases_total";
+                    label = "HelmReleases Total";
+                    format = "number";
+                  }
+                ];
+              };
             };
           }
           {
@@ -983,6 +961,8 @@
 
   # Serve images from $HOMEPAGE_CONFIG_DIR/images/ via nginx since the
   # Next.js standalone server only serves its own bundled public/ directory.
+  # Also serves the Flux status JSON (see homepage-flux-status below) — same
+  # loopback-only vhost, different location.
   services.nginx.enable = true;
   services.nginx.virtualHosts."homepage-images" = {
     listen = [
@@ -994,6 +974,56 @@
     ];
     root = "/etc/homepage-dashboard";
     locations."/images/".extraConfig = "try_files $uri =404;";
+    locations."/flux-status/" = {
+      alias = "/var/lib/homepage-flux-status/";
+      extraConfig = "try_files $uri =404;";
+    };
+  };
+
+  # Polls flux.makifun.se's /api/v1/resources 4 times (kind=Kustomization and
+  # kind=HelmRelease, each with and without status=Ready) and republishes one
+  # combined JSON so the Homepage widget above can be a single customapi call
+  # with 4 mappings — Homepage renders one `widget:` as one row of stat
+  # boxes, but stacks separate `widgets:` entries as independent rows, and
+  # each of these 4 numbers needs its own differently-filtered API call.
+  # Relies on the authentik repo's app_skip_path_regex.flux entry to let
+  # these calls through the sugma outpost unauthenticated.
+  systemd.services.homepage-flux-status = {
+    description = "Aggregate Flux Operator Kustomization/HelmRelease counts for Homepage";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      StateDirectory = "homepage-flux-status";
+      StateDirectoryMode = "0755";
+      ExecStart = pkgs.writeShellScript "homepage-flux-status" ''
+        set -euo pipefail
+        BASE="https://flux.${baseFacts.domainName}/api/v1/resources"
+        OUT=/var/lib/homepage-flux-status/flux.json
+
+        k_ready=$(${pkgs.curl}/bin/curl -sf "$BASE?kind=Kustomization&status=Ready" | ${pkgs.jq}/bin/jq '.resources | length')
+        k_total=$(${pkgs.curl}/bin/curl -sf "$BASE?kind=Kustomization" | ${pkgs.jq}/bin/jq '.resources | length')
+        h_ready=$(${pkgs.curl}/bin/curl -sf "$BASE?kind=HelmRelease&status=Ready" | ${pkgs.jq}/bin/jq '.resources | length')
+        h_total=$(${pkgs.curl}/bin/curl -sf "$BASE?kind=HelmRelease" | ${pkgs.jq}/bin/jq '.resources | length')
+
+        ${pkgs.jq}/bin/jq -n \
+          --argjson kr "$k_ready" --argjson kt "$k_total" \
+          --argjson hr "$h_ready" --argjson ht "$h_total" \
+          '{kustomizations_ready: $kr, kustomizations_total: $kt, helmreleases_ready: $hr, helmreleases_total: $ht}' \
+          > "$OUT.tmp"
+        chmod 644 "$OUT.tmp"
+        mv "$OUT.tmp" "$OUT"
+      '';
+    };
+  };
+
+  systemd.timers.homepage-flux-status = {
+    description = "Refresh the Flux status JSON for Homepage";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "30s";
+      OnUnitActiveSec = "60s";
+    };
   };
 
   services.traefik.dynamicConfigOptions.http = {
