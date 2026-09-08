@@ -770,6 +770,70 @@
             };
           }
           {
+            "Flux" = {
+              icon = "/images/fluxcd.png";
+              href = "https://flux.${baseFacts.domainName}";
+              # The Flux Operator web UI's own /api/v1/resources endpoint
+              # (unauthenticated at the app layer — no OIDC configured on the
+              # chart) is exempted from the sugma outpost's SSO gate via
+              # apps.tf's app_skip_path_regex.flux, same as every other
+              # app's API-bypass entry. Four separate widgets because each
+              # hits a differently-filtered URL — customapi mappings can
+              # only read multiple fields from one response, and Flux's API
+              # has no single endpoint that pre-aggregates ready/total counts.
+              widgets = [
+                {
+                  type = "customapi";
+                  url = "https://flux.${baseFacts.domainName}/api/v1/resources?kind=Kustomization&status=Ready";
+                  refreshInterval = 60000;
+                  mappings = [
+                    {
+                      field = "resources";
+                      label = "Kustomizations Ready";
+                      format = "size";
+                    }
+                  ];
+                }
+                {
+                  type = "customapi";
+                  url = "https://flux.${baseFacts.domainName}/api/v1/resources?kind=Kustomization";
+                  refreshInterval = 60000;
+                  mappings = [
+                    {
+                      field = "resources";
+                      label = "Kustomizations Total";
+                      format = "size";
+                    }
+                  ];
+                }
+                {
+                  type = "customapi";
+                  url = "https://flux.${baseFacts.domainName}/api/v1/resources?kind=HelmRelease&status=Ready";
+                  refreshInterval = 60000;
+                  mappings = [
+                    {
+                      field = "resources";
+                      label = "HelmReleases Ready";
+                      format = "size";
+                    }
+                  ];
+                }
+                {
+                  type = "customapi";
+                  url = "https://flux.${baseFacts.domainName}/api/v1/resources?kind=HelmRelease";
+                  refreshInterval = 60000;
+                  mappings = [
+                    {
+                      field = "resources";
+                      label = "HelmReleases Total";
+                      format = "size";
+                    }
+                  ];
+                }
+              ];
+            };
+          }
+          {
             "Backrest Ligma" = {
               icon = "/images/backrest.png";
               href = "https://backrest-ligma.${baseFacts.domainName}";
