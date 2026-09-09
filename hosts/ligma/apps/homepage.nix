@@ -634,6 +634,18 @@
             };
           }
           {
+            "RomM" = {
+              icon = "/images/romm.png";
+              href = "https://romm.${baseFacts.domainName}";
+              namespace = "romm";
+              app = "romm";
+              widget = {
+                type = "romm";
+                url = "https://romm.${baseFacts.domainName}";
+              };
+            };
+          }
+          {
             "Rclone Playma" = {
               icon = "/images/rclone.png";
               href = "https://rclone-playma.${baseFacts.domainName}";
