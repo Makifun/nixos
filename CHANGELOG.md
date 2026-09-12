@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-09-12
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `nixpkgs` | `8ce4ef6c` (2026-09-10) | `eaad0894` (2026-09-11) | [diff](https://github.com/nixos/nixpkgs/compare/8ce4ef6cb6f871616146b9fe26d2a5ae594e94fe...eaad089433ca2bb662274377d33df3d0e51ef28b) |
+
+### Package versions
+
+| Package | Before | After |
+|---------|--------|-------|
+| `curl` | 8.21.0 | 8.22.0 |
+| `fontconfig` | 2.18.2 | 2.18.3 |
+| `nftables` | 1.1.6 | 1.1.7 |
+| `util-linux` | 2.42.2 | 2.42.3 |
+| `vim` | 9.2.0782 | 9.2.1001 |
+
 ## 2026-09-10
 
 ### Flake inputs
