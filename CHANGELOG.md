@@ -6,6 +6,18 @@
 
 | Input | Before | After | |
 |-------|--------|-------|---|
+| `sops-nix` | `13616fff` (2026-09-09) | `16954c1c` (2026-09-17) | [diff](https://github.com/Mic92/sops-nix/compare/13616fff713a9f94055c66f15687ebdc17a335df...16954c1c360c3dc4d4b3b3e64df59f7e89452cb1) |
+
+### Package versions
+
+_No version changes._
+
+## 2026-09-17
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
 | `nixpkgs` | `ef34387d` (2026-09-13) | `b1b87598` (2026-09-16) | [diff](https://github.com/nixos/nixpkgs/compare/ef34387ddd751e1ab8857adf4676492d32eb24ec...b1b875982b17dabde9b4a37f3e229e74913e6db3) |
 
 ### Package versions
