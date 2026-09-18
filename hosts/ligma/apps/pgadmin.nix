@@ -9,7 +9,7 @@ let
   hostname = config.networking.hostName;
   pgadminPort = 5050;
   # renovate: datasource=docker depName=dpage/pgadmin4
-  pgadminTag = "9.17";
+  pgadminTag = "9.18";
 
   serversJson = pkgs.writeText "pgadmin-servers.json" (
     builtins.toJSON {
