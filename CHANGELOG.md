@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-22
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `nixpkgs` | `20b1ddd1` (2026-09-19) | `44a91898` (2026-09-20) | [diff](https://github.com/nixos/nixpkgs/compare/20b1ddd1aa5ace70c9468305030aa4f9ef79671b...44a91898084f46797b5fac650c7e8c9ac38c43d4) |
+
+### Package versions
+
+| Package | Before | After |
+|---------|--------|-------|
+| `bind` | 9.20.26 | 9.20.29 |
+| `grafana` | 13.1.4 | 13.1.6 |
+
 ## 2026-09-20
 
 ### Flake inputs
