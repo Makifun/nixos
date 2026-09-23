@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-23
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `nixpkgs` | `44a91898` (2026-09-20) | `6774f7bc` (2026-09-22) | [diff](https://github.com/nixos/nixpkgs/compare/44a91898084f46797b5fac650c7e8c9ac38c43d4...6774f7bc253789b113a4f39285dc0fa100abeacc) |
+
+### Package versions
+
+| Package | Before | After |
+|---------|--------|-------|
+| `podman` | 5.8.6 | 5.8.7 |
+| `podman-docker-compat` | 5.8.6 | 5.8.7 |
+
 ## 2026-09-22
 
 ### Flake inputs
