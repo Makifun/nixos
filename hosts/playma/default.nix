@@ -16,6 +16,7 @@
     ./apps/rclone-extra.nix
     ./apps/plex.nix
     ./apps/plex-trash.nix
+    ./apps/jellyfin.nix
   ];
   systemd.tmpfiles.rules = [
     "d '/playma/playma' 0755 root root - -"
