@@ -30,6 +30,7 @@
     ./apps/pve-exporter.nix
     ./apps/traefik-backrest-ligma.nix
     ./apps/traefik-backrest-playma.nix
+    ./apps/traefik-jellyfin-playma.nix
     ./apps/traefik-rclone-playma.nix
     ./apps/traefik-technitium.nix
     ./apps/traefik.nix

@@ -1,11 +1,51 @@
-{ config, pkgs, ... }:
+{
+  baseFacts,
+  config,
+  pkgs,
+  ...
+}:
 let
   hostname = config.networking.hostName;
   jellyfinBase = "/${hostname}/${hostname}/jellyfin";
-  # renovate: datasource=docker depName=docker.io/jellyfin/jellyfin
-  jellyfinTag = "12.1.20260915-010956";
+  jellyfinUrl = "https://jellyfin.${baseFacts.domainName}";
+  # renovate: datasource=docker depName=lscr.io/linuxserver/jellyfin
+  jellyfinTag = "12.1ubu2604-ls50";
+
+  # Provider config for the Flowfin/jellyfin-plugin-sso plugin, read at startup.
+  # Setup notes: Obsidian vault, [[jellyfin]].
+  ssoProviders = pkgs.writeText "jellyfin-sso-providers.json" (
+    builtins.toJSON {
+      FormatVersion = 1;
+      Configuration = {
+        OidConfigs.Authentik = {
+          Enabled = true;
+          OidEndpoint = "https://auth.${baseFacts.domainName}/application/o/jellyfin/.well-known/openid-configuration";
+          OidClientId = "jellyfin";
+          OidSecretFile = "/run/secrets/jellyfin-oidc-secret";
+          AllowPrivateNetworkAddresses = true;
+          BaseUrlOverride = jellyfinUrl;
+          OidScopes = [
+            "email"
+            "groups"
+          ];
+          RoleClaim = "groups";
+          DefaultUsernameClaim = "preferred_username";
+          EnableAuthorization = false;
+        };
+        SamlConfigs = { };
+      };
+    }
+  );
 in
 {
+  sops.secrets.jellyfin-oidc-secret = {
+    sopsFile = ../secrets.yaml;
+    uid = 1000;
+    gid = 1000;
+    mode = "0400";
+    restartUnits = [ "podman-jellyfin.service" ];
+  };
+
   systemd.tmpfiles.rules = [
     "d '${jellyfinBase}/config' 0750 1000 1000 - -"
     "d '/transcode/jellyfin'    0775 1000 1000 - -"
@@ -18,25 +58,25 @@ in
   };
 
   virtualisation.oci-containers.containers.jellyfin = {
-    image = "docker.io/jellyfin/jellyfin:${jellyfinTag}";
-    user = "1000:1000";
+    image = "lscr.io/linuxserver/jellyfin:${jellyfinTag}";
     extraOptions = [
       "--network=host"
       "--device=/dev/dri:/dev/dri"
-      # /dev/dri/renderD128 is owned by the render group; the container
-      # runs as 1000 and needs it for VA-API/QSV hardware transcoding.
-      "--group-add=${toString config.ids.gids.render}"
       "--no-healthcheck"
     ];
     environment = {
+      PUID = "1000";
+      PGID = "1000";
       TZ = config.time.timeZone;
+      JELLYFIN_PublishedServerUrl = jellyfinUrl;
+      JELLYFIN_SSO_CONFIG_FILE = "/run/sso/providers.json";
     };
     volumes = [
       "${jellyfinBase}/config:/config"
-      # Cache (transcodes, image cache) is regenerable — keep it on the
-      # ephemeral transcode disk.
-      "/transcode/jellyfin:/cache"
+      "/transcode/jellyfin:/config/cache"
       "/cloud:/cloud:ro"
+      "${ssoProviders}:/run/sso/providers.json:ro"
+      "${config.sops.secrets.jellyfin-oidc-secret.path}:/run/secrets/jellyfin-oidc-secret:ro"
     ];
   };
 
