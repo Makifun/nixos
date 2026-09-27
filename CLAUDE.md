@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This repo is public on GitHub. Keep code comments and docs short. Do not add
 internal addresses, network topology, setup narratives, or operational
 runbooks here. Detailed notes live in the private Obsidian vault in the
-homelab repo (`vault/`); start with the `nixos repo reference` note there.
+homelab repo (`vault/`); start with the `nixos repo` note there.
 
 ## Overview
 
