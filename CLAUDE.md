@@ -2,418 +2,78 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Public repo
+
+This repo is public on GitHub. Keep code comments and docs short. Do not add
+internal addresses, network topology, setup narratives, or operational
+runbooks here. Detailed notes live in the private Obsidian vault in the
+homelab repo (`vault/`); start with the `nixos repo reference` note there.
+
 ## Overview
 
-NixOS flake-based system configuration for two hosts:
+NixOS flake for the homelab hosts:
 
-- **ligma** — production services host on Proxmox; ephemeral root (tmpfs), LUKS+ZFS, SOPS, impermanence.
-- **playma** (10.10.10.15) — NixOS VM on Proxmox; Plex + `/cloud` via rclone FUSE (S3 crypt remote, VFS cache on 200 G disk), re-exported via Samba to sugma (port 445, guest auth). Intel GVT-g iGPU for hardware transcoding.
+- **ligma** — main services host (Traefik, Authentik, Forgejo, monitoring, and more).
+- **playma** — media host (Plex, Jellyfin, rclone `/cloud` mount, Samba).
+- **minimaliso** — install ISO.
 
-**bofa** (dedicated database host, TimescaleDB for tracearr) was decommissioned — TimescaleDB now runs on sugma via CNPG (see `sugma/CLAUDE.md`).
+Root `/` is tmpfs on every host (impermanence). Persistent state must be
+declared explicitly; app data lives on each host's data disk.
 
-## Common Commands
+## Commands
 
-**Apply configuration changes to the running system (run on ligma):**
-```bash
-nh os switch --refresh
-```
-The `--refresh` flag pulls the latest flake from GitHub before building. Alternatively:
-```bash
-sudo nixos-rebuild switch --flake .#ligma
-```
-
-**Pre-commit sequence (mandatory for every Nix change):**
-```bash
-nixfmt <changed-file>.nix   # 1. format
-nix flake check              # 2. validate all nixosConfigurations
-git commit                   # 3. only then commit
-```
-
-**Format Nix files:**
-```bash
-nixfmt <file.nix>
-# or format entire tree:
-nixfmt **/*.nix
-```
-
-**Deploy/provision a new host from scratch:**
-```bash
-./nixos_install.sh <ip/hostname> ligma
-./nixos_install.sh <ip/hostname> playma
-```
-
-**Refresh SOPS keys** (after adding/changing age keys):
-```bash
-./sops_refresh_key.sh
-```
-
-**Edit an encrypted secrets file:**
-```bash
-sops hosts/ligma/secrets.yaml
-```
-
-**Build the minimal ISO for Proxmox:**
-```bash
-./proxmox_nixos_iso.sh
-```
-
-**Create the Proxmox VM:**
-```bash
-./proxmox_ligma.sh
-```
-
-## Architecture
-
-### Flake Structure
-
-- **`flake.nix`** — Defines three outputs: `nixosConfigurations.ligma`, `nixosConfigurations.playma`, and `nixosConfigurations.minimaliso`. Inputs: nixpkgs (unstable, stateVersion 25.11), disko, impermanence, sops-nix.
-- **`common/`** — Modules applied to all hosts via `common/default.nix` (auto-imports all `.nix` files in the directory): boot (initrd SSH), users, sops, openssh, hardening, fail2ban, zram, autoupgrade, autoupgrade-notify, alloy.
-- **`hosts/ligma/`** — ligma-specific config, disk layout (ZFS), and secrets.
-- **`hosts/playma/`** — playma-specific config, disk layout (XFS), and secrets.
-- **`modules/`** — Reusable custom modules (currently: podman).
-- **`CHANGELOG.md`** — flake-input and package version history; `.github/workflows/update-flake-inputs.yml` prepends a dated entry on each lock update (see "Flake input updates" below).
-
-### Ephemeral Root + Impermanence
-
-Root `/` is a tmpfs (wiped on reboot). Persistent state lives in `/persist` (ZFS dataset on `zroot`). SSH host keys, systemd state, logs, and podman storage are explicitly persisted via the impermanence module. Any new service needing persistent state must declare it explicitly.
-
-### Disk Layout — ligma (`hosts/ligma/disko-config.nix`)
-
-Two encrypted drives:
-
-- **Main drive** (`scsi-0QEMU_QEMU_HARDDISK_nixos`): LUKS → ZFS pool `zroot` with datasets `/nix` and `/persist` (refreservation: 10G), plus 1G EFI partition.
-- **Storage drive** (`scsi-0QEMU_QEMU_HARDDISK_ligma`): LUKS → ZFS pool `zstorage` with `/ligma` dataset (refreservation: 5G). All app persistent data lives here.
-Both drives use XFS with `noatime,nofail`. LUKS passphrases entered via initrd SSH at boot. **New VM install:** disko formats on `nixos_install.sh`. **Existing VM adding a disk:** must manually partition + luksFormat + mkfs.xfs before `nh os switch` — see comments in `disko-config.nix`.
-
-All ZFS pools: ashift=12, autotrim=on, compression=lz4, atime=off, xattr=sa. ARC max=4 GB, min=2 GB (ligma balloon: 12 GB floor, 16 GB ceiling). Prefetch disabled (`zfs_prefetch_disable=1`).
-
-### Disk Layout — playma (`hosts/playma/disko-config.nix`)
-
-Four drives, XFS throughout, root is tmpfs (impermanence module, same pattern as ligma):
-
-- **OS disk** (50 G, `scsi-0QEMU_QEMU_HARDDISK_nixos`): 1 G EFI + LUKS(`crypted_nixos`) → LVM `vg_nixos` → XFS `/nix` (25 G) + XFS `/persist` (rest). Single passphrase for both via LVM.
-- **App data disk** (100 G, `scsi-0QEMU_QEMU_HARDDISK_playma`): LUKS(`crypted_playma`) → XFS `/playma`. All app persistent data lives here.
-- **Cache disk** (400 G, `scsi-0QEMU_QEMU_HARDDISK_cache`): no LUKS (regenerable) → XFS `/rclone-cache`. rclone VFS cache; `vfsCacheMaxSize` set in `apps/rclone-extra.nix` (currently 380 G, 20 G headroom).
-- **Transcode disk** (50 G, `scsi-0QEMU_QEMU_HARDDISK_transcode`): no LUKS (ephemeral) → XFS `/transcode`. Plex transcoder scratch space.
-
-**Growing a disko-managed disk after enlarging the virtual disk in Proxmox:** disko's `size = "100%"` only applies at first format — it does not live-resize an already-formatted disk. On the running host:
-
-1. `sudo nix shell nixpkgs#gptfdisk -c sgdisk -e /dev/sdX` — relocates the GPT backup header to the new disk end (fixes the "GPT not using all space" warning).
-2. Grow partition 1 to fill the disk. `parted /dev/sdX resizepart 1 100%` prompts "partition is in use, are you sure?" and does not accept a piped answer over a non-tty SSH session; use `sgdisk` delete+recreate instead, keeping the original start sector, type GUID, unique GUID, and name (`sgdisk -i 1 /dev/sdX` to read them first): `sudo nix shell nixpkgs#gptfdisk -c sgdisk -d 1 -n 1:<start>:0 -t 1:<type-guid> -u 1:<unique-guid> -c 1:'<name>' /dev/sdX`.
-3. `sudo xfs_growfs <mountpoint>` — grows the live filesystem to fill the partition.
-
-Update the disko comment and any size-derived options (e.g. `vfsCacheMaxSize` in `apps/rclone-extra.nix`) afterward to match.
-
-### Secrets (`hosts/ligma/sops.nix`, `.sops.yaml`)
-
-Age-based encryption with two recipients: the host's SSH key (`&hosts_ligma`) and the user key (`&makifun`). Host decrypts via `/persist/etc/ssh/ssh_host_ed25519_key` at runtime. To add a new secret: edit `secrets.yaml` with `sops`, then reference it in a `sops.nix`.
-
-### Pre-boot LUKS Unlock
-
-`common/boot.nix` configures initrd SSH on port 2222 with a separate ED25519 key (stored in SOPS). After `nixos_install.sh` deploys, it connects to port 2222 to unlock LUKS before the system fully boots.
-
-### Network / Firewall
-
-SSH restricted to `10.10.10.0/24`. NFTables firewall. IPv6 disabled globally. Traefik (80/443) reachable from `10.10.10.0/24` and `10.10.11.0/24` (WireGuard).
-
-Note: `/cloud` is **not** exported via NFS. Sugma apps access it two ways: via Samba/CIFS from playma (`modules/samba.nix`, `hosts allow` = sugma01–03) and via SMB CSI (`//10.10.10.15/cloud`, guest auth) — playma is the cloud host, not ligma.
-
-### Auto-upgrade
-
-`common/autoupgrade.nix` enables `system.autoUpgrade` for all hosts, pulling from `github:makifun/nixos`. Changes pushed to that repo are automatically applied with a randomised 30-min delay. Reboot window 03:00–06:00 (`allowReboot=false` means no auto-reboot outside window).
-
-### Services (`hosts/ligma/apps/`)
-
-| File | Service | Port | Notes |
-|---|---|---|---|
-| `traefik.nix` | Traefik reverse proxy | 80, 443, 8090 (dashboard) | TLS termination, Cloudflare DNS challenge, wildcards `*.makifun.se` + `*.mirror.makifun.se` (separate SANs — single-level wildcard does not cover two-level subdomains). JSON access log (`accessLog.format = "json"`) — client IPs for mirror pulls visible in Loki. ACME `resolvers` hardcoded to `1.1.1.1:53`, `8.8.8.8:53` to bypass OPNsense DNS intercept for propagation checks. Dashboard loopback only. Trusted IP: 10.10.10.1 (OPNsense HAProxy). **ACME DNS gotcha:** Technitium is both the local authoritative NS and the web UI hostname. `technitium.makifun.se` resolves to `10.10.10.13` (Traefik) in LAN — lego finds `technitium.makifun.se` as NS, resolves it, tries port 53 → "connection refused". True fix: change Technitium NS record to a hostname that resolves to `10.10.10.3` (e.g. `ns.makifun.se`) rather than the web UI proxy IP. |
-| `authentik.nix` | Authentik SSO | 9000 (embedded outpost) | Three Podman containers (`authentik_network`): Redis + server + worker. Native PostgreSQL at `/ligma/ligma/authentik/postgresql`. `/run/postgresql` bind-mounted with `trust` auth. SOPS: `authentik_env`. Port 9000 is exposed to the full LAN (not loopback-only) for forwardAuth from other hosts. |
-| `forgejo.nix` | Forgejo + Actions runner | 3010, SSH 22222 | `forgejo-provision` service auto-creates makifun/opnsense/renovate-bot users on every boot. Renovate token persists to `/ligma/ligma/renovate/token`. SOPS: `forgejo-admin-password`, `forgejo-admin-email`, `forgejo-oauth-secret`, `forgejo-runner-token`. |
-| `vaultwarden.nix` | Vaultwarden | 8310 | OIDC via Authentik. Signup disabled. fail2ban protection. SOPS: `vaultwarden_env`. |
-| `homepage.nix` | Homepage dashboard | 8082, 8083 (images) | nginx on 8083 serves `/images/` (Next.js can't serve custom public/). Connects to sugma k8s via SOPS kubeconfig. SOPS: `homepage-env`, `homepage-kubeconfig`. |
-| `monitoring.nix` | Prometheus + Grafana | 9090, 9100, 3000 | 30d retention. Grafana OIDC via Authentik, role from `groups` claim. Alerting: Authentik login success/failure → Gotify webhook. Dashboards (from `grafana_dashboards/`): rclone, registry, rclone-transfers, podman-containers, node-exporter-full, opnsense, proxmox, postgres (CNPG `general-apps` + `tracearr` TimescaleDB, sourced from sugma's `cnpg`/`tracearr-db` Alloy scrape jobs — see `sugma/CLAUDE.md`). Scrape jobs: rclone, prometheus, distribution (debug ports 5011-5014), loki, alloy, opnsense-node, opnsense, pve (relay: `?target=proxmoxifun.makifun.se` → `127.0.0.1:9221/pve`). SOPS: `grafana-secret-key`, `grafana-oauth-secret`, `grafana-gotify-token`. |
-| `pve-exporter.nix` | prometheus-pve-exporter | 9221 | Proxmox API metrics for Grafana proxmox dashboard. Config written to `/run/pve-exporter.yml` by `pve-exporter-config.service` (oneshot, `chmod 444` — container runs non-root). `verify_ssl: true` (Proxmox has LE cert). SOPS: `proxmox-pve-token-value`. One-time Proxmox setup: create user `prometheus@pve` + API token `prometheus` with PVEAuditor role; **apply the role to both user and token** (privilege separation = intersection — token role alone is not enough). `pveum aclmod / --users 'prometheus@pve' --roles PVEAuditor --propagate 1`. |
-| `common/backrest.nix` + `backrest-extra.nix` | Backrest backup manager | 9898 (loopback on ligma, forced by `backrest-extra.nix`) | Shared module: every host gets a Backrest instance on its own UTC backup hour (prune 30 min later) so S3 request rates never overlap; add new hosts to the central schedule map. Restic-backed to Garage S3. SOPS: `backrest-restic-password`, `backrest-repo-uri`, `backrest-aws-access-key-id`, `backrest-aws-secret-access-key`, `backrest-gotify-token`. |
-| `traefik-backrest-ligma.nix` / `traefik-backrest-playma.nix` | Backrest Traefik routes | — | Two separate reverse-proxy routes: `backrest-ligma.makifun.se` → this host's own instance, `backrest-playma.makifun.se` → playma's instance (`http://<playma>:9898`, playma gets the shared `common/backrest.nix` module too, no ligma-side file needed for it). |
-| `traefik-rclone-playma.nix` | rclone RC Traefik route | — | Reverse-proxy route only: `rclone-playma.makifun.se` → `http://<playma>:6969`. The actual rclone mount and RC server live on playma (`modules/rclone.nix` + `hosts/playma/apps/rclone-extra.nix`), not here. |
-| `traefik-jellyfin-playma.nix` | Jellyfin Traefik route | — | `jellyfin.makifun.se` → playma:8096. No Authentik forwardAuth — Jellyfin does its own OIDC login. |
-| `omni.nix` | Sidero Omni (Talos cluster manager) | 9999 (UI), 50180/udp (WG), 8091 (machine API), 8098/6443 (k8s proxy), plus a `kms` route | Distroless container. SAML auth via Authentik. JWT key is OpenPGP ASCII-armor (not PEM). SOPS: `omni-account-uuid`, `omni-jwt-signing-key`. `kms.makifun.se` is a second, IP-allowlisted (`sugma01` only) route to Omni's embedded KMS endpoint, used for Talos disk-encryption unseal — not reachable from anywhere else. |
-| `infisical.nix` | Infisical secrets manager | loopback (behind Traefik at `infisical.makifun.se`) | Three Podman containers (`infisical_network`, 10.89.5.0/24): Postgres + Redis + Infisical. Authentik forwardAuth. SOPS: `infisical-env` (`ENCRYPTION_KEY`, `AUTH_SECRET`). |
-| `loki.nix` | Loki log aggregation | loopback (behind Traefik at `loki.makifun.se`) | **Replaces the old Graylog+Vector pipeline.** Grafana Alloy (`common/alloy.nix`) is the actual log shipper now — journald kernel/audit/syslog streams and container logs all forward here. Three-router split: outpost bypass, `/loki/api/v1/push` bypass (for Alloy push clients, including sugma's), browser SSO catch-all. Runs as uid 10001. |
-| `garage-sync.nix` | Garage offsite sync | — (no HTTP endpoint) | Nightly systemd timer; rclone syncs Garage buckets to an offsite destination via a chunker remote (shared `[garage]` section + per-destination blob in the rclone config). Gotify notification on failure. |
-| `opnsense-exporter.nix` | OPNsense Prometheus exporter | 9091 (loopback) | Scrapes the OPNsense API over HTTPS, exposes Prometheus metrics on loopback instead of letting Prometheus hit OPNsense's own node_exporter directly — keeps OPNsense credentials off the firewall box. `instance-label` must match the node_exporter instance label so the Grafana proxmox/opnsense dashboard can join `opnsense_*` and `node_*` metrics on `$opnsense_instance`. |
-| `gotify.nix` | Gotify push notifications | 8096 | v3 native OIDC via Authentik (`auth.makifun.se/application/o/gotify/`). Two-router split: `X-Gotify-Key` header bypass (push senders), catch-all no-middleware (Gotify handles OIDC itself). Client secret from SOPS `gotify-oidc-secret` → `/run/gotify-oidc.env` via `gotify-env-setup` oneshot. `GOTIFY_OIDC_LINK_BY_USERNAME=true` links existing local users. **Local password auth is disabled** (`GOTIFY_LOCALAUTH_ENABLED=false`, v3.1.0+) — OIDC via Authentik is the only login path; login button reads "Authentik" (`GOTIFY_OIDC_IDP_NAME`). Unaffected: all `/message?token=...` app-token pushes (autoupgrade-notify, garage-sync, watchyourlan Shoutrrr, Grafana, Backrest) — those use per-application tokens, not username/password. |
-| `apprise.nix` | Apprise notification aggregator | 8097 | Three-router split: `/outpost` callback, `/notify` path (API bypass for senders), catch-all SSO. |
-| `beszel-server.nix` + `common/beszel-agent.nix` | Beszel monitoring hub + agent | 8095 (hub, loopback), 45876 (agent) | Agents self-register via universal token. No Authentik forwardAuth — Beszel handles its own login via native OIDC (PocketBase admin UI, not NixOS). See "Beszel monitoring" below. |
-| `distribution.nix` | OCI registry mirrors | 5001-5004 | Four instances: dockerhub (5001), ghcr (5002), lscr (5003), quay (5004). Daily GC at 06:00 UTC. LAN-only via `mirror-lan-only` ipAllowList middleware. `log.level = "info"` — HTTP request logs visible in Loki (`job=ligma-podman-dist-*`). Client IPs are NOT visible here (containers see Podman bridge `10.88.0.1`); use Traefik JSON access logs for real client IPs (`RouterName =~ "dist-.+"`). |
-| `unifi.nix` | UniFi Network Application | 8443 (UI), 8080 (inform), 3478/udp (STUN), 10001/udp (discovery), 5141/udp (syslog in) | Two Podman containers (`unifi_network`): MongoDB 8 + linuxserver/unifi. Syslog on 5141 ingested by Alloy → Loki (job=ligma-unifi). UI self-signed cert — Traefik uses `insecureSkipVerify`. PUID/PGID=1000, MEM_LIMIT=1024M. |
-| `watchyourlan.nix` | WatchYourLAN network presence monitor | 8840 (UI) | Lightweight ARP scanner; notifies via Shoutrrr → Gotify on new/returning devices. Host networking + NET_ADMIN/NET_RAW caps required. Config written on first boot from SOPS `watchyourlan-gotify-token`; UI changes persist (delete `config_v2.yaml` to reset). Scans `ens18` every 60s. SOPS: `watchyourlan-gotify-token`. |
-| `garage.nix` | Garage S3-compatible object store | 3900 (S3 API, loopback) | Single-node (`replication_factor=1`). Data at `/ligma/garage/{data,meta}`. S3 API via Traefik at `https://s3.makifun.se` (no Authentik — S3 clients use access key auth). Admin API loopback-only (3901). RPC loopback-only (3902). No built-in web UI — use `podman exec garage /garage` for management. SOPS: `garage-rpc-secret` (`openssl rand -hex 32`), `garage-admin-token`. **Bootstrap (run once after first deploy):** `podman exec garage /garage layout assign -z dc1 -c 280G <node-id> && podman exec garage /garage layout apply --version 1`. Create buckets/keys with `podman exec garage /garage bucket create <name>` and `podman exec garage /garage key create <name>`. |
-| `hosts/ligma/dns-records.nix` | DNS record module | — | Defines `ligma.dnsRecords` option. Each app sets `ligma.dnsRecords."<fqdn>".value = "<ip>"` and a `systemd.services.dns-record-<name>` oneshot runs `nsupdate` with TSIG to register the record in Technitium at `10.10.10.3`. SOPS: `technitium-tsig-key` (base64 HMAC-SHA256 secret, key name `ligma-key`). Services retry on failure until Technitium is reachable. |
-| `common/autoupgrade-notify.nix` | Gotify notifier on `nixos-upgrade` | — | `OnSuccess`/`OnFailure` hooks; title uses hostname; includes generation + NixOS version; failure attaches last 40 journal lines (capped 3500 bytes). SOPS: `nixos-upgrade-gotify-token`. |
-| `traefik-technitium.nix` | Technitium DNS Server (external) | — | Traefik proxy to Technitium LXC at `10.10.10.3`. `technitium.makifun.se` → `https://10.10.10.3:53443` (self-signed, `insecureSkipVerify`). **No Authentik forwardAuth** — Technitium handles auth via its own OIDC login (like Jellyfin); adding forwardAuth causes 404 since there is no proxy provider. `doh.makifun.se` → `http://10.10.10.3` (no auth). OIDC configured in `authentik/technitium.tf`. Sets `ligma.dnsRecords."technitium.makifun.se"` and `"doh.makifun.se"`. |
-| `pgadmin.nix` | PGAdmin PostgreSQL manager | 5050 | `dpage/pgadmin4:9`. Desktop mode (`SERVER_MODE=False`, no login screen — Authentik handles auth). Pre-configured server: ligma (native PG at /run/postgresql socket, user=authentik). Data at `/ligma/ligma/pgadmin` (UID/GID 5050). Socket bind-mount: `/run/postgresql`. `ENHANCED_COOKIE_PROTECTION=False` (breaks behind reverse proxy). |
-
-### Services (`hosts/playma/apps/` + shared modules)
-
-playma has no CLAUDE.md-documented services table before this pass — it's not just a disk-layout host, it runs Plex plus the cloud/backup stack for the whole homelab.
-
-| File | Service | Port | Notes |
-|---|---|---|---|
-| `plex.nix` | Plex media server | 32400 (web UI/API), 32410/32412–32414 (GDM discovery, plus DLNA on 1900/udp + 32469 if enabled) | `lscr.io/linuxserver/plex`. Starts after `/cloud` (rclone) mounts so media is available on boot. Intel GVT-g iGPU passthrough for hardware transcoding. |
-| `jellyfin.nix` | Jellyfin media server | 8096 (web UI/API), 7359/udp (client discovery) | `lscr.io/linuxserver/jellyfin`. `/cloud` mounted whole at `/cloud` (read-only). Cache on `/transcode/jellyfin`. Same rclone ordering as Plex. SSO provider for the Flowfin/jellyfin-plugin-sso plugin is declared in Nix (`JELLYFIN_SSO_CONFIG_FILE`), secret from SOPS `jellyfin-oidc-secret`. Setup details in the Obsidian vault (`jellyfin`). |
-| `plex-trash.nix` | Plex trash destroyer | — | Timer-triggered Python script; empties Plex's own trash on a schedule. |
-| `modules/rclone.nix` + `rclone-extra.nix` | rclone S3 FUSE mount | 6969 (RC), 6970 (metrics) | **playma is the cloud host** (moved off ligma). Mounts the S3 crypt remote at `/cloud`. VFS cache on the 400G cache disk (`vfsCacheMaxSize=380G`, `vfsCacheMinFreeSize=20G`, `bwlimit=80M`, 10 transfers). Reverse-proxied from ligma at `rclone-playma.makifun.se` via `traefik-rclone-playma.nix`. |
-| `modules/samba.nix` | Samba/CIFS share | 445 | Exposes `/cloud` as `\\playma\cloud`. Guest access, force user=root. `hosts allow` = sugma01–03 (`hosts.sugma01/02/03`) + `127.0.0.1` + any `extraHosts`. **jonny is gone from this list** — it was removed months ago along with the host itself. |
-| `common/backrest.nix` (shared) | Backrest backup manager | 9898 | Same shared module as ligma, own UTC backup hour. Reverse-proxied from ligma at `backrest-playma.makifun.se` via `traefik-backrest-playma.nix`. |
-| `beszel-extra.nix` | Beszel extra-disk reporting | — | Bind-mounts `/transcode` and `/rclone-cache` read-only into the Beszel agent's `/extra-filesystems/` so those disks show up in the Beszel dashboard (same [additional-disks](https://beszel.dev/guide/additional-disks) convention sugma01 uses — see `sugma/CLAUDE.md`). |
-
-### Traefik + Authentik integration
-
-The `authentik` forwardAuth middleware (defined in `traefik.nix`) adds SSO to any router.
-The Authentik embedded outpost (port 9000) injects response headers (lowercase, e.g.
-`x-authentik-username`) which Traefik copies to the upstream request via `authResponseHeaders`.
-
-Every service protected by the `authentik` middleware also needs a second router for
-`PathPrefix(/outpost.goauthentik.io)` pointing to `authentik-embedded-outpost` (no middleware)
-so the post-login callback reaches the outpost.
-
-**Three-router priority split** — used by Loki, Gotify, and Apprise to support both browser SSO and API/push clients on the same domain:
-
-| Router | Priority | Rule | Middleware | Purpose |
-|--------|----------|------|------------|---------|
-| `*-outpost` | 30 | `Host + PathPrefix(/outpost.goauthentik.io)` | none | Authentik post-login callback |
-| `*-api` | 10 | Header or path match (e.g. `X-Gotify-Key`, `PathPrefix(/loki/api/v1/push)`) | none | API/token/push clients bypass SSO |
-| `*` | 1 | `Host` (catch-all) | `authentik` | Browser SSO |
-
-Loki uses `PathPrefix(/loki/api/v1/push)` (Alloy push clients). Gotify uses `X-Gotify-Key`. Apprise uses `PathPrefix(/notify)`.
-
-### Journald retention
-
-`hosts/ligma/default.nix` caps journal at **512 MB / 7 days**. Logs ship to self-hosted Loki (`loki.nix`) via Grafana Alloy (`common/alloy.nix`) — this replaced an older Graylog+Vector pipeline. Vacuum manually: `journalctl --vacuum-size=512M --vacuum-time=7d`.
-
-### Authentik (Podman containers)
-
-Authentik runs as three containers on a dedicated `authentik_network` bridge:
-
-| Container | Image | Role |
-|---|---|---|
-| `authentik-redis` | `redis:7-alpine` | Celery broker + cache |
-| `authentik-server` | `ghcr.io/goauthentik/server:<tag>` | Web UI + embedded outpost (port 9000) |
-| `authentik-worker` | `ghcr.io/goauthentik/server:<tag>` | Celery worker |
-
-PostgreSQL runs as a native NixOS service at `/ligma/ligma/authentik/postgresql`. Both server and worker bind-mount `/run/postgresql` and connect via Unix socket. A `local authentik authentik trust` pg_hba rule (prepended via `lib.mkBefore`) bypasses peer auth since container UIDs don't match the OS `authentik` user.
-
-**Renovate pin**: add `# renovate: datasource=docker depName=ghcr.io/goauthentik/server` above the `authTag` line in `authentik.nix`.
-
-### Podman
-
-`modules/podman.nix` configures Podman. Container images use the default location (`/var/lib/containers`), which is persisted via impermanence. All Podman bridge interfaces are trusted in the firewall (aardvark-dns). Custom networks (authentik_network, unifi_network, infisical_network) use subnets in `10.89.x.0/24`.
-
-**DNS quirk for multi-network containers**: aardvark-dns resolves Podman container names only within the same network. Containers in different networks that need to cross-resolve each other must use `10.88.0.1` (default Podman gateway) as DNS — aardvark-dns there resolves all networks. Used by unifi_network containers.
-
-### Omni (Sidero Talos cluster manager)
-
-Self-hosted Omni runs as a Podman container on ligma. State (embedded etcd + SQLite) lives at `/ligma/ligma/omni/`. Auth is delegated to Authentik via SAML — no Traefik forwardAuth in front of the Omni router. The corresponding SAML provider, application, and policy binding are defined in the **authentik** repo at `omni.tf`; that must be `tofu apply`'d before deploying Omni so the metadata URL resolves.
-
-Three SOPS secrets live in `hosts/ligma/secrets.yaml`:
-
-| Secret | Purpose | Format |
-|---|---|---|
-| `omni-account-uuid` | `--account-id` (passed via `OMNI_ACCOUNT_ID`) | bare UUID string |
-| `omni-jwt-signing-key` | `--private-key-source` for embedded-etcd master key encryption | **ASCII-armored OpenPGP private key** (gopenpgp), not raw PEM |
-| `omni-wireguard-key` | reserved, currently unused | WG private key |
-
-**Generate the PGP key** (one-time):
+Pre-commit sequence (mandatory for every Nix change):
 
 ```bash
-nix run nixpkgs#gnupg -- --batch --gen-key <<EOF
-%no-protection
-Key-Type: EDDSA
-Key-Curve: ed25519
-Subkey-Type: ECDH
-Subkey-Curve: cv25519
-Name-Real: omni
-Name-Email: omni@makifun.se
-Expire-Date: 0
-%commit
-EOF
-nix run nixpkgs#gnupg -- --armor --export-secret-keys omni@makifun.se
+nixfmt <changed-file>.nix
+nix flake check
+git commit
 ```
-
-Paste the full `-----BEGIN PGP PRIVATE KEY BLOCK-----...END...` into sops as a YAML literal block (`omni-jwt-signing-key: |`). After editing the secret on a running ligma, `systemctl restart omni-prep podman-omni` to re-stage and re-load the key without a full rebuild.
-
-**SAML quirks worth knowing** (configured in the authentik repo, not here):
-
-- Provider `audience` must be `https://omni.makifun.se/saml/metadata` (the metadata path), not the bare host. Omni rejects any other value.
-- The provider must include the default property mappings (email, name, username, uid, upn) and pin `name_id_mapping` to the email mapping — Authentik otherwise sends an empty `<saml:AttributeStatement/>` and Omni cannot identify the user.
-- `--auth-saml-attribute-rules` maps Authentik's MS SOAP claim URIs (`http://schemas.xmlsoap.org/ws/2005/05/identity/claims/...`) to Omni's internal `identity` and `fullname` fields.
-- `--auth-saml-url` takes the metadata URL despite its name. `--auth-saml-metadata` expects a local XML file path, not a URL.
-
-**Other gotchas:**
-
-- Omni's distroless image has no `/bin/sh` — entrypoint must be the binary directly, no wrapper script.
-- The `--account-id` flag has no env-binding shown in `--help`, but cobra/viper auto-binds `OMNI_ACCOUNT_ID`.
-- Required flags not obvious from `--help`: `--sqlite-storage-path`, `--etcd-embedded-db-path`, `--machine-api-advertised-url`. Missing flags fail with JSON-schema validation errors that name the missing config path.
-- `--initial-users` re-checks on every start and seeds new admin emails. Existing users created via the UI are not touched.
-
-### Beszel monitoring
-
-Beszel hub (loopback port 8095, also reachable via Traefik at `beszel.makifun.se`) + agent (`common/beszel-agent.nix`, host networking, port 45876) on every flake-managed host. Agent must run on host networking to see host interfaces.
-
-**Agents self-register via universal token** — the agent dials *out* to the hub (`HUB_URL = https://beszel.makifun.se`) and authenticates with a shared `KEY` (hub's public SSH key, same for every agent) + `TOKEN` (a permanent Universal Token, same for every agent). A new host provisioned from the flake shows up in the hub automatically; no manual "add system" step. `PORT`/`LISTEN` isn't set — that only matters for the legacy hub-initiated model (hub connects *to* the agent), which nothing uses anymore now that every agent/DaemonSet uses `HUB_URL`. The agent still binds its default `LISTEN` port (45876) internally since that's just how the binary starts up, but no firewall rule opens it — cleaned up along with `hosts/ligma/apps/beszel-extra.nix` (its only content was that now-dead rule; deleted, not just emptied).
-
-**No Authentik forwardAuth in front of Beszel at all** — Beszel handles its own login via native OIDC (see below), same migration Gotify went through. `beszel-server.nix`'s single `beszel` router has no `authentik` middleware and no outpost-callback router; nothing gates `beszel.makifun.se` at the Traefik layer, including the agent's fixed self-registration path `/api/beszel/agent-connect` (moot now — there was never anything there to bypass once forwardAuth was dropped). The old proxy provider entry (`ligma_apps["beszel"]` + its `skip_path_regex`) was removed from the `authentik` repo's `apps.tf`.
-
-**Native OIDC login** ([beszel.dev/guide/oauth](https://beszel.dev/guide/oauth)) — Beszel is PocketBase-backed, so unlike Gotify (env-var driven) its OAuth2 provider settings are entered by hand into Beszel's own admin UI, not NixOS. One-time setup:
-1. `tofu apply` in the `authentik` repo (`beszel.tf`) to create the OAuth2 provider + application, then `tofu output -raw beszel_oauth_client_secret`.
-2. In Beszel: `https://beszel.makifun.se/_/#/settings` → toggle off "Hide collection create and edit controls" → edit the `users` collection → Options tab → OAuth2 → enable → add provider → OpenID Connect, with:
-   - Client ID / Client secret: from step 1
-   - Auth URL: `https://auth.makifun.se/application/o/authorize/`
-   - Token URL: `https://auth.makifun.se/application/o/token/`
-   - User info URL: `https://auth.makifun.se/application/o/userinfo/`
-3. Toggle "Hide collection create and edit controls" back on.
-4. Beszel does not auto-create users from OIDC login by default — either set `USER_CREATION=true` (not currently set), or make sure the existing Beszel account's email matches the Authentik account's email so login links to it instead of failing.
-5. Verify: click "authentik" on the Beszel login page, confirm it round-trips through Authentik back into Beszel.
-6. Verified and now enforced: `DISABLE_PASSWORD_AUTH=true` is set on the hub container (`beszel-server.nix`) — OIDC via Authentik is the only login path, no local password fallback.
-
-SOPS secrets in `common/secrets.yaml` (shared by every host):
-- `beszel_agent_key` — hub's public SSH key. One-time bootstrap: create the hub admin account at `https://beszel.makifun.se`, add any one system in the UI to reveal the key, copy it into this secret as `KEY=<value>`.
-- `beszel_universal_token` — Settings → Tokens & Fingerprints → enable Universal Token → toggle "permanent" → copy. Store as `TOKEN=<value>`.
-
-Both secrets above are consumed directly as container `environmentFiles`, so the stored value must be the full `KEY=...`/`TOKEN=...` line, not just the bare value. Same convention for the hub-only secret below.
-
-No port is opened for the agent at all anymore — self-registration rides Traefik's existing 443, and the legacy port-45876 firewall rules (per-agent in `common/beszel-agent.nix`, plus a LAN-wide one in the now-deleted `hosts/ligma/apps/beszel-extra.nix`) were removed once nothing used them.
-
-**Outbound heartbeat** ([beszel.dev/guide/heartbeat](https://beszel.dev/guide/heartbeat), 0.18.4+) — the hub itself pings an external monitor (e.g. a healthchecks.io-style push URL) on an interval to prove it's alive, independent of any agent. `beszel-server.nix` sets it via `beszel_heartbeat_url` in `hosts/ligma/secrets.yaml` (hub-only, not the shared `common/secrets.yaml` — this is a hub concern, not an agent one), stored as `HEARTBEAT_URL=<value>`. `HEARTBEAT_INTERVAL`/`HEARTBEAT_METHOD` are left unset — Beszel's built-in defaults apply.
-
-### Distribution registry mirrors
-
-Four OCI registry mirror instances, each a `docker.io/library/registry:3` container:
-
-| Instance | Port | Upstream |
-|---|---|---|
-| `dist-dockerhub` | 5001 | https://registry-1.docker.io |
-| `dist-ghcr` | 5002 | https://ghcr.io |
-| `dist-lscr` | 5003 | https://lscr.io |
-| `dist-quay` | 5004 | https://quay.io |
-
-Served at `{name}.mirror.makifun.se` behind `mirror-lan-only` ipAllowList middleware (10.10.10.0/24 only). Daily garbage collection at 06:00 UTC (systemd timer, stops containers → runs GC → restarts). Talos nodes and Podman are configured to pull from these mirrors. `OTEL_SDK_DISABLED=true` (registry's own telemetry off); log shipping/filtering now goes through Alloy (see Journald retention above), not Vector.
-
-`log.level = "info"` — pull events (HTTP GETs) appear in Loki under `job=ligma-podman-dist-*`. Distribution containers only see `10.88.0.1` (Podman bridge = Traefik) — real client IPs only available from Traefik JSON access logs. Use Loki query: `{job="ligma-syslog", unit="traefik.service"} | json | RouterName =~ "dist-.+" | RequestMethod =~ "GET|HEAD"`.
-
-**Grafana registry dashboard** (`registry.json`) — uses `registry_proxy_*` metrics (not `registry_storage_cache_*` which track internal blob descriptor cache). Distribution v3 renamed metrics: `registry_storage_cache_total{type="Hit"}` → `registry_storage_cache_hits_total`, `{type="Request"}` → `registry_storage_cache_requests_total`. Dashboard datasource UIDs must be hardcoded (`prometheus`, `loki`) — file provisioning does not substitute `${DS_PROMETHEUS}` / `__inputs`.
-
-### Homepage → Kubernetes integration
-
-`homepage.nix` connects Homepage to the sugma k8s cluster for service discovery and pod metrics.
-
-**How it works:**
-- `kubernetes.mode = "default"` + `gateway = true` — enables Gateway API HTTPRoute discovery
-- `KUBECONFIG` env var points to a SOPS secret rendered at runtime
-- Homepage uses the `homepage` ServiceAccount (scoped read-only ClusterRole) in the `homepage` namespace on sugma
-
-**SOPS secret `homepage-kubeconfig`** — kubeconfig YAML for the sugma cluster. Must be added to `secrets.yaml` after Flux applies `k8s/infra/homepage-rbac/` on sugma.
-
-**One-time bootstrap** (run after `k8s/infra/homepage-rbac/` is deployed):
 
 ```bash
-TOKEN=$(kubectl get secret homepage-token -n homepage -o jsonpath='{.data.token}' | base64 -d)
+nh os switch --refresh            # apply on a host (pulls the flake from GitHub)
+sops hosts/<host>/secrets.yaml    # edit a host's secrets
+./sops_refresh_key.sh             # re-encrypt after key changes
+./nixos_install.sh <ip> <host>    # provision a new host
 ```
 
-Add to `sops hosts/ligma/secrets.yaml`:
+## Layout
 
-```yaml
-homepage-kubeconfig: |
-  apiVersion: v1
-  kind: Config
-  clusters:
-  - cluster:
-      insecure-skip-tls-verify: true
-      server: https://10.10.10.29:6443
-    name: sugma
-  contexts:
-  - context:
-      cluster: sugma
-      user: homepage
-    name: homepage@sugma
-  current-context: homepage@sugma
-  users:
-  - name: homepage
-    user:
-      token: <TOKEN>
-```
+- `flake.nix` — outputs, plus `baseFacts` and `hosts` passed to every module
+  via `specialArgs`.
+- `common/` — modules for all hosts, auto-imported by `common/default.nix`.
+- `modules/` — shared opt-in modules (rclone, samba).
+- `hosts/<host>/` — host config, `disko-config.nix`, `secrets.yaml`, `apps/`.
+- `CHANGELOG.md` — flake-input and package history, written by
+  `.github/workflows/update-flake-inputs.yml`.
 
-The secret is rendered with `owner = "homepage-dashboard"` so the service can read it. The `KUBECONFIG` env var is injected via `systemd.services.homepage-dashboard.environment`.
+## Conventions
 
-**HTTPRoute auto-discovery** — annotate any HTTPRoute on sugma with:
+- Use `baseFacts.domainName` for domains and `hosts.<name>` for addresses.
+  Never hard-code either.
+- Pushing to `main` deploys automatically (`system.autoUpgrade`). A new SOPS
+  key must be in `secrets.yaml` before the Nix change that uses it is
+  pushed, or activation fails.
+- Secrets: `sops.secrets.<name>.sopsFile = ../secrets.yaml;` in the app file.
+- Services run as Podman containers (`virtualisation.oci-containers`).
+- Web apps are reached through ligma's Traefik. An app on another host gets
+  a `hosts/ligma/apps/traefik-<app>-<host>.nix` route, and its port on that
+  host is opened only to ligma via `networking.firewall.extraInputRules`.
+- Authentik forwardAuth is the default for web apps. Apps with their own
+  OIDC login (Jellyfin, Gotify, Beszel, Technitium) have no forwardAuth.
 
-```yaml
-annotations:
-  gethomepage.dev/enabled: "true"
-  gethomepage.dev/name: "My App"
-  gethomepage.dev/group: "Server"
-  gethomepage.dev/icon: "myapp.png"
-  gethomepage.dev/href: "https://myapp.makifun.se"
-  gethomepage.dev/pod-selector: "app=myapp"   # matches actual pod label (not app.kubernetes.io/name)
-  # optional widget:
-  gethomepage.dev/widget.type: "myapp"
-  gethomepage.dev/widget.url: "https://{{HOMEPAGE_VAR_MYAPP_URL}}"
-  gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_MYAPP_TOKEN}}"
-```
+## Renovate
 
-`{{HOMEPAGE_VAR_*}}` substitution works in annotations. `pod-selector` must match actual pod labels — homepage defaults to `app.kubernetes.io/name=<name>` which often doesn't match.
-
-### Auto-upgrade notifications
-
-`common/autoupgrade-notify.nix` hooks `OnSuccess=`/`OnFailure=` on `nixos-upgrade.service` to a templated oneshot (`nixos-upgrade-notify@%i`) that posts to `https://gotify.makifun.se`. Title uses `config.networking.hostName`. Failure messages include generation number, NixOS version, and last 40 journal lines (capped at 3500 bytes). sopsFile resolves to `hosts/<hostname>/secrets.yaml` automatically. SOPS key: `nixos-upgrade-gotify-token`. Test with:
-
-```bash
-sudo systemctl start nixos-upgrade-notify@success.service
-```
-
-### Renovate
-
-Two independent Renovate instances run against this fleet — do not confuse them:
-
-1. **GitHub web app**, covering *this* repo's own `.nix` files. `renovate.json` in the repo root configures the GitHub Renovate web app to update container image tags in `.nix` files (see below).
-2. **Self-hosted Forgejo Actions**, covering the internal Forgejo repos (`homelab/authentik`, `homelab/makiplex-bot`, `homelab/sugma`). Runs as a scheduled workflow (`.forgejo/workflows/renovate.yml`, hourly cron) in the dedicated `homelab/renovate-config` repo on `git.makifun.se`, using the existing self-hosted Forgejo Actions runner (`runs-on: nix`, job container overridden to `ghcr.io/renovatebot/renovate:<tag>`). Config lives in that repo's `renovate-config.json` (`platform: gitea`, `binarySource: install` — the job container runs as root so Renovate can self-install per-repo toolchains like Go, no manual mounting needed). Secrets `RENOVATE_TOKEN` (renovate-bot's Forgejo token) and `RENOVATE_GITHUB_TOKEN` (GitHub PAT for release notes; **not** `GITHUB_COM_TOKEN` — Forgejo rejects secret names with the `GITHUB_` prefix) are repo-level Actions secrets on `renovate-config`, since Forgejo has no user-level secrets scope (only repo/org). renovate-bot's Forgejo token is generated once by `forgejo-provision` (see `forgejo.nix`) and persisted to `/ligma/ligma/renovate/token`; to rotate, regenerate the token (`rm /ligma/ligma/renovate/token && systemctl restart forgejo-provision`) then re-push it as the `RENOVATE_TOKEN` secret on `renovate-config` via the Forgejo UI or API. This replaced an earlier standalone `renovate.nix` systemd timer + Podman one-shot on ligma (removed) — that setup ran as the unprivileged `forgejo` user and needed a manually bind-mounted Nix-provided Go toolchain for `gomod` support, which Actions' root-container default avoids.
-
-**Repos moved from the personal `makifun` account to the `homelab` org (2026-09).** Forgejo repo transfers move git remotes and keep old URLs redirecting, but do **not** move the associated container registry packages — images already pushed under `git.makifun.se/makifun/<repo>` stay there permanently; only a fresh CI push lands a new image under `git.makifun.se/homelab/<repo>`. Fixed for `sugma`'s Flux `GitRepository` (`sugma/k8s/bootstrap/gitrepository.yaml`, plus the live cluster object patched directly since it's only applied once at bootstrap) and `makiplex-bot` (`go.mod`/`compose.yaml` repointed to `homelab/`; that push triggered `.forgejo/workflows/ko-build-push.yaml`, which derives its registry path from `github.repository` and so published the first image under the new org automatically; `sugma/k8s/apps/makiplex-bot/deployment.yaml` now pins that new tag). If any other app's deployment still pins a `git.makifun.se/makifun/<repo>` image, it'll keep working (old images don't disappear) but won't get new tags until the same push-triggers-new-path fix happens there too.
-
-`renovate.json` in the repo root configures the GitHub Renovate web app to update container image tags in `.nix` files.
-
-**Custom regex manager** — matches lines annotated with `# renovate: datasource=docker depName=<image>` followed by a Nix assignment. The annotation must be in a `let` block, and the assigned value must be **only the tag** (not a full image reference):
+Image tags are updated by the Renovate GitHub app via a regex manager. Put
+the annotation above a `let` binding that holds only the tag:
 
 ```nix
 let
   # renovate: datasource=docker depName=ghcr.io/garethgeorge/backrest
   backrestTag = "v1.14.1";
 in
-{
-  virtualisation.oci-containers.containers.backrest = {
-    image = "ghcr.io/garethgeorge/backrest:${backrestTag}";
 ```
 
-**Never put the annotation above `image = "registry/name:tag"` directly.** Renovate captures the entire assignment value as `currentValue` and validates it as a docker version. A full image reference like `"ghcr.io/foo/bar:v1.2.3"` fails validation (`skipReason: invalid-value`) and the package is silently skipped.
-
-**linuxserver.io versioning quirk** — `lscr.io/linuxserver/*` images publish historic Ubuntu release tags (`20.04.1`, `22.04.1`) that sort above application version tags under semver. `renovate.json` applies:
-
-1. A global regex versioning rule for all `lscr.io/linuxserver/*` images (handles `version-v` prefix for nzbget and `amd64-` prefix for multi-arch tags).
-2. Per-image `allowedVersions` constraints for qbittorrent (`>=5.0.0 <6.0.0`), prowlarr (`>=2.0.0 <3.0.0`), and nzbget (`/^version-v/`).
-3. Per-image `versioning` regexes for tag formats the global rule can't parse: plex (`version-1.43.4.10903-e5521bd8c`) and jellyfin (`12.1ubu2604-ls50`).
-
-When adding a new linuxserver image, check if its version tags conflict with ubuntu date tags and add an `allowedVersions` entry if needed.
-
-### Flake input updates (GitHub Actions)
-
-`.github/workflows/update-flake-inputs.yml` runs `nix flake update` daily (00:00 Europe/Stockholm) and on manual dispatch. It does not commit to `main` directly:
-
-1. Diffs `flake.lock` before/after; skips the rest if nothing changed.
-2. Snapshots `nixosConfigurations.ligma.config.environment.systemPackages` (name + version, via `parseDrvName`) before and after the update. ligma's package set is representative — `common/default.nix`'s explicit `systemPackages` list is identical across all three hosts, and the module-pulled packages (postgresql, grafana, podman, etc.) mirror the shared `common/` modules. Eval failure degrades gracefully (`nix eval` wrapped in `||`) rather than failing the run — same pattern as the makizen flake-lock workflow (`makizen/.forgejo/workflows/update-flake-lock.yml`), which does the same snapshot/diff against `home.packages`.
-3. Runs `nix flake check` against the updated lock and records pass/fail.
-4. Builds a PR body table of the flake's direct inputs (`nixpkgs`, `disko`, `impermanence`, `sops-nix`) that changed rev, with before/after dates and a GitHub compare link per input. Transitive inputs (e.g. `home-manager`, pulled in by `impermanence`) are excluded from the table. A second table lists packages whose version changed between the before/after snapshots.
-5. Opens (or updates, if one is already open) a PR on branch `update/flake-lock` via `peter-evans/create-pull-request`, titled with the check result. **`nix flake check` failures do not block the PR** — it's still opened, flagged with ⚠️, so the update is visible either way.
-6. Prepends the same flake-input/package diff to `CHANGELOG.md` at the repo root, under a `## <date>` heading, so the history survives after the PR merges (the PR body itself vanishes once the PR is closed). Same mechanism as `makizen/.forgejo/workflows/update-flake-lock.yml` — reuses the exact rows already computed for the PR body, just with `###` sub-headings instead of `##`. The PR includes `CHANGELOG.md` alongside `flake.lock` (`add-paths`).
-
-Requires repo setting **Settings → Actions → General → Workflow permissions → "Allow GitHub Actions to create and approve pull requests"** enabled, or `peter-evans/create-pull-request` fails to open the PR with the default `GITHUB_TOKEN`.
+An annotation above a full `image = "registry/name:tag"` line is silently
+skipped. `lscr.io/linuxserver/*` images need a `versioning` rule in
+`renovate.json` when their tag format isn't `x.y.z` (see plex and jellyfin).

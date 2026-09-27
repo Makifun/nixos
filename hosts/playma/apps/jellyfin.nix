@@ -1,6 +1,7 @@
 {
   baseFacts,
   config,
+  hosts,
   pkgs,
   ...
 }:
@@ -80,10 +81,9 @@ in
     ];
   };
 
-  networking.firewall.allowedTCPPorts = [
-    8096 # Jellyfin web UI + API
-  ];
-  networking.firewall.allowedUDPPorts = [
-    7359 # Jellyfin client discovery
-  ];
+  # Web/API only via ligma's Traefik; discovery stays LAN-wide.
+  networking.firewall.extraInputRules = ''
+    tcp dport 8096 ip saddr ${hosts.ligma}/32 accept comment "Jellyfin from ligma"
+    udp dport 7359 ip saddr ${hosts.lan} accept comment "Jellyfin client discovery"
+  '';
 }
