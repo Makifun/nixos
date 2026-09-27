@@ -7,6 +7,21 @@
     iifname "podman*" accept comment "trust all podman bridge interfaces"
   '';
 
+  # Pin podman 5.8.6: 5.8.7 breaks archive copies through absolute symlinks
+  # like /var/run, which fails every Forgejo Actions job. Remove when fixed.
+  # https://github.com/podman-container-tools/podman/issues/29805
+  nixpkgs.overlays = [
+    (final: prev: {
+      podman = prev.podman.overrideAttrs (old: {
+        version = "5.8.6";
+        src = old.src.override {
+          tag = "v5.8.6";
+          hash = "sha256-a0m6y4Cwm395qYsDO0CFInUkm1AbGHCfBg3/RNMEoQs=";
+        };
+      });
+    })
+  ];
+
   environment.persistence."/persist".directories = [
     {
       directory = "/var/lib/containers";
