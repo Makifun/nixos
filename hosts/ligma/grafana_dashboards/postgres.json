@@ -401,28 +401,6 @@
         {"expr": "increase(cnpg_pg_stat_archiver_archived_count{job=\"cnpg\"}[5m])", "legendFormat": "archived", "refId": "A"},
         {"expr": "increase(cnpg_pg_stat_archiver_failed_count{job=\"cnpg\"}[5m])", "legendFormat": "failed", "refId": "B"}
       ]
-    },
-    {
-      "id": 106,
-      "type": "row",
-      "title": "tracearr — table sizes",
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 66},
-      "collapsed": false
-    },
-    {
-      "id": 60,
-      "title": "tracearr — largest user tables (top 10)",
-      "description": "Includes TimescaleDB chunk tables — a hypertable's data lives in per-chunk child tables, not the parent.",
-      "type": "timeseries",
-      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 67},
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "fieldConfig": {
-        "defaults": {"unit": "bytes", "custom": {"drawStyle": "line", "fillOpacity": 10, "spanNulls": true}}
-      },
-      "options": {"legend": {"displayMode": "table", "placement": "right", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}},
-      "targets": [
-        {"expr": "topk(10, pg_stat_user_tables_table_size_bytes{job=\"tracearr-db\", datname=\"tracearr\"})", "legendFormat": "{{relname}}", "refId": "A"}
-      ]
     }
   ]
 }
