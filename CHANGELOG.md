@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-29
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `nixpkgs` | `e158d9ed` (2026-09-26) | `7a0f122f` (2026-09-28) | [diff](https://github.com/nixos/nixpkgs/compare/e158d9ed9b51c98974c5e66e1ba1c9e0255fecaa...7a0f122f5090cf4c2ade2a13a0e229d4e19ba71f) |
+
+### Package versions
+
+_No version changes._
+
 ## 2026-09-28
 
 ### Flake inputs
