@@ -10,7 +10,7 @@ let
   jellyfinBase = "/${hostname}/${hostname}/jellyfin";
   jellyfinUrl = "https://jellyfin.${baseFacts.domainName}";
   # renovate: datasource=docker depName=lscr.io/linuxserver/jellyfin
-  jellyfinTag = "12.1ubu2604-ls50";
+  jellyfinTag = "12.1ubu2604-ls51";
 
   # Provider config for the Flowfin/jellyfin-plugin-sso plugin, read at startup.
   # Setup notes: Obsidian vault, [[jellyfin]].
