@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-10-01
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `nixpkgs` | `7a0f122f` (2026-09-28) | `b4fd65b1` (2026-09-29) | [diff](https://github.com/nixos/nixpkgs/compare/7a0f122f5090cf4c2ade2a13a0e229d4e19ba71f...b4fd65b198c599cbe814fcb9f42d25d021595ec9) |
+
+### Package versions
+
+| Package | Before | After |
+|---------|--------|-------|
+| `cryptsetup` | 2.8.7 | 2.8.8 |
+| `getconf-glibc` | 2.42-84 | 2.44-25 |
+| `getent-glibc` | 2.42-84 | 2.44-25 |
+| `glibc` | 2.42-84 | 2.44-25 |
+| `glibc-locales` | 2.42-84 | 2.44-25 |
+| `less` | 704 | 710 |
+| `shared-mime-info` | 2.4 | 2.5.1 |
+| `systemd` | 261.2 | 261.3 |
+| `xz` | 5.8.3 | 5.8.4 |
+
 ## 2026-09-29
 
 ### Flake inputs
