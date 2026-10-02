@@ -53,6 +53,11 @@ in
       "--opnsense.address=opnsense.${baseFacts.domainName}"
       "--exporter.instance-label=opnsense.${baseFacts.domainName}"
       "--web.listen-address=:9091"
+      # Exporter calls camelCase systemTemperature; OPNsense ACLs only
+      # list system_temperature, so a non-admin user always gets 403.
+      "--exporter.disable-temperature"
+      # Needs Unbound Extended Statistics; no dashboard uses these metrics.
+      "--exporter.disable-unbound"
       "--log.level=info"
     ];
     ports = [ "127.0.0.1:9091:9091" ];
