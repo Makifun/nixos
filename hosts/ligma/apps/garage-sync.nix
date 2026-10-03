@@ -16,6 +16,8 @@ let
     format = "yaml";
     sopsFile = ../secrets.yaml;
   };
+  # 67 MB/s; rclone's M suffix is MiB, so give bytes. Buckets sync one at a time.
+  bwlimit = "67000000B";
   confPath = bucket: config.sops.templates."rclone-garage-offsite-${bucket}.conf".path;
 in
 {
@@ -60,7 +62,8 @@ in
         set -e
         ${lib.concatMapStrings (bucket: ''
           ${pkgs.rclone}/bin/rclone sync garage:${bucket} chunker: \
-            --config ${confPath bucket} --transfers 4 --log-level INFO
+            --config ${confPath bucket} --transfers 4 --log-level INFO \
+            --bwlimit ${bwlimit}
         '') buckets}
       '';
     };
