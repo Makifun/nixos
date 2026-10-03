@@ -1,7 +1,7 @@
 { config, ... }:
 let
   # renovate: datasource=docker depName=prompve/prometheus-pve-exporter
-  exporterTag = "3.10.0";
+  exporterTag = "3.10.1";
 in
 {
   sops.secrets.proxmox-pve-token-value = {
