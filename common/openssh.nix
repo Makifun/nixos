@@ -1,5 +1,10 @@
 { ... }:
 {
+  # User CA in OpenBao (ssh/). A certificate logs in as its principal.
+  environment.etc."ssh/user_ca.pub".text = ''
+    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID33/DWBWaQEyG6kUFtKJvoZ7w5NYUBGtqEEbUvYKCBv openbao-ssh-ca
+  '';
+
   systemd.tmpfiles.rules = [
     "d /persist/etc/ssh 0755 root root -"
   ];
@@ -19,6 +24,7 @@
       PasswordAuthentication = false;
       LogLevel = "VERBOSE";
       PermitRootLogin = "no";
+      TrustedUserCAKeys = "/etc/ssh/user_ca.pub";
       KexAlgorithms = [
         "mlkem768x25519-sha256"
         "curve25519-sha256"
