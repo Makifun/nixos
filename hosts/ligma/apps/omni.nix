@@ -15,7 +15,7 @@ let
   uiPort = 9999;
   wgPort = 50180;
   # renovate: datasource=docker depName=ghcr.io/siderolabs/omni
-  omniTag = "v1.12.3";
+  omniTag = "v1.12.4";
   kmsBase = "/${hostname}/${hostname}/kms";
   kmsPort = 4050;
   # renovate: datasource=docker depName=ghcr.io/siderolabs/kms-server
