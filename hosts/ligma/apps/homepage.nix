@@ -814,6 +814,14 @@
             };
           }
           {
+            "Hubble" = {
+              icon = "/images/hubble.png";
+              href = "https://hubble.${baseFacts.domainName}";
+              namespace = "kube-system";
+              app = "hubble-ui";
+            };
+          }
+          {
             "Backrest Ligma" = {
               icon = "/images/backrest.png";
               href = "https://backrest-ligma.${baseFacts.domainName}";
