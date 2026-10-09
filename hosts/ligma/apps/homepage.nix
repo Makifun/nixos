@@ -594,6 +594,14 @@
             };
           }
           {
+            "Trawl" = {
+              icon = "/images/trawl.png";
+              href = "https://trawl.${baseFacts.domainName}/dashboard";
+              namespace = "media";
+              app = "media";
+            };
+          }
+          {
             "Gotify" = {
               icon = "/images/gotify.png";
               href = "https://gotify.${baseFacts.domainName}";
