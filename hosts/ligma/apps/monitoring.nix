@@ -364,7 +364,13 @@ in
   # Copy Infinity plugin into Grafana's writable plugins dir before start.
   systemd.services.grafana.serviceConfig =
     let
-      src = pkgs.grafanaPlugins.yesoreyeram-infinity-datasource;
+      # nixpkgs has the darwin-arm64 hash for 4.1.0, but the URL serves the
+      # "any" zip. Remove when nixpkgs has the correct hash.
+      src = pkgs.grafanaPlugins.yesoreyeram-infinity-datasource.overrideAttrs (old: {
+        src = old.src.overrideAttrs {
+          outputHash = "sha256-E3CBS3xVqdBJq4ylHaFmX75INZjI0fk6RX4yYNL1IhI=";
+        };
+      });
     in
     {
       ExecStartPre = toString (
