@@ -11,7 +11,7 @@
       # 50 G SSD (scsi0, serial=nixos) — OS
       main = {
         type = "disk";
-        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_nixos";
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0";
         content = {
           type = "gpt";
           partitions = {
@@ -44,7 +44,7 @@
       # 300 G SSD (scsi1, serial=ligma) — ZFS storage
       storage = {
         type = "disk";
-        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_ligma";
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1";
         content = {
           type = "gpt";
           partitions = {

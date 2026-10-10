@@ -11,7 +11,7 @@
       # 50 G SSD (scsi0, serial=nixos) — OS
       nixos = {
         type = "disk";
-        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_nixos";
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0";
         content = {
           type = "gpt";
           partitions = {
@@ -44,7 +44,7 @@
       # 100 G SSD (scsi1, serial=playma) — all app data
       playma = {
         type = "disk";
-        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_playma";
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1";
         content = {
           type = "gpt";
           partitions = {
@@ -72,7 +72,7 @@
       # 400 G SSD (scsi3, serial=cache) — rclone VFS cache (no LUKS — cache is regenerable)
       cache = {
         type = "disk";
-        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_cache";
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi3";
         content = {
           type = "gpt";
           partitions = {
@@ -98,7 +98,7 @@
       # 50 G SSD (scsi2, serial=transcode) — Plex transcoder scratch (no LUKS — ephemeral data)
       transcode = {
         type = "disk";
-        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_transcode";
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi2";
         content = {
           type = "gpt";
           partitions = {
