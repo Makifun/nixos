@@ -19,11 +19,11 @@ let
   scheduleMap = {
     ligma = {
       hour = 3;
-      minute = 25;
+      minute = 40;
     };
     playma = {
       hour = 4;
-      minute = 40;
+      minute = 50;
     };
   };
   # Hosts not in the map get a stable minute in 5..54 from their name.
