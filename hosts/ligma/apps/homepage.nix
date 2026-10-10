@@ -533,7 +533,7 @@
           }
           {
             "OpenBao" = {
-              icon = "/images/openbao-color.svg";
+              icon = "/images/bao.png";
               href = "https://openbao.${baseFacts.domainName}";
               server = "ligma";
               container = "openbao";
