@@ -105,9 +105,8 @@ in
             schedule.cron = planCron;
             retention.policyTimeBucketed = {
               hourly = 24;
-              daily = 30;
-              weekly = 8;
-              monthly = 12;
+              daily = 14;
+              monthly = 3;
             };
             hooks = [
               {
