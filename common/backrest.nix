@@ -3,6 +3,7 @@
   config,
   hosts,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -12,20 +13,38 @@ let
   # renovate: datasource=docker depName=ghcr.io/garethgeorge/backrest
   backrestTag = "v1.14.1";
 
-  # Central backup schedule — each host gets a distinct UTC hour so backups
-  # never overlap and S3 request rates stay low. Add new hosts here.
+  # Central backup schedule — each host gets a distinct prune hour (UTC) and
+  # a distinct minute for the hourly backup, so the hosts never hit S3 at the
+  # same time. Add new hosts here. Minute 10 is taken by the k8s cluster.
   scheduleMap = {
-    ligma = 3;
-    playma = 4;
+    ligma = {
+      hour = 3;
+      minute = 25;
+    };
+    playma = {
+      hour = 4;
+      minute = 40;
+    };
   };
-  scheduleHour = config.backrest.scheduleHour;
+  # Hosts not in the map get a stable minute in 5..54 from their name.
+  hashedMinute =
+    5 + lib.mod (lib.fromHexString (builtins.substring 0 4 (builtins.hashString "sha256" hostname))) 50;
+  planId = "${hostname}-hourly";
+  repoId = "${hostname}-s3";
+  planCron = "${toString config.backrest.scheduleMinute} * * * *";
+  pruneCron = "30 ${toString config.backrest.scheduleHour} * * *";
 in
 {
   options.backrest = {
     scheduleHour = lib.mkOption {
-      type = lib.types.int;
-      default = scheduleMap.${hostname} or 5;
-      description = "UTC hour for daily backup (prune runs 30 min later). Defaults from the central scheduleMap; override only if needed.";
+      type = lib.types.ints.between 0 23;
+      default = scheduleMap.${hostname}.hour or 5;
+      description = "UTC hour for the daily prune (runs at minute 30). Defaults from the central scheduleMap; override only if needed.";
+    };
+    scheduleMinute = lib.mkOption {
+      type = lib.types.ints.between 0 59;
+      default = scheduleMap.${hostname}.minute or hashedMinute;
+      description = "Minute of the hour for the hourly backup. Defaults from the central scheduleMap; override only if needed.";
     };
     extraPaths = lib.mkOption {
       type = lib.types.listOf lib.types.str;
@@ -66,7 +85,7 @@ in
         auth.disabled = true;
         repos = [
           {
-            id = "${hostname}-s3";
+            id = repoId;
             uri = "${config.sops.placeholder.backrest-repo-uri}${hostname}";
             autoInitialize = true;
             password = config.sops.placeholder.backrest-restic-password;
@@ -75,15 +94,15 @@ in
               "AWS_SECRET_ACCESS_KEY=${config.sops.placeholder.backrest-aws-secret-access-key}"
               "AWS_REGION=garage"
             ];
-            prunePolicy.schedule.cron = "30 ${toString scheduleHour} * * *";
+            prunePolicy.schedule.cron = pruneCron;
           }
         ];
         plans = [
           {
-            id = "${hostname}-hourly";
-            repo = "${hostname}-s3";
+            id = planId;
+            repo = repoId;
             paths = [ "/${hostname}/${hostname}" ] ++ config.backrest.extraPaths;
-            schedule.cron = "0 * * * *";
+            schedule.cron = planCron;
             retention.policyTimeBucketed = {
               hourly = 24;
               daily = 30;
@@ -126,14 +145,31 @@ in
         Type = "oneshot";
         RemainAfterExit = true;
       };
+      path = [ pkgs.jq ];
+      # The config is seeded once so UI edits survive. Only the schedules are
+      # written on every start, so they always follow this file.
       script = ''
         dest="${backrestBase}/config/config.json"
         if [ ! -f "$dest" ]; then
           cp ${config.sops.templates."backrest-config.json".path} "$dest"
           chmod 640 "$dest"
+        else
+          tmp=$(mktemp "$dest.XXXXXX")
+          jq --arg plan ${lib.escapeShellArg planCron} --arg prune ${lib.escapeShellArg pruneCron} '
+            (.plans[] | select(.id == "${planId}") | .schedule.cron) = $plan
+            | (.repos[] | select(.id == "${repoId}") | .prunePolicy.schedule.cron) = $prune
+          ' "$dest" > "$tmp"
+          chmod 640 "$tmp"
+          mv "$tmp" "$dest"
         fi
       '';
     };
+
+    # Backrest reads config.json only at start.
+    systemd.services.podman-backrest.restartTriggers = [
+      planCron
+      pruneCron
+    ];
 
     virtualisation.oci-containers.containers.backrest = {
       image = "ghcr.io/garethgeorge/backrest:${backrestTag}";
