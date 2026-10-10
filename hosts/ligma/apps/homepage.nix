@@ -532,6 +532,14 @@
             };
           }
           {
+            "OpenBao" = {
+              icon = "/images/openbao-color.svg";
+              href = "https://openbao.${baseFacts.domainName}";
+              server = "ligma";
+              container = "openbao";
+            };
+          }
+          {
             "Filebrowser" = {
               icon = "/images/filebrowser.png";
               href = "https://filebrowser.${baseFacts.domainName}";
