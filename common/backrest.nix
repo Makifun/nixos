@@ -13,7 +13,7 @@ let
   # renovate: datasource=docker depName=ghcr.io/garethgeorge/backrest
   backrestTag = "v1.14.1";
 
-  # Central backup schedule — each host gets a distinct prune hour (UTC) and
+  # Central backup schedule — each host gets a distinct prune hour (local) and
   # a distinct minute for the hourly backup, so the hosts never hit S3 at the
   # same time. Add new hosts here. Minute 10 is taken by the k8s cluster.
   scheduleMap = {
@@ -39,7 +39,7 @@ in
     scheduleHour = lib.mkOption {
       type = lib.types.ints.between 0 23;
       default = scheduleMap.${hostname}.hour or 5;
-      description = "UTC hour for the daily prune (runs at minute 30). Defaults from the central scheduleMap; override only if needed.";
+      description = "Local hour for the daily prune (runs at minute 30). Defaults from the central scheduleMap; override only if needed.";
     };
     scheduleMinute = lib.mkOption {
       type = lib.types.ints.between 0 59;
@@ -174,6 +174,8 @@ in
     virtualisation.oci-containers.containers.backrest = {
       image = "ghcr.io/garethgeorge/backrest:${backrestTag}";
       ports = [ "${toString backrestPort}:9898" ];
+      # Schedules use the local clock of the container.
+      environment.TZ = baseFacts.timeZone;
       volumes = [
         "${backrestBase}/data:/data"
         "${backrestBase}/config:/config"
