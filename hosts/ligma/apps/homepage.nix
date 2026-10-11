@@ -642,6 +642,21 @@
             };
           }
           {
+            "Vikunja" = {
+              icon = "/images/vikunja.png";
+              href = "https://vikunja.${baseFacts.domainName}";
+              namespace = "vikunja";
+              app = "vikunja";
+              widget = {
+                type = "vikunja";
+                url = "https://vikunja.${baseFacts.domainName}";
+                key = "{{HOMEPAGE_VAR_VIKUNJA_TOKEN}}";
+                enableTaskList = true;
+                version = 2;
+              };
+            };
+          }
+          {
             "KasmCord" = {
               icon = "/images/discord.png";
               href = "https://kasmcord.${baseFacts.domainName}";
