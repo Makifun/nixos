@@ -651,7 +651,7 @@
                 type = "vikunja";
                 url = "https://vikunja.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_VIKUNJA_TOKEN}}";
-                enableTaskList = true;
+                enableTaskList = false;
                 version = 2;
               };
             };
