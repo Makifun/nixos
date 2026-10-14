@@ -204,7 +204,7 @@
                   "series"
                 ];
                 url = "https://jellyfin.${baseFacts.domainName}";
-                token = "{{HOMEPAGE_VAR_JELLYFIN_TOKEN}}";
+                key = "{{HOMEPAGE_VAR_JELLYFIN_TOKEN}}";
               };
             };
           }
