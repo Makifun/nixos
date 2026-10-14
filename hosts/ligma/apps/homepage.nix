@@ -202,6 +202,7 @@
                 fields = [
                   "movies"
                   "series"
+                  "episodes"
                 ];
                 url = "https://jellyfin.${baseFacts.domainName}";
                 key = "{{HOMEPAGE_VAR_JELLYFIN_TOKEN}}";
