@@ -188,6 +188,27 @@
             };
           }
           {
+            "Jellyfin" = {
+              icon = "/images/jellyfin.png";
+              href = "https://jellyfin.${baseFacts.domainName}";
+              server = "playma";
+              container = "jellyfin";
+              widget = {
+                type = "jellyfin";
+                version = 2;
+                enableBlocks = true;
+                enableUser = true;
+                showEpisodeNumber = true;
+                fields = [
+                  "movies"
+                  "series"
+                ];
+                url = "https://jellyfin.${baseFacts.domainName}";
+                token = "{{HOMEPAGE_VAR_JELLYFIN_TOKEN}}";
+              };
+            };
+          }
+          {
             "Tracearr" = {
               icon = "/images/tracearr.png";
               href = "https://tracearr.${baseFacts.domainName}";
