@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-10-16
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `nixpkgs` | `7fd4004d` (2026-10-11) | `55bfb4d7` (2026-10-14) | [diff](https://github.com/nixos/nixpkgs/compare/7fd4004d0511991fff3a0524856a9be09e28c5f0...55bfb4d7437bd4e09ab7cba58a43bd68eb310044) |
+| `sops-nix` | `ee48786c` (2026-10-11) | `44931708` (2026-10-15) | [diff](https://github.com/Mic92/sops-nix/compare/ee48786c6f9160d2c1a084aac841f68195b8420c...44931708c62937c2b1bf7953902989fa5bb9ee1b) |
+
+### Package versions
+
+| Package | Before | After |
+|---------|--------|-------|
+| `nix` | 2.34.8 | 2.34.9 |
+
 ## 2026-10-13
 
 ### Flake inputs
