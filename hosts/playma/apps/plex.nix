@@ -3,7 +3,7 @@ let
   hostname = config.networking.hostName;
   plexBase = "/${hostname}/${hostname}/plex";
   # renovate: datasource=docker depName=lscr.io/linuxserver/plex
-  plexTag = "1.43.4";
+  plexTag = "1.43.5";
 in
 {
   systemd.tmpfiles.rules = [
