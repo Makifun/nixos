@@ -10,7 +10,7 @@ let
   hostname = config.networking.hostName;
   authBase = "/${hostname}/${hostname}/authentik";
   # renovate: datasource=docker depName=ghcr.io/goauthentik/server
-  authTag = "2026.8.4";
+  authTag = "2026.8.5";
   sharedEnv = {
     AUTHENTIK_POSTGRESQL__HOST = "/run/postgresql";
     AUTHENTIK_POSTGRESQL__USER = "authentik";
