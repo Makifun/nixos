@@ -1,5 +1,37 @@
 # Changelog
 
+## 2026-10-23
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `disko` | `725ea35e` (2026-09-18) | `cedd626e` (2026-10-20) | [diff](https://github.com/nix-community/disko/compare/725ea35e410ad83be4931d1bff7e090eacaf3563...cedd626e11b635470fa6f9fdb8ad79b0075dd7f9) |
+| `impermanence` | `7b1d382f` (2026-01-27) | `936ced36` (2026-10-20) | [diff](https://github.com/nix-community/impermanence/compare/7b1d382faf603b6d264f58627330f9faa5cba149...936ced36ecd25fcbd9b4789184b88aa2e4c2a901) |
+| `nixpkgs` | `fe132422` (2026-10-15) | `02c087f3` (2026-10-20) | [diff](https://github.com/nixos/nixpkgs/compare/fe13242281a67641c0102cdb1087f0ebe586c7df...02c087f3fe673c9e317f206a627cb6b910336dbe) |
+| `sops-nix` | `44931708` (2026-10-15) | `a1438ca3` (2026-10-18) | [diff](https://github.com/Mic92/sops-nix/compare/44931708c62937c2b1bf7953902989fa5bb9ee1b...a1438ca361b05d1e70854d5495abcb34fdf6ff47) |
+
+### Package versions
+
+| Package | Before | After |
+|---------|--------|-------|
+| `bash-interactive` | 5.3p15 | 5.3p20 |
+| `coreutils-full` | 9.11 | 9.12 |
+| `getconf-glibc` | 2.44-25 | 2.44-57 |
+| `getent-glibc` | 2.44-25 | 2.44-57 |
+| `git` | 2.55.0 | 2.56.0 |
+| `glibc` | 2.44-25 | 2.44-57 |
+| `glibc-locales` | 2.44-25 | 2.44-57 |
+| `grafana` | 13.2.3 | 13.2.4 |
+| `gzip` | 1.14 | 1.15 |
+| `iproute2` | 7.1.0 | 7.2.0 |
+| `openssh` | 10.5p1 | 10.6p1 |
+| `python3` | 3.14.7 | 3.14.8 |
+| `shadow` | 4.20.2 | 4.20.3 |
+| `systemd` | 261.3 | 262 |
+| `util-linux` | 2.42.3 | 2.42.4 |
+| `vim` | 9.2.1001 | 9.2.1164 |
+
 ## 2026-10-17
 
 ### Flake inputs
