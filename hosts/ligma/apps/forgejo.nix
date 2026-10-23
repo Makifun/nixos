@@ -28,10 +28,10 @@ in
     owner = config.services.forgejo.user;
   };
 
-  sops.secrets.forgejo-runner-token = {
+  # The runner token from the old .runner file, not a registration token.
+  sops.secrets.forgejo-runner-auth-token = {
     format = "yaml";
     sopsFile = ../secrets.yaml;
-    owner = "gitea-runner";
   };
 
   services.forgejo = {
@@ -279,52 +279,24 @@ in
     '';
   };
 
-  services.gitea-actions-runner = {
-    package = pkgs.forgejo-runner;
-    instances.default = {
-      enable = true;
-      name = "monolith";
-      url = "https://git.${baseFacts.domainName}";
-      tokenFile = config.sops.secrets.forgejo-runner-token.path;
-      labels = [
+  # Registration lives in the config (uuid + token), so the runner's
+  # state directory holds only cache and needs no persistence.
+  services.forgejo-runner.instances.default = {
+    enable = true;
+    settings = {
+      server.connections.default = {
+        url = "https://git.${baseFacts.domainName}";
+        uuid = "860b5ea7-12e0-4100-b2a1-a9eb4579bb95";
+      };
+      runner.labels = [
         "go-builder:docker://golang:alpine"
         "nix:docker://nixos/nix"
       ];
     };
+    secrets.server.connections.default.token_url = config.sops.secrets.forgejo-runner-auth-token.path;
   };
 
-  # Disable DynamicUser so systemd uses /var/lib/gitea-runner directly
-  # (DynamicUser redirects to /var/lib/private which conflicts with impermanence bind mounts)
-  users.users.gitea-runner = {
-    isSystemUser = true;
-    group = "gitea-runner";
-    home = "/var/lib/gitea-runner";
-    extraGroups = [ "podman" ];
-  };
-  users.groups.gitea-runner = { };
-
-  systemd.services."gitea-runner-default" = {
-    environment.DOCKER_HOST = "unix:///run/podman/podman.sock";
-    serviceConfig = {
-      DynamicUser = lib.mkForce false;
-      User = "gitea-runner";
-      Group = "gitea-runner";
-      SupplementaryGroups = [ "podman" ];
-    };
-  };
-
-  environment.persistence."/persist".directories = [
-    {
-      directory = "/var/lib/gitea-runner";
-      user = "gitea-runner";
-      group = "gitea-runner";
-      mode = "0750";
-    }
-  ];
-
-  systemd.tmpfiles.rules = [
-    "d '/persist/var/lib/gitea-runner' 0750 gitea-runner gitea-runner - -"
-  ];
+  systemd.services.forgejo-runner-default.environment.DOCKER_HOST = "unix:///run/podman/podman.sock";
 
   networking.firewall.extraInputRules = ''
     tcp dport 22222 ip saddr ${hosts.lan} accept comment "Forgejo SSH"
