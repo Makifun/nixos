@@ -29,12 +29,12 @@
             generation="$(readlink /nix/var/nix/profiles/system 2>/dev/null | sed -n 's/^.*system-\([0-9]\+\)-link$/\1/p')"
             nixos_version="$(/run/current-system/sw/bin/nixos-version 2>/dev/null || echo unknown)"
             if [ "$STATUS" = "success" ]; then
-              title="${config.networking.hostName} upgrade OK 🎉"
+              title="${config.networking.hostName} OK 🎉"
               prio=3
               msg="Generation: $generation
       NixOS: $nixos_version"
             else
-              title="${config.networking.hostName} upgrade FAILED 😭"
+              title="${config.networking.hostName} FAILED 😭"
               prio=8
               journal="$(journalctl -u nixos-upgrade.service -n 40 --no-pager 2>&1 | tail -c 3500)"
               msg="Generation: $generation
