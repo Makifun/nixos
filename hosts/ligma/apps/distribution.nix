@@ -25,11 +25,6 @@ let
       debugPort = 5012;
       upstream = "https://ghcr.io";
     };
-    lscr = {
-      port = 5003;
-      debugPort = 5013;
-      upstream = "https://lscr.io";
-    };
     quay = {
       port = 5004;
       debugPort = 5014;

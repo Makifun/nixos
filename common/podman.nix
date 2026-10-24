@@ -49,12 +49,6 @@
     location = "ghcr.mirror.makifun.se"
 
     [[registry]]
-    prefix   = "lscr.io"
-    location = "lscr.io"
-    [[registry.mirror]]
-    location = "lscr.mirror.makifun.se"
-
-    [[registry]]
     prefix   = "quay.io"
     location = "quay.io"
     [[registry.mirror]]

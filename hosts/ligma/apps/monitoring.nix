@@ -85,12 +85,6 @@ in
             };
           }
           {
-            targets = [ "127.0.0.1:5013" ];
-            labels = {
-              registry = "lscr";
-            };
-          }
-          {
             targets = [ "127.0.0.1:5014" ];
             labels = {
               registry = "quay";
