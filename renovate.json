@@ -25,27 +25,27 @@
     {
       "versioning": "regex:^(?:amd64-|version-v)?(?<major>\\d+)\\.(?<minor>\\d+)\\.?(?<patch>\\d+)?$",
       "matchPackageNames": [
-        "/^lscr\\.io/linuxserver//"
+        "/^linuxserver//"
       ]
     },
     {
-      "matchPackageNames": ["lscr.io/linuxserver/qbittorrent"],
+      "matchPackageNames": ["linuxserver/qbittorrent"],
       "allowedVersions": ">=5.0.0 <6.0.0"
     },
     {
-      "matchPackageNames": ["lscr.io/linuxserver/prowlarr"],
+      "matchPackageNames": ["linuxserver/prowlarr"],
       "allowedVersions": ">=2.0.0 <3.0.0"
     },
     {
-      "matchPackageNames": ["lscr.io/linuxserver/nzbget"],
+      "matchPackageNames": ["linuxserver/nzbget"],
       "allowedVersions": "/^version-v/"
     },
     {
-      "matchPackageNames": ["lscr.io/linuxserver/plex"],
+      "matchPackageNames": ["linuxserver/plex"],
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
     },
     {
-      "matchPackageNames": ["lscr.io/linuxserver/jellyfin"],
+      "matchPackageNames": ["linuxserver/jellyfin"],
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?ubu(?<compatibility>\\d+)-ls(?<build>\\d+)$"
     },
     {

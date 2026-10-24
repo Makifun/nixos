@@ -12,7 +12,7 @@ let
   unifiBase = "/${hostname}/${hostname}/unifi";
   # renovate: datasource=docker depName=mongo versioning=semver
   mongoTag = "8.2.6";
-  # renovate: datasource=docker depName=linuxserver/unifi-network-application registryUrl=https://lscr.io
+  # renovate: datasource=docker depName=linuxserver/unifi-network-application
   unifiTag = "10.6.109";
 
   # UniFi sends CEF embedded in BSD syslog WITHOUT a <priority> field.
@@ -81,7 +81,7 @@ in
     };
 
     unifi = {
-      image = "lscr.io/linuxserver/unifi-network-application:${unifiTag}";
+      image = "docker.io/linuxserver/unifi-network-application:${unifiTag}";
       dependsOn = [ "unifi-db" ];
       environment = {
         PUID = "1000";

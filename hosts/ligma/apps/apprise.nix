@@ -8,7 +8,7 @@ let
   hostname = config.networking.hostName;
   apprisePort = 8097;
   appriseBase = "/${hostname}/${hostname}/apprise";
-  # renovate: datasource=docker depName=linuxserver/apprise-api registryUrl=https://lscr.io
+  # renovate: datasource=docker depName=linuxserver/apprise-api
   appriseTag = "2.0.1";
 in
 {
@@ -18,7 +18,7 @@ in
   ];
 
   virtualisation.oci-containers.containers.apprise = {
-    image = "lscr.io/linuxserver/apprise-api:${appriseTag}";
+    image = "docker.io/linuxserver/apprise-api:${appriseTag}";
     ports = [ "127.0.0.1:${toString apprisePort}:8000" ];
     environment = {
       PUID = "1000";

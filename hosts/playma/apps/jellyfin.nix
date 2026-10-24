@@ -9,7 +9,7 @@ let
   hostname = config.networking.hostName;
   jellyfinBase = "/${hostname}/${hostname}/jellyfin";
   jellyfinUrl = "https://jellyfin.${baseFacts.domainName}";
-  # renovate: datasource=docker depName=lscr.io/linuxserver/jellyfin
+  # renovate: datasource=docker depName=linuxserver/jellyfin
   jellyfinTag = "12.3ubu2604-ls56";
 
   # Provider config for the Flowfin/jellyfin-plugin-sso plugin, read at startup.
@@ -59,7 +59,7 @@ in
   };
 
   virtualisation.oci-containers.containers.jellyfin = {
-    image = "lscr.io/linuxserver/jellyfin:${jellyfinTag}";
+    image = "docker.io/linuxserver/jellyfin:${jellyfinTag}";
     extraOptions = [
       "--network=host"
       "--device=/dev/dri:/dev/dri"

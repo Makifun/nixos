@@ -2,7 +2,7 @@
 let
   hostname = config.networking.hostName;
   plexBase = "/${hostname}/${hostname}/plex";
-  # renovate: datasource=docker depName=lscr.io/linuxserver/plex
+  # renovate: datasource=docker depName=linuxserver/plex
   plexTag = "1.43.5";
 in
 {
@@ -18,7 +18,7 @@ in
   };
 
   virtualisation.oci-containers.containers.plex = {
-    image = "lscr.io/linuxserver/plex:${plexTag}";
+    image = "docker.io/linuxserver/plex:${plexTag}";
     extraOptions = [
       "--network=host"
       "--device=/dev/dri:/dev/dri"
