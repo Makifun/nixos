@@ -9,7 +9,7 @@
 let
   hostname = config.networking.hostName;
   # renovate: datasource=docker depName=registry
-  registryTag = "3.1";
+  registryTag = "3.1.2";
   base = "/${hostname}/distribution";
 
   # One Distribution instance per upstream registry.
