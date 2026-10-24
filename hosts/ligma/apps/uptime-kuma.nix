@@ -32,36 +32,114 @@ let
     }
     // extra;
 
+  # The app answers this code without a login.
+  code = c: { accepted_statuscodes = [ c ]; };
+  # No path skips the Authentik outpost, so only the outpost redirect is checked.
+  outpost =
+    parent: name: sub:
+    http parent name "https://${sub}.${domain}/" (code "302" // { max_redirects = 0; });
+  sugmaApp =
+    name: sub: path: extra:
+    http "sugma" name "https://${sub}.${domain}${path}" extra;
+
   monitors = {
     infra = {
       type = "group";
-      name = "Infrastructure";
+      name = "infra";
     };
-    apps = {
+    ligma = {
       type = "group";
-      name = "Apps";
+      name = "ligma";
     };
-    media = {
+    playma = {
       type = "group";
-      name = "Media";
+      name = "playma";
+    };
+    sugma = {
+      type = "group";
+      name = "sugma";
     };
 
-    authentik = http "infra" "Authentik" "https://auth.${domain}/-/health/live/" { };
-    openbao = http "infra" "OpenBao" "https://openbao.${domain}/v1/sys/health" { };
-    omni = http "infra" "Omni" "https://omni.${domain}/" { };
+    # infra
+    opnsense = http "infra" "OPNsense" "https://${hosts.opnsense}/" { ignore_tls = true; };
+    proxmox = http "infra" "Proxmox" "https://${hosts.proxmox}:8006/" { ignore_tls = true; };
     technitium = http "infra" "Technitium" "https://technitium.${domain}/" { };
-    garage = http "infra" "Garage S3" "https://s3.${domain}/" {
-      # Anonymous S3 requests get AccessDenied.
-      accepted_statuscodes = [ "403" ];
+    technitium-dns = {
+      type = "dns";
+      name = "Technitium DNS";
+      parent_name = "infra";
+      hostname = "auth.${domain}";
+      dns_resolve_server = hosts.technitium;
+      dns_resolve_type = "A";
+      port = 53;
+      interval = 60;
+      retry_interval = 60;
+      max_retries = 2;
     };
 
-    forgejo = http "apps" "Forgejo" "https://git.${domain}/api/healthz" { };
-    vaultwarden = http "apps" "Vaultwarden" "https://vault.${domain}/alive" { };
-    gotify = http "apps" "Gotify" "https://gotify.${domain}/health" { };
-    grafana = http "apps" "Grafana" "https://grafana.${domain}/api/health" { };
-    beszel = http "apps" "Beszel" "https://beszel.${domain}/api/health" { };
+    # ligma
+    apprise = http "ligma" "Apprise" "https://apprise.${domain}/" { };
+    authentik = http "ligma" "Authentik" "https://auth.${domain}/-/health/live/" { };
+    backrest-ligma = http "ligma" "Backrest (ligma)" "http://127.0.0.1:9898/" { };
+    beszel = http "ligma" "Beszel" "https://beszel.${domain}/api/health" { };
+    forgejo = http "ligma" "Forgejo" "https://git.${domain}/api/healthz" { };
+    garage = http "ligma" "Garage S3" "https://s3.${domain}/" { accepted_statuscodes = [ "403" ]; };
+    gotify = http "ligma" "Gotify" "https://gotify.${domain}/health" { };
+    grafana = http "ligma" "Grafana" "https://grafana.${domain}/api/health" { };
+    homepage = http "ligma" "Homepage" "https://homepage.${domain}/api/healthcheck" { };
+    loki = http "ligma" "Loki" "http://127.0.0.1:3100/ready" { };
+    mirror-dockerhub = http "ligma" "Docker Hub mirror" "https://dockerhub.mirror.${domain}/v2/" { };
+    mirror-ghcr = http "ligma" "GHCR mirror" "https://ghcr.mirror.${domain}/v2/" { };
+    mirror-quay = http "ligma" "Quay mirror" "https://quay.mirror.${domain}/v2/" { };
+    omni = http "ligma" "Omni" "https://omni.${domain}/" { };
+    openbao = http "ligma" "OpenBao" "https://openbao.${domain}/v1/sys/health" { };
+    pgadmin = http "ligma" "pgAdmin" "http://127.0.0.1:5050/misc/ping" { };
+    prometheus = http "ligma" "Prometheus" "http://127.0.0.1:9090/-/healthy" { };
+    traefik = http "ligma" "Traefik" "http://127.0.0.1:8090/api/overview" { };
+    unifi = http "ligma" "UniFi" "https://127.0.0.1:8443/status" { ignore_tls = true; };
+    vaultwarden = http "ligma" "Vaultwarden" "https://vault.${domain}/alive" { };
+    watchyourlan = http "ligma" "WatchYourLAN" "https://watchyourlan.${domain}/api/status/" { };
 
-    jellyfin = http "media" "Jellyfin" "https://jellyfin.${domain}/health" { };
+    # playma
+    backrest-playma = http "playma" "Backrest (playma)" "http://${hosts.playma}:9898/" { };
+    jellyfin = http "playma" "Jellyfin" "https://jellyfin.${domain}/health" { };
+    plex = http "playma" "Plex" "https://${hosts.playma}:32400/identity" { ignore_tls = true; };
+    rclone-playma = http "playma" "rclone (playma)" "http://${hosts.playma}:6969/" { };
+
+    # sugma: paths that skip the Authentik outpost reach the app itself.
+    autobrr = sugmaApp "autobrr" "autobrr" "/api/healthz/liveness" { };
+    backrest-sugma = sugmaApp "Backrest (sugma)" "backrest-sugma" "/v1.Backrest/GetConfig" (code "405");
+    bazarr = sugmaApp "Bazarr" "bazarr" "/api/system/ping" { };
+    bazarr4k = sugmaApp "Bazarr 4K" "bazarr4k" "/api/system/ping" { };
+    filebrowser = sugmaApp "File Browser" "filebrowser" "/static/img/logo.svg" { };
+    flux = sugmaApp "Flux" "flux" "/api/v1/version" { };
+    gluetun = sugmaApp "Gluetun" "gluetun" "/v1/publicip/ip" { };
+    havc = outpost "sugma" "HA Version Control" "havc";
+    homeassistant = sugmaApp "Home Assistant" "homeassistant" "/manifest.json" { };
+    hubble = outpost "sugma" "Hubble" "hubble";
+    kasmcord = outpost "sugma" "Kasmcord" "kasmcord";
+    mediainfo = outpost "sugma" "MediaInfo" "mediainfo";
+    miniflux = sugmaApp "Miniflux" "miniflux" "/v1/version" (code "401");
+    nzbget = sugmaApp "NZBGet" "nzbget" "/jsonrpc" (code "401");
+    pgbackweb = outpost "sugma" "pgBackWeb" "pgbackweb";
+    privatebin = sugmaApp "PrivateBin" "privatebin" "/" { };
+    profilarr = sugmaApp "Profilarr" "profilarr" "/api/v1/health" { };
+    prowlarr = sugmaApp "Prowlarr" "prowlarr" "/api/v1/system/status" (code "401");
+    qbittorrent = sugmaApp "qBittorrent" "qbittorrent" "/api/v2/app/version" { };
+    qui = sugmaApp "Qui" "qui" "/api/version" (code "403");
+    radarr = sugmaApp "Radarr" "radarr" "/api/v3/system/status" (code "401");
+    radarr4k = sugmaApp "Radarr 4K" "radarr4k" "/api/v3/system/status" (code "401");
+    romm = sugmaApp "RomM" "romm" "/api/heartbeat" { };
+    s3manager-garage = outpost "sugma" "S3 Manager (Garage)" "s3manager-garage";
+    s3manager-offsite = outpost "sugma" "S3 Manager (Offsite)" "s3manager-offsite";
+    seerr = sugmaApp "Seerr" "seerr" "/api/v1/status" { };
+    sonarr = sugmaApp "Sonarr" "sonarr" "/api/v3/system/status" (code "401");
+    sonarr4k = sugmaApp "Sonarr 4K" "sonarr4k" "/api/v3/system/status" (code "401");
+    sportarr = sugmaApp "Sportarr" "sportarr" "/api/v1/system/status" (code "401");
+    tracearr = sugmaApp "Tracearr" "tracearr" "/health" { };
+    trawl = sugmaApp "Trawl" "trawl" "/health" { };
+    unpackerr = sugmaApp "Unpackerr" "unpackerr-metrics" "/metrics" { };
+    vikunja = sugmaApp "Vikunja" "vikunja" "/api/v1/info" { };
   };
 
   monitorsDir = pkgs.runCommand "autokuma-monitors" { } (

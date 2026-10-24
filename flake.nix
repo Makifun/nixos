@@ -28,18 +28,23 @@
         timeZone = "Europe/Stockholm";
       };
       hosts = {
+        # networks
         lan = "10.10.10.0/24";
         wireguard = "10.10.11.0/24";
-        opnsense = "10.10.10.1";
-        technitium = "10.10.10.3";
+        # infra
         makizen = "10.10.10.9";
+        opnsense = "10.10.10.1";
+        proxmox = "10.10.10.10";
+        technitium = "10.10.10.3";
+        # nixos
         ligma = "10.10.10.13";
         playma = "10.10.10.15";
+        # sugma
         sugma01 = "10.10.10.26";
         sugma02 = "10.10.10.27";
         sugma03 = "10.10.10.28";
-        sugmaVIP = "10.10.10.29";
         sugmaGW = "10.10.10.30";
+        sugmaVIP = "10.10.10.29";
       };
       mkSystem =
         modules:
