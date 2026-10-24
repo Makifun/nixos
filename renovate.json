@@ -30,6 +30,13 @@
       ]
     },
     {
+      "description": "Jellyfin tags look like 12.3ubu2604-ls56, which the global linuxserver rule cannot parse.",
+      "matchPackageNames": [
+        "linuxserver/jellyfin"
+      ],
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?ubu(?<compatibility>\\d+)-ls(?<build>\\d+)$"
+    },
+    {
       "matchPackageNames": [
         "timescale/timescaledb-ha"
       ],
