@@ -1058,16 +1058,15 @@
       StateDirectoryMode = "0755";
       ExecStart = pkgs.writeShellScript "homepage-flux-status" ''
         set -euo pipefail
-        BASE="https://flux.${baseFacts.domainName}/api/v1/resources"
         OUT=/var/lib/homepage-flux-status/flux.json
 
-        k_ready=$(${pkgs.curl}/bin/curl -sf "$BASE?kind=Kustomization&status=Ready" | ${pkgs.jq}/bin/jq '.resources | length')
-        k_total=$(${pkgs.curl}/bin/curl -sf "$BASE?kind=Kustomization" | ${pkgs.jq}/bin/jq '.resources | length')
-
-        ${pkgs.jq}/bin/jq -n \
-          --argjson kr "$k_ready" --argjson kt "$k_total" \
-          '{kustomizations_ready: $kr, kustomizations_total: $kt}' \
-          > "$OUT.tmp"
+        ${pkgs.kubectl}/bin/kubectl \
+          --kubeconfig ${config.sops.secrets.homepage-kubeconfig.path} \
+          get kustomizations.kustomize.toolkit.fluxcd.io -A -o json \
+          | ${pkgs.jq}/bin/jq '{
+              kustomizations_ready: [.items[] | select(any(.status.conditions[]?; .type == "Ready" and .status == "True"))] | length,
+              kustomizations_total: .items | length
+            }' > "$OUT.tmp"
         chmod 644 "$OUT.tmp"
         mv "$OUT.tmp" "$OUT"
       '';

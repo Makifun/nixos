@@ -112,7 +112,7 @@ let
     bazarr = sugmaApp "Bazarr" "bazarr" "/api/system/ping" { };
     bazarr4k = sugmaApp "Bazarr 4K" "bazarr4k" "/api/system/ping" { };
     filebrowser = sugmaApp "File Browser" "filebrowser" "/static/img/logo.svg" { };
-    flux = sugmaApp "Flux" "flux" "/api/v1/version" { };
+    flux = outpost "sugma" "Flux" "flux";
     gluetun = sugmaApp "Gluetun" "gluetun" "/v1/publicip/ip" { };
     havc = outpost "sugma" "HA Version Control" "havc";
     homeassistant = sugmaApp "Home Assistant" "homeassistant" "/manifest.json" { };
