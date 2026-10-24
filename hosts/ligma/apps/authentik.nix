@@ -15,7 +15,6 @@ let
     AUTHENTIK_POSTGRESQL__HOST = "/run/postgresql";
     AUTHENTIK_POSTGRESQL__USER = "authentik";
     AUTHENTIK_POSTGRESQL__NAME = "authentik";
-    AUTHENTIK_REDIS__HOST = "redis";
     AUTHENTIK_DISABLE_STARTUP_ANALYTICS = "true";
     AUTHENTIK_AVATARS = "none";
   };
@@ -35,12 +34,10 @@ in
   systemd.services.podman-create-authentik-network = {
     description = "Create authentik_network podman network";
     before = [
-      "podman-authentik-redis.service"
       "podman-authentik-server.service"
       "podman-authentik-worker.service"
     ];
     requiredBy = [
-      "podman-authentik-redis.service"
       "podman-authentik-server.service"
       "podman-authentik-worker.service"
     ];
@@ -82,20 +79,12 @@ in
     "d '${authBase}/postgresql'       0700 postgres postgres - -"
     "d '${authBase}/media'            0755 1000     1000     - -"
     "d '${authBase}/custom-templates' 0755 1000     1000     - -"
-    "d '${authBase}/redis'            0755 999      999      - -"
   ];
 
   virtualisation.oci-containers.containers = {
-    authentik-redis = {
-      image = "docker.io/redis:7-alpine";
-      volumes = [ "${authBase}/redis:/data" ];
-      extraOptions = sharedExtraOptions ++ [ "--hostname=redis" ];
-    };
-
     authentik-server = {
       image = "ghcr.io/goauthentik/server:${authTag}";
       cmd = [ "server" ];
-      dependsOn = [ "authentik-redis" ];
       environmentFiles = [ config.sops.secrets.authentik_env.path ];
       environment = sharedEnv;
       ports = [
@@ -109,7 +98,6 @@ in
     authentik-worker = {
       image = "ghcr.io/goauthentik/server:${authTag}";
       cmd = [ "worker" ];
-      dependsOn = [ "authentik-redis" ];
       environmentFiles = [ config.sops.secrets.authentik_env.path ];
       environment = sharedEnv;
       volumes = sharedVolumes;
