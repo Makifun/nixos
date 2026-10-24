@@ -1,6 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:recommended"
+  ],
   "hostRules": [
     {
       "matchHost": "git.deuxfleurs.fr",
@@ -9,18 +11,17 @@
   ],
   "packageRules": [
     {
-      "matchPackageNames": ["dxflrs/garage"],
+      "matchPackageNames": [
+        "dxflrs/garage"
+      ],
       "sourceUrl": "https://git.deuxfleurs.fr/Deuxfleurs/garage"
     },
     {
       "description": "Docker versioning treats -rc.N as a fixed suffix and never moves to the stable release.",
-      "matchPackageNames": ["ghcr.io/bigboot/autokuma"],
+      "matchPackageNames": [
+        "ghcr.io/bigboot/autokuma"
+      ],
       "versioning": "semver"
-    },
-    {
-      "matchPackageNames": ["ghcr.io/renovatebot/renovate"],
-      "automerge": true,
-      "automergeType": "branch"
     },
     {
       "versioning": "regex:^(?:amd64-|version-v)?(?<major>\\d+)\\.(?<minor>\\d+)\\.?(?<patch>\\d+)?$",
@@ -29,36 +30,16 @@
       ]
     },
     {
-      "matchPackageNames": ["linuxserver/qbittorrent"],
-      "allowedVersions": ">=5.0.0 <6.0.0"
-    },
-    {
-      "matchPackageNames": ["linuxserver/prowlarr"],
-      "allowedVersions": ">=2.0.0 <3.0.0"
-    },
-    {
-      "matchPackageNames": ["linuxserver/nzbget"],
-      "allowedVersions": "/^version-v/"
-    },
-    {
-      "matchPackageNames": ["linuxserver/plex"],
-      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
-    },
-    {
-      "matchPackageNames": ["linuxserver/jellyfin"],
-      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?ubu(?<compatibility>\\d+)-ls(?<build>\\d+)$"
-    },
-    {
-      "matchPackageNames": ["ghcr.io/hotio/unpackerr"],
-      "versioning": "regex:^release-v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
-    },
-    {
-      "matchPackageNames": ["timescale/timescaledb-ha"],
+      "matchPackageNames": [
+        "timescale/timescaledb-ha"
+      ],
       "versioning": "regex:^pg18\\.1-ts(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
     },
     {
       "description": "2026.8.0's published manifest list is broken upstream (podman rejects it: 'Unexpectedly received a manifest list instead of a manifest for a single image'). Block until goauthentik republishes a working 2026.8.x tag — see hosts/ligma/apps/authentik.nix.",
-      "matchPackageNames": ["ghcr.io/goauthentik/server"],
+      "matchPackageNames": [
+        "ghcr.io/goauthentik/server"
+      ],
       "allowedVersions": "!/^2026\\.8\\.0$/"
     }
   ],
