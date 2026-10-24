@@ -9,7 +9,7 @@ let
   apprisePort = 8097;
   appriseBase = "/${hostname}/${hostname}/apprise";
   # renovate: datasource=docker depName=linuxserver/apprise-api
-  appriseTag = "2.0.1";
+  appriseTag = "amd64-2.0.2";
 in
 {
   systemd.tmpfiles.rules = [
