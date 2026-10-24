@@ -820,6 +820,19 @@
             };
           }
           {
+            "Uptime Kuma" = {
+              icon = "/images/uptime-kuma.png";
+              href = "https://status.${baseFacts.domainName}";
+              server = "ligma";
+              container = "uptime-kuma";
+              widget = {
+                type = "uptimekuma";
+                url = "https://status.${baseFacts.domainName}";
+                slug = "homelab";
+              };
+            };
+          }
+          {
             "Grafana" = {
               icon = "/images/grafana.png";
               href = "https://grafana.${baseFacts.domainName}";

@@ -13,6 +13,11 @@
       "sourceUrl": "https://git.deuxfleurs.fr/Deuxfleurs/garage"
     },
     {
+      "description": "Docker versioning treats -rc.N as a fixed suffix and never moves to the stable release.",
+      "matchPackageNames": ["ghcr.io/bigboot/autokuma"],
+      "versioning": "semver"
+    },
+    {
       "matchPackageNames": ["ghcr.io/renovatebot/renovate"],
       "automerge": true,
       "automergeType": "branch"

@@ -35,6 +35,7 @@
     ./apps/traefik-technitium.nix
     ./apps/traefik.nix
     ./apps/unifi.nix
+    ./apps/uptime-kuma.nix
     ./apps/vaultwarden.nix
     ./apps/watchyourlan.nix
   ];
