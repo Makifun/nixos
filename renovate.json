@@ -1,7 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
+  "hostRules": [
+    {
+      "matchHost": "git.deuxfleurs.fr",
+      "hostType": "forgejo"
+    }
+  ],
   "packageRules": [
+    {
+      "matchPackageNames": ["dxflrs/garage"],
+      "sourceUrl": "https://git.deuxfleurs.fr/Deuxfleurs/garage"
+    },
     {
       "matchPackageNames": ["ghcr.io/renovatebot/renovate"],
       "automerge": true,

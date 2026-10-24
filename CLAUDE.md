@@ -77,3 +77,8 @@ in
 An annotation above a full `image = "registry/name:tag"` line is silently
 skipped. `lscr.io/linuxserver/*` images need a `versioning` rule in
 `renovate.json` when their tag format isn't `x.y.z` (see plex and jellyfin).
+
+An image without an `org.opencontainers.image.source` label gets no release
+notes. Set `sourceUrl` in a package rule. A source host whose name does not
+contain `forgejo`/`gitea`/`github`/`gitlab` also needs a `hostRules` entry
+with its `hostType` (see garage).
