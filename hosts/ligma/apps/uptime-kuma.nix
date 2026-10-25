@@ -88,9 +88,9 @@ let
     grafana = http "ligma" "Grafana" "https://grafana.${domain}/api/health" { };
     homepage = http "ligma" "Homepage" "https://homepage.${domain}/api/healthcheck" { };
     loki = http "ligma" "Loki" "http://127.0.0.1:3100/ready" { };
-    mirror-dockerhub = http "ligma" "Docker Hub mirror" "https://dockerhub.mirror.${domain}/v2/" { };
-    mirror-ghcr = http "ligma" "GHCR mirror" "https://ghcr.mirror.${domain}/v2/" { };
-    mirror-quay = http "ligma" "Quay mirror" "https://quay.mirror.${domain}/v2/" { };
+    mirror-dockerhub = http "ligma" "Mirror Docker.io" "https://dockerhub.mirror.${domain}/v2/" { };
+    mirror-ghcr = http "ligma" "Mirror GHCR" "https://ghcr.mirror.${domain}/v2/" { };
+    mirror-quay = http "ligma" "Mirror Quay" "https://quay.mirror.${domain}/v2/" { };
     omni = http "ligma" "Omni" "https://omni.${domain}/" { };
     openbao = http "ligma" "OpenBao" "https://openbao.${domain}/v1/sys/health" { };
     pgadmin = http "ligma" "pgAdmin" "http://127.0.0.1:5050/misc/ping" { };
