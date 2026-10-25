@@ -20,6 +20,9 @@ let
   # AutoKuma static monitors. The attribute name is the AutoKuma ID; renaming
   # it deletes the monitor and its history. parent_name is a group's ID.
   # Properties: https://autokuma.bigboot.dev/dev/entity-types/
+  notify = {
+    notification_name_list = [ "gotify-notification" ];
+  };
   http =
     parent: name: url: extra:
     {
@@ -30,6 +33,7 @@ let
       retry_interval = 60;
       max_retries = 2;
     }
+    // notify
     // extra;
 
   # The app answers this code without a login.
@@ -43,6 +47,21 @@ let
     http "sugma" name "https://${sub}.${domain}${path}" extra;
 
   monitors = {
+    # Not "gotify": that ID is the Gotify monitor. AutoKuma fills in the token
+    # at runtime (files preprocess), so it stays out of the Nix store.
+    gotify-notification = {
+      type = "notification";
+      name = "Gotify";
+      active = true;
+      config = {
+        type = "gotify";
+        name = "Gotify";
+        gotifyserverurl = "http://127.0.0.1:8096";
+        gotifyapplicationToken = "{{ get_env(name='AUTOKUMA__ENV__GOTIFY_TOKEN') }}";
+        gotifyPriority = 8;
+      };
+    };
+
     infra = {
       type = "group";
       name = "infra";
@@ -75,7 +94,8 @@ let
       interval = 60;
       retry_interval = 60;
       max_retries = 2;
-    };
+    }
+    // notify;
 
     # ligma
     apprise = http "ligma" "Apprise" "https://apprise.${domain}/" { };
@@ -192,6 +212,20 @@ in
     sopsFile = ../secrets.yaml;
   };
 
+  sops.secrets.uptime-kuma-gotify-token = {
+    format = "yaml";
+    sopsFile = ../secrets.yaml;
+  };
+
+  # get_env only reads variables with the AUTOKUMA__ENV__ prefix.
+  sops.templates."autokuma.env" = {
+    mode = "0400";
+    content = ''
+      AUTOKUMA__ENV__GOTIFY_TOKEN=${config.sops.placeholder.uptime-kuma-gotify-token}
+    '';
+    restartUnits = [ "podman-autokuma.service" ];
+  };
+
   # The rootless image runs as node (UID 1000).
   systemd.tmpfiles.rules = [
     "d '${kumaBase}' 0700 1000 1000 - -"
@@ -220,12 +254,14 @@ in
       AUTOKUMA__KUMA__PASSWORD = "@/run/secrets/kuma-password";
       AUTOKUMA__DOCKER__ENABLED = "false";
       AUTOKUMA__FILES__ENABLED = "true";
+      AUTOKUMA__FILES__PREPROCESS = "true";
       AUTOKUMA__STATIC_MONITORS = "/monitors";
       AUTOKUMA__DATA_PATH = "/data";
       AUTOKUMA__ON_DELETE = "delete";
       # The health server defaults to 8090, which Traefik uses on the host.
       AUTOKUMA__HEALTHCHECK_PORT = "";
     };
+    environmentFiles = [ config.sops.templates."autokuma.env".path ];
     volumes = [
       "${monitorsDir}:/monitors:ro"
       "${autokumaBase}:/data"
