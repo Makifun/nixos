@@ -7,7 +7,6 @@
     };
     initrd = {
       systemd = {
-        enable = true;
         users.root.shell = "/bin/systemd-tty-ask-password-agent";
         # Device units (dev-mapper-crypted_*.device) have a default timeout (~90s).
         # When they expire, ZFS import fails → /persist mount fails → emergency mode.
