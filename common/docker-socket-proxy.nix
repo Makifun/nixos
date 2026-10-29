@@ -6,7 +6,7 @@
 let
   hostname = config.networking.hostName;
   # renovate: datasource=docker depName=ghcr.io/linuxserver/socket-proxy
-  socketProxyTag = "3.4.7";
+  socketProxyTag = "3.4.7-r0-ls104";
 in
 {
   virtualisation.oci-containers.containers.docker-socket-proxy = {

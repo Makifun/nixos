@@ -37,6 +37,20 @@
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?ubu(?<compatibility>\\d+)-ls(?<build>\\d+)$"
     },
     {
+      "description": "Plex tags look like version-1.43.5.11079-b3b13e506. The trailing commit hash is ignored.",
+      "matchPackageNames": [
+        "linuxserver/plex"
+      ],
+      "versioning": "regex:^version-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)-[0-9a-f]+$"
+    },
+    {
+      "description": "socket-proxy tags look like 3.4.7-r0-ls104 (Alpine package revision, then LinuxServer build).",
+      "matchPackageNames": [
+        "ghcr.io/linuxserver/socket-proxy"
+      ],
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-r(?<build>\\d+)-ls(?<revision>\\d+)$"
+    },
+    {
       "matchPackageNames": [
         "timescale/timescaledb-ha"
       ],
