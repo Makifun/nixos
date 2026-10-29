@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-10-29
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `nixpkgs` | `3ec63636` (2026-10-23) | `31ecbaca` (2026-10-27) | [diff](https://github.com/nixos/nixpkgs/compare/3ec636362e1816bc2f0888fa0fa2c69f1bc9e504...31ecbaca1bdefa45dffc409f0250bd8039ea0010) |
+
+### Package versions
+
+| Package | Before | After |
+|---------|--------|-------|
+| `btop` | 1.4.7 | 1.4.8 |
+| `strace` | 7.2 | 7.3 |
+
 ## 2026-10-27
 
 ### Flake inputs
