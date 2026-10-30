@@ -147,6 +147,9 @@ in
         "local-fs.target"
         "sops-nix.service"
       ];
+      # A switch can remount the data pool. Without this, the script can run
+      # on the bare mount point and seed a config that the mount then hides.
+      unitConfig.RequiresMountsFor = [ backrestBase ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
@@ -173,12 +176,15 @@ in
       '';
     };
 
-    # Backrest reads config.json only at start.
-    systemd.services.podman-backrest.restartTriggers = [
-      planCron
-      pruneCron
-      excludesJson
-    ];
+    systemd.services.podman-backrest = {
+      # Backrest reads config.json only at start.
+      restartTriggers = [
+        planCron
+        pruneCron
+        excludesJson
+      ];
+      unitConfig.RequiresMountsFor = [ "/${hostname}/${hostname}" ];
+    };
 
     virtualisation.oci-containers.containers.backrest = {
       image = "ghcr.io/garethgeorge/backrest:${backrestTag}";
