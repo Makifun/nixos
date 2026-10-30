@@ -1,4 +1,5 @@
 {
+  baseFacts,
   config,
   hosts,
   lib,
@@ -9,7 +10,7 @@ let
   cfg = config.ligma.dnsRecords;
   tsigKeyFile = config.sops.secrets.technitium-tsig-key.path;
   server = hosts.technitium;
-  zone = "makifun.se";
+  zone = baseFacts.domainName;
   keyName = "ligma-key";
 
   mkService =

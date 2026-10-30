@@ -33,10 +33,6 @@ in
     image = "docker.io/henrygd/beszel-agent:${beszelTag}";
     environment = {
       FILESYSTEM = "/extra-filesystems/${hostname}__${hostname}";
-      # Agent dials the hub itself and self-registers via the universal token
-      # (KEY/TOKEN below) — no manual "add system in the UI" step needed for
-      # new hosts. Goes through the existing beszel.makifun.se Traefik route
-      # (no Authentik forwardAuth in front of it — see beszel-server.nix).
       HUB_URL = "https://beszel.${baseFacts.domainName}";
     };
     environmentFiles = [

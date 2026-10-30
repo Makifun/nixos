@@ -1,8 +1,8 @@
-{ config, ... }:
+{ baseFacts, config, ... }:
 let
   hostname = config.networking.hostName;
-  lokiUrl = "https://loki.makifun.se/loki/api/v1/push";
-  prometheusUrl = "https://prometheus.makifun.se/api/v1/write";
+  lokiUrl = "https://loki.${baseFacts.domainName}/loki/api/v1/push";
+  prometheusUrl = "https://prometheus.${baseFacts.domainName}/api/v1/write";
   alloyPort = 12345;
   # renovate: datasource=docker depName=grafana/alloy
   alloyTag = "v1.21.3";

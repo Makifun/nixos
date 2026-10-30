@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  baseFacts,
+  config,
+  pkgs,
+  ...
+}:
 {
   sops.secrets.nixos-upgrade-gotify-token = {
     format = "yaml";
@@ -42,7 +47,7 @@
 
       $journal"
             fi
-            curl -fsS -X POST "https://gotify.makifun.se/message?token=$token" \
+            curl -fsS -X POST "https://gotify.${baseFacts.domainName}/message?token=$token" \
               -F "title=$title" \
               -F "message=$msg" \
               -F "priority=$prio"

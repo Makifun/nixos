@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ baseFacts, pkgs, ... }:
 {
   # Trust all podman bridge interfaces so aardvark-dns can bind on each
   # network's gateway and containers can query DNS. These are host-only
@@ -25,19 +25,19 @@
     prefix   = "docker.io"
     location = "docker.io"
     [[registry.mirror]]
-    location = "dockerhub.mirror.makifun.se"
+    location = "dockerhub.mirror.${baseFacts.domainName}"
 
     [[registry]]
     prefix   = "ghcr.io"
     location = "ghcr.io"
     [[registry.mirror]]
-    location = "ghcr.mirror.makifun.se"
+    location = "ghcr.mirror.${baseFacts.domainName}"
 
     [[registry]]
     prefix   = "quay.io"
     location = "quay.io"
     [[registry.mirror]]
-    location = "quay.mirror.makifun.se"
+    location = "quay.mirror.${baseFacts.domainName}"
   '';
 
   virtualisation = {
