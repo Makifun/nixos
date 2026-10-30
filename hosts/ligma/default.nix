@@ -51,6 +51,9 @@
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.devNodes = "/dev/mapper";
   boot.zfs.forceImportRoot = false;
+  # A changed import script must not restart the unit on switch: that
+  # unmounts /ligma and stops every service on it.
+  systemd.services.zfs-import-zstorage.restartIfChanged = false;
   # ARC tuning — 4 GB max (balloon floor is 12 GB; 6 GB was sized for 16 GB)
   boot.kernelParams = [ "zfs.zfs_arc_max=4294967296" ];
   boot.extraModprobeConfig = ''
