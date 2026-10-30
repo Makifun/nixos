@@ -33,6 +33,7 @@ in
     image = "docker.io/henrygd/beszel-agent:${beszelTag}";
     environment = {
       FILESYSTEM = "/extra-filesystems/${hostname}__${hostname}";
+      # The agent dials the hub and self-registers with the universal token.
       HUB_URL = "https://beszel.${baseFacts.domainName}";
     };
     environmentFiles = [
