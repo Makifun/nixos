@@ -33,6 +33,7 @@ let
   repoId = "${hostname}-s3";
   planCron = "${toString config.backrest.scheduleMinute} * * * *";
   pruneCron = "30 ${toString config.backrest.scheduleHour} * * *";
+  excludesJson = builtins.toJSON config.backrest.excludePaths;
 in
 {
   options.backrest = {
@@ -50,6 +51,11 @@ in
       type = lib.types.listOf lib.types.str;
       default = [ ];
       description = "Additional paths to include in the backup plan";
+    };
+    excludePaths = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "Paths to exclude from the backup plan";
     };
   };
 
@@ -102,6 +108,7 @@ in
             id = planId;
             repo = repoId;
             paths = [ "/${hostname}/${hostname}" ] ++ config.backrest.extraPaths;
+            excludes = config.backrest.excludePaths;
             schedule.cron = planCron;
             retention.policyTimeBucketed = {
               hourly = 24;
@@ -145,8 +152,8 @@ in
         RemainAfterExit = true;
       };
       path = [ pkgs.jq ];
-      # The config is seeded once so UI edits survive. Only the schedules are
-      # written on every start, so they always follow this file.
+      # The config is seeded once so UI edits survive. Only the schedules and
+      # excludes are written on every start, so they always follow this file.
       script = ''
         dest="${backrestBase}/config/config.json"
         if [ ! -f "$dest" ]; then
@@ -154,8 +161,10 @@ in
           chmod 640 "$dest"
         else
           tmp=$(mktemp "$dest.XXXXXX")
-          jq --arg plan ${lib.escapeShellArg planCron} --arg prune ${lib.escapeShellArg pruneCron} '
+          jq --arg plan ${lib.escapeShellArg planCron} --arg prune ${lib.escapeShellArg pruneCron} \
+            --argjson excludes ${lib.escapeShellArg excludesJson} '
             (.plans[] | select(.id == "${planId}") | .schedule.cron) = $plan
+            | (.plans[] | select(.id == "${planId}") | .excludes) = $excludes
             | (.repos[] | select(.id == "${repoId}") | .prunePolicy.schedule.cron) = $prune
           ' "$dest" > "$tmp"
           chmod 640 "$tmp"
@@ -168,6 +177,7 @@ in
     systemd.services.podman-backrest.restartTriggers = [
       planCron
       pruneCron
+      excludesJson
     ];
 
     virtualisation.oci-containers.containers.backrest = {
