@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-11-09
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `nixpkgs` | `f9a75f41` (2026-11-05) | `f4a03c00` (2026-11-07) | [diff](https://github.com/nixos/nixpkgs/compare/f9a75f41be3a74eab55d3a7679d34ad6cc0da977...f4a03c008967841f2a0b3cb7c436fc6fc31671f6) |
+
+### Package versions
+
+| Package | Before | After |
+|---------|--------|-------|
+| `curl` | 8.22.0 | 8.23.0 |
+| `patch` | 2.8 | 2.8.1 |
+| `python3` | 3.14.8 | 3.14.10 |
+| `sqlite` | 3.53.3 | 3.54.0 |
+| `vim` | 9.2.1164 | 9.2.1252 |
+
 ## 2026-11-08
 
 ### Flake inputs
