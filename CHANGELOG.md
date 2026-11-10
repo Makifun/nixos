@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-10
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `sops-nix` | `89a234ce` (2026-11-06) | `fe7b4228` (2026-11-09) | [diff](https://github.com/Mic92/sops-nix/compare/89a234ce2daf6e568a7d4b4fe250afdd23d84e20...fe7b4228405aeac2ce7192c2049a6e2bc8637082) |
+
+### Package versions
+
+_No version changes._
+
 ## 2026-11-09
 
 ### Flake inputs
