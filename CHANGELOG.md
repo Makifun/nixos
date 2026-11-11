@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-11
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `disko` | `cedd626e` (2026-10-20) | `1dd30c29` (2026-11-10) | [diff](https://github.com/nix-community/disko/compare/cedd626e11b635470fa6f9fdb8ad79b0075dd7f9...1dd30c29c88d99ce295f15e27f93c49bc5fbae07) |
+
+### Package versions
+
+_No version changes._
+
 ## 2026-11-10
 
 ### Flake inputs
