@@ -1,0 +1,4 @@
+{ ... }:
+{
+  services.bootvine.enable = true;
+}
