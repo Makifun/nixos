@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-11-12
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `nixpkgs` | `f4a03c00` (2026-11-07) | `177d0540` (2026-11-09) | [diff](https://github.com/nixos/nixpkgs/compare/f4a03c008967841f2a0b3cb7c436fc6fc31671f6...177d0540942fb205af6993b1d5fa0b57799e09f8) |
+
+### Package versions
+
+| Package | Before | After |
+|---------|--------|-------|
+| `mtools` | 4.0.49 | 4.0.50 |
+
 ## 2026-11-11
 
 ### Flake inputs
