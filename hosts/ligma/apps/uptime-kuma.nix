@@ -13,7 +13,7 @@ let
   kumaBase = "/${hostname}/${hostname}/uptime-kuma";
   autokumaBase = "/${hostname}/${hostname}/autokuma";
   # renovate: datasource=docker depName=louislam/uptime-kuma
-  kumaTag = "2.5.9-slim-rootless";
+  kumaTag = "2.5.10-slim-rootless";
   # renovate: datasource=docker depName=ghcr.io/bigboot/autokuma
   autokumaTag = "2.1.0-rc.2";
 
