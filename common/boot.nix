@@ -24,6 +24,7 @@
           port = 2222;
           authorizedKeys = [
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA4ulg3WPkj3HMDz3hi1ELphE/BQN5ztOY55JZzNfAih makizen"
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJbIV/oiJk8EEa50hhncX3z9S4z8F8yrXv8gEEe/FL4s makicachy"
           ];
           hostKeys = [ config.sops.secrets."initrd_ssh_host_ed25519_key".path ];
         };
