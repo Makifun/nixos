@@ -11,6 +11,7 @@ let
   rclonePort = 6969;
   metricsPort = 6970;
   rcloneGuiPort = 6971;
+  rcloneGuiApiPort = 6972;
   cfg = config.services.rclone-cloud;
 in
 {
@@ -141,7 +142,7 @@ in
         ExecStart =
           "${pkgs.rclone}/bin/rclone gui"
           + " --addr 0.0.0.0:${toString rcloneGuiPort}"
-          + " --api-addr 127.0.0.1:${toString rclonePort}"
+          + " --api-addr 127.0.0.1:${toString rcloneGuiApiPort}"
           + " --no-open-browser"
           + " --no-auth";
         Restart = "on-failure";
