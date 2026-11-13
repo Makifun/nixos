@@ -57,5 +57,6 @@ in
     ];
   };
 
+  ligma.dnsRecords."rclone-gui.${baseFacts.domainName}".value = hosts.ligma;
   ligma.dnsRecords."rclone-playma.${baseFacts.domainName}".value = hosts.ligma;
 }
