@@ -5,7 +5,7 @@ let
   prometheusUrl = "https://prometheus.${baseFacts.domainName}/api/v1/write";
   alloyPort = 12345;
   # renovate: datasource=docker depName=grafana/alloy
-  alloyTag = "v1.21.3";
+  alloyTag = "v1.22.0";
 in
 {
   # Trust podman bridge interfaces for aardvark-dns.
