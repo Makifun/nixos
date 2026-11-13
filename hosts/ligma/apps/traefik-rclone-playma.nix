@@ -1,6 +1,6 @@
 { baseFacts, hosts, ... }:
 let
-  rclonePort = 6969;
+  rcloneGuiPort = 6971;
 in
 {
   services.traefik.dynamicConfigOptions.http = {
@@ -28,7 +28,7 @@ in
       };
     };
     services."rclone-playma-svc".loadBalancer.servers = [
-      { url = "http://${hosts.playma}:${toString rclonePort}"; }
+      { url = "http://${hosts.playma}:${toString rcloneGuiPort}"; }
     ];
   };
 
