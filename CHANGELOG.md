@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-13
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `nixpkgs` | `177d0540` (2026-11-09) | `d4f25a3e` (2026-11-11) | [diff](https://github.com/nixos/nixpkgs/compare/177d0540942fb205af6993b1d5fa0b57799e09f8...d4f25a3e562008648d45bcf2d70bcc7422cad84e) |
+
+### Package versions
+
+| Package | Before | After |
+|---------|--------|-------|
+| `nix` | 2.34.9 | 2.35.6 |
+| `postgresql-and-plugins` | 17.11 | 17.12 |
+
 ## 2026-11-12
 
 ### Flake inputs
