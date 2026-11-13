@@ -10,6 +10,7 @@ let
   rcloneBase = "/${hostname}/${hostname}/rclone";
   rclonePort = 6969;
   metricsPort = 6970;
+  rcloneGuiPort = 6971;
   cfg = config.services.rclone-cloud;
 in
 {
@@ -104,8 +105,6 @@ in
           + " --metrics-addr 0.0.0.0:${toString metricsPort}"
           + " --poll-interval 10000h"
           + " --rc-addr 0.0.0.0:${toString rclonePort}"
-          + " --rc-web-gui"
-          + " --rc-web-gui-no-open-browser"
           + " --rc-no-auth"
           + " --rc-serve"
           + " --rc"
@@ -132,10 +131,29 @@ in
       };
     };
 
-    # Only ligma's Traefik proxies the rclone RC web UI.
+    systemd.services.rclone-cloud-gui = {
+      description = "rclone Web GUI";
+      after = [ "rclone-cloud.service" ];
+      requires = [ "rclone-cloud.service" ];
+      wantedBy = [ "multi-user.target" ];
+
+      serviceConfig = {
+        ExecStart =
+          "${pkgs.rclone}/bin/rclone gui"
+          + " --addr 0.0.0.0:${toString rcloneGuiPort}"
+          + " --api-addr 127.0.0.1:${toString rclonePort}"
+          + " --no-open-browser"
+          + " --no-auth";
+        Restart = "on-failure";
+        RestartSec = "5s";
+      };
+    };
+
+    # Only ligma's Traefik proxies the rclone RC web UI and metrics.
     networking.firewall.extraInputRules = ''
       tcp dport ${toString rclonePort} ip saddr ${hosts.ligma}/32 accept comment "rclone RC from ligma"
       tcp dport ${toString metricsPort} ip saddr ${hosts.ligma}/32 accept comment "rclone metrics from ligma"
+      tcp dport ${toString rcloneGuiPort} ip saddr ${hosts.ligma}/32 accept comment "rclone Web GUI from ligma"
     '';
   };
 }
