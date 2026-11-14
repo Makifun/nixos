@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-14
+
+_Only transitive/non-GitHub inputs changed — see `flake.lock` diff._
+
+### Package versions
+
+_No version changes._
+
 ## 2026-11-13
 
 ### Flake inputs
