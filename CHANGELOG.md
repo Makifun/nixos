@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-11-15
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `sops-nix` | `fe7b4228` (2026-11-09) | `11e5885d` (2026-11-14) | [diff](https://github.com/Mic92/sops-nix/compare/fe7b4228405aeac2ce7192c2049a6e2bc8637082...11e5885d241743ff0193465d533b20e754bc3ce0) |
+
+### Package versions
+
+| Package | Before | After |
+|---------|--------|-------|
+| `bootvine` | 0.1.3 | 0.1.4 |
+
 ## 2026-11-14
 
 _Only transitive/non-GitHub inputs changed — see `flake.lock` diff._
