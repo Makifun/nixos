@@ -10,7 +10,7 @@ let
   openbaoPort = 8200;
   openbaoBase = "/${hostname}/${hostname}/openbao";
   # renovate: datasource=docker depName=quay.io/openbao/openbao
-  openbaoTag = "2.7.2";
+  openbaoTag = "2.7.3";
 
   # The image runs as openbao (100:1000) and never as root.
   openbaoUid = 100;
