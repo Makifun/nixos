@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-21
+
+### Flake inputs
+
+| Input | Before | After | |
+|-------|--------|-------|---|
+| `disko` | `1dd30c29` (2026-11-10) | `44761d4f` (2026-11-20) | [diff](https://github.com/nix-community/disko/compare/1dd30c29c88d99ce295f15e27f93c49bc5fbae07...44761d4f745b95e037458a0e57133c5700c8e320) |
+| `nixpkgs` | `1a08097f` (2026-11-15) | `0bb82723` (2026-11-19) | [diff](https://github.com/nixos/nixpkgs/compare/1a08097fc1ed85575db39763b2c4a5d8970a37ba...0bb8272318b4ca41bf0edc6224df3e3e3046b70d) |
+
+### Package versions
+
+_No version changes._
+
 ## 2026-11-18
 
 ### Flake inputs
