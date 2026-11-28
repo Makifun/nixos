@@ -9,7 +9,7 @@ let
   lokiPort = 3100;
   lokiBase = "/${hostname}/${hostname}/loki";
   # renovate: datasource=docker depName=grafana/loki
-  lokiTag = "3.7.10";
+  lokiTag = "3.7.11";
 in
 {
   environment.etc."loki/config.yaml".text = ''
