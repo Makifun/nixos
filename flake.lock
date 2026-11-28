@@ -11,11 +11,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1795417174,
-        "narHash": "sha256-YZhRJqsSuwA/Xh5RSELzVh1j7q9d+gwCc4iQs6cd4J0=",
+        "lastModified": 1795701077,
+        "narHash": "sha256-kG3ZdwpNc5fh8fCcJpXWkuXpNiYgj8JsjGpGyBAi6L0=",
         "ref": "refs/heads/main",
-        "rev": "0e7acf85f85084b30c681658a4b8fc1c3a90b0a3",
-        "revCount": 152,
+        "rev": "0fd15d5e99c4b803a74148c971315540d09f0be6",
+        "revCount": 153,
         "type": "git",
         "url": "https://codeberg.org/wvhulle/bootvine"
       },
